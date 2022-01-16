@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React from 'react'
 import Link from 'next/link'
 import BLOG from '@/blog.config'
 /**
@@ -9,11 +9,10 @@ import BLOG from '@/blog.config'
  * @constructor
  */
 const BlogPostArchive = ({ posts = [], archiveTitle }) => {
-  const targetRef = useRef(null)
   if (!posts || posts.length === 0) {
     return <></>
   } else {
-    return <div ref={targetRef}>
+    return <div>
       <div className='pt-16 pb-4 text-3xl dark:text-gray-300' id={archiveTitle}>{archiveTitle}</div>
       <ul>
         {posts.map(post => (
