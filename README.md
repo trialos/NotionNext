@@ -15,6 +15,11 @@
   </a>
 </p>
 
+
+中文文档 | [README in English](./README_EN.md)
+
+<hr/>
+
 一个使用 NextJS + Notion API 实现的，部署在 Vercel 上的静态博客系统。为Notion和所有创作者设计。
 
 
@@ -35,7 +40,10 @@
 - [个性配置手册 - 如何配置功能插件](https://tangly1024.com/article/notion-next-guide) 
 
 - [二次开发指引 - 如何进行本地开发](https://tangly1024.com/article/how-to-develop-with-notion-next)
- 
+
+- [更新操作指南 - 获取最新升级补丁](https://tangly1024.com/article/how-to-update-notionnext)
+
+- [历史版本汇总 - 查询版本功能特性](https://tangly1024.com/article/notion-next-changelogs)
 
 ## 致谢
 感谢Craig Hart发起的Nobelium项目
@@ -157,8 +165,22 @@
   </td>
 
   <td align="center">
+    <a href="https://github.com/RedhairHambagu" style="display:inline-block;width:80px"><img src="https://avatars.githubusercontent.com/u/129669334" width="64px;"  alt="RedhairHambagu"/><br/><sub><b>RedhairHambagu</b></sub></a><br/><a href="https://github.com/tangly1024/NotionNext/commits?author=RedhairHambagu" title="RedhairHambagu" >🔧 🐛</a>
+  </td>
+
+  <td align="center">
+    <a href="https://github.com/Allengl" style="display:inline-block;width:80px"><img src="https://avatars.githubusercontent.com/u/58612763" width="64px;"  alt="Allen"/><br/><sub><b>Allen</b></sub></a><br/><a href="https://github.com/tangly1024/NotionNext/commits?author=Allengl" title="Allengl" >🔧 🐛</a>
+  </td>
+
+  <td align="center">
+    <a href="https://github.com/zdf1230" style="display:inline-block;width:80px"><img src="https://avatars.githubusercontent.com/u/5999425" width="64px;"  alt="zdf1230"/><br/><sub><b>zdf</b></sub></a><br/><a href="https://github.com/tangly1024/NotionNext/commits?author=zdf1230" title="zdf1230" >🔧 🐛</a>
+  </td>
+
+  <td align="center">
     <a href="https://github.com/emengweb" style="display:inline-block;width:80px"><img src="https://avatars.githubusercontent.com/u/31469739" width="64px;"  alt="emengweb"/><br/><sub><b>emengweb</b></sub></a><br/><a href="https://github.com/tangly1024/NotionNext/commits?author=emengweb" title="emengweb" >🔧 🐛</a>
   </td>
+
+
 </tr>
 </table>
 
