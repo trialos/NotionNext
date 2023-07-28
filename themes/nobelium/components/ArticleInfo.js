@@ -1,5 +1,4 @@
 
-import formatDate from '@/lib/formatDate'
 import Image from 'next/image'
 import BLOG from '@/blog.config'
 import TagItem from './TagItem'
@@ -14,7 +13,7 @@ export const ArticleInfo = (props) => {
         <div>
 
             <div className="font-bold text-3xl text-black dark:text-white">
-            {post.title}
+            {post?.title}
             </div>
 
             {post?.type !== 'Page' && <>
@@ -33,14 +32,11 @@ export const ArticleInfo = (props) => {
               <span className="block">&nbsp;/&nbsp;</span>
             </div>
             <div className="mr-2 mb-4 md:ml-0">
-              {formatDate(
-                post?.date?.start_date || post.createdTime,
-                BLOG.LANG
-              )}
+              {post?.publishTime}
             </div>
-            {post.tags && (
+            {post?.tags && (
               <div className="flex flex-nowrap max-w-full overflow-x-auto article-tags">
-                {post.tags.map(tag => (
+                {post?.tags.map(tag => (
                   <TagItem key={tag} tag={tag} />
                 ))}
               </div>
