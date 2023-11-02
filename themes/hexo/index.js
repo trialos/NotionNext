@@ -41,7 +41,7 @@ import { siteConfig } from '@/lib/config'
  * @constructor
  */
 const LayoutBase = props => {
-  const { children, headerSlot, floatSlot, slotTop, meta, siteInfo, className } = props
+  const { children, headerSlot, floatSlot, slotTop, meta, className } = props
   const { onLoading } = useGlobal()
 
   return (
