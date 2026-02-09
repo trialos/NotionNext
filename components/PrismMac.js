@@ -1,273 +1,184 @@
-import { useEffect } from 'react'
-import Prism from 'prismjs'
-// 所有语言的prismjs 使用autoloader引入
-// import 'prismjs/plugins/autoloader/prism-autoloader'
-import 'prismjs/plugins/toolbar/prism-toolbar'
-import 'prismjs/plugins/toolbar/prism-toolbar.min.css'
-import 'prismjs/plugins/show-language/prism-show-language'
-import 'prismjs/plugins/copy-to-clipboard/prism-copy-to-clipboard'
-import 'prismjs/plugins/line-numbers/prism-line-numbers'
-import 'prismjs/plugins/line-numbers/prism-line-numbers.css'
-
-// mermaid图
-import { loadExternalResource } from '@/lib/utils'
-import { useRouter } from 'next/navigation'
-import { useGlobal } from '@/lib/global'
-import { siteConfig } from '@/lib/config'
-
 /**
- * 代码美化相关
- * @author https://github.com/txs/
- * @returns
- */
-const PrismMac = () => {
-  const router = useRouter()
-  const { isDarkMode } = useGlobal()
-  const codeMacBar = siteConfig('CODE_MAC_BAR')
-  const prismjsAutoLoader = siteConfig('PRISM_JS_AUTO_LOADER')
-  const prismjsPath = siteConfig('PRISM_JS_PATH')
+ * @author https://github.com/txs
+ * 通用 Mac 风格代码块样式 (NotionNext Universal)
+ **/
 
-  const prismThemeSwitch = siteConfig('PRISM_THEME_SWITCH')
-  const prismThemeDarkPath = siteConfig('PRISM_THEME_DARK_PATH')
-  const prismThemeLightPath = siteConfig('PRISM_THEME_LIGHT_PATH')
-  const prismThemePrefixPath = siteConfig('PRISM_THEME_PREFIX_PATH')
-
-  const mermaidCDN = siteConfig('MERMAID_CDN')
-  const codeLineNumbers = siteConfig('CODE_LINE_NUMBERS')
-
-  const codeCollapse = siteConfig('CODE_COLLAPSE')
-  const codeCollapseExpandDefault = siteConfig('CODE_COLLAPSE_EXPAND_DEFAULT')
-
-  useEffect(() => {
-    if (codeMacBar) {
-      loadExternalResource('/css/prism-mac-style.css', 'css')
-    }
-    // 加载prism样式
-    loadPrismThemeCSS(
-      isDarkMode,
-      prismThemeSwitch,
-      prismThemeDarkPath,
-      prismThemeLightPath,
-      prismThemePrefixPath
-    )
-    // 折叠代码
-    loadExternalResource(prismjsAutoLoader, 'js').then(url => {
-      if (window?.Prism?.plugins?.autoloader) {
-        window.Prism.plugins.autoloader.languages_path = prismjsPath
-      }
-
-      renderPrismMac(codeLineNumbers)
-      renderMermaid(mermaidCDN)
-      renderCollapseCode(codeCollapse, codeCollapseExpandDefault)
-    })
-  }, [router, isDarkMode])
-
-  return <></>
+/* 1. Mac 窗口容器样式 */
+.code-toolbar {
+  position: relative;
+  width: 100%;
+  margin: 1rem 0;
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: rgba(27, 28, 32, 0.94); /* 浅色模式下默认暗底 */
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 18px 44px rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
-/**
- * 加载Prism主题样式
- */
-const loadPrismThemeCSS = (
-  isDarkMode,
-  prismThemeSwitch,
-  prismThemeDarkPath,
-  prismThemeLightPath,
-  prismThemePrefixPath
-) => {
-  let PRISM_THEME
-  let PRISM_PREVIOUS
-  if (prismThemeSwitch) {
-    if (isDarkMode) {
-      PRISM_THEME = prismThemeDarkPath
-      PRISM_PREVIOUS = prismThemeLightPath
-    } else {
-      PRISM_THEME = prismThemeLightPath
-      PRISM_PREVIOUS = prismThemeDarkPath
-    }
-    const previousTheme = document.querySelector(
-      `link[href="${PRISM_PREVIOUS}"]`
-    )
-    if (
-      previousTheme &&
-      previousTheme.parentNode &&
-      previousTheme.parentNode.contains(previousTheme)
-    ) {
-      previousTheme.parentNode.removeChild(previousTheme)
-    }
-    loadExternalResource(PRISM_THEME, 'css')
-  } else {
-    loadExternalResource(prismThemePrefixPath, 'css')
-  }
+/* 暗色模式适配 */
+html.dark .code-toolbar {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(27, 28, 32, 0.72);
+  -webkit-backdrop-filter: saturate(140%) blur(12px);
+  backdrop-filter: saturate(140%) blur(12px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35), 0 18px 44px rgba(0, 0, 0, 0.45);
 }
 
-/*
- * 将代码块转为可折叠对象
- */
-const renderCollapseCode = (codeCollapse, codeCollapseExpandDefault) => {
-  if (!codeCollapse) {
-    return
-  }
-  const codeBlocks = document.querySelectorAll('.code-toolbar')
-  for (const codeBlock of codeBlocks) {
-    // 判断当前元素是否被包裹
-    if (codeBlock.closest('.collapse-wrapper')) {
-      continue // 如果被包裹了，跳过当前循环
-    }
-
-    const code = codeBlock.querySelector('code')
-    const language = code.getAttribute('class').match(/language-(\w+)/)[1]
-
-    const collapseWrapper = document.createElement('div')
-    collapseWrapper.className = 'collapse-wrapper w-full py-2'
-    const panelWrapper = document.createElement('div')
-    panelWrapper.className =
-      'border dark:border-gray-600 rounded-md hover:border-indigo-500 duration-200 transition-colors'
-
-    const header = document.createElement('div')
-    header.className =
-      'flex justify-between items-center px-4 py-2 cursor-pointer select-none'
-    header.innerHTML = `<h3 class="text-lg font-medium">${language}</h3><svg class="transition-all duration-200 w-5 h-5 transform rotate-0" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M6.293 6.293a1 1 0 0 1 1.414 0L10 8.586l2.293-2.293a1 1 0 0 1 1.414 1.414l-3 3a1 1 0 0 1-1.414 0l-3-3a1 1 0 0 1 0-1.414z" clip-rule="evenodd"/></svg>`
-
-    const panel = document.createElement('div')
-    panel.className =
-      'invisible h-0 transition-transform duration-200 border-t border-gray-300'
-
-    panelWrapper.appendChild(header)
-    panelWrapper.appendChild(panel)
-    collapseWrapper.appendChild(panelWrapper)
-
-    codeBlock.parentNode.insertBefore(collapseWrapper, codeBlock)
-    panel.appendChild(codeBlock)
-
-    function collapseCode() {
-      panel.classList.toggle('invisible')
-      panel.classList.toggle('h-0')
-      panel.classList.toggle('h-auto')
-      header.querySelector('svg').classList.toggle('rotate-180')
-      panelWrapper.classList.toggle('border-gray-300')
-    }
-
-    // 点击后折叠展开代码
-    header.addEventListener('click', collapseCode)
-    // 是否自动展开
-    if (codeCollapseExpandDefault) {
-      header.click()
-    }
-  }
+/* 2. Mac 三色点 */
+.pre-mac {
+  position: absolute;
+  left: 12px;
+  top: 11px;
+  z-index: 13;
+  display: flex;
+  gap: 7px;
 }
 
-/**
- * 将mermaid语言 渲染成图片
- */
-const renderMermaid = mermaidCDN => {
-  const observer = new MutationObserver(mutationsList => {
-    for (const m of mutationsList) {
-      if (m.target.className === 'notion-code language-mermaid') {
-        const chart = m.target.querySelector('code').textContent
-        if (chart && !m.target.querySelector('.mermaid')) {
-          const mermaidChart = document.createElement('pre')
-          mermaidChart.className = 'mermaid'
-          mermaidChart.innerHTML = chart
-          m.target.appendChild(mermaidChart)
-        }
-
-        const mermaidsSvg = document.querySelectorAll('.mermaid')
-        if (mermaidsSvg) {
-          let needLoad = false
-          for (const e of mermaidsSvg) {
-            if (e?.firstChild?.nodeName !== 'svg') {
-              needLoad = true
-            }
-          }
-          if (needLoad) {
-            loadExternalResource(mermaidCDN, 'js').then(url => {
-              setTimeout(() => {
-                const mermaid = window.mermaid
-                mermaid?.contentLoaded()
-              }, 100)
-            })
-          }
-        }
-      }
-    }
-  })
-  if (document.querySelector('#notion-article')) {
-    observer.observe(document.querySelector('#notion-article'), {
-      attributes: true,
-      subtree: true
-    })
-  }
+.pre-mac > span {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
 }
 
-function renderPrismMac(codeLineNumbers) {
-  const container = document?.getElementById('notion-article')
+.pre-mac > span:nth-child(1) { background: #ff5f57; }
+.pre-mac > span:nth-child(2) { background: #febc2e; }
+.pre-mac > span:nth-child(3) { background: #28c840; }
 
-  // Add line numbers
-  if (codeLineNumbers) {
-    const codeBlocks = container?.getElementsByTagName('pre')
-    if (codeBlocks) {
-      Array.from(codeBlocks).forEach(item => {
-        if (!item.classList.contains('line-numbers')) {
-          item.classList.add('line-numbers')
-          item.style.whiteSpace = 'pre-wrap'
-        }
-      })
-    }
-  }
-  // 重新渲染之前检查所有的多余text
-
-  try {
-    Prism.highlightAll()
-  } catch (err) {
-    console.log('代码渲染', err)
-  }
-
-  const codeToolBars = container?.getElementsByClassName('code-toolbar')
-  // Add pre-mac element for Mac Style UI
-  if (codeToolBars) {
-    Array.from(codeToolBars).forEach(item => {
-      const existPreMac = item.getElementsByClassName('pre-mac')
-      if (existPreMac.length < codeToolBars.length) {
-        const preMac = document.createElement('div')
-        preMac.classList.add('pre-mac')
-        preMac.innerHTML = '<span></span><span></span><span></span>'
-        item?.appendChild(preMac, item)
-      }
-    })
-  }
-
-  // 折叠代码行号bug
-  if (codeLineNumbers) {
-    fixCodeLineStyle()
-  }
+/* 3. Toolbar 工具栏 (复制按钮、语言标签) */
+.code-toolbar > .toolbar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  z-index: 12;
 }
 
-/**
- * 行号样式在首次渲染或被detail折叠后行高判断错误
- * 在此手动resize计算
- */
-const fixCodeLineStyle = () => {
-  const observer = new MutationObserver(mutationsList => {
-    for (const m of mutationsList) {
-      if (m.target.nodeName === 'DETAILS') {
-        const preCodes = m.target.querySelectorAll('pre.notion-code')
-        for (const preCode of preCodes) {
-          Prism.plugins.lineNumbers.resize(preCode)
-        }
-      }
-    }
-  })
-  observer.observe(document.querySelector('#notion-article'), {
-    attributes: true,
-    subtree: true
-  })
-  setTimeout(() => {
-    const preCodes = document.querySelectorAll('pre.notion-code')
-    for (const preCode of preCodes) {
-      Prism.plugins.lineNumbers.resize(preCode)
-    }
-  }, 10)
+.code-toolbar .toolbar-item > button {
+  font-size: 12px !important;
+  line-height: 1 !important;
+  padding: 6px 8px !important;
+  border-radius: 999px !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  color: rgba(255, 255, 255, 0.82) !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-export default PrismMac
+.code-toolbar .toolbar-item > button:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #fff !important;
+}
+
+/* 4. 代码正文排版 */
+pre.notion-code {
+  font-size: 0.92em !important;
+  line-height: 1.6 !important;
+  margin: 0 !important;
+  padding: 46px 1.1rem 1rem !important;
+  border-radius: 0 !important;
+  border: none !important;
+  background: transparent !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 5. 智能折叠 S1 极简 UI */
+.collapse-wrapper {
+  margin: 1rem 0;
+}
+
+.collapse-panel-wrapper {
+  border-radius: 14px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.55);
+  -webkit-backdrop-filter: saturate(160%) blur(10px);
+  backdrop-filter: saturate(160%) blur(10px);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+html.dark .collapse-panel-wrapper {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(27, 28, 32, 0.6);
+}
+
+.collapse-header {
+  width: 100%;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  cursor: pointer;
+  user-select: none;
+  border: none;
+  background: transparent;
+  color: rgba(60, 60, 67, 0.6);
+}
+
+html.dark .collapse-header {
+  color: rgba(235, 235, 245, 0.6);
+}
+
+.collapse-label {
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+.collapse-chevron {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.3s ease;
+  opacity: 0.8;
+}
+
+.collapse-panel-wrapper.is-expanded .collapse-chevron {
+  transform: rotate(180deg);
+}
+
+.collapse-panel {
+  max-height: 0;
+  overflow: hidden;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  transition: max-height 0.32s ease;
+}
+
+html.dark .collapse-panel {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+.collapse-panel.is-expanded {
+  max-height: 3000px;
+}
+
+/* 6. Prism 代码高亮补丁 (暗底优化) */
+.code-toolbar .token.comment,
+.code-toolbar .token.prolog,
+.code-toolbar .token.doctype,
+.code-toolbar .token.cdata { color: rgba(235, 235, 245, 0.46); }
+.code-toolbar .token.punctuation { color: rgba(235, 235, 245, 0.6); }
+.code-toolbar .token.property,
+.code-toolbar .token.tag,
+.code-toolbar .token.boolean,
+.code-toolbar .token.number,
+.code-toolbar .token.constant,
+.code-toolbar .token.symbol,
+.code-toolbar .token.deleted { color: #7ee787; }
+.code-toolbar .token.selector,
+.code-toolbar .token.attr-name,
+.code-toolbar .token.string,
+.code-toolbar .token.char,
+.code-toolbar .token.builtin,
+.code-toolbar .token.inserted { color: #a5d6ff; }
+.code-toolbar .token.atrule,
+.code-toolbar .token.attr-value,
+.code-toolbar .token.keyword { color: #ff7ab2; }
+.code-toolbar .token.function,
+.code-toolbar .token.class-name { color: #ffd479; }
