@@ -160,37 +160,40 @@ const nextConfig = {
     : () => {
       // 处理多语言重定向
       const langsRewrites = []
+      const allLangs = [BLOG.LANG] // 包含默认语言
+
       if (BLOG.NOTION_PAGE_ID.indexOf(',') > 0) {
         const siteIds = BLOG.NOTION_PAGE_ID.split(',')
-        const langs = []
         for (const siteId of siteIds) {
           const prefix = extractLangPrefix(siteId)
           // 如果包含前缀 例如 zh , en 等
           if (prefix) {
-            langs.push(prefix)
+            if (!allLangs.includes(prefix)) {
+              allLangs.push(prefix)
+            }
           }
           console.log('[Locales]', siteId)
         }
-
-        // 映射多语言
-        // 示例： source: '/:locale(zh|en)/:path*' ; :locale() 会将语言放入重写后的 `?locale=` 中。
-        langsRewrites.push(
-          {
-            source: `/:locale(${langs.join('|')})/:path*`,
-            destination: '/:path*'
-          },
-          // 匹配没有路径的情况，例如 [domain]/zh 或 [domain]/en
-          {
-            source: `/:locale(${langs.join('|')})`,
-            destination: '/'
-          },
-          // 匹配没有路径的情况，例如 [domain]/zh/ 或 [domain]/en/
-          {
-            source: `/:locale(${langs.join('|')})/`,
-            destination: '/'
-          }
-        )
       }
+
+      // 映射多语言
+      // 示例： source: '/:locale(zh|en)/:path*' ; :locale() 会将语言放入重写后的 `?locale=` 中。
+      langsRewrites.push(
+        {
+          source: `/:locale(${allLangs.join('|')})/:path*`,
+          destination: '/:path*'
+        },
+        // 匹配没有路径的情况，例如 [domain]/zh 或 [domain]/en
+        {
+          source: `/:locale(${allLangs.join('|')})`,
+          destination: '/'
+        },
+        // 匹配没有路径的情况，例如 [domain]/zh/ 或 [domain]/en/
+        {
+          source: `/:locale(${allLangs.join('|')})/`,
+          destination: '/'
+        }
+      )
 
       return [
         ...langsRewrites,
