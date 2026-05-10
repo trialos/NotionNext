@@ -4,6 +4,11 @@ import {
   normalizeNotionBlockType
 } from '@/lib/utils/notion.util'
 
+jest.mock('p-limit', () => ({
+  __esModule: true,
+  default: jest.fn(() => fn => fn())
+}))
+
 jest.mock('notion-utils', () => ({
   getTextContent: jest.fn(value => {
     if (!Array.isArray(value)) return ''
