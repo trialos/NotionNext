@@ -28,6 +28,8 @@ Please follow these rules for every contribution:
 4. Do not submit personalized config defaults that can affect other contributors.
 5. Run lint/tests before opening PR.
 
+Core maintainers should also read [Maintenance and change-control philosophy](./docs/MAINTENANCE_PHILOSOPHY.en.md) to keep `main` stable and reviewable.
+
 For full Chinese workflow guidance, see:
 
 - [Docs Navigation](./docs/README.md)

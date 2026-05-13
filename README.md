@@ -68,6 +68,8 @@ yarn dev
 - [Theme Migration Guide (English)](./docs/THEME_MIGRATION_GUIDE.md)
 - [贡献入口（中文）](./CONTRIBUTING.zh-CN.md)
 - [贡献入口（英文）](./CONTRIBUTING.md)
+- [维护与变更尺度（中文）](./docs/MAINTENANCE_PHILOSOPHY.zh-CN.md)
+- [Maintenance & change control (English)](./docs/MAINTENANCE_PHILOSOPHY.en.md)
 
 ## 预览效果
 

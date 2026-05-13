@@ -13,6 +13,7 @@ This docs directory helps contributors and new developers understand the project
 | Project Structure | [PROJECT_STRUCTURE.en.md](./PROJECT_STRUCTURE.en.md) | [PROJECT_STRUCTURE.md](./PROJECT_STRUCTURE.md) |
 | Configuration | [CONFIGURATION.en.md](./CONFIGURATION.en.md) | [CONFIGURATION.md](./CONFIGURATION.md) |
 | Contribution Workflow | [CONTRIBUTION_WORKFLOW.en.md](./CONTRIBUTION_WORKFLOW.en.md) | [CONTRIBUTION_WORKFLOW.md](./CONTRIBUTION_WORKFLOW.md) |
+| Maintenance & change control | [MAINTENANCE_PHILOSOPHY.en.md](./MAINTENANCE_PHILOSOPHY.en.md) | [MAINTENANCE_PHILOSOPHY.zh-CN.md](./MAINTENANCE_PHILOSOPHY.zh-CN.md) |
 | Theme Migration Guide | [THEME_MIGRATION_GUIDE.md](./THEME_MIGRATION_GUIDE.md) | [THEME_MIGRATION_GUIDE.zh-CN.md](./THEME_MIGRATION_GUIDE.zh-CN.md) |
 
 ## Purpose
