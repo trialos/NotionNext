@@ -4,6 +4,16 @@
 
 This docs directory helps contributors and new developers understand the project quickly and collaborate safely.
 
+## Repository and organization
+
+The main repository is maintained by the GitHub organization **[notionnext-org](https://github.com/notionnext-org)** (canonical: `https://github.com/notionnext-org/NotionNext`). **You are welcome to request org membership** when that fits your role. If you cloned before the transfer, run:
+
+```bash
+git remote set-url origin https://github.com/notionnext-org/NotionNext.git
+```
+
+See [Contributing](../CONTRIBUTING.md#repository-and-organization) (and the Chinese contributing guide) for details.
+
 ## Start Here (5 minutes)
 
 | Topic | English | 中文 |
