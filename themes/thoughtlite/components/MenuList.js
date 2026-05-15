@@ -6,10 +6,11 @@ import { MenuItemDrop } from './MenuItemDrop'
 /**
  * 导航菜单列表
  * @param {*} props
+ * @param {'stack'|'header'} [props.variant] stack：旧版通栏导航；header：顶栏内横向滚动
  * @returns
  */
 export const MenuList = props => {
-  const { customNav, customMenu } = props
+  const { customNav, customMenu, variant = 'stack' } = props
   const { locale } = useGlobal()
 
   let links = [
@@ -54,6 +55,18 @@ export const MenuList = props => {
 
   if (!links || links.length === 0) {
     return null
+  }
+
+  if (variant === 'header') {
+    return (
+      <nav aria-label='Main' className='flex-1 min-w-0 flex justify-center'>
+        <ul className='flex items-center gap-0.5 sm:gap-1 overflow-x-auto max-w-full py-1 no-scrollbar'>
+          {links.map((link, index) => (
+            <MenuItemDrop key={link.id ?? index} link={link} variant='inline' />
+          ))}
+        </ul>
+      </nav>
+    )
   }
 
   return (

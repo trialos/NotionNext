@@ -9,8 +9,8 @@
  * 关联：[#3987](https://github.com/notionnext-org/NotionNext/issues/3987)
  */
 
-import Comment from '@/components/Comment'
 import replaceSearchResult from '@/components/Mark'
+import NotionIcon from '@/components/NotionIcon'
 import NotionPage from '@/components/NotionPage'
 import ShareBar from '@/components/ShareBar'
 import { siteConfig } from '@/lib/config'
@@ -18,6 +18,7 @@ import { useGlobal } from '@/lib/global'
 import { isBrowser } from '@/lib/utils'
 import { Transition } from '@headlessui/react'
 import SmartLink from '@/components/SmartLink'
+import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import BlogListArchive from './components/BlogListArchive'
@@ -25,6 +26,7 @@ import { BlogListPage } from './components/BlogListPage'
 import { BlogListScroll } from './components/BlogListScroll'
 import { Footer } from './components/Footer'
 import { Header } from './components/Header'
+import LatestCard from './components/LatestCard'
 import { PostLock } from './components/PostLock'
 import { PostMeta } from './components/PostMeta'
 import SearchInput from './components/SearchInput'
@@ -32,6 +34,8 @@ import { SideBar } from './components/SideBar'
 import TitleBar from './components/TitleBar'
 import CONFIG from './config'
 import { Style } from './style'
+
+const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
 
 /**
  * 基础布局框架
@@ -44,35 +48,45 @@ const LayoutBase = props => {
   const { children, post } = props
   const { onLoading, fullWidth, locale } = useGlobal()
 
-  // 文章详情页左右布局改为上下布局
   const LAYOUT_VERTICAL =
     post && siteConfig('THOUGHTLITE_ARTICLE_LAYOUT_VERTICAL', false, CONFIG)
 
-  // 网站左右布局颠倒
   const LAYOUT_SIDEBAR_REVERSE = siteConfig('LAYOUT_SIDEBAR_REVERSE', false)
+
+  const sidebarOnlyPost = siteConfig(
+    'THOUGHTLITE_SIDEBAR_ONLY_ON_POST',
+    true,
+    CONFIG
+  )
+  const showSidebar =
+    !fullWidth && (!sidebarOnlyPost || Boolean(post)) && !LAYOUT_VERTICAL
 
   return (
     <div
       id='theme-thoughtlite'
-      className={`${siteConfig('FONT_STYLE')} dark:text-gray-300  bg-white dark:bg-black scroll-smooth`}>
+      className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth`}>
       <Style />
 
-      {/* 页头 */}
       <Header {...props} />
-      {/* 标题栏 */}
       <TitleBar {...props} />
 
-      {/* 主体 */}
-      <div id='container-inner' className='w-full relative z-10'>
+      <div id='container-inner' className='relative z-10 w-full flex-1'>
         <div
           id='container-wrapper'
-          className={`relative mx-auto justify-center md:flex py-8 px-2
-          ${LAYOUT_SIDEBAR_REVERSE ? 'flex-row-reverse' : ''} 
-          ${LAYOUT_VERTICAL ? 'items-center flex-col' : 'items-start'} 
+          className={`relative mx-auto flex justify-center px-4 py-8 md:px-6
+          ${LAYOUT_SIDEBAR_REVERSE ? 'md:flex-row-reverse' : ''} 
+          ${
+            LAYOUT_VERTICAL
+              ? 'max-w-5xl flex-col items-center'
+              : showSidebar
+                ? 'max-w-5xl flex-col items-start gap-8 md:flex-row md:gap-10'
+                : 'max-w-3xl flex-col items-start'
+          } 
           `}>
-          {/* 内容 */}
           <div
-            className={`${fullWidth ? '' : LAYOUT_VERTICAL ? 'max-w-5xl' : 'max-w-3xl'} w-full xl:px-14 lg:px-4`}>
+            className={`min-w-0 flex-1 ${
+              fullWidth ? 'w-full' : LAYOUT_VERTICAL ? 'w-full max-w-5xl' : 'w-full max-w-3xl'
+            }`}>
             <Transition
               show={!onLoading}
               appear={true}
@@ -83,37 +97,35 @@ const LayoutBase = props => {
               leaveFrom='opacity-100 translate-y-0'
               leaveTo='opacity-0 -translate-y-16'
               unmount={false}>
-              {/* 嵌入模块 */}
               {props.slotTop}
               {children}
             </Transition>
           </div>
 
-          {/* 侧边栏 */}
-          {!fullWidth && (
-            <div
-              className={`${
-                LAYOUT_VERTICAL
-                  ? 'flex space-x-0 md:space-x-2 md:flex-row flex-col w-full max-w-5xl justify-center xl:px-14 lg:px-4'
-                  : 'md:w-64 sticky top-8'
-              }`}>
+          {showSidebar && (
+            <div className='w-full flex-shrink-0 md:w-64 md:sticky md:top-24'>
+              <SideBar {...props} />
+            </div>
+          )}
+
+          {LAYOUT_VERTICAL && !fullWidth && (
+            <div className='flex w-full max-w-5xl flex-col justify-center space-y-0 px-0 md:flex-row md:space-x-2 md:space-y-0'>
               <SideBar {...props} />
             </div>
           )}
         </div>
       </div>
 
-      {/* 页脚 */}
-      <Footer {...props} />
+      <Footer />
 
-      {/* 回顶按钮 */}
-      <div className='fixed right-4 bottom-4 z-10'>
-        <div
+      <div className='fixed bottom-4 right-4 z-10'>
+        <button
+          type='button'
           title={locale.POST.TOP}
-          className='cursor-pointer p-2 text-center'
+          className='tl-icon-btn bg-[var(--tl-surface)] shadow-sm'
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <i className='fas fa-angle-up text-2xl' />
-        </div>
+          <i className='fas fa-angle-up text-lg' />
+        </button>
       </div>
     </div>
   )
@@ -134,24 +146,39 @@ const LayoutIndex = props => {
  * @returns
  */
 const LayoutPostList = props => {
-  const { category, tag } = props
+  const { category, tag, keyword, latestPosts, posts } = props
+  const router = useRouter()
+  const useTimeline =
+    siteConfig('THOUGHTLITE_HOME_TIMELINE', true, CONFIG) &&
+    !category &&
+    !tag &&
+    !keyword &&
+    !router?.query?.s &&
+    (router.pathname === '/' || router.pathname === '/page/[page]')
+
+  const latestCardPost = latestPosts?.[0] || posts?.[0]
 
   return (
     <>
-      {/* 显示分类 */}
       {category && (
-        <div className='pb-12'>
+        <div className='tl-timeline-day-label mb-4 border-0 pb-2'>
           <i className='mr-1 fas fa-folder-open' />
           {category}
         </div>
       )}
-      {/* 显示标签 */}
-      {tag && <div className='pb-12'>#{tag}</div>}
+      {tag && (
+        <div className='tl-timeline-day-label mb-4 border-0 pb-2'>#{tag}</div>
+      )}
+
+      {useTimeline &&
+        siteConfig('THOUGHTLITE_HOME_LATEST_CARD', true, CONFIG) && (
+          <LatestCard post={latestCardPost} />
+        )}
 
       {siteConfig('POST_LIST_STYLE') === 'page' ? (
-        <BlogListPage {...props} />
+        <BlogListPage {...props} useTimeline={useTimeline} />
       ) : (
-        <BlogListScroll {...props} />
+        <BlogListScroll {...props} useTimeline={useTimeline} />
       )}
     </>
   )
@@ -165,6 +192,7 @@ const LayoutPostList = props => {
 const LayoutSlug = props => {
   const { post, lock, validPassword } = props
   const router = useRouter()
+  const { locale } = useGlobal()
   const waiting404 = siteConfig('POST_WAITING_TIME_FOR_404') * 1000
   useEffect(() => {
     // 404
@@ -188,15 +216,36 @@ const LayoutSlug = props => {
     <>
       {lock ? (
         <PostLock validPassword={validPassword} />
-      ) : post && (
-        <div>
-          <PostMeta post={post} />
-          <div id='article-wrapper'>
-            <NotionPage post={post} />
-            <ShareBar post={post} />
-          </div>
-          <Comment frontMatter={post} />
-        </div>
+      ) : (
+        post && (
+          <article className='tl-card overflow-hidden p-5 md:p-8'>
+            <header className='tl-article-hero mb-6 border-b border-[var(--tl-border)] pb-6'>
+              <h1 className='tl-article-title'>
+                {siteConfig('POST_TITLE_ICON') && (
+                  <NotionIcon icon={post.pageIcon} />
+                )}
+                {post.title}
+              </h1>
+              <PostMeta post={post} />
+            </header>
+            <div id='article-wrapper' className='tl-prose-wrap'>
+              <NotionPage post={post} />
+              <ShareBar post={post} />
+            </div>
+            <section
+              className='mt-8 border-t border-[var(--tl-border)] pt-6'
+              aria-label={locale?.COMMON?.COMMENTS || 'Comments'}>
+              <h2 className='mb-4 flex items-center gap-2 text-base font-semibold text-[var(--tl-text)]'>
+                <i
+                  className='far fa-comments text-[var(--tl-muted)]'
+                  aria-hidden='true'
+                />
+                {locale?.COMMON?.COMMENTS || 'Comments'}
+              </h2>
+              <Comment frontMatter={post} />
+            </section>
+          </article>
+        )
       )}
     </>
   )
@@ -222,11 +271,11 @@ const Layout404 = props => {
   }, [])
 
   return <>
-        <div className='md:-mt-20 text-black w-full h-screen text-center justify-center content-center items-center flex flex-col'>
-            <div className='dark:text-gray-200'>
-                <h2 className='inline-block border-r-2 border-gray-600 mr-2 px-3 py-2 align-top'><i className='mr-2 fas fa-spinner animate-spin' />404</h2>
-                <div className='inline-block text-left h-32 leading-10 items-center'>
-                    <h2 className='m-0 p-0'>页面无法加载，即将返回首页</h2>
+        <div className='tl-card mx-auto mt-24 max-w-md px-8 py-12 text-center'>
+            <div className='text-[var(--tl-text)]'>
+                <h2 className='inline-block border-r-2 border-[var(--tl-border)] mr-2 px-3 py-2 align-top text-2xl font-semibold'><i className='mr-2 fas fa-spinner animate-spin' />404</h2>
+                <div className='inline-block text-left h-32 leading-10 items-center text-[var(--tl-muted)]'>
+                    <h2 className='m-0 p-0 text-base'>页面无法加载，即将返回首页</h2>
                 </div>
             </div>
         </div>

@@ -11,7 +11,7 @@
 ## 当前状态
 
 - 工作分支：**`feat/theme-thoughtlite`**
-- 主题目录：**`themes/thoughtlite/`** — 基于 `themes/example` 的**可运行骨架**（配置前缀 `THOUGHTLITE_*`），用于先跑通 NotionNext 数据流；**视觉尚未对齐**上游 ThoughtLite。
+- 主题目录：**`themes/thoughtlite/`** — 已接入 **ThoughtLite 取向** 的顶栏、CSS 变量主题色、首页 **Latest 卡片**、**按日发布日时间线**、文章页 **卡片式标题区 + 正文 prose 包裹**、侧栏 **仅文章页显示**（可配置）、评论区 **SSR 关闭** 等；仍可按计划继续微调像素级对齐上游 Astro 版。
 
 ## 本地试用
 

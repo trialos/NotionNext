@@ -1,21 +1,15 @@
 import { BeiAnGongAn } from '@/components/BeiAnGongAn'
 import BeiAnSite from '@/components/BeiAnSite'
 import CopyRightDate from '@/components/CopyRightDate'
-import DarkModeButton from '@/components/DarkModeButton'
 import PoweredBy from '@/components/PoweredBy'
 
-export const Footer = props => {
+export const Footer = () => {
   return (
-    <footer className='z-10 relative w-full bg-white px-6 space-y-1 border-t dark:border-hexo-black-gray dark:bg-hexo-black-gray '>
-      <DarkModeButton className='text-center pt-4' />
-
-      <div className='container mx-auto max-w-4xl py-6 md:flex flex-wrap md:flex-no-wrap md:justify-between items-center text-sm'>
+    <footer className='tl-footer relative z-10 mt-auto w-full px-4 py-8 text-sm'>
+      <div className='mx-auto flex max-w-3xl flex-col items-center justify-between gap-3 text-center md:flex-row md:text-left'>
         <CopyRightDate />
-        <div className='md:p-0 text-center md:text-right text-xs'>
-          {/* 右侧链接 */}
-          {/* <a href="#" className="text-black no-underline hover:underline">Privacy Policy</a> */}
-          <div className='flex flex-wrap'>
-            {' '}
+        <div className='flex flex-col items-center gap-1 md:items-end text-xs'>
+          <div className='flex flex-wrap justify-center gap-x-2'>
             <BeiAnSite />
             <BeiAnGongAn />
           </div>

@@ -7,13 +7,54 @@ import CONFIG from '../config'
 
 /**
  * 博客列表的单个卡片
- * @param {*} param0
- * @returns
+ * @param {{ post: object, variant?: 'default' | 'timeline' }} props
  */
-const BlogItem = ({ post }) => {
+const BlogItem = ({ post, variant = 'default' }) => {
   const showPageCover =
+    variant === 'default' &&
     siteConfig('THOUGHTLITE_POST_LIST_COVER', null, CONFIG) &&
     post?.pageCoverThumbnail
+
+  if (variant === 'timeline') {
+    return (
+      <article className='tl-timeline-post py-2'>
+        <div className='flex flex-wrap items-baseline gap-x-2 gap-y-0.5'>
+          <SmartLink
+            href={post?.href}
+            className='group font-medium leading-snug text-[var(--tl-text)] no-underline hover:text-[var(--tl-accent)]'>
+            {siteConfig('POST_TITLE_ICON') && (
+              <span className='mr-1 inline-flex align-middle'>
+                <NotionIcon icon={post.pageIcon} />
+              </span>
+            )}
+            {post?.title}
+          </SmartLink>
+          {post?.type !== 'Page' && post?.category && (
+            <SmartLink
+              href={`/category/${post.category}`}
+              className='text-xs text-[var(--tl-faint)] no-underline hover:text-[var(--tl-accent)]'>
+              #{post.category}
+            </SmartLink>
+          )}
+        </div>
+        {post.summary && !post.results ? (
+          <p className='mt-1 mb-0 text-sm text-[var(--tl-muted)] line-clamp-2 leading-relaxed'>
+            {post.summary}
+          </p>
+        ) : null}
+        {post.results ? (
+          <p className='mt-1 mb-0 text-sm text-[var(--tl-muted)] line-clamp-2'>
+            {post.results.map((r, index) => (
+              <span key={index}>{r}</span>
+            ))}
+          </p>
+        ) : null}
+        <div className='mt-1 text-xs text-[var(--tl-faint)]'>
+          <TwikooCommentCount post={post} className='mr-2' />
+        </div>
+      </article>
+    )
+  }
 
   return (
     <article
@@ -22,7 +63,7 @@ const BlogItem = ({ post }) => {
         <h2 className='mb-4'>
           <SmartLink
             href={post?.href}
-            className='text-black dark:text-gray-100 text-xl md:text-2xl no-underline hover:underline'>
+            className='text-[var(--tl-text)] text-xl md:text-2xl no-underline hover:underline'>
             {siteConfig('POST_TITLE_ICON') && (
               <NotionIcon icon={post.pageIcon} />
             )}
@@ -30,11 +71,10 @@ const BlogItem = ({ post }) => {
           </SmartLink>
         </h2>
 
-        <div className='mb-4 text-sm text-gray-700 dark:text-gray-300'>
+        <div className='mb-4 text-sm text-[var(--tl-muted)]'>
           by{' '}
-          <a href='#' className='text-gray-700 dark:text-gray-300'>
-            {siteConfig('AUTHOR')}
-          </a>{' '}
+          <span className='text-[var(--tl-muted)]'>{siteConfig('AUTHOR')}</span>
+          {' '}
           on {post.date?.start_date || post.createdTime}
           <TwikooCommentCount post={post} className='pl-1' />
           {post.category && (
@@ -42,30 +82,26 @@ const BlogItem = ({ post }) => {
               <span className='font-bold mx-1'> | </span>
               <SmartLink
                 href={`/category/${post.category}`}
-                className='text-gray-700 dark:text-gray-300 hover:underline'>
+                className='text-[var(--tl-muted)] hover:underline'>
                 {post.category}
               </SmartLink>
             </>
           )}
-          {/* <span className="font-bold mx-1"> | </span> */}
-          {/* <a href="#" className="text-gray-700">2 Comments</a> */}
         </div>
 
         {!post.results && (
-          <p className='line-clamp-3 text-gray-700 dark:text-gray-400 leading-normal'>
+          <p className='line-clamp-3 text-[var(--tl-muted)] leading-normal'>
             {post.summary}
           </p>
         )}
-        {/* 搜索结果 */}
         {post.results && (
-          <p className='line-clamp-3 mt-4 text-gray-700 dark:text-gray-300 text-sm font-light leading-7'>
+          <p className='line-clamp-3 mt-4 text-[var(--tl-muted)] text-sm font-light leading-7'>
             {post.results.map((r, index) => (
               <span key={index}>{r}</span>
             ))}
           </p>
         )}
       </div>
-      {/* 图片封面 */}
       {showPageCover && (
         <div className='md:w-5/12 w-full h-44 overflow-hidden p-1'>
           <SmartLink href={post?.href} passHref legacyBehavior>

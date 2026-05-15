@@ -1,48 +1,58 @@
 ﻿import NotionIcon from '@/components/NotionIcon'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
+import { useRouter } from 'next/router'
 import CONFIG from '../config'
 
 /**
- * 标题栏
+ * 列表/归档等页顶栏下的弱标题区；文章页标题在 LayoutSlug 内展示。
  */
 export default function TitleBar(props) {
   const { post } = props
   const { fullWidth, siteInfo } = useGlobal()
+  const router = useRouter()
 
-  const title = post?.title || siteConfig('TITLE')
-  const description = post?.description || siteConfig('AUTHOR')
-  const headerImage = post?.pageCoverThumbnail
-    ? post.pageCoverThumbnail
-    : siteInfo?.pageCover
+  if (post) {
+    return null
+  }
+
+  const skipOnHome =
+    siteConfig('THOUGHTLITE_HOME_MINIMAL_HEADER', true, CONFIG) &&
+    (router.pathname === '/' || router.pathname === '/page/[page]')
+
+  if (skipOnHome) {
+    return null
+  }
+
+  const title = siteConfig('TITLE')
+  const description = siteConfig('AUTHOR')
+  const headerImage = siteInfo?.pageCover
 
   const TITLE_BG = siteConfig('THOUGHTLITE_TITLE_IMAGE', false, CONFIG)
 
+  if (fullWidth) {
+    return null
+  }
+
   return (
-    <>
-      {/* 标题栏 */}
-      {!fullWidth && (
-        <div className='relative overflow-hidden text-center px-6 py-12 mb-6 bg-gray-100 dark:bg-hexo-black-gray dark:border-hexo-black-gray border-b'>
-          <h1 className='title-1 relative text-xl md:text-4xl pb-4 z-10'>
-            {siteConfig('POST_TITLE_ICON') && (
-              <NotionIcon icon={post?.pageIcon} />
-            )}
-            {title}
-          </h1>
-          <p className='title-2 relative leading-loose text-gray-dark z-10'>
-            {description}
-          </p>
-          {TITLE_BG && (
-            <>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={headerImage}
-                className='absolute object-cover top-0 left-0 w-full h-full select-none opacity-70 z-0'
-              />
-            </>
-          )}
-        </div>
-      )}
-    </>
+    <div className='relative overflow-hidden border-b border-[var(--tl-border)] bg-[var(--tl-bg)] px-4 py-8 text-center'>
+      <div className='relative z-10 mx-auto max-w-3xl'>
+        <h1 className='tl-article-title mb-2'>
+          {siteConfig('POST_TITLE_ICON') && <NotionIcon icon={siteInfo?.pageIcon} />}
+          {title}
+        </h1>
+        <p className='m-0 text-sm text-[var(--tl-muted)] leading-relaxed'>{description}</p>
+      </div>
+      {TITLE_BG && headerImage ? (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={headerImage}
+            alt=''
+            className='pointer-events-none absolute inset-0 z-0 h-full w-full object-cover opacity-25'
+          />
+        </>
+      ) : null}
+    </div>
   )
 }

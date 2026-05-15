@@ -4,13 +4,20 @@ import SmartLink from '@/components/SmartLink'
 import { useRouter } from 'next/router'
 import CONFIG from '../config'
 import BlogItem from './BlogItem'
+import HomeTimeline from './HomeTimeline'
+
 /**
  * 使用分页插件的博客列表
  * @param {*} props
  * @returns
  */
 export const BlogListPage = props => {
-  const { page = 1, posts, postCount } = props
+  const {
+    page = 1,
+    posts,
+    postCount,
+    useTimeline: useTimelineProp
+  } = props
   const { locale, NOTION_CONFIG } = useGlobal()
   const router = useRouter()
   const totalPage = Math.ceil(
@@ -28,13 +35,26 @@ export const BlogListPage = props => {
 
   const showPageCover = siteConfig('THOUGHTLITE_POST_LIST_COVER', null, CONFIG)
 
+  const useTimeline =
+    useTimelineProp ??
+    (siteConfig('THOUGHTLITE_HOME_TIMELINE', true, CONFIG) &&
+      !props.category &&
+      !props.tag &&
+      !props.keyword &&
+      !router?.query?.s &&
+      (router.pathname === '/' || router.pathname === '/page/[page]'))
+
   return (
     <div className={`w-full ${showPageCover ? 'md:pr-2' : 'md:pr-12'} mb-12`}>
-      <div id='posts-wrapper'>
-        {posts?.map(post => (
-          <BlogItem key={post.id} post={post} />
-        ))}
-      </div>
+      {useTimeline ? (
+        <HomeTimeline posts={posts} />
+      ) : (
+        <div id='posts-wrapper'>
+          {posts?.map(post => (
+            <BlogItem key={post.id} post={post} />
+          ))}
+        </div>
+      )}
 
       <div className='flex justify-between text-xs'>
         <SmartLink
