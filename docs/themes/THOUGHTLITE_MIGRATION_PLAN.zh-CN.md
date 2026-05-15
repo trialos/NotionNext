@@ -38,15 +38,19 @@
 
 - [x] 新建分支 `feat/theme-thoughtlite`。  
 - [x] 建立 `themes/thoughtlite`（example 骨架 + `THOUGHTLITE_*` 配置前缀 + `id='theme-thoughtlite'`）。  
+- [x] 顶栏 / 页脚 / 首页时间线与 Latest 卡片 / 文章卡片化初版（React 自研样式，非复制上游 Astro 源码）。  
 - [ ] 本地 `NEXT_PUBLIC_THEME=thoughtlite`（或 URL `?theme=thoughtlite`）跑通：首页、文章、归档、分类、标签、搜索、404。  
 - [ ] `yarn lint` / `yarn type-check` 针对本主题目录无新增错误。
 
 ### Phase B — 版式对齐 ThoughtLite
 
 - [ ] 阅读上游 `src/layouts`、`src/pages` 与首页「时间线 / Latest」结构，画出与 NotionNext 路由的映射表（`/`、`/[prefix]/[slug]` 等）。  
-- [ ] 替换顶栏导航：风格贴近上游（Home / Note / Jotting / About 等需映射到 Notion 的 Page/Post 或 `customNav`）。  
-- [ ] 首页：实现上游式 **列表时间线**（可用 `posts` + `publishDate` / `lastEditedDate` 排序），再接 `Pagination` / 滚动列表模式。  
-- [ ] `style.js`：用 CSS 变量固化 ThoughtLite 色板与圆角（参考上游 Tailwind 主题 token）。
+- [x] 替换顶栏导航：站点名 + 横向菜单 + 搜索入口 + 深浅色切换。  
+- [x] 首页：按 `publishDay` 分组的时间线列表（滚动/分页均支持）。  
+- [x] 归档页：按月分组列表与首页一致的时间线视觉。  
+- [x] 分类 / 标签索引：`tl-chip` 导航块。  
+- [x] 搜索页：`TlPageHero` + 搜索框卡片化；关键词高亮 `useEffect` 依赖补全。  
+- [ ] `style.js`：继续对齐上游色板、间距与字体（当前为首版 token）。
 
 ### Phase C — 文章与侧栏
 
@@ -58,7 +62,7 @@
 
 - [ ] `docs/themes/THOUGHTLITE.md`（及英文若有）写清功能、配置项、上游致谢与许可证。  
 - [ ] `docs/themes/README.md` 导航表更新。  
-- [ ] 按 [主题迁移指南 §8](../THEME_MIGRATION_GUIDE.zh-CN.md) 提交 `public/images/themes-preview/thoughtlite.png` / `.webp` 与 `conf/themeSwitch.manifest.js` 条目。  
+- [x] 按 [主题迁移指南 §8](../THEME_MIGRATION_GUIDE.zh-CN.md) 提交 `public/images/themes-preview/thoughtlite.png` / `.webp`（当前为占位图，可后续替换为真实截图）与 `conf/themeSwitch.manifest.js` 条目。  
 - [ ] 发起 PR，关联 **关闭 #3987**。
 
 ---

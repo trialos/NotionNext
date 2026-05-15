@@ -82,7 +82,7 @@ export const BlogListScroll = props => {
 
       <div
         onClick={handleGetMore}
-        className='w-full my-4 py-4 text-center cursor-pointer '>
+        className='my-4 w-full cursor-pointer py-4 text-center text-sm text-[var(--tl-muted)]'>
         {' '}
         {hasMore ? locale.COMMON.MORE : `${locale.COMMON.NO_MORE} 😰`}{' '}
       </div>

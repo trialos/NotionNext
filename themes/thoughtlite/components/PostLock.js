@@ -3,10 +3,6 @@ import { useEffect, useRef } from 'react'
 
 /**
  * 文章锁；通过此组件校验密码访问文章
- * @param {password, validPassword} props
- * @param password 正确的密码
- * @param validPassword(bool) 回调函数，校验正确回调入参为true
- * @returns
  */
 export const PostLock = props => {
   const { validPassword } = props
@@ -24,17 +20,16 @@ export const PostLock = props => {
   }
   const passwordInputRef = useRef(null)
   useEffect(() => {
-    // 选中密码输入框并将其聚焦
-    passwordInputRef.current.focus()
+    passwordInputRef.current?.focus()
   }, [])
 
   return (
-    <div
-      id='container'
-      className='w-full flex justify-center items-center h-96 '>
-      <div className='text-center space-y-3'>
-        <div className='font-bold'>{locale.COMMON.ARTICLE_LOCK_TIPS}</div>
-        <div className='flex mx-4'>
+    <div className='flex w-full justify-center py-16'>
+      <div className='tl-card w-full max-w-md space-y-4 p-8 text-center'>
+        <div className='text-sm font-medium text-[var(--tl-text)]'>
+          {locale.COMMON.ARTICLE_LOCK_TIPS}
+        </div>
+        <div className='tl-search-bar flex overflow-hidden'>
           <input
             id='password'
             type='password'
@@ -43,20 +38,18 @@ export const PostLock = props => {
                 submitPassword()
               }
             }}
-            ref={passwordInputRef} // 绑定ref到passwordInputRef变量
-            className='outline-none w-full text-sm pl-5 rounded-l transition focus:shadow-lg font-light leading-10 text-black dark:bg-gray-500 bg-gray-50'></input>
-          <div
+            ref={passwordInputRef}
+            className='min-w-0 flex-1 border-0 bg-transparent py-3 pl-4 text-sm text-[var(--tl-text)] outline-none'
+          />
+          <button
+            type='button'
             onClick={submitPassword}
-            className='px-3 whitespace-nowrap cursor-pointer items-center justify-center py-2 rounded-r duration-300 bg-gray-300'>
-            <i
-              className={
-                'duration-200 cursor-pointer fas fa-key dark:text-black'
-              }>
-              &nbsp;{locale.COMMON.SUBMIT}
-            </i>
-          </div>
+            className='border-l border-[var(--tl-border)] bg-[var(--tl-accent-soft)] px-4 text-sm font-medium text-[var(--tl-accent)] hover:opacity-90'>
+            <i className='fas fa-key mr-1' aria-hidden='true' />
+            {locale.COMMON.SUBMIT}
+          </button>
         </div>
-        <div id='tips'></div>
+        <div id='tips' />
       </div>
     </div>
   )

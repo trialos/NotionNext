@@ -179,6 +179,72 @@ const Style = () => {
         color: var(--tl-muted);
       }
 
+      #theme-thoughtlite .tl-page-hero {
+        font-family: var(--tl-font-display);
+      }
+
+      #theme-thoughtlite .tl-archive-item::before {
+        content: '';
+        position: absolute;
+        left: -4px;
+        top: 1.15rem;
+        width: 7px;
+        height: 7px;
+        border-radius: 9999px;
+        background: var(--tl-surface);
+        border: 2px solid var(--tl-accent);
+      }
+
+      #theme-thoughtlite .tl-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.4rem 0.85rem;
+        margin: 0.25rem;
+        border-radius: 9999px;
+        border: 1px solid var(--tl-border);
+        background: var(--tl-surface);
+        font-size: 0.875rem;
+        color: var(--tl-text);
+        text-decoration: none;
+        transition:
+          border-color 0.15s ease,
+          color 0.15s ease,
+          background 0.15s ease;
+      }
+
+      #theme-thoughtlite .tl-chip:hover {
+        border-color: var(--tl-accent);
+        color: var(--tl-accent);
+        background: var(--tl-accent-soft);
+      }
+
+      #theme-thoughtlite .tl-pager {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.45rem 1rem;
+        border-radius: 9999px;
+        border: 1px solid var(--tl-border);
+        background: var(--tl-surface);
+        color: var(--tl-text);
+        text-decoration: none;
+        font-weight: 500;
+        transition:
+          border-color 0.15s ease,
+          color 0.15s ease;
+      }
+
+      #theme-thoughtlite .tl-pager:hover:not(.tl-pager--disabled) {
+        border-color: var(--tl-accent);
+        color: var(--tl-accent);
+      }
+
+      #theme-thoughtlite .tl-pager--disabled {
+        visibility: hidden;
+        pointer-events: none;
+      }
+
       #theme-thoughtlite .no-scrollbar::-webkit-scrollbar {
         display: none;
       }

@@ -32,6 +32,7 @@ import { PostMeta } from './components/PostMeta'
 import SearchInput from './components/SearchInput'
 import { SideBar } from './components/SideBar'
 import TitleBar from './components/TitleBar'
+import TlPageHero from './components/TlPageHero'
 import CONFIG from './config'
 import { Style } from './style'
 
@@ -290,9 +291,9 @@ const Layout404 = props => {
 const LayoutSearch = props => {
   const { keyword } = props
   const router = useRouter()
+  const { locale } = useGlobal()
   useEffect(() => {
     if (isBrowser) {
-      // 高亮搜索到的结果
       const container = document.getElementById('posts-wrapper')
       if (keyword && container) {
         replaceSearchResult({
@@ -305,11 +306,15 @@ const LayoutSearch = props => {
         })
       }
     }
-  }, [router])
+  }, [router, keyword])
 
   return (
     <>
-      <div className='pb-12'>
+      <TlPageHero
+        title={locale?.NAV?.SEARCH || 'Search'}
+        description={keyword ? `「${keyword}」` : undefined}
+      />
+      <div className='mb-8'>
         <SearchInput {...props} />
       </div>
       <LayoutPostList {...props} />
@@ -324,10 +329,18 @@ const LayoutSearch = props => {
  */
 const LayoutArchive = props => {
   const { archivePosts } = props
+  const { locale } = useGlobal()
+  const keys = Object.keys(archivePosts || {}).sort((a, b) =>
+    String(b).localeCompare(String(a), undefined, {
+      sensitivity: 'base',
+      numeric: true
+    })
+  )
   return (
     <>
-      <div className='mb-10 pb-20 md:py-12 p-3  min-h-screen w-full'>
-        {Object.keys(archivePosts).map(archiveTitle => (
+      <TlPageHero title={locale?.NAV?.ARCHIVE || 'Archive'} />
+      <div className='w-full pb-16'>
+        {keys.map(archiveTitle => (
           <BlogListArchive
             key={archiveTitle}
             archiveTitle={archiveTitle}
@@ -346,22 +359,19 @@ const LayoutArchive = props => {
  */
 const LayoutCategoryIndex = props => {
   const { categoryOptions } = props
+  const { locale } = useGlobal()
   return (
     <>
-      <div id='category-list' className='duration-200 flex flex-wrap'>
+      <TlPageHero title={locale?.COMMON?.CATEGORY || 'Categories'} />
+      <div id='category-list' className='flex flex-wrap'>
         {categoryOptions?.map(category => (
           <SmartLink
             key={category.name}
             href={`/category/${category.name}`}
-            passHref
-            legacyBehavior>
-            <div
-              className={
-                'hover:text-black dark:hover:text-white dark:text-gray-300 dark:hover:bg-gray-600 px-5 cursor-pointer py-2 hover:bg-gray-100'
-              }>
-              <i className='mr-4 fas fa-folder' />
-              {category.name}({category.count})
-            </div>
+            className='tl-chip'>
+            <i className='fas fa-folder opacity-70' aria-hidden='true' />
+            {category.name}
+            <span className='text-[var(--tl-faint)]'>({category.count})</span>
           </SmartLink>
         ))}
       </div>
@@ -376,22 +386,22 @@ const LayoutCategoryIndex = props => {
  */
 const LayoutTagIndex = props => {
   const { tagOptions } = props
+  const { locale } = useGlobal()
   return (
     <>
-      <div id='tags-list' className='duration-200 flex flex-wrap'>
+      <TlPageHero title={locale?.COMMON?.TAGS || 'Tags'} />
+      <div id='tags-list' className='flex flex-wrap'>
         {tagOptions.map(tag => (
-          <div key={tag.name} className='p-2'>
-            <SmartLink
-              key={tag}
-              href={`/tag/${encodeURIComponent(tag.name)}`}
-              passHref
-              className={`cursor-pointer inline-block rounded hover:bg-gray-500 hover:text-white duration-200 mr-2 py-1 px-2 text-xs whitespace-nowrap dark:hover:text-white text-gray-600 hover:shadow-xl dark:border-gray-400 notion-${tag.color}_background dark:bg-gray-800`}>
-              <div className='font-light dark:text-gray-400'>
-                <i className='mr-1 fas fa-tag' />{' '}
-                {tag.name + (tag.count ? `(${tag.count})` : '')}{' '}
-              </div>
-            </SmartLink>
-          </div>
+          <SmartLink
+            key={tag.name}
+            href={`/tag/${encodeURIComponent(tag.name)}`}
+            className={`tl-chip notion-${tag.color}_background`}>
+            <i className='fas fa-tag opacity-70' aria-hidden='true' />
+            {tag.name}
+            {tag.count ? (
+              <span className='text-[var(--tl-faint)]'>({tag.count})</span>
+            ) : null}
+          </SmartLink>
         ))}
       </div>
     </>

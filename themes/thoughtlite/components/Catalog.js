@@ -64,7 +64,7 @@ const Catalog = ({ toc }) => {
       <div
         className='overflow-y-auto max-h-96 overscroll-none scroll-hidden'
         ref={tRef}>
-        <nav className='h-full  text-black dark:text-gray-300'>
+        <nav className='h-full text-[var(--tl-muted)]'>
           {toc.map(tocItem => {
             const id = uuidToId(tocItem.id)
             tocIds.push(id)
@@ -79,7 +79,11 @@ const Catalog = ({ toc }) => {
                     display: 'inline-block',
                     marginLeft: tocItem.indentLevel * 16
                   }}
-                  className={`truncate ${activeSection === id ? ' font-bold text-red-400 underline' : ''}`}>
+                  className={`truncate ${
+                    activeSection === id
+                      ? 'font-semibold text-[var(--tl-accent)] underline decoration-[var(--tl-accent)]/40'
+                      : 'hover:text-[var(--tl-text)]'
+                  }`}>
                   {tocItem.text}
                 </span>
               </a>

@@ -1,36 +1,30 @@
 import SmartLink from '@/components/SmartLink'
 
 /**
- * 博客归档列表；仅归档页面使用
- * 按照日期将文章分组
- * @param {*} param0
- * @returns
+ * 归档：按月（或站点约定）分组的文章列表
  */
 export default function BlogListArchive({ archiveTitle, archivePosts }) {
+  const posts = archivePosts[archiveTitle] || []
+  const sectionId = `archive-${String(archiveTitle).replace(/\s+/g, '-')}`
   return (
-    <div key={archiveTitle}>
-      <div id={archiveTitle} className='pt-16 pb-4 text-3xl dark:text-gray-300'>
+    <section className='tl-archive-section' aria-labelledby={sectionId}>
+      <h2 id={sectionId} className='tl-timeline-day-label mb-3 mt-10 first:mt-0'>
         {archiveTitle}
-      </div>
-
-      <ul>
-        {archivePosts[archiveTitle].map(post => {
-          return (
-            <li
-              key={post.id}
-              className='border-l-2 p-1 text-xs md:text-base items-center  hover:scale-x-105 hover:border-gray-500 dark:hover:border-gray-300 dark:border-gray-400 transform duration-500'>
-              <div id={post?.publishDay}>
-                <span className='text-gray-400'>{post?.publishDay}</span> &nbsp;
-                <SmartLink
-                  href={post?.href}
-                  className='dark:text-gray-400  dark:hover:text-gray-300 overflow-x-hidden hover:underline cursor-pointer text-gray-600'>
-                  {post.title}
-                </SmartLink>
-              </div>
-            </li>
-          )
-        })}
+      </h2>
+      <ul className='tl-archive-rail m-0 list-none border-l border-[var(--tl-border)] pl-0'>
+        {posts.map(post => (
+          <li key={post.id} className='tl-archive-item relative pl-5 py-1.5'>
+            <span className='mb-0.5 block text-xs text-[var(--tl-faint)]'>
+              {post?.publishDay}
+            </span>
+            <SmartLink
+              href={post?.href}
+              className='text-[var(--tl-text)] no-underline hover:text-[var(--tl-accent)]'>
+              {post.title}
+            </SmartLink>
+          </li>
+        ))}
       </ul>
-    </div>
+    </section>
   )
 }

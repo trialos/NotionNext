@@ -12,6 +12,7 @@
 
 - 工作分支：**`feat/theme-thoughtlite`**
 - 主题目录：**`themes/thoughtlite/`** — 已接入 **ThoughtLite 取向** 的顶栏、CSS 变量主题色、首页 **Latest 卡片**、**按日发布日时间线**、文章页 **卡片式标题区 + 正文 prose 包裹**、侧栏 **仅文章页显示**（可配置）、评论区 **SSR 关闭** 等；仍可按计划继续微调像素级对齐上游 Astro 版。
+- 主题切换面板：已在 **`conf/themeSwitch.manifest.js`** 注册 **`thoughtlite`**；预览资源为 **`public/images/themes-preview/thoughtlite.png`** 与 **`.webp`**（当前由 `endspace` 预览图复制占位，合并前请替换为真实截图并可运行 `yarn perf:compress-theme-previews` 重生成 webp）。
 
 ## 本地试用
 

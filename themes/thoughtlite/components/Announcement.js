@@ -4,10 +4,7 @@ import dynamic from 'next/dynamic'
 const NotionPage = dynamic(() => import('@/components/NotionPage'))
 
 /**
- * 公告模块
- * 其实就是一篇文章
- * @param {*} param0
- * @returns
+ * 公告模块（单篇 Notion 页）
  */
 const Announcement = ({ post, className }) => {
   const { locale } = useGlobal()
@@ -15,14 +12,15 @@ const Announcement = ({ post, className }) => {
     return <></>
   }
   return (
-    <aside className='rounded shadow overflow-hidden mb-6'>
-      <h3 className='text-sm bg-gray-100 text-gray-700 dark:bg-hexo-black-gray dark:text-gray-200 py-3 px-4 dark:border-hexo-black-gray border-b'>
+    <aside
+      className={`tl-card mb-6 w-full overflow-hidden ${className || ''}`}>
+      <h3 className='border-b border-[var(--tl-border)] bg-[var(--tl-bg)] px-4 py-3 text-sm text-[var(--tl-text)]'>
         <i className='mr-2 fas fa-bullhorn' />
         {locale.COMMON.ANNOUNCEMENT}
       </h3>
 
       {post && (
-        <div id='announcement-content'>
+        <div id='announcement-content' className='px-2 py-3 text-left'>
           <NotionPage post={post} className='text-center' />
         </div>
       )}

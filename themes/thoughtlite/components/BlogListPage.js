@@ -56,7 +56,7 @@ export const BlogListPage = props => {
         </div>
       )}
 
-      <div className='flex justify-between text-xs'>
+      <div className='mt-6 flex justify-between gap-4 text-sm'>
         <SmartLink
           href={{
             pathname:
@@ -65,7 +65,7 @@ export const BlogListPage = props => {
                 : `${pagePrefix}/page/${currentPage - 1}`,
             query: router.query.s ? { s: router.query.s } : {}
           }}
-          className={`${showPrev ? 'bg-black dark:bg-hexo-black-gray' : 'bg-gray pointer-events-none invisible'} text-white no-underline py-2 px-3 rounded`}>
+          className={`tl-pager ${showPrev ? '' : 'tl-pager--disabled'}`}>
           {locale.PAGINATION.PREV}
         </SmartLink>
         <SmartLink
@@ -73,7 +73,7 @@ export const BlogListPage = props => {
             pathname: `${pagePrefix}/page/${currentPage + 1}`,
             query: router.query.s ? { s: router.query.s } : {}
           }}
-          className={`${showNext ? 'bg-black dark:bg-hexo-black-gray ' : 'bg-gray pointer-events-none invisible'} text-white no-underline py-2 px-3 rounded`}>
+          className={`tl-pager ${showNext ? '' : 'tl-pager--disabled'}`}>
           {locale.PAGINATION.NEXT}
         </SmartLink>
       </div>
