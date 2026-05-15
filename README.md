@@ -1,15 +1,35 @@
+ <div align="center">
+
+<img src="https://github.com/user-attachments/assets/c111204d-2016-4343-92e4-83357cac4b19" width="96" height="96" alt="NotionNext Logo" />
+
+# NotionNext
+
+一个使用 Next.js + Notion API 构建的高颜值静态博客系统
+
+为 Notion 与所有创作者设计 ✨
+
+<p>
+  <a href="https://preview.tangly1024.com/">
+    在线预览
+  </a>
+  ·
+  <a href="https://docs.tangly1024.com/">
+    文档
+  </a>
+  ·
+  <a href="./CONTRIBUTING.md">
+    参与贡献
+  </a>
+</p>
+
+</div>
+
+---
 # 帮助教程
 
-访问帮助：[NotionNext帮助手册](https://docs.tangly1024.com/)
-
-> 本项目教程为免费、公开资源，仅限个人学习使用，禁止利用本教程建立的博客发布非法内容、进行违法犯罪活动。严禁任何个人或组织将本教程用于商业用途，包括但不限于直接售卖、间接收费、或其他变相盈利行为。转载、复制或介绍本教程内容时，须保留作者信息并明确注明来源。 
-> 本项目仅提供由作者团队授权的付费咨询服务，请注意辨别，谨防诈骗行为。任何未经授权的收费服务均可能存在法律风险。
+> 本项目为免费、公开资源，仅限个人学习使用，禁止利用本教程建立的博客发布非法内容、进行违法犯罪活动。
 
 Notion是一个能让效率暴涨的生产力引擎，可以帮你书写文档、管理笔记，搭建知识库，甚至可以为你规划项目、时间管理、组织团队、提高生产力、还有当前最强大的AI技术加持。
-
-> 若希望进一步探索Notion的功能，欢迎购买《[Notion笔记从入门到精通进阶课程](https://docs.tangly1024.com/article/notion-tutorial)》
-
-> 若希望获得稳定、高速、不限设备数量的VPN科学上网服务，欢迎使用[飞鸟VPN](https://fbinv02.fbaff.cc/auth/register?code=kaA7t4kh)，这是我目前在用的VPN，仅作友情推广
 
 # NotionNext
 
