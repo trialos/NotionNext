@@ -47,16 +47,11 @@ export default function ArticleRecommend({ recommendPosts, siteInfo }) {
                   className='absolute inset-0 z-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110 group-hover:brightness-50'
                 />
 
-                {/* 底部遮罩：轻微磨砂 + 更深渐变，弱化封面自带文字与标题重叠 */}
+                {/* 整图半透明蒙层：统一压暗封面，避免只遮文字区、与图上文字仍打架 */}
                 <div
                   aria-hidden
-                  className='pointer-events-none absolute bottom-0 left-0 z-[5] h-[78%] w-full'>
-                  <div
-                    className='absolute inset-0 opacity-95 transition-opacity duration-300 group-hover:opacity-100
-                    backdrop-blur-[3px] supports-[backdrop-filter]:backdrop-blur-sm
-                    bg-gradient-to-b from-transparent via-black/60 to-black/95'
-                  />
-                </div>
+                  className='pointer-events-none absolute inset-0 z-[5] bg-black/40 backdrop-blur-[2px] transition-colors duration-300 supports-[backdrop-filter]:backdrop-blur-sm group-hover:bg-black/50'
+                />
 
                 <div className='relative z-20 flex h-full w-full items-center justify-center duration-300'>
                   <div className='max-w-full px-4 text-center text-lg font-bold text-white shadow-text select-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.75)]'>
