@@ -3,6 +3,9 @@ import BeiAnSite from '@/components/BeiAnSite'
 import CopyRightDate from '@/components/CopyRightDate'
 import PoweredBy from '@/components/PoweredBy'
 
+const UPSTREAM_REPO = 'https://github.com/tuyuritio/astro-theme-thought-lite'
+const UPSTREAM_AUTHOR = 'https://github.com/tuyuritio'
+
 export const Footer = () => {
   return (
     <footer className='tl-footer relative z-10 mt-auto w-full px-4 py-8 text-sm'>
@@ -16,6 +19,26 @@ export const Footer = () => {
           <PoweredBy />
         </div>
       </div>
+      <p className='mx-auto mt-6 max-w-3xl border-t border-[var(--tl-border)] pt-4 text-center text-xs leading-relaxed text-[var(--tl-muted)]'>
+        <span className='font-medium text-[var(--tl-text)]'>ThoughtLite</span>
+        {' 主题 · 设计参考 '}
+        <a
+          className='text-[var(--tl-accent)] underline-offset-2 hover:underline'
+          href={UPSTREAM_REPO}
+          target='_blank'
+          rel='noopener noreferrer'>
+          tuyuritio/astro-theme-thought-lite
+        </a>
+        {'（原作者 '}
+        <a
+          className='text-[var(--tl-accent)] underline-offset-2 hover:underline'
+          href={UPSTREAM_AUTHOR}
+          target='_blank'
+          rel='noopener noreferrer'>
+          tuyuritio
+        </a>
+        ）
+      </p>
     </footer>
   )
 }
