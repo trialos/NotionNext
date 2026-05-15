@@ -60,10 +60,10 @@
 
 ### Phase D — 上架主仓库清单
 
-- [ ] `docs/themes/THOUGHTLITE.md`（及英文若有）写清功能、配置项、上游致谢与许可证。  
-- [ ] `docs/themes/README.md` 导航表更新。  
+- [x] `docs/themes/THOUGHTLITE.md` 与 **`docs/themes/THOUGHTLITE.en.md`**：功能、配置、上游致谢与许可证说明。  
+- [x] `docs/themes/README.md` / `README.en.md` 导航表更新。  
 - [x] 按 [主题迁移指南 §8](../THEME_MIGRATION_GUIDE.zh-CN.md) 提交 `public/images/themes-preview/thoughtlite.png` / `.webp`（当前为占位图，可后续替换为真实截图）与 `conf/themeSwitch.manifest.js` 条目。  
-- [ ] 发起 PR，关联 **关闭 #3987**。
+- [ ] 合并 PR 时由维护者决定是否 **`Closes #3987`**（若仍有多阶段需求可保留 Issue 子任务）。
 
 ---
 
@@ -91,3 +91,13 @@ yarn type-check
 ---
 
 维护者可按 Phase 勾选推进；每阶段结束建议 squash 或清晰 commit message 便于审阅。
+
+---
+
+## 5. 维护文档索引
+
+| 文档 | 用途 |
+|------|------|
+| [THOUGHTLITE.md](./THOUGHTLITE.md) | 加入原因、上游来源、原作者仓库、配置与维护清单（**主入口**） |
+| [THOUGHTLITE.en.md](./THOUGHTLITE.en.md) | 上述内容的英文版，便于国际贡献者 |
+| 本文（迁移计划） | 分阶段任务、风险、验证命令；与主文档交叉引用 |
