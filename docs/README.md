@@ -25,6 +25,7 @@ git remote set-url origin https://github.com/notionnext-org/NotionNext.git
 | 提交与 PR 规范 | [CONTRIBUTION_WORKFLOW.md](./CONTRIBUTION_WORKFLOW.md) | [CONTRIBUTION_WORKFLOW.en.md](./CONTRIBUTION_WORKFLOW.en.md) |
 | 维护与变更尺度 | [MAINTENANCE_PHILOSOPHY.zh-CN.md](./MAINTENANCE_PHILOSOPHY.zh-CN.md) | [MAINTENANCE_PHILOSOPHY.en.md](./MAINTENANCE_PHILOSOPHY.en.md) |
 | 主题迁移指南 | [THEME_MIGRATION_GUIDE.zh-CN.md](./THEME_MIGRATION_GUIDE.zh-CN.md) | [THEME_MIGRATION_GUIDE.md](./THEME_MIGRATION_GUIDE.md) |
+| 社区官网能力扩展路线 | [COMMUNITY_SITE_ROADMAP.md](./COMMUNITY_SITE_ROADMAP.md) | — |
 
 ## 主题文档
 

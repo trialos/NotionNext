@@ -41,20 +41,22 @@ export default function ArticleRecommend({ recommendPosts, siteInfo }) {
               href={post?.href}
               passHref
               className='flex h-40 cursor-pointer overflow-hidden'>
-              <div className='h-full w-full relative group'>
-                <div className='flex items-center justify-center w-full h-full duration-300 '>
-                  <div className='z-10 text-lg px-4 font-bold text-white text-center shadow-text select-none'>
-                    {post.title}
-                  </div>
-                </div>
+              <div className='h-full w-full relative isolate group'>
                 <LazyImage
                   src={headerImage}
-                  className='absolute top-0 w-full h-full object-cover object-center group-hover:scale-110 group-hover:brightness-50 transform duration-200'
+                  className='absolute inset-0 z-0 h-full w-full object-cover object-center transition duration-200 group-hover:scale-110 group-hover:brightness-50'
                 />
 
-                {/* 卡片的阴影遮罩，为了凸显图片上的文字 */}
-                <div className='h-3/4 w-full absolute left-0 bottom-0'>
-                  <div className='h-full w-full absolute opacity-80 group-hover:opacity-100 transition-all duration-1000 bg-gradient-to-b from-transparent to-black'></div>
+                {/* 整图半透明蒙层：统一压暗封面，避免只遮文字区、与图上文字仍打架 */}
+                <div
+                  aria-hidden
+                  className='pointer-events-none absolute inset-0 z-[5] bg-black/40 backdrop-blur-[2px] transition-colors duration-300 supports-[backdrop-filter]:backdrop-blur-sm group-hover:bg-black/50'
+                />
+
+                <div className='relative z-20 flex h-full w-full items-center justify-center duration-300'>
+                  <div className='max-w-full px-4 text-center text-lg font-bold text-white shadow-text select-none drop-shadow-[0_2px_8px_rgba(0,0,0,0.75)]'>
+                    {post.title}
+                  </div>
                 </div>
               </div>
             </SmartLink>
