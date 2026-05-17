@@ -1,5 +1,7 @@
 # 参与维护在线文档
 
+> 第一次参与？先看 **[参与社区](./community-participate.md)**（提问、PR、维护者路径）。
+
 在线文档站：[https://notionnext.tangly1024.com](https://notionnext.tangly1024.com)
 
 源码与 GitHub 上的 Markdown **一一对应**；改仓库 → 合并 `main` → 自动发布。

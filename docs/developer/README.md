@@ -15,11 +15,13 @@
 | 配置体系 | [CONFIGURATION.md](./CONFIGURATION.md) | [CONFIGURATION.en.md](./CONFIGURATION.en.md) |
 | 提交与 PR | [CONTRIBUTION_WORKFLOW.md](./CONTRIBUTION_WORKFLOW.md) | [CONTRIBUTION_WORKFLOW.en.md](./CONTRIBUTION_WORKFLOW.en.md) |
 | 维护哲学 | [MAINTENANCE_PHILOSOPHY.zh-CN.md](./MAINTENANCE_PHILOSOPHY.zh-CN.md) | [MAINTENANCE_PHILOSOPHY.en.md](./MAINTENANCE_PHILOSOPHY.en.md) |
+| 大改动 RFC | [rfc/README.md](./rfc/README.md) | — |
+| 项目治理 | [GOVERNANCE.zh-CN.md](../../GOVERNANCE.zh-CN.md) | [GOVERNANCE.md](../../GOVERNANCE.md) |
 | 主题迁移 | [THEME_MIGRATION_GUIDE.zh-CN.md](./THEME_MIGRATION_GUIDE.zh-CN.md) | [THEME_MIGRATION_GUIDE.md](./THEME_MIGRATION_GUIDE.md) |
 | 版本更新说明 | [UPDATE.md](./UPDATE.md) | — |
 | 社区路线图 | [COMMUNITY_SITE_ROADMAP.md](./COMMUNITY_SITE_ROADMAP.md) | — |
 
-仓库贡献总则：[CONTRIBUTING.zh-CN.md](../../CONTRIBUTING.zh-CN.md)
+仓库贡献总则：[CONTRIBUTING.zh-CN.md](../../CONTRIBUTING.zh-CN.md) · 用户向 [参与社区](../user-guide/community-participate.md) · [MAINTAINERS.md](../../MAINTAINERS.md)
 
 ## 主题开发者文档
 

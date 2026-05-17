@@ -24,6 +24,14 @@
   <a href="./CONTRIBUTING.md">
     参与贡献
   </a>
+  ·
+  <a href="./docs/user-guide/community-participate.md">
+    参与社区
+  </a>
+  ·
+  <a href="./GOVERNANCE.zh-CN.md">
+    项目治理
+  </a>
 </p>
 
 </div>
@@ -104,6 +112,18 @@ yarn dev
 
 说明：本地开发保持简单（`yarn` 即可）；锁文件一致性由 CI 严格校验。
 
+## 参与社区
+
+项目由 **[notionnext-org](https://github.com/notionnext-org)** 托管，欢迎站长与开发者共同维护。
+
+| | |
+| --- | --- |
+| **参与指南** | [docs/user-guide/community-participate.md](./docs/user-guide/community-participate.md)（在线：[参与社区](https://notionnext.tangly1024.com/user-guide/community-participate)） |
+| **贡献代码/文档** | [CONTRIBUTING.zh-CN.md](./CONTRIBUTING.zh-CN.md) |
+| **项目治理** | [GOVERNANCE.zh-CN.md](./GOVERNANCE.zh-CN.md) · [MAINTAINERS.md](./MAINTAINERS.md) |
+| **行为准则** | [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) |
+| **讨论** | [GitHub Discussions](https://github.com/notionnext-org/NotionNext/discussions) |
+
 ## 开发者文档导航
 
 为方便新贡献者快速上手，项目已补充文档导航与协作规范：
@@ -112,6 +132,7 @@ yarn dev
 - [开发者文档](./docs/developer/README.md)
 - [贡献入口（中文）](./CONTRIBUTING.zh-CN.md)
 - [贡献入口（英文）](./CONTRIBUTING.md)
+- [RFC 与大改动流程](./docs/developer/rfc/README.md)
 
 ## 主题与预览
 

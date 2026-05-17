@@ -30,6 +30,7 @@ export default defineConfig({
       { text: '主题', link: '/user-guide/themes/THEMES_CATALOG', activeMatch: '/user-guide/themes/' },
       { text: '参考手册', link: '/user-guide/reference/features', activeMatch: '/user-guide/reference/' },
       { text: '维护策略', link: '/DOCUMENTATION_POLICY' },
+      { text: '参与社区', link: '/user-guide/community-participate' },
       { text: '参与维护', link: '/user-guide/maintain-docs' },
       { text: '旧版手册', link: '/user-guide/help/legacy-docs' },
       {
@@ -108,6 +109,7 @@ export default defineConfig({
           text: '开发与帮助',
           collapsed: true,
           items: [
+            { text: '参与社区', link: '/user-guide/community-participate' },
             { text: '开发入门', link: '/user-guide/development/getting-started' },
             { text: '运行原理', link: '/user-guide/development/architecture' },
             { text: '反馈', link: '/user-guide/help/feedback' },
@@ -133,6 +135,7 @@ export default defineConfig({
           items: [
             { text: '首页', link: '/' },
             { text: '使用说明', link: '/user-guide/intro' },
+            { text: '参与社区', link: '/user-guide/community-participate' },
             { text: '文档维护策略', link: '/DOCUMENTATION_POLICY' },
             { text: '参与维护', link: '/user-guide/maintain-docs' }
           ]

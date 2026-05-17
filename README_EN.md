@@ -36,6 +36,15 @@ A static blog system built with NextJS and Notion API, deployed on Vercel. Desig
 
 **Repository hosting:** The main repository is maintained by the GitHub organization **[notionnext-org](https://github.com/notionnext-org)** (canonical: `https://github.com/notionnext-org/NotionNext`). Contributions are welcome; see the org page for collaboration. If you cloned before the transfer, run `git remote set-url origin https://github.com/notionnext-org/NotionNext.git` and verify with `git remote -v`.
 
+## Community
+
+| | |
+| --- | --- |
+| **Participate** | [community-participate.md](./docs/user-guide/community-participate.md) · [Discussions](https://github.com/notionnext-org/NotionNext/discussions) |
+| **Contributing** | [CONTRIBUTING.md](./CONTRIBUTING.md) |
+| **Governance** | [GOVERNANCE.md](./GOVERNANCE.md) · [MAINTAINERS.md](./MAINTAINERS.md) |
+| **Code of Conduct** | [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) |
+| **Docs site** | [notionnext.tangly1024.com](https://notionnext.tangly1024.com) |
 
 ## 3-Minute Quick Start
 
