@@ -109,22 +109,15 @@ yarn dev
 为方便新贡献者快速上手，项目已补充文档导航与协作规范：
 
 - [文档导航入口（中文）](./docs/README.md)
-- [社区官网能力扩展路线](./docs/COMMUNITY_SITE_ROADMAP.md)
-- [Docs Navigation (English)](./docs/README.en.md)
-- [主题迁移指南（中文）](./docs/THEME_MIGRATION_GUIDE.zh-CN.md)
-- [Theme Migration Guide (English)](./docs/THEME_MIGRATION_GUIDE.md)
+- [开发者文档](./docs/developer/README.md)
 - [贡献入口（中文）](./CONTRIBUTING.zh-CN.md)
 - [贡献入口（英文）](./CONTRIBUTING.md)
-- [维护与变更尺度（中文）](./docs/MAINTENANCE_PHILOSOPHY.zh-CN.md)
-- [Maintenance & change control (English)](./docs/MAINTENANCE_PHILOSOPHY.en.md)
 
-## 预览效果
+## 主题与预览
 
-在线演示：[https://preview.tangly1024.com/](https://preview.tangly1024.com/) ，点击左下角挂件可以切换主题，没找到喜欢的主题？[贡献](/CONTRIBUTING.md)一个吧~
-
-| Next                                                                                                  | Medium                                                                                                      | Hexo                                                                                                  | Fukasawa                                                                                                          |
-| ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| <img src='./docs/theme-next.png' width='300'/> [预览NEXT](https://preview.tangly1024.com/?theme=next) | <img src='./docs/theme-medium.png' width='300'/> [预览MEDIUM](https://preview.tangly1024.com/?theme=medium) | <img src='./docs/theme-hexo.png' width='300'/> [预览HEXO](https://preview.tangly1024.com/?theme=hexo) | <img src='./docs/theme-fukasawa.png' width='300'/> [预览FUKASAWA](https://preview.tangly1024.com/?theme=fukasawa) |
+- **在线切换主题**：[preview.tangly1024.com](https://preview.tangly1024.com/)（左下角挂件）
+- **25 个内置主题说明**：[docs/user-guide/themes/THEMES_CATALOG.md](./docs/user-guide/themes/THEMES_CATALOG.md)
+- 想贡献新主题？见 [CONTRIBUTING.zh-CN.md](./CONTRIBUTING.zh-CN.md) 与 [主题迁移指南](./docs/developer/THEME_MIGRATION_GUIDE.zh-CN.md)
 
 ## 致谢
 
