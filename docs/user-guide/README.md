@@ -1,7 +1,7 @@
-# NotionNext 使用说明（用户教程）
+﻿# NotionNext 使用说明（用户教程）
 
 本目录为 **部署者与站长** 操作手册，在仓库内持续维护（对齐主线 **4.9.5.2**）。  
-历史在线版：[NotionNext 帮助手册](https://docs.tangly1024.com/about)
+**在线站**：[notionnext.tangly1024.com](https://notionnext.tangly1024.com) · 历史 Notion 版：[docs.tangly1024.com](https://docs.tangly1024.com/about)
 
 > **维护者**：[维护工作流](./MAINTENANCE_WORKFLOW.md) · 策略：[DOCUMENTATION_POLICY.md](../DOCUMENTATION_POLICY.md) · 索引：[ARTICLE_INDEX.md](./ARTICLE_INDEX.md) · 迁移：[MIGRATION_STATUS.md](./MIGRATION_STATUS.md)
 
@@ -44,7 +44,7 @@
 
 ### 主题
 
-- [主题总览](./themes/overview.md) · **[25 个主题说明目录](./themes/README.md)** · [选型全表](./themes/THEMES_CATALOG.md)  
+- [主题总览](./themes/overview.md) · **[25 个主题说明目录](./developer/themes/README.md)** · [选型全表](./themes/THEMES_CATALOG.md)  
 - 示例：[Simple](./themes/simple.md) · [Hexo](./themes/hexo.md) · [Proxio](./themes/proxio.md) · [HEO](./themes/heo.md)
 
 ### 统计 · 评论 · 插件
@@ -55,7 +55,7 @@
 
 ### 开发与运营
 
-- [开发入门](./development/getting-started.md)（详见 [GETTING_STARTED.md](../GETTING_STARTED.md)）  
+- [开发入门](./development/getting-started.md)（详见 [GETTING_STARTED.md](../developer/GETTING_STARTED.md)）  
 - [运行原理](./development/architecture.md) · [SEO](./operations/seo.md)
 
 ### 帮助 · 更新
@@ -65,6 +65,7 @@
 
 ## 其它
 
+- [参与维护在线文档](./maintain-docs.md) · [GitHub docs 目录](https://github.com/notionnext-org/NotionNext/tree/main/docs)  
 - [Notion 建站模板](https://tanghh.notion.site/02ab3b8678004aa69e9e415905ef32a5)  
-- [VitePress 静态站](./WEBSITE.md) · [Cloudflare Pages 部署文档站](./deploy/cloudflare-pages-docs.md)  
+- [VitePress 静态站](./WEBSITE.md) · [Cloudflare 部署](./deploy/cloudflare-pages-docs.md)  
 - **开发者文档**（仅 GitHub）：[docs/README.md](https://github.com/notionnext-org/NotionNext/blob/main/docs/README.md)

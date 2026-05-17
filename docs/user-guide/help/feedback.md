@@ -5,7 +5,7 @@
 ## 获取帮助渠道
 
 - 站点右下角 AI 助手（若已配置）  
-- 文档站评论区  
+- 在线文档任意页底部 **文档反馈**（Giscus → [GitHub Discussions](https://github.com/notionnext-org/NotionNext/discussions)）  
 - [GitHub Issues](https://github.com/notionnext-org/NotionNext/issues)（推荐，便于跟踪）  
 - 邮件 / [交流社群](./community.md)
 

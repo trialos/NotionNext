@@ -1,4 +1,4 @@
-# ThoughtLite 主题
+﻿# ThoughtLite 主题
 
 > 主题 ID：`thoughtlite` · 预览：[preview.tangly1024.com/?theme=thoughtlite](https://preview.tangly1024.com/?theme=thoughtlite)
 
@@ -18,7 +18,7 @@
 
 ## 开发者深度文档
 
-实现细节、全局改动与架构说明见 [ThoughtLite 开发者文档](../../themes/THOUGHTLITE.md)（docs/themes/，与本文站长向说明分工）。
+实现细节、全局改动与架构说明见 [ThoughtLite 开发者文档](../../developer/themes/THOUGHTLITE.md)（docs/developer/themes/，与本文站长向说明分工）。
 
 ## 配置说明
 

@@ -1,4 +1,4 @@
-# 官方文档迁移索引
+﻿# 官方文档迁移索引
 
 源站：https://docs.tangly1024.com  
 本目录为迁移后的 Markdown 路径。文末「原文」链到线上版本（含截图）。
@@ -124,8 +124,10 @@
 
 | slug | 说明 |
 | --- | --- |
-| `example-1` | Notion 排版示例 |
+| `example-1` | [notion/example-article.md](./notion/example-article.md) |
 | `notion-tutorial` | 付费课程 |
 | `v4.0` 全文 | 见 [changelog/v4-history.md](./changelog/v4-history.md) |
 
-维护者新增迁移时请同步更新本表与 [MIGRATION_STATUS.md](./MIGRATION_STATUS.md)。
+旧站总入口：[help/legacy-docs.md](./help/legacy-docs.md)。
+
+维护者新增迁移时请同步更新本表与 [MIGRATION_STATUS.md](./MIGRATION_STATUS.md)。批量拉取：`node scripts/migrate-legacy-docs.mjs`。

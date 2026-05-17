@@ -1,4 +1,4 @@
-# Endspace 主题
+﻿# Endspace 主题
 
 > 主题 ID：`endspace` · 预览：[preview.tangly1024.com/?theme=endspace](https://preview.tangly1024.com/?theme=endspace)
 
@@ -18,7 +18,7 @@
 
 ## 开发者深度文档
 
-实现细节、全局改动与架构说明见 [Endspace 开发者文档](../../themes/ENDSPACE.md)（docs/themes/，与本文站长向说明分工）。
+实现细节、全局改动与架构说明见 [Endspace 开发者文档](../../developer/themes/ENDSPACE.md)（docs/developer/themes/，与本文站长向说明分工）。
 
 ## 配置说明
 

@@ -1,4 +1,4 @@
-# Theme Migration Guide (NotionNext)
+﻿# Theme Migration Guide (NotionNext)
 
 [中文](./THEME_MIGRATION_GUIDE.zh-CN.md)
 
@@ -180,7 +180,7 @@ Edit **`conf/themeSwitch.manifest.js`** and add an entry under **`THEME_SWITCH_M
 
 ### 8.3 Docs and review
 
-- Long-form theme notes still belong under **`docs/themes/`** (see the visual fidelity checklist for doc placement).
+- Long-form theme notes still belong under **`docs/developer/themes/`** (see the visual fidelity checklist for doc placement).
 - In the PR description, list preview files and any new or updated manifest entries.
 
 ### 8.4 For developers: open source today and future commercial themes (roadmap)
@@ -228,6 +228,6 @@ For `themes/fuwari`, these specifics are already applied:
   - expose copied hue/hex for operators to write back into `config.js`
 - **Theme docs placement**:
   - avoid putting markdown docs under `themes/<theme>/` if build pipeline treats theme dirs as runtime modules
-  - place theme docs under `docs/themes/` instead
+  - place theme docs under `docs/developer/themes/` instead
 - **Route transition feel**: add lightweight page/card transition to mimic source theme interaction rhythm.
 

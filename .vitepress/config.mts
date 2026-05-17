@@ -1,47 +1,41 @@
 import { defineConfig } from 'vitepress'
 
-/** 仅发布站长向文档；开发者长篇与英文副本不进入静态站 */
-const srcExclude = [
-  '**/*.en.md',
-  '**/performance/**',
-  'GETTING_STARTED.md',
-  'ARCHITECTURE.md',
-  'PROJECT_STRUCTURE.md',
-  'CONFIGURATION.md',
-  'CONTRIBUTION_WORKFLOW.md',
-  'MAINTENANCE_PHILOSOPHY.zh-CN.md',
-  'MAINTENANCE_PHILOSOPHY.en.md',
-  'THEME_MIGRATION_GUIDE.md',
-  'THEME_MIGRATION_GUIDE.zh-CN.md',
-  'COMMUNITY_SITE_ROADMAP.md',
-  'UPDATE.md',
-  'README.en.md',
-  'themes/THOUGHTLITE_MIGRATION_PLAN.zh-CN.md',
-  // 含 {{ }} 或复杂代码块，易触发 VitePress 解析错误；站长向见 user-guide/themes/
-  'themes/CLAUDE.md',
-  'themes/ENDSPACE.md',
-  'themes/FUWARI.md',
-  'themes/THOUGHTLITE.md'
-]
+const giscusEnabled = process.env.VITE_GISCUS_ENABLED !== 'false'
+const giscusRepoId = process.env.VITE_GISCUS_REPO_ID || ''
+const giscusCategoryId = process.env.VITE_GISCUS_CATEGORY_ID || ''
+
+/**
+ * 在线站仅发布：
+ *   docs/index.md
+ *   docs/DOCUMENTATION_POLICY.md
+ *   docs/user-guide/**
+ * 开发者文档在 docs/developer/**（整目录排除）
+ */
+const srcExclude = ['developer/**', 'README.md', 'README.en.md']
 
 export default defineConfig({
   title: 'NotionNext 使用说明',
   description: 'NotionNext 部署、配置、主题与 Notion 教程',
   lang: 'zh-CN',
   srcDir: 'docs',
-  srcExclude: [...srcExclude, 'README.md', 'themes/README.md'],
+  srcExclude,
   cleanUrls: true,
   lastUpdated: true,
-  /** 教程内大量链到未收录的开发者文档 / 仓库根路径，构建时不阻断 */
   ignoreDeadLinks: true,
+  head: [['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }]],
   themeConfig: {
-    logo: '/favicon.ico',
+    logo: '/favicon.svg',
     nav: [
       { text: '使用说明', link: '/user-guide/intro', activeMatch: '/user-guide/' },
       { text: '主题', link: '/user-guide/themes/THEMES_CATALOG', activeMatch: '/user-guide/themes/' },
       { text: '参考手册', link: '/user-guide/reference/features', activeMatch: '/user-guide/reference/' },
       { text: '维护策略', link: '/DOCUMENTATION_POLICY' },
-      { text: 'GitHub', link: 'https://github.com/notionnext-org/NotionNext' }
+      { text: '参与维护', link: '/user-guide/maintain-docs' },
+      { text: '旧版手册', link: '/user-guide/help/legacy-docs' },
+      {
+        text: 'GitHub',
+        link: 'https://github.com/notionnext-org/NotionNext/tree/main/docs'
+      }
     ],
     sidebar: {
       '/user-guide/': [
@@ -70,7 +64,8 @@ export default defineConfig({
             { text: '部署索引', link: '/user-guide/deploy/' },
             { text: 'Vercel 域名', link: '/user-guide/deploy/vercel-domain' },
             { text: 'Vercel 静态导出', link: '/user-guide/deploy/vercel-static' },
-            { text: 'Cloudflare Pages', link: '/user-guide/deploy/cloudflare-pages' },
+            { text: 'Cloudflare 文档站', link: '/user-guide/deploy/cloudflare-pages-docs' },
+            { text: 'Cloudflare 博客静态', link: '/user-guide/deploy/cloudflare-pages' },
             { text: 'Netlify', link: '/user-guide/deploy/netlify' },
             { text: 'VPS', link: '/user-guide/deploy/vps' }
           ]
@@ -116,6 +111,9 @@ export default defineConfig({
             { text: '开发入门', link: '/user-guide/development/getting-started' },
             { text: '运行原理', link: '/user-guide/development/architecture' },
             { text: '反馈', link: '/user-guide/help/feedback' },
+            { text: '旧版手册入口', link: '/user-guide/help/legacy-docs' },
+            { text: 'Notion 排版示例', link: '/user-guide/notion/example-article' },
+            { text: '参与维护（在线站）', link: '/user-guide/maintain-docs' },
             { text: '维护工作流', link: '/user-guide/MAINTENANCE_WORKFLOW' },
             { text: '迁移索引', link: '/user-guide/ARTICLE_INDEX' }
           ]
@@ -135,18 +133,79 @@ export default defineConfig({
           items: [
             { text: '首页', link: '/' },
             { text: '使用说明', link: '/user-guide/intro' },
-            { text: '文档维护策略', link: '/DOCUMENTATION_POLICY' }
+            { text: '文档维护策略', link: '/DOCUMENTATION_POLICY' },
+            { text: '参与维护', link: '/user-guide/maintain-docs' }
           ]
         }
       ]
     },
+    editLink: {
+      pattern:
+        'https://github.com/notionnext-org/NotionNext/edit/main/docs/:path',
+      text: '在 GitHub 上维护此页'
+    },
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/notionnext-org/NotionNext' }
+      {
+        icon: 'github',
+        link: 'https://github.com/notionnext-org/NotionNext/tree/main/docs'
+      }
     ],
     footer: {
-      message: '以仓库 docs/user-guide 为准 · MIT',
-      copyright: 'NotionNext Contributors'
+      message:
+        '以 GitHub 仓库为准 · <a href="https://github.com/notionnext-org/NotionNext/tree/main/docs" target="_blank" rel="noreferrer">浏览 docs 目录</a> · <a href="https://github.com/notionnext-org/NotionNext/blob/main/docs/README.md" target="_blank" rel="noreferrer">目录说明</a>',
+      copyright: 'NotionNext · MIT'
     },
-    search: { provider: 'local' }
+    search: {
+      provider: 'local',
+      options: {
+        locales: {
+          root: {
+            translations: {
+              button: {
+                buttonText: '搜索',
+                buttonAriaLabel: '搜索文档'
+              },
+              modal: {
+                displayDetails: '显示详细列表',
+                resetButtonTitle: '清除搜索条件',
+                backButtonTitle: '关闭搜索',
+                noResultsText: '未找到与',
+                footer: {
+                  selectText: '打开',
+                  selectKeyAriaLabel: '回车键',
+                  navigateText: '切换',
+                  navigateUpKeyAriaLabel: '上方向键',
+                  navigateDownKeyAriaLabel: '下方向键',
+                  closeText: '关闭',
+                  closeKeyAriaLabel: 'Esc 键'
+                }
+              }
+            }
+          }
+        },
+        miniSearch: {
+          searchOptions: {
+            fuzzy: 0.2,
+            prefix: true,
+            boost: { title: 4, text: 2, titles: 2 }
+          }
+        }
+      }
+    },
+    /** 文档页底 Giscus → GitHub Discussions；ID 见 giscus.app */
+    giscus: {
+      enabled: giscusEnabled,
+      repo: 'notionnext-org/NotionNext',
+      repoId: giscusRepoId,
+      category: 'General',
+      categoryId: giscusCategoryId,
+      mapping: 'pathname',
+      strict: '0',
+      reactionsEnabled: '1',
+      emitMetadata: '0',
+      inputPosition: 'top',
+      theme: 'preferred_color_scheme',
+      lang: 'zh-CN'
+    }
   }
 })

@@ -1,4 +1,4 @@
-# Endspace Theme (NotionNext)
+﻿# Endspace Theme (NotionNext)
 
 Endspace is a NotionNext theme inspired by the visual language of *Arknights: Endfield*’s official site, maintained by the community. Upstream repository: [cloud-oc/endspace](https://github.com/cloud-oc/endspace). Tracking issue: [#3990](https://github.com/tangly1024/NotionNext/issues/3990).
 
@@ -29,4 +29,4 @@ Theme preview: `public/images/themes-preview/endspace.webp` (generated from `end
 
 ## Maintenance
 
-Follow the [Theme migration guide](../THEME_MIGRATION_GUIDE.md) for data/prop conventions (menus, dark mode, comments, TOC, etc.). Upstream ships the theme as a single package on the `theme` branch—prefer directory-level diffs when syncing updates.
+Follow the [Theme migration guide](../developer/THEME_MIGRATION_GUIDE.md) for data/prop conventions (menus, dark mode, comments, TOC, etc.). Upstream ships the theme as a single package on the `theme` branch—prefer directory-level diffs when syncing updates.

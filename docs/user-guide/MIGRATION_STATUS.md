@@ -1,8 +1,8 @@
-# 官方文档迁移状态
+﻿# 官方文档迁移状态
 
 源站：[https://docs.tangly1024.com](https://docs.tangly1024.com/about)
 
-目标：`docs/user-guide/` + `docs/themes/`
+目标：`docs/user-guide/` + `docs/developer/themes/`
 
 **状态：核心栏目已全部迁入本地 Markdown**；**2026-05 起按 4.9.5.2 全面修订**（见下方「内容刷新」）。对照表：[ARTICLE_INDEX.md](./ARTICLE_INDEX.md)。
 
@@ -15,12 +15,12 @@
 | 站点配置 | [config/](./config/)、`config-site.md` |
 | Notion 教程 | [notion/](./notion/)、`notion-database.md` |
 | 菜单 | `menu-secondary.md` |
-| 更新日志 | [changelog/](./changelog/)、[../UPDATE.md](../UPDATE.md) |
-| 主题 | [themes/](./themes/)（含 [THEMES_CATALOG.md](./themes/THEMES_CATALOG.md)）、[../themes/](../themes/) |
+| 更新日志 | [changelog/](./changelog/)、[../UPDATE.md](../developer/UPDATE.md) |
+| 主题 | [user-guide/themes/](./themes/)（含 [THEMES_CATALOG.md](./themes/THEMES_CATALOG.md)）；开发长文 [../developer/themes/](../developer/themes/) |
 | 网站统计 | [analytics/](./analytics/) |
 | 评论插件 | [comments/](./comments/) |
 | 外部扩展 | [plugins/](./plugins/) |
-| 开发教程 | [development/](./development/) + `docs/GETTING_STARTED.md` 等 |
+| 开发教程 | [development/](./development/) + `docs/developer/GETTING_STARTED.md` 等 |
 | 运营 | [operations/](./operations/) |
 | 获取帮助 / 支持 | [help/](./help/) |
 
@@ -41,9 +41,15 @@
 | --- | --- |
 | `v4.0` 超长 changelog | [changelog/v4-history.md](./changelog/v4-history.md) 索引 + GitHub Releases |
 | `latest` | [changelog/latest.md](./changelog/latest.md) |
-| `example-1` | 排版示例，保留源站链接 |
+| `example-1` | [notion/example-article.md](./notion/example-article.md) + [旧站原文](https://docs.tangly1024.com/article/example-1) |
 | `notion-tutorial` | 付费课程外链 |
 | `vercel-accelerate`、`vercel-redploy` | [deploy/vercel-accelerate.md](./deploy/vercel-accelerate.md)、[deploy/vercel-redeploy.md](./deploy/vercel-redeploy.md) |
+
+## 旧站入口与评论
+
+- 用户向导航：[help/legacy-docs.md](./help/legacy-docs.md)（slug 对照 + 旧站直达）
+- 文档站页底：[Giscus](https://giscus.app/zh-CN) → `notionnext-org/NotionNext` Discussions（见 [maintain-docs.md](./maintain-docs.md)）
+- 维护者批量拉取：`node scripts/migrate-legacy-docs.mjs`
 
 ## 维护
 
