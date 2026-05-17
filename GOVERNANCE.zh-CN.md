@@ -4,6 +4,18 @@
 
 NotionNext 由 **[notionnext-org](https://github.com/notionnext-org)** 托管，目标是从「个人主导」过渡到 **社区协作维护**：欢迎既是站长又是开发者的参与者，通过公开渠道讨论、通过 PR 交付、通过书面规则降低沟通成本。
 
+## 低负担与合规原则
+
+| 目标 | 做法 |
+| --- | --- |
+| **减少 Founder 被打扰** | Issue 不默认 assign；使用类问题进 Discussions；`docs/**` 由社区维护者合并 |
+| **机器守门** | PR 必过 [CI](.github/workflows/ci.yml)；Dependabot 提依赖 PR；Stale 关长期无响应 Issue |
+| **权责清晰** | [CODEOWNERS](.github/CODEOWNERS) 仅覆盖高影响路径；其余按 [维护者手册](./docs/developer/MAINTAINER_RUNBOOK.zh-CN.md) 域内自治 |
+| **合规** | [MIT](./LICENSE) 贡献；[行为准则](./CODE_OF_CONDUCT.md)；安全见 [SECURITY.md](./SECURITY.md)；禁止提交密钥与真实 Token |
+| **透明** | 决策、发版、组织成员申请均在 GitHub 公开留痕 |
+
+维护者日常 checklist 见 **[维护者运行手册](./docs/developer/MAINTAINER_RUNBOOK.zh-CN.md)**（约每周 15 分钟）。
+
 ## 决策方式
 
 | 类型 | 流程 |
@@ -39,10 +51,11 @@ NotionNext 由 **[notionnext-org](https://github.com/notionnext-org)** 托管，
 ## 合并与 `main` 分支
 
 - 禁止直接向 `main` 推送（维护者亦应走 PR）。  
-- **建议**（由 Org Admin 在仓库设置中启用）：  
-  - 至少 **1** 位 Review  
-  - CI（lint / build / 文档构建等）通过  
-  - 高影响路径（`lib/db/`、`next.config.js`、全局配置、依赖大版本）由 **2** 位维护者 Review 或 Founder 确认  
+- **CI 必过**（见 `.github/workflows/ci.yml`）：lint、type-check、单元测试、lockfile 一致性；文档改动另过 VitePress 构建。  
+- **建议**（由 Org Admin 在仓库设置中启用为 **Required checks**）：  
+  - 至少 **1** 位 Review（纯 `docs/user-guide/**` 可由文档维护者 Review，无需 Founder）  
+  - 高影响路径（[CODEOWNERS](.github/CODEOWNERS)）由 **Founder 或 2 位维护者** Review  
+  - 可选：对仅文档 PR 启用 **auto-merge**（CI 绿 + 1 Review 后自动合并）  
 - 紧急 hotfix：维护者可在 Discussion **公告** 说明后合并，事后补文档/Changelog。
 
 ## 发版与 Changelog
@@ -69,6 +82,7 @@ NotionNext 由 **[notionnext-org](https://github.com/notionnext-org)** 托管，
 | [CONTRIBUTING.zh-CN.md](./CONTRIBUTING.zh-CN.md) | 环境、分支、主题与语言贡献 |
 | [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) | 社区行为准则 |
 | [DOCUMENTATION_POLICY.md](./docs/DOCUMENTATION_POLICY.md) | 文档权威来源与迁移策略 |
+| [维护者运行手册](./docs/developer/MAINTAINER_RUNBOOK.zh-CN.md) | 分流、合并、每周 checklist、自动化说明 |
 
 ## GitHub 设置清单（Org Admin）
 
@@ -76,6 +90,8 @@ NotionNext 由 **[notionnext-org](https://github.com/notionnext-org)** 托管，
 
 - [ ] 启用 **Discussions** 并创建分类：`公告`、`使用问答`、`想法`、`文档`、`开发`  
 - [ ] 安装 **[Giscus](https://github.com/apps/giscus)** App（文档站评论）  
-- [ ] **分支保护** `main`：Review + 状态检查  
-- [ ] 标签：`good first issue`、`help wanted`、`documentation`、`theme`、`question`  
+- [ ] **分支保护** `main`：Require PR + Required checks（`Lint & type-check`、`Unit tests`、`Lockfile consistency`）  
+- [ ] 启用 **Secret scanning**、**Dependabot alerts**、合并 **[dependabot.yml](.github/dependabot.yml)** 产生的 PR  
+- [ ] 确认 [stale workflow](.github/workflows/stale.yml) 已启用（每周一自动运行；需 `issues: write` 权限）  
+- [ ] 标签与 [labeler.yml](.github/labeler.yml) 一致：`documentation`、`theme`、`core`、`config`、`dependencies`、`stale`、`needs-info`、`good first issue`、`help wanted`、`bug`、`enhancement`  
 - [ ] 组织 Profile（`notionnext-org/.github`）指向本仓库与文档站  

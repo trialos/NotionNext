@@ -61,7 +61,7 @@ Fork 开发与向 `main` 提 PR 的流程不变；PR 的目标仓库请选择 **
 2. PR 保持聚焦，避免把无关重构混在一起。
 3. 不要提交个人本地文件（如 `.env.local`）。
 4. 不要提交会影响他人的个性化默认配置。
-5. 提交前至少执行 lint / type-check / 必要测试。
+5. 提交前至少执行 lint / type-check / 必要测试（合并前 [CI](.github/workflows/ci.yml) 会自动跑同样检查）。
 
 维护者与高频贡献者请阅读 [维护与变更尺度（共识）](./docs/developer/MAINTENANCE_PHILOSOPHY.zh-CN.md)，避免大范围、难回滚的改动影响主线稳定。
 

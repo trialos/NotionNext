@@ -122,6 +122,7 @@ yarn dev
 | **贡献代码/文档** | [CONTRIBUTING.zh-CN.md](./CONTRIBUTING.zh-CN.md) |
 | **项目治理** | [GOVERNANCE.zh-CN.md](./GOVERNANCE.zh-CN.md) · [MAINTAINERS.md](./MAINTAINERS.md) |
 | **行为准则** | [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md) |
+| **维护者手册** | [MAINTAINER_RUNBOOK](./docs/developer/MAINTAINER_RUNBOOK.zh-CN.md) |
 | **讨论** | [GitHub Discussions](https://github.com/notionnext-org/NotionNext/discussions) |
 
 ## 开发者文档导航

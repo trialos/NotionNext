@@ -1,6 +1,6 @@
 # 维护者
 
-本文件列出 **NotionNext** 的公开维护者与负责域。合并权、发版与组织设置见 [GOVERNANCE.zh-CN.md](./GOVERNANCE.zh-CN.md)。
+本文件列出 **NotionNext** 的公开维护者与负责域。合并权、发版与组织设置见 [GOVERNANCE.zh-CN.md](./GOVERNANCE.zh-CN.md)。日常 triage 见 [维护者运行手册](./docs/developer/MAINTAINER_RUNBOOK.zh-CN.md)。
 
 > **想加入？** 先贡献 1～2 个合并 PR，再在 [Discussions](https://github.com/notionnext-org/NotionNext/discussions) 说明希望负责的域。详见 [参与社区](./docs/user-guide/community-participate.md)。  
 > **已符合条件但未被邀请？** 请在 [Discussions](https://github.com/notionnext-org/NotionNext/discussions/new/choose) 留言（标题：**组织成员申请**），勿重复私信。
