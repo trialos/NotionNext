@@ -10,8 +10,11 @@ hero:
       text: 快速开始
       link: /user-guide/intro
     - theme: alt
-      text: GitHub
-      link: https://github.com/notionnext-org/NotionNext
+      text: 在 GitHub 上维护文档
+      link: https://github.com/notionnext-org/NotionNext/tree/main/docs
+    - theme: alt
+      text: 维护说明
+      link: /user-guide/maintain-docs
 
 features:
   - title: 仓库内维护

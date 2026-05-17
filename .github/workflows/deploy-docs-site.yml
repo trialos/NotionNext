@@ -10,6 +10,7 @@ on:
     paths:
       - 'docs/**'
       - '.vitepress/**'
+      - 'README.md'
       - 'package.json'
       - 'yarn.lock'
       - '.github/workflows/deploy-docs-site.yml'

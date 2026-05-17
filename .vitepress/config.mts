@@ -41,7 +41,11 @@ export default defineConfig({
       { text: '主题', link: '/user-guide/themes/THEMES_CATALOG', activeMatch: '/user-guide/themes/' },
       { text: '参考手册', link: '/user-guide/reference/features', activeMatch: '/user-guide/reference/' },
       { text: '维护策略', link: '/DOCUMENTATION_POLICY' },
-      { text: 'GitHub', link: 'https://github.com/notionnext-org/NotionNext' }
+      { text: '参与维护', link: '/user-guide/maintain-docs' },
+      {
+        text: 'GitHub',
+        link: 'https://github.com/notionnext-org/NotionNext/tree/main/docs'
+      }
     ],
     sidebar: {
       '/user-guide/': [
@@ -116,6 +120,7 @@ export default defineConfig({
             { text: '开发入门', link: '/user-guide/development/getting-started' },
             { text: '运行原理', link: '/user-guide/development/architecture' },
             { text: '反馈', link: '/user-guide/help/feedback' },
+            { text: '参与维护（在线站）', link: '/user-guide/maintain-docs' },
             { text: '维护工作流', link: '/user-guide/MAINTENANCE_WORKFLOW' },
             { text: '迁移索引', link: '/user-guide/ARTICLE_INDEX' }
           ]
@@ -135,17 +140,27 @@ export default defineConfig({
           items: [
             { text: '首页', link: '/' },
             { text: '使用说明', link: '/user-guide/intro' },
-            { text: '文档维护策略', link: '/DOCUMENTATION_POLICY' }
+            { text: '文档维护策略', link: '/DOCUMENTATION_POLICY' },
+            { text: '参与维护', link: '/user-guide/maintain-docs' }
           ]
         }
       ]
     },
+    editLink: {
+      pattern:
+        'https://github.com/notionnext-org/NotionNext/edit/main/docs/:path',
+      text: '在 GitHub 上维护此页'
+    },
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/notionnext-org/NotionNext' }
+      {
+        icon: 'github',
+        link: 'https://github.com/notionnext-org/NotionNext/tree/main/docs'
+      }
     ],
     footer: {
-      message: '以仓库 docs/user-guide 为准 · MIT',
-      copyright: 'NotionNext Contributors'
+      message:
+        '以 GitHub 仓库为准 · <a href="https://github.com/notionnext-org/NotionNext/tree/main/docs" target="_blank" rel="noreferrer">浏览 docs 目录</a> · <a href="https://github.com/notionnext-org/NotionNext/blob/main/docs/README.md" target="_blank" rel="noreferrer">维护说明</a>',
+      copyright: 'NotionNext · MIT'
     },
     search: { provider: 'local' }
   }
