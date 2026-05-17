@@ -42,10 +42,14 @@ NotionNext 已由个人仓库移交至组织 **[notionnext-org](https://github.c
 
 **改代码 / 主题**：阅读 [开发者文档](../developer/README.md) · [贡献指南](../../CONTRIBUTING.zh-CN.md) · 大改动先写 [RFC](../developer/rfc/README.md)
 
-### 4. 成为维护者
+### 4. 成为维护者与加入组织
 
-- 完成若干合并 PR，在 Discussion 或 Issue **自荐**负责域（文档 / CI / 某主题等）  
+- 完成 **1～2 个合并 PR** 后，在 [Discussions](https://github.com/notionnext-org/NotionNext/discussions) **自荐**负责域（文档 / CI / 某主题等）  
 - 规则见 [GOVERNANCE.zh-CN.md](../../GOVERNANCE.zh-CN.md) · 名单 [MAINTAINERS.md](../../MAINTAINERS.md)
+
+::: info 已符合条件但未被邀请？
+若你已满足组织协作的合并 PR 等条件，却**尚未收到组织邀请**，请到 **[GitHub Discussions 发帖](https://github.com/notionnext-org/NotionNext/discussions/new/choose)**（可选用「组织成员申请」模板），标题写 **组织成员申请**，并附上 GitHub 用户名、已合并 PR 链接与希望负责的域。维护者会在讨论区按队列回复，邀请可能有延迟。
+:::
 
 ## 行为与治理
 

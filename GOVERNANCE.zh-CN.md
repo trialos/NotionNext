@@ -32,6 +32,8 @@ NotionNext 由 **[notionnext-org](https://github.com/notionnext-org)** 托管，
 2. 在 [Discussions · 维护者自荐](https://github.com/notionnext-org/NotionNext/discussions/categories/general) 或 Issue 说明：希望负责的域（文档 / 某主题 / CI 等）、可投入时间。  
 3. 现有 **Maintainer** 在讨论中确认后，由 **Org Admin** 邀请加入组织或授予仓库 **Write / Maintain**。
 
+**已符合条件但尚未收到邀请？** 请勿重复私信或仅在 Issue 追问。请到 [GitHub Discussions](https://github.com/notionnext-org/NotionNext/discussions/new/choose) 发帖（可选用「组织成员申请」模板），标题注明 **组织成员申请**，正文附上：GitHub 用户名、已合并 PR 链接、希望负责的域、可投入时间。维护者按队列处理，邀请可能有延迟。
+
 不要求加入微信群；**GitHub 为官方协作主战场**。
 
 ## 合并与 `main` 分支
