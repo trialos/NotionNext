@@ -58,13 +58,14 @@
 - [开发入门](./development/getting-started.md)（详见 [GETTING_STARTED.md](../developer/GETTING_STARTED.md)）  
 - [运行原理](./development/architecture.md) · [SEO](./operations/seo.md)
 
-### 帮助 · 更新
+### 帮助 · 社区 · 更新
 
-- [反馈与守则](./help/feedback.md) · [社群](./help/community.md) · [支持项目](./help/support.md)  
+- [**参与社区**](./community-participate.md) · [反馈与守则](./help/feedback.md) · [社群](./help/community.md) · [支持项目](./help/support.md)  
 - [最新版本](./changelog/latest.md) · [V4 历史索引](./changelog/v4-history.md)
 
 ## 其它
 
+- [参与社区](./community-participate.md) · [项目治理](../../GOVERNANCE.zh-CN.md) · [维护者名单](../../MAINTAINERS.md)  
 - [参与维护在线文档](./maintain-docs.md) · [GitHub docs 目录](https://github.com/notionnext-org/NotionNext/tree/main/docs)  
 - [Notion 建站模板](https://tanghh.notion.site/02ab3b8678004aa69e9e415905ef32a5)  
 - [VitePress 静态站](./WEBSITE.md) · [Cloudflare 部署](./deploy/cloudflare-pages-docs.md)  
