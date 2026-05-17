@@ -1,29 +1,31 @@
-# 用户教程静态网站（规划）
+# 用户教程静态网站
 
-`docs/user-guide/` 中的 Markdown 计划通过静态站点生成器发布为可浏览网站，用于逐步替换 [docs.tangly1024.com](https://docs.tangly1024.com/about)。
+教程已通过 **VitePress** 接入本仓库，可部署到 Cloudflare Pages（或其它静态托管）。
 
-## 推荐方案
+## 本地命令
 
-| 方案 | 说明 |
+| 命令 | 作用 |
 | --- | --- |
-| **VitePress** | 轻量、适合 `docs/**/*.md`，侧边栏可手写于 `.vitepress/config.ts` |
-| **Nextra** | 与 Next.js 同栈，适合与 NotionNext 主站同仓 monorepo 部署 |
-| **继续 Gitbook 主题** | 与当前线上一致，需单独构建流水线 |
+| `yarn docs:site:dev` | 本地开发预览 |
+| `yarn docs:site:build` | 构建静态站 → `.vitepress/dist` |
+| `yarn docs:site:preview` | 预览构建结果 |
 
-## 建议目录映射
+## Cloudflare Pages（最快上线）
 
-```
-docs/user-guide/README.md     → 站点首页 / 导航
-docs/user-guide/*.md          → 用户教程页面
-docs/themes/*.md              → 「主题参数」分区
-docs/DOCUMENTATION_POLICY.md  → 「维护说明」页
-```
+详见 **[cloudflare-pages-docs.md](./deploy/cloudflare-pages-docs.md)**。
 
-## 实施清单（后续 PR）
+构建命令：`yarn install && yarn docs:site:build`  
+输出目录：`.vitepress/dist`
 
-- [ ] 选定生成器并在 `package.json` 增加 `docs:dev` / `docs:build`
-- [ ] 配置侧边栏与搜索
-- [ ] CI 部署到 `docs.notionnext.org` 或子路径（由维护者决定）
-- [ ] 根目录 `README.md` 与 Vercel 部署页环境变量说明指向新文档站
+## 发布范围
 
-当前阶段：**以 GitHub 上 Markdown 为准**，可直接在 IDE 或 GitHub 网页阅读。
+- `docs/user-guide/**` — 主教程  
+- `docs/themes/*.md`（中文，排除 `*.en.md`）  
+- `docs/DOCUMENTATION_POLICY.md`、`docs/index.md`  
+
+开发者文档（`ARCHITECTURE.md`、`GETTING_STARTED.md` 等）在 `srcExclude` 中排除，不进入静态站。
+
+## 配置位置
+
+- `.vitepress/config.mts` — 导航、侧栏、`srcExclude`  
+- `docs/index.md` — 站点首页  

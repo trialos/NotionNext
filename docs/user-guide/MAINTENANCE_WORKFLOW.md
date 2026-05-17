@@ -9,7 +9,7 @@
 
 ## 一、维护者先记住的三件事
 
-1. **权威位置**：站长向教程在 `docs/user-guide/`（主题统一在 `user-guide/themes/<id>.md`）；`docs/themes/` 仅放开发者深度文档，不要只改 [docs.tangly1024.com](https://docs.tangly1024.com/about)。
+1. **权威位置**：站长向教程在 `docs/user-guide/`（主题统一在 `user-guide/themes/<id>.md`）；`docs/themes/` 仅放开发者深度文档。
 2. **三处必同步**：改一篇教程时，视情况更新 **正文**、**README 目录**、**ARTICLE_INDEX**（新建或废弃时还要动 **MIGRATION_STATUS**）。
 3. **与代码一致**：环境变量名、配置键、默认值以 `conf/*.config.js`、`blog.config.js`、各主题 `themes/*/config.js` 为准；版本号以 `package.json` 为准。
 

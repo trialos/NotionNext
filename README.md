@@ -28,7 +28,7 @@
 # 帮助教程
 
 - **仓库内使用说明（推荐，持续更新）**：[docs/user-guide/README.md](./docs/user-guide/README.md)（部署、配置、Notion 数据库、菜单等）
-- **4.9.x 参考手册**：[全站配置索引](./docs/user-guide/reference/features.md) · [25 个主题说明（每主题一篇）](./docs/user-guide/themes/README.md) · [Notion 4.x 能力](./docs/user-guide/reference/notion-4x.md)
+- **4.9.x 参考手册**：[全站配置索引](./docs/user-guide/reference/features.md) · [25 个主题说明](./docs/user-guide/themes/README.md) · [本地预览文档站](./docs/user-guide/WEBSITE.md)（`yarn docs:site:dev`）
 - **文档维护工作流**：[docs/user-guide/MAINTENANCE_WORKFLOW.md](./docs/user-guide/MAINTENANCE_WORKFLOW.md)（目录秩序、检查清单、注意事项）
 - **维护策略**：[docs/DOCUMENTATION_POLICY.md](./docs/DOCUMENTATION_POLICY.md)
 - **历史在线手册**：[NotionNext 帮助手册](https://docs.tangly1024.com/)（过渡期仍可读，重要章节已迁入 `docs/user-guide/`）

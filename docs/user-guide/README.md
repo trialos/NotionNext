@@ -66,5 +66,5 @@
 ## 其它
 
 - [Notion 建站模板](https://tanghh.notion.site/02ab3b8678004aa69e9e415905ef32a5)  
-- [静态站发布规划](./WEBSITE.md)  
-- **开发者文档**：[docs/README.md](../README.md)
+- [VitePress 静态站](./WEBSITE.md) · [Cloudflare Pages 部署文档站](./deploy/cloudflare-pages-docs.md)  
+- **开发者文档**（仅 GitHub）：[docs/README.md](https://github.com/notionnext-org/NotionNext/blob/main/docs/README.md)
