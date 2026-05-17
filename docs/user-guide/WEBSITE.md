@@ -10,12 +10,14 @@
 | `yarn docs:site:build` | 构建静态站 → `.vitepress/dist` |
 | `yarn docs:site:preview` | 预览构建结果 |
 
-## Cloudflare Pages（最快上线）
+## Cloudflare Pages
 
 详见 **[cloudflare-pages-docs.md](./deploy/cloudflare-pages-docs.md)**。
 
-构建命令：`yarn install && yarn docs:site:build`  
-输出目录：`.vitepress/dist`
+- **组织仓库（推荐）**：GitHub Actions 部署，无需 Cloudflare「连接 Git」  
+- **个人仓库**：也可在 CF 控制台直连 Git 构建  
+
+构建命令：`yarn docs:site:build` · 输出：`.vitepress/dist`
 
 ## 发布范围
 
