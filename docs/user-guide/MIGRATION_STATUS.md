@@ -41,9 +41,15 @@
 | --- | --- |
 | `v4.0` 超长 changelog | [changelog/v4-history.md](./changelog/v4-history.md) 索引 + GitHub Releases |
 | `latest` | [changelog/latest.md](./changelog/latest.md) |
-| `example-1` | 排版示例，保留源站链接 |
+| `example-1` | [notion/example-article.md](./notion/example-article.md) + [旧站原文](https://docs.tangly1024.com/article/example-1) |
 | `notion-tutorial` | 付费课程外链 |
 | `vercel-accelerate`、`vercel-redploy` | [deploy/vercel-accelerate.md](./deploy/vercel-accelerate.md)、[deploy/vercel-redeploy.md](./deploy/vercel-redeploy.md) |
+
+## 旧站入口与评论
+
+- 用户向导航：[help/legacy-docs.md](./help/legacy-docs.md)（slug 对照 + 旧站直达）
+- 文档站页底：[Giscus](https://giscus.app/zh-CN) → `notionnext-org/NotionNext` Discussions（见 [maintain-docs.md](./maintain-docs.md)）
+- 维护者批量拉取：`node scripts/migrate-legacy-docs.mjs`
 
 ## 维护
 

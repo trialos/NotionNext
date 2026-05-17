@@ -129,6 +129,18 @@ npx wrangler pages deploy .vitepress/dist --project-name=notionnext-docs
 
 见 `.vitepress/config.mts`：`srcExclude: ['developer/**', ...]`，即仅发布 `user-guide/`、`index.md`、`DOCUMENTATION_POLICY.md`。
 
+## 文档评论（Giscus，可选）
+
+构建时注入环境变量后，教程页底显示 **文档反馈**（同步到 GitHub Discussions）：
+
+| 名称 | 类型 | 说明 |
+| --- | --- | --- |
+| `VITE_GISCUS_REPO_ID` | Secret | `R_kgDOGHdxTw`（`notionnext-org/NotionNext`） |
+| `VITE_GISCUS_CATEGORY_ID` | Secret | `DIC_kwDOGHdxT84CBR2I`（Discussions 分类 **General**） |
+| `VITE_GISCUS_ENABLED` | Variable | 设为 `false` 可关闭评论区 |
+
+组织仓库 Actions 部署时通常已在 GitHub Secrets 配好；详见 [maintain-docs.md](../maintain-docs.md) 与根目录 `.env.docs.example`。
+
 ## 相关
 
 - [WEBSITE.md](../WEBSITE.md)  

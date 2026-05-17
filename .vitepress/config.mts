@@ -1,4 +1,9 @@
 import { defineConfig } from 'vitepress'
+import { cjkTokenize } from './search-tokenize'
+
+const giscusEnabled = process.env.VITE_GISCUS_ENABLED !== 'false'
+const giscusRepoId = process.env.VITE_GISCUS_REPO_ID || ''
+const giscusCategoryId = process.env.VITE_GISCUS_CATEGORY_ID || ''
 
 /**
  * 在线站仅发布：
@@ -19,13 +24,14 @@ export default defineConfig({
   lastUpdated: true,
   ignoreDeadLinks: true,
   themeConfig: {
-    logo: '/favicon.ico',
+    logo: '/favicon.svg',
     nav: [
       { text: '使用说明', link: '/user-guide/intro', activeMatch: '/user-guide/' },
       { text: '主题', link: '/user-guide/themes/THEMES_CATALOG', activeMatch: '/user-guide/themes/' },
       { text: '参考手册', link: '/user-guide/reference/features', activeMatch: '/user-guide/reference/' },
       { text: '维护策略', link: '/DOCUMENTATION_POLICY' },
       { text: '参与维护', link: '/user-guide/maintain-docs' },
+      { text: '旧版手册', link: '/user-guide/help/legacy-docs' },
       {
         text: 'GitHub',
         link: 'https://github.com/notionnext-org/NotionNext/tree/main/docs'
@@ -105,6 +111,8 @@ export default defineConfig({
             { text: '开发入门', link: '/user-guide/development/getting-started' },
             { text: '运行原理', link: '/user-guide/development/architecture' },
             { text: '反馈', link: '/user-guide/help/feedback' },
+            { text: '旧版手册入口', link: '/user-guide/help/legacy-docs' },
+            { text: 'Notion 排版示例', link: '/user-guide/notion/example-article' },
             { text: '参与维护（在线站）', link: '/user-guide/maintain-docs' },
             { text: '维护工作流', link: '/user-guide/MAINTENANCE_WORKFLOW' },
             { text: '迁移索引', link: '/user-guide/ARTICLE_INDEX' }
@@ -147,6 +155,60 @@ export default defineConfig({
         '以 GitHub 仓库为准 · <a href="https://github.com/notionnext-org/NotionNext/tree/main/docs" target="_blank" rel="noreferrer">浏览 docs 目录</a> · <a href="https://github.com/notionnext-org/NotionNext/blob/main/docs/README.md" target="_blank" rel="noreferrer">目录说明</a>',
       copyright: 'NotionNext · MIT'
     },
-    search: { provider: 'local' }
+    search: {
+      provider: 'local',
+      options: {
+        locales: {
+          root: {
+            translations: {
+              button: {
+                buttonText: '搜索',
+                buttonAriaLabel: '搜索文档'
+              },
+              modal: {
+                displayDetails: '显示详细列表',
+                resetButtonTitle: '清除搜索条件',
+                backButtonTitle: '关闭搜索',
+                noResultsText: '未找到与',
+                footer: {
+                  selectText: '打开',
+                  selectKeyAriaLabel: '回车键',
+                  navigateText: '切换',
+                  navigateUpKeyAriaLabel: '上方向键',
+                  navigateDownKeyAriaLabel: '下方向键',
+                  closeText: '关闭',
+                  closeKeyAriaLabel: 'Esc 键'
+                }
+              }
+            }
+          }
+        },
+        miniSearch: {
+          options: {
+            tokenize: cjkTokenize
+          },
+          searchOptions: {
+            fuzzy: 0.2,
+            prefix: true,
+            boost: { title: 4, text: 2, titles: 2 }
+          }
+        }
+      }
+    },
+    /** 文档页底 Giscus → GitHub Discussions；ID 见 giscus.app */
+    giscus: {
+      enabled: giscusEnabled,
+      repo: 'notionnext-org/NotionNext',
+      repoId: giscusRepoId,
+      category: 'General',
+      categoryId: giscusCategoryId,
+      mapping: 'pathname',
+      strict: '0',
+      reactionsEnabled: '1',
+      emitMetadata: '0',
+      inputPosition: 'top',
+      theme: 'preferred_color_scheme',
+      lang: 'zh-CN'
+    }
   }
 })

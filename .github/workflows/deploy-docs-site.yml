@@ -41,6 +41,10 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Build VitePress
+        env:
+          VITE_GISCUS_REPO_ID: ${{ secrets.VITE_GISCUS_REPO_ID }}
+          VITE_GISCUS_CATEGORY_ID: ${{ secrets.VITE_GISCUS_CATEGORY_ID }}
+          VITE_GISCUS_ENABLED: ${{ vars.VITE_GISCUS_ENABLED }}
         run: yarn docs:site:build
 
       - name: Set Pages project name

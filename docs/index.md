@@ -15,6 +15,9 @@ hero:
     - theme: alt
       text: 维护说明
       link: /user-guide/maintain-docs
+    - theme: alt
+      text: 旧版手册入口
+      link: /user-guide/help/legacy-docs
 
 features:
   - title: 仓库内维护

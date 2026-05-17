@@ -17,8 +17,8 @@
     使用说明文档站
   </a>
   ·
-  <a href="https://docs.tangly1024.com/">
-    历史手册
+  <a href="https://notionnext.tangly1024.com/user-guide/help/legacy-docs">
+    旧版手册入口
   </a>
   ·
   <a href="./CONTRIBUTING.md">
@@ -49,7 +49,7 @@
 - **4.9.x 参考手册**：[全站配置索引](./docs/user-guide/reference/features.md) · [25 个主题说明](./docs/user-guide/themes/README.md) · [本地预览文档站](./docs/user-guide/WEBSITE.md)（`yarn docs:site:dev`）
 - **文档维护工作流**：[docs/user-guide/MAINTENANCE_WORKFLOW.md](./docs/user-guide/MAINTENANCE_WORKFLOW.md)（目录秩序、检查清单、注意事项）
 - **维护策略**：[docs/DOCUMENTATION_POLICY.md](./docs/DOCUMENTATION_POLICY.md)
-- **历史在线手册**：[NotionNext 帮助手册](https://docs.tangly1024.com/)（过渡期仍可读，重要章节已迁入 `docs/user-guide/`）
+- **旧版手册**：[docs.tangly1024.com](https://docs.tangly1024.com/) · [slug 对照与迁移索引](./docs/user-guide/help/legacy-docs.md)（重要章节已迁入 `docs/user-guide/`）
 
 > 本项目为免费、公开资源，仅限个人学习使用，禁止利用本教程建立的博客发布非法内容、进行违法犯罪活动。
 

@@ -11,7 +11,7 @@
 | [reference/features.md](./reference/features.md) | 全站 `conf/*.config.js` 配置索引 |
 | [reference/notion-4x.md](./reference/notion-4x.md) | NOTION_INDEX、TOP_TAG、密码、评论 Hide 等 |
 | [themes/THEMES_CATALOG.md](./themes/THEMES_CATALOG.md) | 25 个内置主题全表 |
-| [themes/README.md](./developer/themes/README.md) | 25 个主题各一篇 `<id>.md` 说明 |
+| [themes/README.md](./themes/README.md) | 25 个主题各一篇 `<id>.md` 说明 |
 | [deploy/README.md](./deploy/README.md) | 部署栏目索引 → 根目录 `DEPLOYMENT.md` |
 
 ## 入门
@@ -124,8 +124,10 @@
 
 | slug | 说明 |
 | --- | --- |
-| `example-1` | Notion 排版示例 |
+| `example-1` | [notion/example-article.md](./notion/example-article.md) |
 | `notion-tutorial` | 付费课程 |
 | `v4.0` 全文 | 见 [changelog/v4-history.md](./changelog/v4-history.md) |
 
-维护者新增迁移时请同步更新本表与 [MIGRATION_STATUS.md](./MIGRATION_STATUS.md)。
+旧站总入口：[help/legacy-docs.md](./help/legacy-docs.md)。
+
+维护者新增迁移时请同步更新本表与 [MIGRATION_STATUS.md](./MIGRATION_STATUS.md)。批量拉取：`node scripts/migrate-legacy-docs.mjs`。

@@ -4,6 +4,7 @@
 | --- | --- |
 | **在线阅读** | [https://notionnext.tangly1024.com](https://notionnext.tangly1024.com) |
 | **参与维护** | 在线页底「在 GitHub 上维护此页」· [user-guide/maintain-docs.md](./user-guide/maintain-docs.md) |
+| **旧版手册** | [user-guide/help/legacy-docs.md](./user-guide/help/legacy-docs.md) · 源站 [docs.tangly1024.com](https://docs.tangly1024.com) |
 
 ## 本目录结构（仅两类）
 

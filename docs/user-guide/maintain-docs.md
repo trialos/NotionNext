@@ -37,4 +37,24 @@ push main（docs/user-guide/ 等变更）
 
 ## 与旧版在线手册
 
-[docs.tangly1024.com](https://docs.tangly1024.com/about) 为历史 Notion 托管；**以 `docs/user-guide/` 与 notionnext.tangly1024.com 为准**。
+[docs.tangly1024.com](https://docs.tangly1024.com) 为历史 Notion 托管；**以 `docs/user-guide/` 与 notionnext.tangly1024.com 为准**。
+
+- slug 对照与旧站直达：[help/legacy-docs.md](./help/legacy-docs.md) · [ARTICLE_INDEX.md](./ARTICLE_INDEX.md)
+- 可选批量拉取旧文：`node scripts/migrate-legacy-docs.mjs --slug <slug>`（加 `--images` 下载图片到 `docs/public/legacy/`）
+
+## 文档站评论（Giscus）
+
+每篇教程页底可显示 **文档反馈**（[Giscus](https://giscus.app/zh-CN) → 仓库 [`notionnext-org/NotionNext`](https://github.com/notionnext-org/NotionNext) 的 **GitHub Discussions**）。
+
+当前复用仓库默认分类 **General**（可在 [Discussions](https://github.com/notionnext-org/NotionNext/discussions) 查看）：
+
+| 变量 | 值（公开 ID，非密钥） |
+| --- | --- |
+| `VITE_GISCUS_REPO_ID` | `R_kgDOGHdxTw` |
+| `VITE_GISCUS_CATEGORY_ID` | `DIC_kwDOGHdxT84CBR2I` |
+
+**GitHub Actions**：已在组织仓库 Secrets 中配置上述两项（构建 workflow 会自动注入）。  
+**本地预览**：复制根目录 [`.env.docs.example`](../../.env.docs.example) 为 `.env.local` 后执行 `yarn docs:site:dev`。  
+**Cloudflare 直连构建**：若不用 Actions，在 Pages 环境变量中写入同上两项。
+
+可选 `VITE_GISCUS_ENABLED=false` 关闭评论区。未配置 ID 时页底仅显示 Issue 链接。单页 frontmatter：`comments: false`。
