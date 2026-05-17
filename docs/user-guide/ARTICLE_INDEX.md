@@ -1,4 +1,4 @@
-# 官方文档迁移索引
+﻿# 官方文档迁移索引
 
 源站：https://docs.tangly1024.com  
 本目录为迁移后的 Markdown 路径。文末「原文」链到线上版本（含截图）。
@@ -11,7 +11,7 @@
 | [reference/features.md](./reference/features.md) | 全站 `conf/*.config.js` 配置索引 |
 | [reference/notion-4x.md](./reference/notion-4x.md) | NOTION_INDEX、TOP_TAG、密码、评论 Hide 等 |
 | [themes/THEMES_CATALOG.md](./themes/THEMES_CATALOG.md) | 25 个内置主题全表 |
-| [themes/README.md](./themes/README.md) | 25 个主题各一篇 `<id>.md` 说明 |
+| [themes/README.md](./developer/themes/README.md) | 25 个主题各一篇 `<id>.md` 说明 |
 | [deploy/README.md](./deploy/README.md) | 部署栏目索引 → 根目录 `DEPLOYMENT.md` |
 
 ## 入门

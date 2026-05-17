@@ -1,4 +1,4 @@
-# ThoughtLite 主题迁移任务计划（NotionNext）
+﻿# ThoughtLite 主题迁移任务计划（NotionNext）
 
 关联需求：[Issue #3987 · 新主题 ThoughtLite](https://github.com/notionnext-org/NotionNext/issues/3987)
 
@@ -16,13 +16,13 @@
 上游仓库为 **GPL-3.0**。NotionNext 主仓库为 **MIT**。
 
 - **直接复制**上游 `.astro` / `.svelte` 等源码进本仓库，可能触发 **GPL 与 MIT 的兼容性**问题，需在合并前由维护者确认策略（例如：主题单独以 GPL 子目录说明、或仅「参考设计」用 React 重写而不复制 GPL 文本等）。  
-- 请在 **PR 描述与 `docs/themes/THOUGHTLITE.md`** 中写明许可证结论后再合入 `main`。
+- 请在 **PR 描述与 `docs/developer/themes/THOUGHTLITE.md`** 中写明许可证结论后再合入 `main`。
 
 ---
 
 ## 1. 与 Fuwari（Astro → Next）迁移的相同注意点
 
-对照 [`docs/themes/FUWARI.md`](./FUWARI.md) 与 [主题迁移指南（中文）](../THEME_MIGRATION_GUIDE.zh-CN.md)：
+对照 [`docs/developer/themes/FUWARI.md`](./FUWARI.md) 与 [主题迁移指南（中文）](../developer/THEME_MIGRATION_GUIDE.zh-CN.md)：
 
 1. **技术栈**：上游为 **Astro + Svelte**，NotionNext 主题为 **Next.js Pages Router + React**；不能「直接挂载」Astro 工程，只能 **移植视觉与信息架构**。  
 2. **数据契约**：仅使用 NotionNext 传入的 `props`（`siteInfo`、`posts`、`post`、`customNav`、`customMenu`、`notice`、`tagOptions` 等），见迁移指南 §3。  
@@ -60,9 +60,9 @@
 
 ### Phase D — 上架主仓库清单
 
-- [x] `docs/themes/THOUGHTLITE.md` 与 **`docs/themes/THOUGHTLITE.en.md`**：功能、配置、上游致谢与许可证说明。  
-- [x] `docs/themes/README.md` / `README.en.md` 导航表更新。  
-- [x] 按 [主题迁移指南 §8](../THEME_MIGRATION_GUIDE.zh-CN.md) 提交 `public/images/themes-preview/thoughtlite.png` / `.webp`（当前为占位图，可后续替换为真实截图）与 `conf/themeSwitch.manifest.js` 条目。  
+- [x] `docs/developer/themes/THOUGHTLITE.md` 与 **`docs/developer/themes/THOUGHTLITE.en.md`**：功能、配置、上游致谢与许可证说明。  
+- [x] `docs/developer/themes/README.md` / `README.en.md` 导航表更新。  
+- [x] 按 [主题迁移指南 §8](../developer/THEME_MIGRATION_GUIDE.zh-CN.md) 提交 `public/images/themes-preview/thoughtlite.png` / `.webp`（当前为占位图，可后续替换为真实截图）与 `conf/themeSwitch.manifest.js` 条目。  
 - [ ] 合并 PR 时由维护者决定是否 **`Closes #3987`**（若仍有多阶段需求可保留 Issue 子任务）。
 
 ---

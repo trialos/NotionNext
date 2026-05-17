@@ -1,4 +1,4 @@
-# NotionNext 运行原理
+﻿# NotionNext 运行原理
 
 > 迁移自：[NotionNext项目运行原理](https://docs.tangly1024.com/article/vercel-notionnext-notion)
 
@@ -14,7 +14,7 @@
 
 ## 开发者文档
 
-详见 [ARCHITECTURE.md](../../ARCHITECTURE.md)。
+详见 [ARCHITECTURE.md](../../developer/ARCHITECTURE.md)。
 
 ## 原文链接
 

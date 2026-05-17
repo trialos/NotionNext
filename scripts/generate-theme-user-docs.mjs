@@ -15,12 +15,12 @@ const themesDir = path.join(root, 'themes')
 const outDir = path.join(root, 'docs/user-guide/themes')
 const manifestPath = path.join(root, 'conf/themeSwitch.manifest.js')
 
-/** 开发者向长篇仍保留在 docs/themes/（仅链接，不重复站长正文） */
+/** 开发者向长篇在 docs/developer/themes/（不进在线站） */
 const DEV_DEEP_DOCS = {
-  claude: '../../themes/CLAUDE.md',
-  endspace: '../../themes/ENDSPACE.md',
-  fuwari: '../../themes/FUWARI.md',
-  thoughtlite: '../../themes/THOUGHTLITE.md'
+  claude: '../../developer/themes/CLAUDE.md',
+  endspace: '../../developer/themes/ENDSPACE.md',
+  fuwari: '../../developer/themes/FUWARI.md',
+  thoughtlite: '../../developer/themes/THOUGHTLITE.md'
 }
 
 const manifestSrc = fs.readFileSync(manifestPath, 'utf8')
@@ -134,7 +134,7 @@ function buildFullDoc(id, title, summary, keys, notes) {
   const devLink = DEV_DEEP_DOCS[id]
   if (devLink) {
     md += '## 开发者深度文档\n\n'
-    md += `实现细节、全局改动与架构说明见 [${title} 开发者文档](${devLink})（docs/themes/，与本文站长向说明分工）。\n\n`
+    md += `实现细节、全局改动与架构说明见 [${title} 开发者文档](${devLink})（\`docs/developer/themes/\`，与本文站长向说明分工）。\n\n`
   }
 
   md += '## 配置说明\n\n'

@@ -1,4 +1,4 @@
-# 主题迁移指南（NotionNext）
+﻿# 主题迁移指南（NotionNext）
 
 [English](./THEME_MIGRATION_GUIDE.md)
 
@@ -180,7 +180,7 @@ const CONTACT_EMAIL = siteConfig('CONTACT_EMAIL')
 
 ### 8.3 文档与其他约定
 
-- 主题详细说明仍建议写在 **`docs/themes/`**（见下文「高还原度检查清单」中的文档放置约定）。
+- 主题详细说明仍建议写在 **`docs/developer/themes/`**（见下文「高还原度检查清单」中的文档放置约定）。
 - 合并主仓库前请在 PR 说明中列出：预览图文件、`themeSwitch.manifest.js` 中新增或修改的条目。
 
 ### 8.4 面向开发者：开源贡献与商业化规划（路线说明）
@@ -228,6 +228,6 @@ const CONTACT_EMAIL = siteConfig('CONTACT_EMAIL')
   - 显示可复制的 hue/hex，便于站长回填 `config.js`
 - **主题文档放置位置**：
   - 避免把 Markdown 文档直接放在 `themes/<theme>/` 下（部分构建链路会把主题目录当运行时模块处理）
-  - 主题说明建议统一放在 `docs/themes/`
+  - 主题说明建议统一放在 `docs/developer/themes/`
 - **页面跳转体感**：补轻量过渡动效，接近源主题的交互节奏。
 

@@ -1,4 +1,4 @@
-# Cloudflare Pages 部署文档站（VitePress）
+﻿# Cloudflare Pages 部署文档站（VitePress）
 
 本仓库教程通过 **VitePress** 构建为静态站（例如 `notionnext.tangly1024.com`）。
 
@@ -127,7 +127,7 @@ npx wrangler pages deploy .vitepress/dist --project-name=notionnext-docs
 
 ## 发布范围
 
-见 `.vitepress/config.mts` 的 `srcExclude`：`docs/user-guide/**`、部分 `docs/themes/`、`DOCUMENTATION_POLICY.md` 等。
+见 `.vitepress/config.mts`：`srcExclude: ['developer/**', ...]`，即仅发布 `user-guide/`、`index.md`、`DOCUMENTATION_POLICY.md`。
 
 ## 相关
 

@@ -8,32 +8,33 @@
 
 任意教程页底部有 **「在 GitHub 上维护此页」**，直达该文件的编辑界面。
 
-## 浏览 / 克隆文档目录
+## 浏览文档目录
 
-- [docs 目录（GitHub）](https://github.com/notionnext-org/NotionNext/tree/main/docs)
-- [docs/README.md（维护总说明）](https://github.com/notionnext-org/NotionNext/blob/main/docs/README.md)
-- [user-guide/（站长教程）](https://github.com/notionnext-org/NotionNext/tree/main/docs/user-guide)
+| 链接 | 说明 |
+| --- | --- |
+| [docs/](https://github.com/notionnext-org/NotionNext/tree/main/docs) | 目录说明（本 README 在 GitHub 可见） |
+| [docs/user-guide/](https://github.com/notionnext-org/NotionNext/tree/main/docs/user-guide) | **在线站主体**，改教程只动这里 |
+| [docs/developer/](https://github.com/notionnext-org/NotionNext/tree/main/docs/developer) | 开发者文档（不进在线站） |
 
 ## 推荐流程（贡献者）
 
 1. Fork [notionnext-org/NotionNext](https://github.com/notionnext-org/NotionNext) 或具备组织仓库写权限。  
 2. 编辑 `docs/user-guide/**/*.md`（主题配置表可运行 `node scripts/generate-theme-user-docs.mjs`）。  
 3. 本地预览：`yarn docs:site:dev`。  
-4. 提交 PR，合并 **`main`** 后由 GitHub Actions 部署到 Cloudflare Pages。  
+4. 提交 PR，合并 **`main`** 后由 GitHub Actions 部署。  
 
 详细检查清单：[MAINTENANCE_WORKFLOW.md](./MAINTENANCE_WORKFLOW.md) · 策略：[DOCUMENTATION_POLICY.md](../DOCUMENTATION_POLICY.md)
 
 ## 部署原理（简述）
 
 ```text
-push main（docs/ 或 .vitepress/ 等路径变更）
+push main（docs/user-guide/ 等变更）
     → GitHub Actions: yarn docs:site:build
-    → 上传 .vitepress/dist
-    → Cloudflare Pages（notionnext.tangly1024.com）
+    → .vitepress/dist → Cloudflare Pages
 ```
 
-组织仓库使用 **API Token 部署**，不依赖 Cloudflare「连接 Git」。详见 [cloudflare-pages-docs.md](./deploy/cloudflare-pages-docs.md)。
+详见 [cloudflare-pages-docs.md](./deploy/cloudflare-pages-docs.md)。
 
 ## 与旧版在线手册
 
-[docs.tangly1024.com](https://docs.tangly1024.com/about) 为历史 Notion 托管；**以本仓库 `docs/user-guide/` 与 notionnext.tangly1024.com 为准**。
+[docs.tangly1024.com](https://docs.tangly1024.com/about) 为历史 Notion 托管；**以 `docs/user-guide/` 与 notionnext.tangly1024.com 为准**。

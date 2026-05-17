@@ -1,4 +1,4 @@
-# V4.0 → V4.9 更新历史（索引）
+﻿# V4.0 → V4.9 更新历史（索引）
 
 > 迁移自：[V4.0 → V4.9.0](https://docs.tangly1024.com/article/v4.0)
 
@@ -6,7 +6,7 @@
 
 1. **GitHub Releases**：https://github.com/notionnext-org/NotionNext/releases  
 2. **源站全文**：https://docs.tangly1024.com/article/v4.0  
-3. **升级操作**：[../update.md](../update.md)
+3. **升级操作**：[../update.md](../developer/UPDATE.md)
 
 ## V4.0 总览（摘要）
 

@@ -1,8 +1,8 @@
-# 官方文档迁移状态
+﻿# 官方文档迁移状态
 
 源站：[https://docs.tangly1024.com](https://docs.tangly1024.com/about)
 
-目标：`docs/user-guide/` + `docs/themes/`
+目标：`docs/user-guide/` + `docs/developer/themes/`
 
 **状态：核心栏目已全部迁入本地 Markdown**；**2026-05 起按 4.9.5.2 全面修订**（见下方「内容刷新」）。对照表：[ARTICLE_INDEX.md](./ARTICLE_INDEX.md)。
 
@@ -15,12 +15,12 @@
 | 站点配置 | [config/](./config/)、`config-site.md` |
 | Notion 教程 | [notion/](./notion/)、`notion-database.md` |
 | 菜单 | `menu-secondary.md` |
-| 更新日志 | [changelog/](./changelog/)、[../UPDATE.md](../UPDATE.md) |
-| 主题 | [themes/](./themes/)（含 [THEMES_CATALOG.md](./themes/THEMES_CATALOG.md)）、[../themes/](../themes/) |
+| 更新日志 | [changelog/](./changelog/)、[../UPDATE.md](../developer/UPDATE.md) |
+| 主题 | [user-guide/themes/](./themes/)（含 [THEMES_CATALOG.md](./themes/THEMES_CATALOG.md)）；开发长文 [../developer/themes/](../developer/themes/) |
 | 网站统计 | [analytics/](./analytics/) |
 | 评论插件 | [comments/](./comments/) |
 | 外部扩展 | [plugins/](./plugins/) |
-| 开发教程 | [development/](./development/) + `docs/GETTING_STARTED.md` 等 |
+| 开发教程 | [development/](./development/) + `docs/developer/GETTING_STARTED.md` 等 |
 | 运营 | [operations/](./operations/) |
 | 获取帮助 / 支持 | [help/](./help/) |
 

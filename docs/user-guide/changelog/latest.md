@@ -1,4 +1,4 @@
-# 最新版本与更新日志
+﻿# 最新版本与更新日志
 
 > 当前主线：**4.9.5.2**（见根目录 `package.json`）
 
@@ -20,8 +20,8 @@
 
 ## 如何升级
 
-- 站长：[update.md](../update.md)
-- 开发者：[UPDATE.md](../../UPDATE.md)
+- 站长：[update.md](../developer/UPDATE.md)
+- 开发者：[UPDATE.md](../../developer/UPDATE.md)
 
 ## 历史版本全文
 

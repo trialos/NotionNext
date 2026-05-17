@@ -1,33 +1,31 @@
-# 用户教程静态网站
+﻿# 用户教程静态网站
 
-教程已通过 **VitePress** 接入本仓库，可部署到 Cloudflare Pages（或其它静态托管）。
+教程通过 **VitePress** 构建，发布到 [notionnext.tangly1024.com](https://notionnext.tangly1024.com)。
 
 ## 本地命令
 
 | 命令 | 作用 |
 | --- | --- |
 | `yarn docs:site:dev` | 本地开发预览 |
-| `yarn docs:site:build` | 构建静态站 → `.vitepress/dist` |
+| `yarn docs:site:build` | 构建 → `.vitepress/dist` |
 | `yarn docs:site:preview` | 预览构建结果 |
 
 ## Cloudflare Pages
 
-详见 **[cloudflare-pages-docs.md](./deploy/cloudflare-pages-docs.md)**。
+详见 **[cloudflare-pages-docs.md](./deploy/cloudflare-pages-docs.md)**（组织仓库推荐 GitHub Actions，无需 CF 连 Git）。
 
-- **组织仓库（推荐）**：GitHub Actions 部署，无需 Cloudflare「连接 Git」  
-- **个人仓库**：也可在 CF 控制台直连 Git 构建  
+## 在线站包含的目录
 
-构建命令：`yarn docs:site:build` · 输出：`.vitepress/dist`
+```text
+docs/
+├── index.md
+├── DOCUMENTATION_POLICY.md
+└── user-guide/          ← 全部进入在线站
+```
 
-## 发布范围
-
-- `docs/user-guide/**` — 主教程  
-- `docs/themes/*.md`（中文，排除 `*.en.md`）  
-- `docs/DOCUMENTATION_POLICY.md`、`docs/index.md`  
-
-开发者文档（`ARCHITECTURE.md`、`GETTING_STARTED.md` 等）在 `srcExclude` 中排除，不进入静态站。
+**不包含** `docs/developer/`（开发者文档仅 GitHub 阅读）。配置见 [`.vitepress/config.mts`](../../.vitepress/config.mts) 的 `srcExclude: ['developer/**', ...]`。
 
 ## 配置位置
 
-- `.vitepress/config.mts` — 导航、侧栏、`srcExclude`  
+- `.vitepress/config.mts` — 导航、侧栏  
 - `docs/index.md` — 站点首页  

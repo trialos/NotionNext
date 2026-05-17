@@ -1,4 +1,4 @@
-# Fuwari 主题
+﻿# Fuwari 主题
 
 > 主题 ID：`fuwari` · 预览：[preview.tangly1024.com/?theme=fuwari](https://preview.tangly1024.com/?theme=fuwari)
 
@@ -18,7 +18,7 @@
 
 ## 开发者深度文档
 
-实现细节、全局改动与架构说明见 [Fuwari 开发者文档](../../themes/FUWARI.md)（docs/themes/，与本文站长向说明分工）。
+实现细节、全局改动与架构说明见 [Fuwari 开发者文档](../../developer/themes/FUWARI.md)（docs/developer/themes/，与本文站长向说明分工）。
 
 ## 配置说明
 

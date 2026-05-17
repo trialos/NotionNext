@@ -1,4 +1,4 @@
-# 主题功能说明
+﻿# 主题功能说明
 
 > 基于当前主线 **4.9.5.2** · 完整列表见 **[内置主题全览](./THEMES_CATALOG.md)**（25 个主题，一个不漏）
 
@@ -32,11 +32,11 @@
 
 - **完整列表**：[themes/README.md](./README.md)（每主题一篇 `<id>.md`）  
 - **选型总表**：[THEMES_CATALOG.md](./THEMES_CATALOG.md)  
-- **开发者深度文档**（Claude 全局 `_app.js` 等）：`docs/themes/` 下 CLAUDE、ENDSPACE 等；站长向以本目录 `<id>.md` 为准
+- **开发者深度文档**（Claude 全局 `_app.js` 等）：`docs/developer/themes/` 下 CLAUDE、ENDSPACE 等；站长向以本目录 `<id>.md` 为准
 
 ## 自建主题
 
-[development/own-theme.md](../development/own-theme.md) · [THEME_MIGRATION_GUIDE.zh-CN.md](../../THEME_MIGRATION_GUIDE.zh-CN.md)
+[development/own-theme.md](../development/own-theme.md) · [THEME_MIGRATION_GUIDE.zh-CN.md](../../developer/THEME_MIGRATION_GUIDE.zh-CN.md)
 
 ## 历史原文
 

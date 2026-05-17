@@ -11,6 +11,7 @@ on:
       - 'docs/**'
       - '.vitepress/**'
       - 'README.md'
+      - 'scripts/generate-theme-user-docs.mjs'
       - 'package.json'
       - 'yarn.lock'
       - '.github/workflows/deploy-docs-site.yml'

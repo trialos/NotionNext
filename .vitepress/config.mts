@@ -1,38 +1,22 @@
 import { defineConfig } from 'vitepress'
 
-/** 仅发布站长向文档；开发者长篇与英文副本不进入静态站 */
-const srcExclude = [
-  '**/*.en.md',
-  '**/performance/**',
-  'GETTING_STARTED.md',
-  'ARCHITECTURE.md',
-  'PROJECT_STRUCTURE.md',
-  'CONFIGURATION.md',
-  'CONTRIBUTION_WORKFLOW.md',
-  'MAINTENANCE_PHILOSOPHY.zh-CN.md',
-  'MAINTENANCE_PHILOSOPHY.en.md',
-  'THEME_MIGRATION_GUIDE.md',
-  'THEME_MIGRATION_GUIDE.zh-CN.md',
-  'COMMUNITY_SITE_ROADMAP.md',
-  'UPDATE.md',
-  'README.en.md',
-  'themes/THOUGHTLITE_MIGRATION_PLAN.zh-CN.md',
-  // 含 {{ }} 或复杂代码块，易触发 VitePress 解析错误；站长向见 user-guide/themes/
-  'themes/CLAUDE.md',
-  'themes/ENDSPACE.md',
-  'themes/FUWARI.md',
-  'themes/THOUGHTLITE.md'
-]
+/**
+ * 在线站仅发布：
+ *   docs/index.md
+ *   docs/DOCUMENTATION_POLICY.md
+ *   docs/user-guide/**
+ * 开发者文档在 docs/developer/**（整目录排除）
+ */
+const srcExclude = ['developer/**', 'README.md', 'README.en.md']
 
 export default defineConfig({
   title: 'NotionNext 使用说明',
   description: 'NotionNext 部署、配置、主题与 Notion 教程',
   lang: 'zh-CN',
   srcDir: 'docs',
-  srcExclude: [...srcExclude, 'README.md', 'themes/README.md'],
+  srcExclude,
   cleanUrls: true,
   lastUpdated: true,
-  /** 教程内大量链到未收录的开发者文档 / 仓库根路径，构建时不阻断 */
   ignoreDeadLinks: true,
   themeConfig: {
     logo: '/favicon.ico',
@@ -74,7 +58,8 @@ export default defineConfig({
             { text: '部署索引', link: '/user-guide/deploy/' },
             { text: 'Vercel 域名', link: '/user-guide/deploy/vercel-domain' },
             { text: 'Vercel 静态导出', link: '/user-guide/deploy/vercel-static' },
-            { text: 'Cloudflare Pages', link: '/user-guide/deploy/cloudflare-pages' },
+            { text: 'Cloudflare 文档站', link: '/user-guide/deploy/cloudflare-pages-docs' },
+            { text: 'Cloudflare 博客静态', link: '/user-guide/deploy/cloudflare-pages' },
             { text: 'Netlify', link: '/user-guide/deploy/netlify' },
             { text: 'VPS', link: '/user-guide/deploy/vps' }
           ]
@@ -159,7 +144,7 @@ export default defineConfig({
     ],
     footer: {
       message:
-        '以 GitHub 仓库为准 · <a href="https://github.com/notionnext-org/NotionNext/tree/main/docs" target="_blank" rel="noreferrer">浏览 docs 目录</a> · <a href="https://github.com/notionnext-org/NotionNext/blob/main/docs/README.md" target="_blank" rel="noreferrer">维护说明</a>',
+        '以 GitHub 仓库为准 · <a href="https://github.com/notionnext-org/NotionNext/tree/main/docs" target="_blank" rel="noreferrer">浏览 docs 目录</a> · <a href="https://github.com/notionnext-org/NotionNext/blob/main/docs/README.md" target="_blank" rel="noreferrer">目录说明</a>',
       copyright: 'NotionNext · MIT'
     },
     search: { provider: 'local' }

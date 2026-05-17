@@ -1,12 +1,12 @@
-# NotionNext 开发先导
+﻿# NotionNext 开发先导
 
 > 迁移自：[NotionNext开发先导](https://docs.tangly1024.com/article/how-to-develop-with-notion-next)
 
 ⚠️ **更完整的开发者文档**请以本仓库为准：
 
-- [docs/GETTING_STARTED.md](../../GETTING_STARTED.md)  
-- [docs/ARCHITECTURE.md](../../ARCHITECTURE.md)  
-- [docs/PROJECT_STRUCTURE.md](../../PROJECT_STRUCTURE.md)  
+- [docs/developer/GETTING_STARTED.md](../../developer/GETTING_STARTED.md)  
+- [docs/ARCHITECTURE.md](../../developer/ARCHITECTURE.md)  
+- [docs/PROJECT_STRUCTURE.md](../../developer/PROJECT_STRUCTURE.md)  
 - [CONTRIBUTING.md](../../../CONTRIBUTING.md)
 
 ## 环境

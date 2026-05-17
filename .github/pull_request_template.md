@@ -37,7 +37,7 @@
 
 ## 用户文档（`docs/user-guide/`）
 
-若本 PR **未** 修改 `docs/user-guide/`、`docs/themes/` 中与站长相关的说明，可勾选「不适用」并跳过本节。
+若本 PR **未** 修改 `docs/user-guide/`、`docs/developer/` 中与站长相关的说明，可勾选「不适用」并跳过本节。
 
 - [ ] 不适用（无文档改动）
 - [ ] 已按 [维护工作流](https://github.com/notionnext-org/NotionNext/blob/main/docs/user-guide/MAINTENANCE_WORKFLOW.md) 自检
