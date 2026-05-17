@@ -1,5 +1,4 @@
 import { defineConfig } from 'vitepress'
-import { cjkTokenize } from './search-tokenize'
 
 const giscusEnabled = process.env.VITE_GISCUS_ENABLED !== 'false'
 const giscusRepoId = process.env.VITE_GISCUS_REPO_ID || ''
@@ -23,6 +22,7 @@ export default defineConfig({
   cleanUrls: true,
   lastUpdated: true,
   ignoreDeadLinks: true,
+  head: [['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }]],
   themeConfig: {
     logo: '/favicon.svg',
     nav: [
@@ -184,9 +184,6 @@ export default defineConfig({
           }
         },
         miniSearch: {
-          options: {
-            tokenize: cjkTokenize
-          },
           searchOptions: {
             fuzzy: 0.2,
             prefix: true,
