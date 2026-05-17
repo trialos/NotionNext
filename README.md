@@ -27,6 +27,12 @@
 ---
 # 帮助教程
 
+- **仓库内使用说明（推荐，持续更新）**：[docs/user-guide/README.md](./docs/user-guide/README.md)（部署、配置、Notion 数据库、菜单等）
+- **4.9.x 参考手册**：[全站配置索引](./docs/user-guide/reference/features.md) · [25 个主题说明（每主题一篇）](./docs/user-guide/themes/README.md) · [Notion 4.x 能力](./docs/user-guide/reference/notion-4x.md)
+- **文档维护工作流**：[docs/user-guide/MAINTENANCE_WORKFLOW.md](./docs/user-guide/MAINTENANCE_WORKFLOW.md)（目录秩序、检查清单、注意事项）
+- **维护策略**：[docs/DOCUMENTATION_POLICY.md](./docs/DOCUMENTATION_POLICY.md)
+- **历史在线手册**：[NotionNext 帮助手册](https://docs.tangly1024.com/)（过渡期仍可读，重要章节已迁入 `docs/user-guide/`）
+
 > 本项目为免费、公开资源，仅限个人学习使用，禁止利用本教程建立的博客发布非法内容、进行违法犯罪活动。
 
 Notion是一个能让效率暴涨的生产力引擎，可以帮你书写文档、管理笔记，搭建知识库，甚至可以为你规划项目、时间管理、组织团队、提高生产力、还有当前最强大的AI技术加持。
