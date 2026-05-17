@@ -2,21 +2,32 @@
 
 中文 | [English](./README.en.md)
 
-本目录用于统一维护各主题的设计说明、配置说明与迁移注意事项。
+本目录用于**开发者向**主题说明（架构、全局改动、迁移计划）及英文文档。  
+**站长向统一入口**：[user-guide/themes/README.md](../user-guide/themes/README.md)（25 个主题各一篇 `<id>.md`）。
 
-## 主题总览
+## 文档分工
 
-| Theme | 中文文档 | English Docs |
+| 类型 | 位置 | 说明 |
 | --- | --- | --- |
-| Claude | [CLAUDE.md](./CLAUDE.md) | [CLAUDE.en.md](./CLAUDE.en.md) |
-| Endspace | [ENDSPACE.md](./ENDSPACE.md) | [ENDSPACE.en.md](./ENDSPACE.en.md) |
-| Fuwari | [FUWARI.md](./FUWARI.md) | [FUWARI.md](./FUWARI.md) |
-| ThoughtLite（移植中） | [THOUGHTLITE.md](./THOUGHTLITE.md) | [THOUGHTLITE.en.md](./THOUGHTLITE.en.md) · [迁移计划](./THOUGHTLITE_MIGRATION_PLAN.zh-CN.md) |
+| 站长教程 | `docs/user-guide/themes/<id>.md` | 启用、场景、配置表；**Proxio / Heo 全文在此** |
+| 开发者深度 | 本目录 `CLAUDE.md` 等 | 实现细节、Supabase、`_app.js` 等 |
+| 已合并存根 | `PROXIO.md`、`HEO.md` | 仅重定向，勿再编辑 |
+
+## 主题索引
+
+| Theme | 站长文档 | 开发者 / 英文 |
+| --- | --- | --- |
+| Proxio | [proxio.md](../user-guide/themes/proxio.md) | 已合并至站长文档 |
+| HEO | [heo.md](../user-guide/themes/heo.md) | 已合并至站长文档 |
+| Claude | [claude.md](../user-guide/themes/claude.md) | [CLAUDE.md](./CLAUDE.md) · [CLAUDE.en.md](./CLAUDE.en.md) |
+| Endspace | [endspace.md](../user-guide/themes/endspace.md) | [ENDSPACE.md](./ENDSPACE.md) · [ENDSPACE.en.md](./ENDSPACE.en.md) |
+| Fuwari | [fuwari.md](../user-guide/themes/fuwari.md) | [FUWARI.md](./FUWARI.md) |
+| ThoughtLite | [thoughtlite.md](../user-guide/themes/thoughtlite.md) | [THOUGHTLITE.md](./THOUGHTLITE.md) · [THOUGHTLITE.en.md](./THOUGHTLITE.en.md) |
+
+全部主题列表：[THEMES_CATALOG.md](../user-guide/themes/THEMES_CATALOG.md)
 
 ## 维护约定
 
-- **开发者须知**：主题开发与长期维护成本高；当前以向 **GitHub 主仓库贡献免费可分发主题**为主。后续若上线付费主题与私有仓库交付等机制，以 [主题迁移指南 §8.4](../THEME_MIGRATION_GUIDE.zh-CN.md) 的路线说明及项目公告为准。
-- 新增主题时，必须在本目录补齐中英文说明（至少包含功能、配置、启用方式）。
-- 主题涉及全局文件改动时，需在主题文档中明确“全局改动影响范围”。
-- `docs/README.md` 与 `docs/README.en.md` 仅保留导航，详细说明应收敛到本目录。
-- **合并主仓库时**：除 `themes/<id>/` 外，需在 **`public/images/themes-preview/`** 提交与目录名一致的 **`<id>.png`** 与 **`<id>.webp`**（预览封面），并在 **`conf/themeSwitch.manifest.js`** 的 **`THEME_SWITCH_MANIFEST`** 中填写 **`name` / `summary`**（及可选 `cover` / `coverWebp`、`tier`）；详见 [主题迁移指南 §8](../THEME_MIGRATION_GUIDE.zh-CN.md)（[English §8](../THEME_MIGRATION_GUIDE.md)）。本地自建主题可不提交上游，无需此项。
+- 新增主题时，在 **`docs/user-guide/themes/<id>.md`** 写站长说明；仅当需要记录全局改动时再在本目录补开发者文档。
+- 修改 `themes/<id>/config.js` 后运行 `node scripts/generate-theme-user-docs.mjs` 刷新配置表（`proxio` / `heo` 仅更新 `<!-- theme-config-table -->` 段）。
+- **合并主仓库时**：除 `themes/<id>/` 外，需在 **`public/images/themes-preview/`** 提交 `<id>.png` / `<id>.webp`，并更新 **`conf/themeSwitch.manifest.js`**；详见 [主题迁移指南 §8](../THEME_MIGRATION_GUIDE.zh-CN.md)。

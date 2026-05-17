@@ -14,6 +14,21 @@ git remote set-url origin https://github.com/notionnext-org/NotionNext.git
 
 详见 [贡献指南（中文）](../CONTRIBUTING.zh-CN.md#仓库与组织) / [Contributing (English)](../CONTRIBUTING.md#repository-and-organization)。
 
+> **使用说明（站长 / 部署者）**：自 2026 年起，部署教程以 **[`docs/user-guide/`](./user-guide/README.md)** 在本仓库内持续维护，并逐步替代仅托管在 Notion 的 [docs.tangly1024.com](https://docs.tangly1024.com/about)。  
+> **维护文档**：策略 [DOCUMENTATION_POLICY.md](./DOCUMENTATION_POLICY.md) · 工作流 [MAINTENANCE_WORKFLOW.md](./user-guide/MAINTENANCE_WORKFLOW.md)
+
+## 用户使用说明（中文）
+
+| 主题 | 文档 |
+| --- | --- |
+| 目录与维护策略 | [user-guide/README.md](./user-guide/README.md) · [DOCUMENTATION_POLICY.md](./DOCUMENTATION_POLICY.md) |
+| 完整索引 | [ARTICLE_INDEX.md](./user-guide/ARTICLE_INDEX.md)（官方文档对照表） |
+| 介绍 / 部署 / 配置 / 升级 | [user-guide/README.md](./user-guide/README.md) |
+| 4.9.x 参考 · 全主题说明 | [reference/features.md](./user-guide/reference/features.md) · [themes/README.md](./user-guide/themes/README.md)（25 篇） |
+| 部署专题 / 评论 / 统计 / 插件 | [deploy/](./user-guide/deploy/) · [comments/](./user-guide/comments/) · [analytics/](./user-guide/analytics/) · [plugins/](./user-guide/plugins/) |
+| Proxio · HEO · ThoughtLite | [proxio.md](./user-guide/themes/proxio.md) · [heo.md](./user-guide/themes/heo.md) · [THOUGHTLITE.md](./themes/THOUGHTLITE.md) |
+| 迁移状态 | [MIGRATION_STATUS.md](./user-guide/MIGRATION_STATUS.md)（核心栏目已完成） |
+
 ## 文档入口（中英双语）
 
 | 主题 | 中文 | English |
@@ -30,6 +45,8 @@ git remote set-url origin https://github.com/notionnext-org/NotionNext.git
 ## 主题文档
 
 - [Themes Documentation](./themes/README.md)
+- [Proxio 顶栏导航](./user-guide/themes/proxio.md#右上角导航定制)
+- [ThoughtLite Theme](./themes/THOUGHTLITE.md)
 - [Claude Theme](./themes/CLAUDE.md)
 - [Endspace Theme](./themes/ENDSPACE.md)
 - [Fuwari Theme](./themes/FUWARI.md)

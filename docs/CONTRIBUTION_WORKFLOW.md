@@ -56,3 +56,7 @@ yarn build
 - 大改动拆分为多个小 PR
 - 在 PR 描述中标注“是否包含破坏性变更”
 
+## 7. 用户文档（user-guide）
+
+修改或新增 `docs/user-guide/` 时，请遵循 [用户文档维护工作流](./user-guide/MAINTENANCE_WORKFLOW.md)：同步更新 `README.md`、`ARTICLE_INDEX.md`，并与 `conf/*.config.js` 中的配置键保持一致。
+
