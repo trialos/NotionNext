@@ -65,4 +65,4 @@ NotionNext 已由个人仓库移交至组织 **[notionnext-org](https://github.c
 - 单主题说明或截图更新  
 - 翻译与 `lib/lang` 补充  
 
-维护者会在 [Discussions](https://github.com/notionnext-org/NotionNext/discussions) 不定期发布「欢迎贡献」置顶帖。
+维护者会在 [Discussions](https://github.com/notionnext-org/NotionNext/discussions) 置顶「欢迎贡献」帖；草稿见 [PINNED_DISCUSSION_POSTS.zh-CN.md](../community/PINNED_DISCUSSION_POSTS.zh-CN.md)。
