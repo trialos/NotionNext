@@ -1,5 +1,13 @@
 # notion-i18n-translator（中英双数据库自动翻译）
 
+> **安全提示（合并前必读）**
+>
+> - 本工具为**本地 CLI**，不会进入 Next.js 生产构建；误操作不会影响 Vercel/Cloudflare 上的站点代码。
+> - 对**已配对**的目标页会**先删除全部子块再重写**，未勾选 `translation_locked` 的内容可能被覆盖；请务必先 `yarn translate:diagnose` 与 `yarn translate:all --dry-run`。
+> - `column_list` / `table` / `synced_block` 等块**不会同步**到目标库；批量同步后请人工检查版式。
+> - 需自备 LLM API Key，会产生调用费用；建议设置 `TRANSLATOR_BUDGET_TOKENS_PER_RUN`。
+> - 用户文档：[双语库翻译 CLI](../../docs/user-guide/notion/bilingual-translator.md)
+
 为 NotionNext 博客提供两个语言数据库（中文库与英文库）之间的自动双向翻译。源语言由页面所在数据库决定，无需在每篇文章上额外维护 `lang` 字段。
 
 默认语言对：**`zh-CN` ↔ `en-US`**。已在 DeepSeek（V3+）与 GLM-4 上验证通过。翻译提供方接口很小（`{ text, sourceLang, targetLang, glossary, hint } → { text, inputTokens, outputTokens }`），可在 `providers/` 下扩展其他模型。
