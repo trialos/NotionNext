@@ -19,6 +19,8 @@ Sending SIGTERM signal to Next.js build worker due to timeout of 300 seconds
 [API<<--响应] 耗时:8336ms - from:prefetch
 ```
 
+多语言 `NOTION_PAGE_ID` 用逗号拼接很多站点时，旧版构建缓存可能报 `ENAMETOOLONG: name too long`（锁文件/缓存文件名过长）。**4.9.5.3+** 已对缓存路径做 SHA-256 短名处理；升级后重新部署即可，无需缩短环境变量。
+
 ## 环境变量一览
 
 在部署平台（Cloudflare Pages → **Settings → Environment variables**）或本地 `.env.local` 中配置（**构建时**生效，无需 `NEXT_PUBLIC_` 前缀）：
