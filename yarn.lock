@@ -2239,17 +2239,17 @@
   resolved "https://registry.yarnpkg.com/@vercel/analytics/-/analytics-1.6.1.tgz#b4e16daf445cf6cd365a91e43d86e9e5b3428ddc"
   integrity sha512-oH9He/bEM+6oKlv3chWuOOcp8Y6fo6/PSro8hEkgCW3pu9/OiCXiUpRUogDh3Fs3LH2sosDrx8CxeOLBEE+afg==
 
-"@vercel/functions@^3.4.3":
-  version "3.4.3"
-  resolved "https://registry.npmjs.org/@vercel/functions/-/functions-3.4.3.tgz"
-  integrity sha512-kA14KIUVgAY6VXbhZ5jjY+s0883cV3cZqIU3WhrSRxuJ9KvxatMjtmzl0K23HK59oOUjYl7HaE/eYMmhmqpZzw==
+"@vercel/functions@^3.6.0":
+  version "3.6.0"
+  resolved "https://registry.yarnpkg.com/@vercel/functions/-/functions-3.6.0.tgz#f9441294d1bfdfff49b530fa0b4667fa36963214"
+  integrity sha512-Xj68JYqqJwtqFWJN7EWmFN7MOiUjv5whjw48UEKqQbg8r7hRkhuJhncTU0ba3jJCh/wxEuLWckrtsKcrHQraxw==
   dependencies:
-    "@vercel/oidc" "3.2.0"
+    "@vercel/oidc" "3.4.1"
 
-"@vercel/oidc@3.2.0":
-  version "3.2.0"
-  resolved "https://registry.npmjs.org/@vercel/oidc/-/oidc-3.2.0.tgz"
-  integrity sha512-UycprH3T6n3jH0k44NHMa7pnFHGu/N05MjojYr+Mc6I7obkoLIJujSWwin1pCvdy/eOxrI/l3uDLQsmcrOb4ug==
+"@vercel/oidc@3.4.1":
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/@vercel/oidc/-/oidc-3.4.1.tgz#7f7f0361da6e021273bbf5bf467f5c495488c91e"
+  integrity sha512-H6B+/ig/GoahccL3WZjiHayHw1H5KhvTJNceqYulwfK9kkz5iul2hTmYzcJ7tTCQzyd0dutuL9xYFZCyLUqsog==
 
 "@vitejs/plugin-vue@^5.2.1":
   version "5.2.4"
