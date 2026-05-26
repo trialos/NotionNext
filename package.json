@@ -131,7 +131,8 @@
   },
   "resolutions": {
     "axios": ">=0.21.1",
-    "form-data": "^4.0.4"
+    "form-data": "^4.0.4",
+    "qs": "^6.15.2"
   },
   "bugs": {
     "url": "https://github.com/tangly/NotionNext/issues",
