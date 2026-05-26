@@ -11,7 +11,6 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
 
 concurrency:
   group: bump-package-version-main
@@ -39,11 +38,21 @@ jobs:
           VERSION=$(node -p "require('./package.json').version")
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
-      - name: Create version bump pull request
-        uses: peter-evans/create-pull-request@v7
-        with:
-          commit-message: "chore(release): bump package.json to ${{ steps.bump.outputs.version }} [skip-version]"
-          title: "chore(release): bump package.json to ${{ steps.bump.outputs.version }} [skip-version]"
-          body: "Automated package version bump after a main branch update."
-          branch: chore/bump-package-version
-          delete-branch: true
+      - name: Push version bump branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet package.json; then
+            echo "No version change (unexpected)."
+            exit 0
+          fi
+          BRANCH="chore/bump-package-version"
+          git checkout -B "${BRANCH}"
+          git add package.json
+          git commit -m "chore(release): bump package.json to ${{ steps.bump.outputs.version }} [skip-version]"
+          git push --force-with-lease origin "${BRANCH}"
+          {
+            echo "Version bump branch pushed: \`${BRANCH}\`"
+            echo ""
+            echo "Create a pull request from \`${BRANCH}\` to \`main\` to publish version ${{ steps.bump.outputs.version }}."
+          } >> "$GITHUB_STEP_SUMMARY"
