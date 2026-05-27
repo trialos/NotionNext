@@ -13,20 +13,8 @@ hero:
       text: 快速开始
       link: /user-guide/intro
     - theme: alt
-      text: 在 GitHub 上维护文档
+      text: 维护文档
       link: https://github.com/notionnext-org/NotionNext/tree/main/docs
-    - theme: alt
-      text: 参与社区
-      link: /user-guide/community-participate
-    - theme: alt
-      text: 维护说明
-      link: /user-guide/maintain-docs
-    - theme: alt
-      text: 致谢
-      link: /user-guide/acknowledgements
-    - theme: alt
-      text: 旧版 Notion 教程
-      link: https://docs.tangly1024.com
 
 features:
   - title: 仓库内维护
