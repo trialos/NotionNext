@@ -41,49 +41,6 @@
 **我录了一个1分38秒的简略视频**，演示了整个部署过程，最终以文档为主。
 
 https://player.bilibili.com/player.html?aid=913088616&bvid=BV1fM4y1L7Qi&cid=1203316294&page=1
-
-- 另外有Youtube网友也分享了部署的过程，可以参考
-[将您的Notion笔记变为博客站，所有文章的编写发布都只在您的Notion笔记中完成，小白也能快速地搭建自己的网站](https://www.youtube.com/watch?v=zWlPyDQCkrk)
-
-首先，借助NotionNext建站，所有文章的编写发布都只在您的Notion笔记中完成，Notion笔记支持在电脑与手机上随时访问；因此您无需登录任何第三方平台、或打开WordPress后台、或者通过写Git上传等繁琐的方式来发布文章。
-其次，Notion 是一款将笔记、在线文档、知识库和任务管理无缝整合的「All-In-One」应用，它也是我一直在用、并且极力推荐的一款笔记软件
-借助Notion灵活的排版以及便捷的写作体验，您不需要专门学习Markdown语法，也可以轻松随时随地写出调理清晰的文章，以便记录您的创意与灵感。站点数据完全保存在Notion笔记当中，您可以随时导出本地进行备份。
-Notion AI
-Notion集成了Open AI，能大大提升您的写作效率，这也是Notion作为笔记工具的理由之一。
-最后，NotionNext 只是一个将您的笔记转成网站的小工具，并不是一个繁重的系统，之后还可以选择其他的工具和软件渲染您的笔记。
-
-===============================
-🔔订阅我的频道，第一时间通知您最新的更新!🔔
-👉Subscribe: https://www.youtube.com/@maple_tech
-===============================
-chapter章节：
-00:00 介绍
-00:30 安装NotionNext
-01:30 配置Github
-01:48 配置Vercel
-03:40 绑定自己的域名
-04:35 把域名配置到cloudflare管理
-06:32 效果演示
-
-===============================
-相关资源：
-https://github.com/tangly1024/NotionNext
-https://www.namesilo.com/
-===============================
-🔽 与我联系
-Twitter: https://twitter.com/MapleNext
-Telegram: https://t.me/+1UCf0K0yi4tiMDEx
-===============================
-#notion #博客 #建站
-[零基础入门NotionNext网站搭建、个人博客、网站快速搭建部署教程 | 无需编程教学 | All in one | 404实验室](https://www.youtube.com/watch?v=AbI70b9KfXE)
-
-订阅频道▶https://www.youtube.com/channel/UCm84OFeAJCPqerpjCFOrVwg?sub_confirmation=1
-博客▶https://404lab.cc/
-TG群组▶https://bit.ly/404Lab
-海豚湾▶https://bit.ly/3Y2DgBZ
-接码平台▶https://bit.ly/3ryxig9
-
-
 ## 一、创建您的Notion页面
 
 
