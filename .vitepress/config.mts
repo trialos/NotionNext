@@ -25,9 +25,12 @@ export default defineConfig({
   cleanUrls: true,
   lastUpdated: true,
   ignoreDeadLinks: [/^https?:\/\//],
-  head: [['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }]],
+  head: [
+    ['link', { rel: 'icon', href: '/brand/notionnext-logo.png', type: 'image/png' }],
+    ['link', { rel: 'apple-touch-icon', href: '/brand/notionnext-logo.png' }]
+  ],
   themeConfig: {
-    logo: '/favicon.svg',
+    logo: '/brand/notionnext-logo.png',
     nav: [
       { text: '使用说明', link: '/user-guide/intro', activeMatch: '/user-guide/' },
       { text: '主题', link: '/user-guide/themes/THEMES_CATALOG', activeMatch: '/user-guide/themes/' },

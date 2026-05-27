@@ -5,6 +5,9 @@ hero:
   name: NotionNext
   text: 使用说明
   tagline: 部署、配置、主题与 Notion 写作 — 与仓库 main 分支同步
+  image:
+    src: /brand/notionnext-logo.svg
+    alt: NotionNext Logo
   actions:
     - theme: brand
       text: 快速开始
