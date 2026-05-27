@@ -1,178 +1,124 @@
-# NotionNext-快速免费建站
+# NotionNext 快速免费建站
+
 > 迁移自：[NotionNext-快速免费建站](https://docs.tangly1024.com/about)
 > 发布日期：2021-12-4
 > 最后编辑：2026-5-10
 > 标签：Notion、NotionNext、建站
-> 摘要：无需服务器、即使是小白也能几分钟搭建自己的独立博客站～如果你在使用Notion这款神级笔记本的话，不妨来试试顺手建个网站🤣🤣🤣，这是一款基于NotionAPI的博客系统。
+
+NotionNext 是一个基于 Notion 和 Next.js 的开源建站系统。你可以继续在 Notion 中写文章、整理知识库和维护页面结构，NotionNext 负责把这些内容渲染成独立网站，并提供主题、SEO、评论、统计、搜索、广告、插件、静态导出和多平台部署等能力。
+
+它适合个人博客、知识库、文档站、作品集、导航站、产品官网、相册和轻量商业展示等场景。对非技术用户来说，它降低了从 Notion 到独立站的门槛；对开发者来说，它保留了完整源码、配置文件和主题扩展空间。
 
 <details>
 <summary>旧版升级提醒</summary>
 
-> **💡**
->
-2026 年起 Notion 侧数据结构多次升级，过旧的 NotionNext 源码可能无法完整拉取页面。请把站点代码同步到 [主线最新发行版说明](https://docs.tangly1024.com/article/latest) 所建议的版本（截至本文修订时为 4.9.5.x），按文内步骤升级或排查。
+2026 年起 Notion 侧数据结构多次升级，过旧的 NotionNext 源码可能无法完整拉取页面。建议把站点代码同步到主线最新版本。当前仓库版本为 **4.9.5.7**，升级步骤见 [版本升级指引](./update.md)。
 
 </details>
 
-> **📔**
->
-折腾博客多年，尝试过 WordPress、Hexo等各种博客系统。然而在写作过程中最重要的应该是养成内容持续输出的习惯；软件平台仅仅是一个辅助，反复折腾搭建系统显得本末倒置。
->
-> 是否有一种方案，能让“**坚持笔记**”和“**博客分享**”得到完美结合呢？
-> 直到Notion笔记本的出现，一切都有了可能！
+## 为什么选择 NotionNext
 
+写作系统最重要的不是后台有多复杂，而是能不能降低持续输出的阻力。许多博客系统需要维护数据库、后台、插件、主题和服务器；NotionNext 的思路更轻：把 Notion 作为内容源，把网站作为展示层。
 
-## NotionNext是什么？
+这样做有几个直接好处：
 
-> **📔**
->
-NotionNext的愿景是帮助非技术人员的小白，最低成本、最快速地搭建自己的网站，帮助您将自己的产品与故事高效地传达给世界。
+- 写作仍然在 Notion 中完成，电脑和手机都可以随时编辑。
+- 内容、图片、分类、标签、菜单等数据集中沉淀在 Notion 中，便于备份和迁移。
+- 网站源码、域名、部署平台都由你自己掌控，不被第三方内容平台锁定。
+- 基于 Next.js 渲染，支持良好的访问性能、SEO、RSS、Sitemap 和静态化能力。
+- 主题与插件可自由扩展，既能快速上线，也能按业务需要长期演进。
 
-NotionNext是我基于**NextJS**框架开发的[免费开源](https://github.com/tangly1024/NotionNext)的**Notion**建站工具。它将您的[Notion笔记](https://tangly1024.com/article/notion)实时渲染成静态博客站；您**无需购买服务器**，只要**一个笔记**即可搭建完全属于您自己的独立网站，让您与全世界建立连接！
+## 核心能力
 
+### 1. Notion 写作与内容管理
 
-### 成功案例
+NotionNext 直接读取 Notion 数据库和页面内容。你可以在 Notion 中维护文章、分类、标签、发布日期、摘要、封面图、菜单、隐藏页、定时发布和多语言内容。
 
-数以万计的网友在NotionNext的帮助下，成功搭建了自己的网站；
+Notion 本身支持富文本、图片、视频、引用、表格、代码块、折叠块、数据库视图等内容形态。通过 NotionNext，这些内容可以转化为可访问、可搜索、可分享的独立网站页面。
 
-更有许多优秀的站长，借助网站搭建自己的自动获客平台、实现从传统职员迈向数字游民的身份转变，打造属于自己的超级个体、网络事业。
+Notion 也集成了 AI 写作能力，可以辅助起草、润色、总结和翻译内容。对内容型站点来说，这意味着选题、写作、编辑和发布都可以在同一个知识库中完成。
 
-您可以访问以下链接查看部分案例：
+### 2. 25 个内置主题
 
-[友情链接 | Tangly Blog](https://blog.tangly1024.com/links)
+当前版本内置 **25 个主题**，覆盖不同站点形态：
 
-站友们的集合
+- 个人博客：`simple`、`hexo`、`nobelium`、`typography`
+- 文档和知识库：`gitbook`、`claude`
+- 作品集和品牌站：`proxio`、`starter`、`landing`
+- 图片和相册：`plog`、`photo`
+- 导航聚合：`nav`
+- 杂志与视觉展示：`magzine`、`heo`
+- 阅读体验：`medium`、`fuwari`、`thoughtlite`
 
+完整主题列表见 [内置主题全览](./themes/THEMES_CATALOG.md)。你可以通过环境变量、Notion Config 或主题切换挂件选择主题。
 
-## NotionNext建站的5个理由
+### 3. 部署与静态化
 
+NotionNext 支持多种部署方式，包括 Vercel、Cloudflare Pages、EdgeOne Pages、Netlify、Zeabur、4EVERLAND 和 VPS。新手建议先从 [Vercel 部署](./deploy-vercel.md) 开始。
 
-### 1.Notion笔记
+站点可以使用 ISR 缓存、静态导出、伪静态路径、构建预热和 Notion 请求限速等能力，在访问速度、构建稳定性和平台资源消耗之间取得平衡。相关说明见 [部署索引](./deploy/) 与 [构建性能调优](./deploy/build-tuning.md)。
 
-借助NotionNext建站，所有文章的编写发布都只在您的Notion笔记中完成。
+### 4. SEO、订阅与站点运营
 
-而Notion笔记支持在电脑与手机上随时访问，因此您无需登录任何第三方平台：或打开WordPress后台、或将Markdown文本上传Git仓库等繁琐的方式来发布文章。
+NotionNext 内置面向独立站运营的基础能力：
 
-其次，Notion 是一款将笔记、在线文档、知识库和任务管理无缝整合的「All-In-One」应用，它也是我一直在用、并且极力推荐的一款笔记软件，关于Notion的介绍可浏览此文《[Notion笔记 | 简化生活的效率工具](https://tangly1024.com/article/notion)》。
+- 自定义标题、描述、关键词、作者信息和站点图标
+- Sitemap 与 RSS
+- Google / 百度站长验证
+- 自定义文章 URL、伪静态 `.html` 路径和 UUID 重定向
+- 分享按钮、文章推荐、文章过期提示和置顶文章
+- Google、百度、Umami、Clarity、51LA、Ackee、Matomo、Vercel Analytics 等统计接入
 
-借助Notion灵活的排版以及[便捷的写作体验](https://docs.tangly1024.com/article/notion-short-key)，您不需要专门学习[Markdown](https://markdown.com.cn/basic-syntax/)语法，也可以轻松随时随地写出条理清晰的文章，以便记录您的创意与灵感。站点数据完全保存在Notion笔记当中，您可以随时导出本地进行备份。
+如果你希望长期运营个人品牌、产品站或内容站，独立域名和可持续的 SEO 积累会比依赖第三方内容平台更稳定。
 
+### 5. 评论、搜索、广告与插件
 
-#### Notion AI
+NotionNext 支持多种评论系统，可按需同时启用并在评论区 Tab 切换：
 
-Notion集成了Open AI，能大大提升您的写作效率，这也是Notion作为笔记工具的理由之一。
+- Twikoo、Waline、Valine
+- Giscus、Utterances、Cusdis
+- Gitalk、Artalk、Webmention
 
-NotionNext 是一个将笔记转成网站的小工具，并非繁重的内容管理系统，之后您还可以选择其他的工具和软件渲染您的笔记，或者将笔记导出到其它任意平台。
+扩展能力还包括 Algolia 全文搜索、Google AdSense、万维广告、AI 文章摘要、Mailchimp 邮件订阅、音乐播放器、Live2D 挂件、Chatbase、Dify、WebWhiz、Facebook / SaleSmartly / Tidio 等聊天组件，以及点击烟花、樱花、星空、鼠标跟随等动效。
 
+插件教程见 [外部插件说明](./plugins/overview.md)，评论教程见 [评论插件说明](./comments/overview.md)，统计教程见 [站点统计相关](./analytics/overview.md)。
 
-#### 平滑迁移与数据安全
+### 6. 开源可控与高度自定义
+
+NotionNext 的源码、配置和主题都在你的仓库中。你可以通过 `blog.config.js` 和 `conf/*.config.js` 配置站点基础信息、文章列表、评论、统计、图片、字体、代码块、动画、广告、插件、缓存和主题专属选项。
+
+如果现有主题不满足需求，也可以继续开发自己的主题，或在现有主题中定制布局、样式和交互。开发入口见 [开发入门](./development/getting-started.md) 和 [开发自己的主题](./development/own-theme.md)。
+
+## 平滑迁移与数据安全
 
 这套新版 VitePress 文档本身就是一个迁移案例：它从旧版 Notion 文档站迁移而来，保留了原文章内容、图片、链接与分类结构。借助 AI、脚本和结构化解析工具，Notion 中的数据可以被快速转换为 Markdown、静态站点或其他网站平台需要的格式。
 
-这意味着 NotionNext 并不会把内容锁死在某一个框架或托管平台中。Notion 负责沉淀原始内容，网站系统负责展示与分发；当你需要升级主题、更换框架、切换部署平台，甚至迁移到全新的文档系统时，都可以沿着清晰的数据链路完成迁移。这为站点搭建提供了更平滑的迁移弹性，也为长期运营提供了更可靠的数据安全保障。
+这说明 NotionNext 不会把内容锁死在某一个框架或托管平台中。Notion 负责沉淀原始内容，网站系统负责展示与分发；当你需要升级主题、更换框架、切换部署平台，甚至迁移到全新的文档系统时，都可以沿着清晰的数据链路完成迁移。
 
+这种架构为站点搭建提供了更平滑的迁移弹性，也为长期运营提供了更可靠的数据安全保障。
 
-### 2.NextJs框架
+## 独立站价值
 
-Next.js 是一个轻量级的React服务端渲染框架，其优势是更快的响应速度、更强的SEO，从而助力于您的网站被搜索引擎更好地收录，从而大大提升您的网站曝光量与访问人数！
+在互联网和自媒体环境中，独立站不只是一个展示页面，更是长期积累的数字资产。
 
-NotionNext基于NextJs框架开发，源代码完全免费开源，任何人都可以修改代码的源码，从而自定义站点的功能。
+1. **建立可信的个人或品牌入口**：独立域名、稳定页面和持续内容能让读者更容易记住你。
+2. **沉淀搜索权重和内容资产**：优质文章会持续为域名积累搜索曝光，而不是只服务于某个第三方平台。
+3. **连接更多业务场景**：作品集、产品介绍、知识库、邮件订阅、评论互动、广告和在线客服都可以在同一个站点中组合。
 
+对个人而言，它可以是博客和作品集；对团队而言，它可以是文档站、产品官网和内容运营阵地。
 
-#### 🚀 网站的性能
+## 快速开始
 
-![Untitled](/legacy/9ded0af529658035.png)
+建议按下面顺序阅读：
 
+1. [Vercel 部署 NotionNext](./deploy-vercel.md)
+2. [Notion 数据库](./notion-database.md)
+3. [配置站点](./config-site.md)
+4. [主题总览](./themes/overview.md)
+5. [全站功能与配置索引](./reference/features.md)
+6. [版本升级指引](./update.md)
 
-### 3. 完全自有
-
-站点的**源码**、**域名**、**服务器**都在您手中；站点一切所有权归您所有，不受第三方博客平台或社交平台的规则限制、功能限制，这是独属于您自己的顶级流量平台。
-
-第三方博客写作平台通常使用二级域名托管的形式。其缺点是：**站点权重**被牢牢掌握在平台手中。而**站点权重**将意味着搜索引擎是否优先展示您的网站。类似blogspot这类的免费托管平台，[已经成了垃圾博客的重灾区](https://techmoon.xyz/blogspot/)，由于平台中充斥着低质量的博客拉低了整体平台的权重，从而导致您的Blogger无法被搜索引擎推荐。
-
-在独立站运营过程中，您的每一篇优质文章都将为您的域名权重添砖加瓦，从而使您的站点SEO越来越好，随着时间推移，您Notion笔记中的内容越来越多，只要您的域名记得续费，您的网站也就自然长久稳定地运营，而稳定，长久、内容丰富是一个网站优质的重要考核标准。
-
-
-#### 独立站价值
-
-在互联网时代和自媒体的浪潮下，建立一个个人品牌变得越来越重要，因为它带来了无限的价值。
-
-1. **脱颖而出的竞争优势：** 在互联网上，人们面临着海量信息和激烈竞争。而通过建立个人品牌，您能够在众多竞争者中脱颖而出，让人们更容易记住您和您的业务。
-
-1. **增强专业形象与信誉：** 个人品牌展示了您的专业知识和技能，增强了人们对您的信任和尊重。这有助于更好地推广您的业务，吸引更多的客户。
-
-1. **创造更多机遇和成就：** 通过建立个人品牌，您将建立更广泛的人脉和社交网络，结交志同道合的人和潜在客户。这将为您带来更多机遇和成就，提高您的影响力和声誉。
-
-- 使用NotionNext，您也可以像我一样，打造属于自己的价值**百万美元**的数字资产。您可以在[SiteIndices](https://tangly1024.com.siteindices.com/)上查看站点的价值：
-
-![Untitled](/legacy/dea63f3c7fec8045.png)
-
-
-### 4. 简单安装
-
-截止2024年10月，已有10000+的网友使用NotionNext建站
-
-![Untitled](/legacy/af22f4212c14d97e.png)
-![Untitled](/legacy/326073a95324e24a.png)
-![Untitled](/legacy/4875002289d81b72.png)
-![Untitled](/legacy/f867485bcb83008b.png)
-![Untitled](/legacy/836e0eff5f5bf862.png)
-
-![Untitled](/legacy/3773e02ae600a7ab.png)
-
-
-### 5. 多主题切换
-
-多达数十款主题风格任您挑选，其中有适合做技术文档的Gitbook主题（当前文档就是使用Gitbook主题），也有适合做导航站点的[Nav主题](https://blog.tangly1024.com/?theme=nav)，还有适合做产品落地页官网的[Landing主题](https://www.tangly1024.com/)与Starter主题，以及适合做相册的[Plog主题](https://blog.tangly1024.com/?theme=plog)。
-
-点击[预览网页](https://preview.tangly1024.com/)左下角的挂件可以在线切换主题，关于主题的切换与预览可以参考[帮助文档](https://docs.tangly1024.com/article/notion-next-themes)**。**
-
-![Untitled](/legacy/098a91336b3675d9.png)
-
-
-## 开始部署您的站点
-
-部署方便且免费，即使您不会编程也可以实现轻松部署。NotionNext支持多种方式部署，请在文档手册左边任选一个教程快速开始！新手推荐从《[Vercel部署NotionNext](https://www.notion.so/62bed0ccac5c4dc8b809d1349d8f6c1e?pvs=25)》开始学习。
-
-> **😀**
->
-提示：您可以同时使用多种部署方案；部署完成后，请阅读下方的站点配置教程
-
-
-## 站点配置
-
-部署完成后，如何设置您的站点信息，例如博客排序，绑定个性域名等，请访问《操作手册》搜索关键词：
-
-[修改配置入门 | NotionNext文档](https://docs.tangly1024.com/article/how-to-config-notion-next)
-
-这是一个由NotionNext生成的站点
-
-
-### 绑定个性域名
-
-vercel为您的站点提供一个 免费的`*.vercel.app` 域名，但vercel的官方域名在大陆被墙，推荐您绑定自己的域名，从而有更好的SEO权重。
-
-参考以下文章，您可以快速地将自己的域名解析到Vercel站点:
-
-[Vercel绑定自定义域名 | NotionNext文档](https://docs.tangly1024.com/article/vercel-domain)
-
-Vercel 借助cloudFlare可以快速绑定解析自己的域名
-
-
-## 项目更新
-
-项目不定期会修复bug、增加新特性，请参考此篇文章进行更新：
-
-[版本升级指引 | NotionNext文档](https://docs.tangly1024.com/article/how-to-update-notionnext)
-
-当NotionNext发布新版后，如何更新你的项目？
-
-
-## 联系我们
-
-[NotionNext学生守则 | NotionNext文档](https://docs.tangly1024.com/article/how-to-question)
-
-这是一个由NotionNext生成的站点
+部署完成后，你可以继续绑定自定义域名、配置评论系统、接入统计、开启搜索、选择主题，并根据自己的站点定位逐步补齐内容和功能。
 
 ## 原文链接
 
