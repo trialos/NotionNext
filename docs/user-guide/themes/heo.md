@@ -4,6 +4,11 @@
 > 最后编辑：2024-9-12
 > 原栏目：⭐ 主题参数
 
+
+## 主题预览
+
+![Heo 主题预览](/images/themes-preview/heo.webp)
+
 > **💡** 感谢张洪大佬的设计 [https://blog.zhheo.com/](https://blog.zhheo.com/)
 
 

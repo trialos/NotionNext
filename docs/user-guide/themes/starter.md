@@ -5,6 +5,11 @@
 > 原栏目：⭐ 主题参数
 > 摘要：如何使用Starter主题
 
+
+## 主题预览
+
+![Starter 主题预览](/images/themes-preview/starter.webp)
+
 ## **新主题 Starter**
 
 V4.3版本中加入的免费主题：为公司、创业者、独立开发者、开源技术社区、品牌推广者设计。
