@@ -68,20 +68,28 @@ https://player.bilibili.com/player.html?aid=913088616&bvid=BV1fM4y1L7Qi&cid=1203
   - 如下图所示：
 ![Untitled](/legacy/3be621dcdd736f88.png)
   - 页面ID注意
-> **❓**
+
+> **如何识别页面ID**
 >
-👇以下我的**共享链接，**其中**标红****加粗**下划线部分才是**页面ID**！要忽略_`**?**`_`**v=**`后面的英文数字。
-> [https://www.notion.so/tanghh/](https://www.notion.so/tanghh/)**02ab3b8678004aa69e9e415905ef32a5**_?_v=b7eb215720224ca5827bfaa5ef82cf2d
-> 👇我的**页面ID **是
->  **02ab3b8678004aa69e9e415905ef32a5**
-> **⚠️**
+> 页面 ID 是 Notion 共享链接中那段**连续 32 位的字母和数字**。只复制这 32 位字符串即可，不要复制 `?v=`、`?pvs=` 以及它们后面的参数。
 >
-新版的notion中，页面ID的格式可能会有一点不同，例如会把页面的标题也带上：
-> [https://www.notion.so/tanghh/Today-](https://www.notion.so/tanghh/Today-)`261c36d269a74acd97682af86d7bc9a0`?pvs=4
-> 但不变的是，页面 url 中的那串连续 32 位的字符串就是 id。
-> **❓**
+> 示例一：
 >
-请将您的**页面ID记录下来，**在步骤三会用到。
+> `https://www.notion.so/tanghh/02ab3b8678004aa69e9e415905ef32a5?v=b7eb215720224ca5827bfaa5ef82cf2d`
+>
+> 这里的页面 ID 是：
+>
+> `02ab3b8678004aa69e9e415905ef32a5`
+>
+> 示例二：新版 Notion 可能会把页面标题放进链接里，例如：
+>
+> `https://www.notion.so/tanghh/Today-261c36d269a74acd97682af86d7bc9a0?pvs=4`
+>
+> 这里的页面 ID 是：
+>
+> `261c36d269a74acd97682af86d7bc9a0`
+
+请将您的**页面ID**记录下来，步骤三配置环境变量时会用到。
 
 
 ## 二、复制源代码
