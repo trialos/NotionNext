@@ -38,6 +38,7 @@ export default defineConfig({
       { text: '维护策略', link: '/DOCUMENTATION_POLICY' },
       { text: '参与社区', link: '/user-guide/community-participate' },
       { text: '参与维护', link: '/user-guide/maintain-docs' },
+      { text: '致谢', link: '/user-guide/acknowledgements' },
       { text: '旧版手册', link: '/user-guide/help/legacy-docs' },
       {
         text: 'GitHub',
@@ -219,6 +220,7 @@ export default defineConfig({
             { text: '众筹计划', link: '/user-guide/help/crowdfunding' },
             { text: '旧版手册入口', link: '/user-guide/help/legacy-docs' },
             { text: '参与维护（在线站）', link: '/user-guide/maintain-docs' },
+            { text: '致谢', link: '/user-guide/acknowledgements' },
             { text: '维护工作流', link: '/user-guide/MAINTENANCE_WORKFLOW' },
             { text: '迁移索引', link: '/user-guide/ARTICLE_INDEX' }
           ]
@@ -243,7 +245,8 @@ export default defineConfig({
             { text: '使用说明', link: '/user-guide/intro' },
             { text: '参与社区', link: '/user-guide/community-participate' },
             { text: '文档维护策略', link: '/DOCUMENTATION_POLICY' },
-            { text: '参与维护', link: '/user-guide/maintain-docs' }
+            { text: '参与维护', link: '/user-guide/maintain-docs' },
+            { text: '致谢', link: '/user-guide/acknowledgements' }
           ]
         }
       ]
