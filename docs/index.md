@@ -22,6 +22,9 @@ hero:
       text: 维护说明
       link: /user-guide/maintain-docs
     - theme: alt
+      text: 致谢
+      link: /user-guide/acknowledgements
+    - theme: alt
       text: 旧版 Notion 教程
       link: https://docs.tangly1024.com
 
@@ -40,10 +43,14 @@ features:
     details: 项目由 notionnext-org 社区维护；提问、改文档、提 PR、成为维护者。
     link: /user-guide/community-participate
     linkText: 查看指南
+  - title: 致谢贡献者
+    details: 感谢所有参与代码、主题、文档、Issue、Review 与发布维护的贡献者。
+    link: /user-guide/acknowledgements
+    linkText: 查看致谢
 ---
 
 ::: tip 参与社区维护
-NotionNext 已移交组织仓库，欢迎站长与开发者共建。请参阅 **[参与社区](/user-guide/community-participate)** · [GitHub Discussions](https://github.com/notionnext-org/NotionNext/discussions) · [贡献指南](https://github.com/notionnext-org/NotionNext/blob/main/CONTRIBUTING.zh-CN.md)。
+NotionNext 已移交组织仓库，欢迎站长与开发者共建。请参阅 **[参与社区](/user-guide/community-participate)** · [参与维护](/user-guide/maintain-docs) · [致谢](/user-guide/acknowledgements) · [GitHub Discussions](https://github.com/notionnext-org/NotionNext/discussions) · [贡献指南](https://github.com/notionnext-org/NotionNext/blob/main/CONTRIBUTING.zh-CN.md)。
 :::
 
 ::: info 还在找旧版教程？
