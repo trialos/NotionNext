@@ -62,7 +62,7 @@ features:
     <a class="nn-step-card" href="/user-guide/start-here">
       <span>01</span>
       <strong>确认路线</strong>
-      <p>先看 5 分钟路线图，理解 NotionNext 适合哪些站点和需要准备什么。</p>
+      <p>先看 20 分钟部署路线，理解 NotionNext 适合哪些站点和需要准备什么。</p>
     </a>
     <a class="nn-step-card" href="/user-guide/deploy-vercel">
       <span>02</span>
