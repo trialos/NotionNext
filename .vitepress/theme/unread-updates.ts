@@ -8,7 +8,8 @@ export type RecentUpdatedDoc = {
 
 const STORAGE_PREFIX = 'notionnext:docs-read:'
 const SIDEBAR_ITEM_SELECTOR = '.VPSidebarItem'
-const SIDEBAR_LINK_SELECTOR = '.VPSidebar a[href]'
+const SIDEBAR_SELECTOR = '.VPSidebar, .VPSidebarNav, aside'
+const SIDEBAR_LINK_SELECTOR = 'a[href]'
 const RETRY_DELAYS = [0, 80, 240, 600]
 
 function normalizePath(value: string) {
@@ -54,9 +55,36 @@ function getUnreadItems(items: RecentUpdatedDoc[]) {
 }
 
 function clearUnreadMarkers() {
-  document.querySelectorAll('.nn-unread-leaf, .nn-has-unread').forEach((element) => {
-    element.classList.remove('nn-unread-leaf', 'nn-has-unread')
+  document.querySelectorAll('.nn-unread-dot').forEach((element) => {
+    element.remove()
   })
+
+  document
+    .querySelectorAll('.nn-unread-leaf, .nn-has-unread, .nn-has-visible-unread')
+    .forEach((element) => {
+      element.classList.remove('nn-unread-leaf', 'nn-has-unread', 'nn-has-visible-unread')
+    })
+}
+
+function appendUnreadDot(element: Element) {
+  if (element.querySelector(':scope > .nn-unread-dot')) {
+    return
+  }
+
+  const dot = document.createElement('span')
+  dot.className = 'nn-unread-dot'
+  dot.setAttribute('aria-hidden', 'true')
+  element.appendChild(dot)
+}
+
+function getParentDotTarget(sidebarItem: Element) {
+  return (
+    sidebarItem.querySelector(':scope > .item > .text') ||
+    sidebarItem.querySelector(':scope > .item > .link') ||
+    sidebarItem.querySelector(':scope > .item > button') ||
+    sidebarItem.querySelector(':scope > .item') ||
+    sidebarItem.querySelector(':scope > a')
+  )
 }
 
 function markSidebarParents(anchor: Element) {
@@ -65,10 +93,26 @@ function markSidebarParents(anchor: Element) {
   while (current) {
     if (current.matches(SIDEBAR_ITEM_SELECTOR)) {
       current.classList.add('nn-has-unread')
+
+      if (current.classList.contains('collapsed')) {
+        const dotTarget = getParentDotTarget(current)
+
+        if (dotTarget) {
+          current.classList.add('nn-has-visible-unread')
+          appendUnreadDot(dotTarget)
+        }
+      }
     }
 
     current = current.parentElement
   }
+}
+
+function getSidebarLinks() {
+  const sidebars = document.querySelectorAll(SIDEBAR_SELECTOR)
+  return Array.from(sidebars).flatMap((sidebar) =>
+    Array.from(sidebar.querySelectorAll<HTMLAnchorElement>(SIDEBAR_LINK_SELECTOR))
+  )
 }
 
 function applyUnreadMarkers(items: RecentUpdatedDoc[]) {
@@ -77,7 +121,7 @@ function applyUnreadMarkers(items: RecentUpdatedDoc[]) {
   const unreadItems = getUnreadItems(items)
   const unreadLinks = new Set(unreadItems.map((item) => normalizePath(item.link)))
 
-  document.querySelectorAll<HTMLAnchorElement>(SIDEBAR_LINK_SELECTOR).forEach((anchor) => {
+  getSidebarLinks().forEach((anchor) => {
     const href = normalizePath(anchor.getAttribute('href') || '')
 
     if (!unreadLinks.has(href)) {
@@ -85,6 +129,7 @@ function applyUnreadMarkers(items: RecentUpdatedDoc[]) {
     }
 
     anchor.classList.add('nn-unread-leaf')
+    appendUnreadDot(anchor)
     markSidebarParents(anchor)
   })
 }
