@@ -27,7 +27,7 @@ aside a.nn-unread-leaf,
   right: -10px;
 }
 
-.VPSidebarItem.nn-has-unread:not(.collapsed) > .item .nn-unread-dot {
+.VPSidebarItem.nn-has-unread:not(.collapsed) > .item .nn-parent-unread-dot {
   display: none;
 }
 

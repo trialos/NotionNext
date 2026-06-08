@@ -11,6 +11,9 @@ const SIDEBAR_ITEM_SELECTOR = '.VPSidebarItem'
 const SIDEBAR_SELECTOR = '.VPSidebar, .VPSidebarNav, aside'
 const SIDEBAR_LINK_SELECTOR = 'a[href]'
 const RETRY_DELAYS = [0, 80, 240, 600]
+let sidebarObserver: MutationObserver | null = null
+let observerTimer: number | undefined
+let isSyncingMarkers = false
 
 function normalizePath(value: string) {
   try {
@@ -66,13 +69,13 @@ function clearUnreadMarkers() {
     })
 }
 
-function appendUnreadDot(element: Element) {
+function appendUnreadDot(element: Element, isParentDot = false) {
   if (element.querySelector(':scope > .nn-unread-dot')) {
     return
   }
 
   const dot = document.createElement('span')
-  dot.className = 'nn-unread-dot'
+  dot.className = isParentDot ? 'nn-unread-dot nn-parent-unread-dot' : 'nn-unread-dot'
   dot.setAttribute('aria-hidden', 'true')
   element.appendChild(dot)
 }
@@ -99,7 +102,7 @@ function markSidebarParents(anchor: Element) {
 
         if (dotTarget) {
           current.classList.add('nn-has-visible-unread')
-          appendUnreadDot(dotTarget)
+          appendUnreadDot(dotTarget, true)
         }
       }
     }
@@ -116,6 +119,7 @@ function getSidebarLinks() {
 }
 
 function applyUnreadMarkers(items: RecentUpdatedDoc[]) {
+  isSyncingMarkers = true
   clearUnreadMarkers()
 
   const unreadItems = getUnreadItems(items)
@@ -132,12 +136,37 @@ function applyUnreadMarkers(items: RecentUpdatedDoc[]) {
     appendUnreadDot(anchor)
     markSidebarParents(anchor)
   })
+
+  window.setTimeout(() => {
+    isSyncingMarkers = false
+  })
 }
 
 function scheduleUnreadMarkers(items: RecentUpdatedDoc[]) {
   RETRY_DELAYS.forEach((delay) => {
     window.setTimeout(() => applyUnreadMarkers(items), delay)
   })
+}
+
+function observeSidebar(items: RecentUpdatedDoc[]) {
+  sidebarObserver?.disconnect()
+  window.clearTimeout(observerTimer)
+
+  const sidebar = document.querySelector('.VPSidebar')
+
+  if (!sidebar) {
+    return
+  }
+
+  sidebarObserver = new MutationObserver(() => {
+    if (isSyncingMarkers) {
+      return
+    }
+
+    window.clearTimeout(observerTimer)
+    observerTimer = window.setTimeout(() => applyUnreadMarkers(items), 50)
+  })
+  sidebarObserver.observe(sidebar, { childList: true, subtree: true, attributes: true })
 }
 
 export async function syncUnreadUpdates(
@@ -161,4 +190,5 @@ export async function syncUnreadUpdates(
 
   await nextTick()
   scheduleUnreadMarkers(unreadTargetDocs)
+  observeSidebar(unreadTargetDocs)
 }
