@@ -9,6 +9,7 @@ export type RecentUpdatedDoc = {
 const STORAGE_PREFIX = 'notionnext:docs-read:'
 const SIDEBAR_ITEM_SELECTOR = '.VPSidebarItem'
 const SIDEBAR_LINK_SELECTOR = '.VPSidebar a[href]'
+const RETRY_DELAYS = [0, 80, 240, 600]
 
 function normalizePath(value: string) {
   try {
@@ -85,6 +86,12 @@ function applyUnreadMarkers(items: RecentUpdatedDoc[]) {
   })
 }
 
+function scheduleUnreadMarkers(items: RecentUpdatedDoc[]) {
+  RETRY_DELAYS.forEach((delay) => {
+    window.setTimeout(() => applyUnreadMarkers(items), delay)
+  })
+}
+
 export async function syncUnreadUpdates(items: RecentUpdatedDoc[] | undefined, currentPath: string) {
   if (typeof window === 'undefined' || !Array.isArray(items) || items.length === 0) {
     return
@@ -92,5 +99,5 @@ export async function syncUnreadUpdates(items: RecentUpdatedDoc[] | undefined, c
 
   markCurrentPageRead(items, currentPath)
   await nextTick()
-  applyUnreadMarkers(items)
+  scheduleUnreadMarkers(items)
 }

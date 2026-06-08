@@ -1,12 +1,12 @@
 /* 文档站主题扩展 */
 
-.VPSidebarItem .link.nn-unread-leaf,
+.VPSidebar a.nn-unread-leaf,
 .VPSidebarItem .item,
 .VPSidebarItem .text {
   position: relative;
 }
 
-.VPSidebarItem .link.nn-unread-leaf::after,
+.VPSidebar a.nn-unread-leaf::after,
 .VPSidebarItem.nn-has-unread > .item > .text::after {
   position: absolute;
   top: 7px;
@@ -24,7 +24,7 @@
   top: 2px;
 }
 
-.VPSidebarItem .link.nn-unread-leaf::after {
+.VPSidebar a.nn-unread-leaf::after {
   right: 4px;
 }
 
