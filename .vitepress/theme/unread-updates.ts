@@ -38,12 +38,15 @@ function getReadTime(link: string) {
 function markCurrentPageRead(items: RecentUpdatedDoc[], currentPath: string) {
   const current = normalizePath(currentPath)
   const item = items.find((doc) => normalizePath(doc.link) === current)
+  const now = String(Date.now())
+
+  window.localStorage.setItem(readKey(current), now)
 
   if (!item) {
     return
   }
 
-  window.localStorage.setItem(readKey(item.link), String(Date.now()))
+  window.localStorage.setItem(readKey(item.link), now)
 }
 
 function getUnreadItems(items: RecentUpdatedDoc[]) {
@@ -92,12 +95,25 @@ function scheduleUnreadMarkers(items: RecentUpdatedDoc[]) {
   })
 }
 
-export async function syncUnreadUpdates(items: RecentUpdatedDoc[] | undefined, currentPath: string) {
-  if (typeof window === 'undefined' || !Array.isArray(items) || items.length === 0) {
+export async function syncUnreadUpdates(
+  updatedDocs: RecentUpdatedDoc[] | undefined,
+  recentDocs: RecentUpdatedDoc[] | undefined,
+  currentPath: string
+) {
+  if (typeof window === 'undefined') {
     return
   }
 
-  markCurrentPageRead(items, currentPath)
+  const allDocs = Array.isArray(updatedDocs) ? updatedDocs : []
+  const unreadTargetDocs = Array.isArray(recentDocs) ? recentDocs : []
+
+  markCurrentPageRead(allDocs, currentPath)
+
+  if (unreadTargetDocs.length === 0) {
+    clearUnreadMarkers()
+    return
+  }
+
   await nextTick()
-  scheduleUnreadMarkers(items)
+  scheduleUnreadMarkers(unreadTargetDocs)
 }
