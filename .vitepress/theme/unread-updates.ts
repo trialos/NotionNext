@@ -8,6 +8,7 @@ export type RecentUpdatedDoc = {
 
 const STORAGE_PREFIX = 'notionnext:docs-read:'
 const SIDEBAR_ITEM_SELECTOR = '.VPSidebarItem'
+const SIDEBAR_LINK_SELECTOR = '.VPSidebar a[href]'
 
 function normalizePath(value: string) {
   try {
@@ -66,31 +67,13 @@ function markSidebarParents(anchor: Element) {
   }
 }
 
-function markNavParents(unreadItems: RecentUpdatedDoc[]) {
-  const hasUnreadChangelog = unreadItems.some((item) =>
-    normalizePath(item.link).startsWith('/user-guide/changelog')
-  )
-
-  if (!hasUnreadChangelog) {
-    return
-  }
-
-  document.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((anchor) => {
-    const href = normalizePath(anchor.getAttribute('href') || '')
-
-    if (href === '/user-guide/changelog/latest') {
-      anchor.classList.add('nn-unread-leaf')
-    }
-  })
-}
-
 function applyUnreadMarkers(items: RecentUpdatedDoc[]) {
   clearUnreadMarkers()
 
   const unreadItems = getUnreadItems(items)
   const unreadLinks = new Set(unreadItems.map((item) => normalizePath(item.link)))
 
-  document.querySelectorAll<HTMLAnchorElement>('a[href]').forEach((anchor) => {
+  document.querySelectorAll<HTMLAnchorElement>(SIDEBAR_LINK_SELECTOR).forEach((anchor) => {
     const href = normalizePath(anchor.getAttribute('href') || '')
 
     if (!unreadLinks.has(href)) {
@@ -100,8 +83,6 @@ function applyUnreadMarkers(items: RecentUpdatedDoc[]) {
     anchor.classList.add('nn-unread-leaf')
     markSidebarParents(anchor)
   })
-
-  markNavParents(unreadItems)
 }
 
 export async function syncUnreadUpdates(items: RecentUpdatedDoc[] | undefined, currentPath: string) {

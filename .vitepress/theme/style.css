@@ -1,15 +1,11 @@
 /* 文档站主题扩展 */
 
-.VPNavBarMenuLink.nn-unread-leaf,
-.VPNavBarMenuGroup .button.nn-unread-leaf,
 .VPSidebarItem .link.nn-unread-leaf,
 .VPSidebarItem .item,
 .VPSidebarItem .text {
   position: relative;
 }
 
-.VPNavBarMenuLink.nn-unread-leaf::after,
-.VPNavBarMenuGroup .button.nn-unread-leaf::after,
 .VPSidebarItem .link.nn-unread-leaf::after,
 .VPSidebarItem.nn-has-unread > .item > .text::after {
   position: absolute;
