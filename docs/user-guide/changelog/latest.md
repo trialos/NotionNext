@@ -20,6 +20,17 @@
 - 修复 Giscus OAuth 回跳后 `?giscus=...` 参数被页面容器过早清理的问题。
 - 现在 Giscus 脚本会先消费 OAuth 回调 token 并写入 `localStorage`，再清理地址栏参数，避免登录后仍显示“登录后可以评论”。
 
+### 同期主线修复
+
+本轮 4.10.2 发布窗口也同步记录了 4.10.1 之后主线上的多项修复：
+
+- 修复嵌入式 Notion collection view 数据未过滤导致页面数据膨胀、无关集合记录泄露到页面 props 的问题。
+- 修复 Notion 新结构中 `sync_block` 的 `content` ID 数组解析问题，避免同步块内容缺失。
+- 修复没有 `properties.title` 的 quote block 渲染异常，提升 Notion 块结构兼容性。
+- 修复数据库页面解析中视图筛选条件因短 ID / UUID 格式不一致而失效的问题。
+- 修复 Fuwari 主题首次渲染时主题色相未立即应用的问题，避免初屏色彩与配置不一致。
+- 修复 Magzine 主题推荐标签默认值处理，避免未配置推荐标签时推荐逻辑异常。
+
 ### 适用场景
 
 - Cloudflare Pages、Netlify、Vercel 或自托管 CI 中使用 `yarn build` / `yarn export`。
