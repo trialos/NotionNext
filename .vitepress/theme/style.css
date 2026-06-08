@@ -1,5 +1,37 @@
 /* 文档站主题扩展 */
 
+.VPNavBarMenuLink.nn-unread-leaf,
+.VPNavBarMenuGroup .button.nn-unread-leaf,
+.VPSidebarItem .link.nn-unread-leaf,
+.VPSidebarItem .item,
+.VPSidebarItem .text {
+  position: relative;
+}
+
+.VPNavBarMenuLink.nn-unread-leaf::after,
+.VPNavBarMenuGroup .button.nn-unread-leaf::after,
+.VPSidebarItem .link.nn-unread-leaf::after,
+.VPSidebarItem.nn-has-unread > .item > .text::after {
+  position: absolute;
+  top: 7px;
+  right: -10px;
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--vp-c-bg);
+  border-radius: 999px;
+  background: #e11d48;
+  content: '';
+  box-shadow: 0 0 0 2px color-mix(in srgb, #e11d48 18%, transparent);
+}
+
+.VPSidebarItem.nn-has-unread > .item > .text::after {
+  top: 2px;
+}
+
+.VPSidebarItem .link.nn-unread-leaf::after {
+  right: 4px;
+}
+
 .VPHome .VPHomeHero .main {
   max-width: 680px;
 }
