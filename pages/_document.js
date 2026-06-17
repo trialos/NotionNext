@@ -2,6 +2,21 @@
 import BLOG from '@/blog.config'
 import Document, { Head, Html, Main, NextScript } from 'next/document'
 
+const fontAwesomeLoadScript = BLOG.FONT_AWESOME
+  ? `
+(function() {
+  var link = document.getElementById('font-awesome-css');
+  if (!link) return;
+  var enable = function() { link.media = 'all'; };
+  if (link.sheet) {
+    enable();
+  } else {
+    link.addEventListener('load', enable, { once: true });
+  }
+})()
+`
+  : ''
+
 // 预先设置深色模式的脚本内容
 const darkModeScript = `
 (function() {
@@ -53,11 +68,30 @@ class MyDocument extends Document {
                 crossOrigin='anonymous'
               />
               <link
+                id='font-awesome-css'
                 rel='stylesheet'
                 href={BLOG.FONT_AWESOME}
+                media='print'
                 crossOrigin='anonymous'
                 referrerPolicy='no-referrer'
               />
+              <style
+                dangerouslySetInnerHTML={{
+                  __html:
+                    '.fa,.fas,.far,.fab,.fa-solid,.fa-regular,.fa-brands{display:inline-block;min-width:1em;text-align:center}'
+                }}
+              />
+              <script
+                dangerouslySetInnerHTML={{ __html: fontAwesomeLoadScript }}
+              />
+              <noscript>
+                <link
+                  rel='stylesheet'
+                  href={BLOG.FONT_AWESOME}
+                  crossOrigin='anonymous'
+                  referrerPolicy='no-referrer'
+                />
+              </noscript>
             </>
           )}
 
