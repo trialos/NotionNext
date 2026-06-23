@@ -1,4 +1,5 @@
 import getAllPageIds from '@/lib/db/notion/getAllPageIds'
+import { filterCollectionViewData } from '@/lib/db/notion/filterCollectionViewData'
 import {
   adapterNotionBlockMap,
   normalizeNotionBlockType
@@ -168,6 +169,95 @@ describe('Notion data format compatibility', () => {
     )
 
     expect(pageIds).toEqual(['page_1', 'page_2'])
+  })
+
+  it('filters embedded collection query results by selected view filters', () => {
+    const blockMap = {
+      block: {
+        published_page: {
+          value: {
+            id: 'published_page',
+            type: 'page',
+            properties: {
+              type: [['Post']],
+              status: [['Published']]
+            }
+          }
+        },
+        draft_page: {
+          value: {
+            id: 'draft_page',
+            type: 'page',
+            properties: {
+              type: [['Post']],
+              status: [['Draft']]
+            }
+          }
+        },
+        invisible_page: {
+          value: {
+            id: 'invisible_page',
+            type: 'page',
+            properties: {
+              type: [['Post']],
+              status: [['Invisible']]
+            }
+          }
+        }
+      },
+      collection_view: {
+        view_1: {
+          value: {
+            value: {
+              id: 'view_1',
+              page_sort: ['published_page', 'draft_page', 'invisible_page'],
+              format: {
+                collection_pointer: { id: 'collection_1' },
+                property_filters: [
+                  {
+                    filter: {
+                      property: 'type',
+                      filter: {
+                        operator: 'enum_is',
+                        value: { type: 'exact', value: 'Post' }
+                      }
+                    }
+                  },
+                  {
+                    filter: {
+                      property: 'status',
+                      filter: {
+                        operator: 'enum_is',
+                        value: { type: 'exact', value: 'Published' }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      collection_query: {
+        collection_1: {
+          view_1: {
+            collection_group_results: {
+              blockIds: ['published_page', 'draft_page', 'invisible_page']
+            }
+          }
+        }
+      }
+    }
+
+    filterCollectionViewData(blockMap)
+
+    expect(
+      blockMap.collection_query.collection_1.view_1.collection_group_results
+        .blockIds
+    ).toEqual(['published_page'])
+    expect(blockMap.collection_view.view_1.value.value.page_sort).toEqual([
+      'published_page'
+    ])
   })
 
   it('normalizes nested blocks and strips crdt fields before rendering', () => {
