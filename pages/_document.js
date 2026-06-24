@@ -23,6 +23,9 @@ const fontAwesomeLoadScript = BLOG.FONT_AWESOME
       document.documentElement.classList.add('fontawesome-ready');
     };
     document.head.appendChild(link);
+    setTimeout(function() {
+      document.documentElement.classList.add('fontawesome-ready');
+    }, 3000);
   };
 
   try {
@@ -32,7 +35,7 @@ const fontAwesomeLoadScript = BLOG.FONT_AWESOME
     }
   } catch (e) {}
 
-  var intentEvents = ['pointerdown', 'keydown', 'touchstart', 'scroll'];
+  var intentEvents = ['pointerdown', 'pointermove', 'mouseover', 'keydown', 'touchstart', 'scroll'];
   var onIntent = function() {
     clearIntentEvents();
     load();
@@ -51,7 +54,7 @@ const fontAwesomeLoadScript = BLOG.FONT_AWESOME
     setTimeout(function() {
       clearIntentEvents();
       load();
-    }, 8000);
+    }, 1200);
   }, { once: true });
 })()
 `
