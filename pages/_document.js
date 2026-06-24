@@ -5,24 +5,53 @@ import Document, { Head, Html, Main, NextScript } from 'next/document'
 const fontAwesomeLoadScript = BLOG.FONT_AWESOME
   ? `
 (function() {
+  var href = '${BLOG.FONT_AWESOME}';
+  var storageKey = 'notionnext-font-awesome-loaded';
+  var loaded = false;
+
   var load = function() {
-    if (document.getElementById('font-awesome-css')) return;
+    if (loaded || document.getElementById('font-awesome-css')) return;
+    loaded = true;
     var link = document.createElement('link');
     link.id = 'font-awesome-css';
     link.rel = 'stylesheet';
-    link.href = '${BLOG.FONT_AWESOME}';
+    link.href = href;
     link.crossOrigin = 'anonymous';
     link.referrerPolicy = 'no-referrer';
+    link.onload = function() {
+      try { localStorage.setItem(storageKey, '1'); } catch (e) {}
+    };
     document.head.appendChild(link);
   };
 
-  if ('requestIdleCallback' in window) {
-    requestIdleCallback(load, { timeout: 3000 });
-  } else {
-    window.addEventListener('load', function() {
-      setTimeout(load, 1500);
-    }, { once: true });
-  }
+  try {
+    if (localStorage.getItem(storageKey) === '1') {
+      setTimeout(load, 0);
+      return;
+    }
+  } catch (e) {}
+
+  var intentEvents = ['pointerdown', 'keydown', 'touchstart', 'scroll'];
+  var onIntent = function() {
+    clearIntentEvents();
+    load();
+  };
+  var clearIntentEvents = function() {
+    intentEvents.forEach(function(eventName) {
+      window.removeEventListener(eventName, onIntent);
+    });
+  };
+
+  intentEvents.forEach(function(eventName) {
+    window.addEventListener(eventName, onIntent, { once: true, passive: true });
+  });
+
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      clearIntentEvents();
+      load();
+    }, 8000);
+  }, { once: true });
 })()
 `
   : ''
