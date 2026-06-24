@@ -176,7 +176,7 @@ export default function LazyImage({
   if (title) imgProps.title = title
   if (width) imgProps.width = width
   if (height) imgProps.height = height
-  if (priority) imgProps.fetchPriority = 'high'
+  if (priority) imgProps.fetchpriority = 'high'
 
   if (!src) {
     return null
@@ -193,7 +193,7 @@ export default function LazyImage({
             rel='preload'
             as='image'
             href={adjustImgSize(src, targetImageWidth)}
-            fetchPriority='high'
+            fetchpriority='high'
           />
         </Head>
       )}
