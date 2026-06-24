@@ -20,6 +20,7 @@ const fontAwesomeLoadScript = BLOG.FONT_AWESOME
     link.referrerPolicy = 'no-referrer';
     link.onload = function() {
       try { localStorage.setItem(storageKey, '1'); } catch (e) {}
+      document.documentElement.classList.add('fontawesome-ready');
     };
     document.head.appendChild(link);
   };
@@ -106,7 +107,7 @@ class MyDocument extends Document {
               <style
                 dangerouslySetInnerHTML={{
                   __html:
-                    '.fa,.fas,.far,.fab,.fa-solid,.fa-regular,.fa-brands{display:inline-block;min-width:1em;text-align:center}'
+                    '.fa,.fas,.far,.fab,.fa-solid,.fa-regular,.fa-brands{display:inline-flex;width:1.25em;min-width:1.25em;height:1em;align-items:center;justify-content:center;text-align:center;line-height:1;visibility:hidden}.fontawesome-ready .fa,.fontawesome-ready .fas,.fontawesome-ready .far,.fontawesome-ready .fab,.fontawesome-ready .fa-solid,.fontawesome-ready .fa-regular,.fontawesome-ready .fa-brands{visibility:visible}'
                 }}
               />
               <script
