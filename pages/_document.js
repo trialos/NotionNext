@@ -2,63 +2,9 @@
 import BLOG from '@/blog.config'
 import Document, { Head, Html, Main, NextScript } from 'next/document'
 
-const fontAwesomeLoadScript = BLOG.FONT_AWESOME
-  ? `
-(function() {
-  var href = '${BLOG.FONT_AWESOME}';
-  var storageKey = 'notionnext-font-awesome-loaded';
-  var loaded = false;
-
-  var load = function() {
-    if (loaded || document.getElementById('font-awesome-css')) return;
-    loaded = true;
-    var link = document.createElement('link');
-    link.id = 'font-awesome-css';
-    link.rel = 'stylesheet';
-    link.href = href;
-    link.crossOrigin = 'anonymous';
-    link.referrerPolicy = 'no-referrer';
-    link.onload = function() {
-      try { localStorage.setItem(storageKey, '1'); } catch (e) {}
-      document.documentElement.classList.add('fontawesome-ready');
-    };
-    document.head.appendChild(link);
-    setTimeout(function() {
-      document.documentElement.classList.add('fontawesome-ready');
-    }, 3000);
-  };
-
-  try {
-    if (localStorage.getItem(storageKey) === '1') {
-      setTimeout(load, 0);
-      return;
-    }
-  } catch (e) {}
-
-  var intentEvents = ['pointerdown', 'pointermove', 'mouseover', 'keydown', 'touchstart', 'scroll'];
-  var onIntent = function() {
-    clearIntentEvents();
-    load();
-  };
-  var clearIntentEvents = function() {
-    intentEvents.forEach(function(eventName) {
-      window.removeEventListener(eventName, onIntent);
-    });
-  };
-
-  intentEvents.forEach(function(eventName) {
-    window.addEventListener(eventName, onIntent, { once: true, passive: true });
-  });
-
-  window.addEventListener('load', function() {
-    setTimeout(function() {
-      clearIntentEvents();
-      load();
-    }, 1200);
-  }, { once: true });
-})()
-`
-  : ''
+const isLocalFontAwesome = BLOG.FONT_AWESOME?.startsWith(
+  '/vendor/fontawesome/'
+)
 
 // 预先设置深色模式的脚本内容
 const darkModeScript = `
@@ -107,23 +53,42 @@ class MyDocument extends Document {
           {/* 预加载字体 */}
           {BLOG.FONT_AWESOME && (
             <>
+              {isLocalFontAwesome && (
+                <>
+                  <link
+                    rel='preload'
+                    href='/vendor/fontawesome/webfonts/fa-solid-900.woff2'
+                    as='font'
+                    type='font/woff2'
+                    crossOrigin='anonymous'
+                  />
+                  <link
+                    rel='preload'
+                    href='/vendor/fontawesome/webfonts/fa-regular-400.woff2'
+                    as='font'
+                    type='font/woff2'
+                    crossOrigin='anonymous'
+                  />
+                  <link
+                    rel='preload'
+                    href='/vendor/fontawesome/webfonts/fa-brands-400.woff2'
+                    as='font'
+                    type='font/woff2'
+                    crossOrigin='anonymous'
+                  />
+                </>
+              )}
               <style
                 dangerouslySetInnerHTML={{
                   __html:
-                    '.fa,.fas,.far,.fab,.fa-solid,.fa-regular,.fa-brands{display:inline-flex;width:1.25em;min-width:1.25em;height:1em;align-items:center;justify-content:center;text-align:center;line-height:1;visibility:hidden}.fontawesome-ready .fa,.fontawesome-ready .fas,.fontawesome-ready .far,.fontawesome-ready .fab,.fontawesome-ready .fa-solid,.fontawesome-ready .fa-regular,.fontawesome-ready .fa-brands{visibility:visible}'
+                    '.fa,.fas,.far,.fab,.fa-solid,.fa-regular,.fa-brands{display:inline-flex;width:1.25em;min-width:1.25em;height:1em;align-items:center;justify-content:center;text-align:center;line-height:1}'
                 }}
               />
-              <script
-                dangerouslySetInnerHTML={{ __html: fontAwesomeLoadScript }}
+              <link
+                id='font-awesome-css'
+                rel='stylesheet'
+                href={BLOG.FONT_AWESOME}
               />
-              <noscript>
-                <link
-                  rel='stylesheet'
-                  href={BLOG.FONT_AWESOME}
-                  crossOrigin='anonymous'
-                  referrerPolicy='no-referrer'
-                />
-              </noscript>
             </>
           )}
 

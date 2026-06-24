@@ -44,6 +44,7 @@ export default function LazyImage({
       ? adjustImgSize(src, targetImageWidth)
       : placeholderSrc || defaultPlaceholderSrc
   )
+  const [imageLoaded, setImageLoaded] = useState(Boolean(priority && src))
 
   /**
    * 占位图加载成功
@@ -64,6 +65,7 @@ export default function LazyImage({
       } else {
         imageRef.current.src = defaultPlaceholderSrc
       }
+      setImageLoaded(true)
       imageRef.current.classList.remove('lazy-image-placeholder')
     }
   }, [defaultPlaceholderSrc, fallbackSrc, placeholderSrc])
@@ -76,6 +78,7 @@ export default function LazyImage({
       if (typeof onLoad === 'function') {
         onLoad()
       }
+      setImageLoaded(true)
       if (imageRef.current) {
         imageRef.current.classList.remove('lazy-image-placeholder')
       }
@@ -161,7 +164,7 @@ export default function LazyImage({
     alt: alt || 'Lazy loaded image',
     onLoad: handleThumbnailLoaded,
     onError: handleImageError,
-    className: `${className || ''} lazy-image-placeholder`,
+    className: `${className || ''}${imageLoaded ? '' : ' lazy-image-placeholder'}`,
     style,
     onClick,
     // 性能优化属性
