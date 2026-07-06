@@ -1133,11 +1133,11 @@ describe('Notion data format compatibility', () => {
     expect(normalizeNotionBlockType('heading_1')).toBe('header')
     expect(normalizeNotionBlockType('heading_2')).toBe('sub_header')
     expect(normalizeNotionBlockType('heading_3')).toBe('sub_sub_header')
-    expect(normalizeNotionBlockType('heading_4')).toBe('sub_sub_header')
-    expect(normalizeNotionBlockType('header_4')).toBe('sub_sub_header')
+    expect(normalizeNotionBlockType('heading_4')).toBe('header_4')
+    expect(normalizeNotionBlockType('header_4')).toBe('header_4')
   })
 
-  it('formats header_4 blocks into a renderable fallback heading type', () => {
+  it('keeps header_4 blocks as renderable fourth-level headings', () => {
     const formatted = formatNotionBlock({
       page_1: {
         value: {
@@ -1150,7 +1150,7 @@ describe('Notion data format compatibility', () => {
       }
     })
 
-    expect(formatted.page_1.value.type).toBe('sub_sub_header')
+    expect(formatted.page_1.value.type).toBe('header_4')
   })
 
   it('builds a stable toc for newer heading block types', () => {
