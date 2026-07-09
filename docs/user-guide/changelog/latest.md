@@ -12,6 +12,7 @@
 - 新增 `/api/notion-comments` 动态接口，评论数据写入用户自己的 Notion 数据库，支持文章维度查询、发表评论、回复评论、分页加载和失败重试。
 - 新增评论区交互界面：加载中、空状态、错误重试、回复输入、收起回复、加载更多等基础状态都已覆盖。
 - 新增 NotionComments 使用教程，包含 Notion Integration 创建、数据库字段配置、环境变量、部署方式、常见问题、使用效果截图，以及“独立评论数据库”和“Notion 页面原生评论”两种方案的取舍说明。
+- 新增会员评论路线图文档，记录未来会员体系和评论能力继续结合 Notion 数据的可选方向。
 
 ### 主线功能与修复
 
@@ -47,6 +48,7 @@
 ### 自 v4.10.4 以来的提交
 
 - `feat: add Notion database comments plugin`
+- `docs: add optional membership comments roadmap`
 - `fix(endspace): sync upstream theme updates`
 - `fix: improve SEO canonical metadata (#4248)`
 - `feat: support custom article copyright mode`
