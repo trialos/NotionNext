@@ -265,6 +265,7 @@ export default defineConfig({
             { text: 'Artalk', link: '/user-guide/comments/artalk' },
             { text: 'Gitalk', link: '/user-guide/comments/gitalk' },
             { text: 'Valine', link: '/user-guide/comments/valine' },
+            { text: 'NotionComments', link: '/user-guide/comments/notion-comments' },
             { text: 'Waline', link: '/user-guide/comments/waline' }
           ]
         },
