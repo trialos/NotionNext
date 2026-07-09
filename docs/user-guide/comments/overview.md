@@ -72,4 +72,4 @@ https://docs.tangly1024.com/article/notion-next-comment-plugin
 
 ## NotionComments
 
-如果希望评论数据也保存在 Notion 中，可以使用 [NotionComments](./notion-comments.md)。它通过 Notion API 写入独立的评论数据库，访客不需要登录 Notion；但它没有审核后台、邮件通知和垃圾评论过滤，更适合轻量站点。
+如果希望评论数据也保存在 Notion 中，可以使用 [NotionComments](./notion-comments.md)。它通过 Notion API 写入独立的评论数据库，访客不需要登录 Notion；支持昵称、回复、加载更多、Notion 手动审核和基础频率限制，但没有独立管理后台、邮件通知和完整垃圾评论过滤，更适合轻量站点。

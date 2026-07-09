@@ -43,6 +43,9 @@ Notion API 支持读取和创建页面评论，但它更适合工作区内部协
 - 文章评论和嵌套回复。
 - 回复展开/收起。
 - 评论列表加载更多。
+- 昵称、邮箱识别和首字母头像。
+- 可选审核状态：站长在 Notion 数据库里把 `Pending` 改成 `Approved` 后再展示。
+- 基础反垃圾：长度限制、蜜罐字段、同一 IP 简单频率限制。
 - 提交中、加载中、加载失败重试等基础交互。
 - 多评论插件并存时，作为一个评论 Tab 显示。
 
@@ -63,6 +66,18 @@ Notion API 支持读取和创建页面评论，但它更适合工作区内部协
 | `IpAddress` | Text   | 访客 IP，用于排查滥用                     |
 | `Author`    | Email  | 访客邮箱，前缀会作为昵称显示              |
 | `Level`     | Number | 回复层级                                  |
+
+增强字段建议一起添加，复制模板的用户通常已经包含这些字段：
+
+| 字段        | 类型   | 说明                                               |
+| ----------- | ------ | -------------------------------------------------- |
+| `Nickname`  | Text   | 访客填写的昵称，优先用于前台展示                   |
+| `EmailHash` | Text   | 邮箱哈希，用于未来头像、会员识别或去重             |
+| `Status`    | Select | 审核状态，建议选项为 `Approved`、`Pending`、`Spam` |
+| `CreatedAt` | Date   | 评论提交时间                                       |
+| `UserAgent` | Text   | 浏览器 User-Agent，用于排查垃圾评论                |
+
+基础字段必须存在；增强字段是可选的。旧数据库不添加增强字段也能继续提交评论，只是不会启用昵称保存、审核状态和额外排查信息。
 
 建议把这个数据库放在站点数据库之外，方便单独管理评论。
 
@@ -145,6 +160,10 @@ Integration 可以理解成“给 NotionNext 使用的机器人账号”。Notio
 NEXT_PUBLIC_COMMENT_NOTION_ENABLE=true
 NOTION_COMMENT_DATABASE_ID=your_comment_database_id
 NOTION_TOKEN=secret_xxx
+# 可选：开启后新评论写入 Pending，前台只显示 Approved
+NOTION_COMMENT_REQUIRE_APPROVAL=false
+# 可选：同一 IP 每分钟最多提交次数，默认 5
+NOTION_COMMENT_RATE_LIMIT=5
 ```
 
 说明：
@@ -152,6 +171,8 @@ NOTION_TOKEN=secret_xxx
 - `NEXT_PUBLIC_COMMENT_NOTION_ENABLE`：开启 NotionComments。
 - `NOTION_COMMENT_DATABASE_ID`：评论数据库 ID。
 - `NOTION_TOKEN`：Notion integration token，是服务端密钥，不要加 `NEXT_PUBLIC_` 前缀。
+- `NOTION_COMMENT_REQUIRE_APPROVAL`：是否开启审核。设置为 `true` 后，新评论会写入 `Pending`，需要站长在 Notion 数据库中改成 `Approved` 才会显示。
+- `NOTION_COMMENT_RATE_LIMIT`：基础频率限制，默认同一 IP 每分钟 5 条。
 
 修改环境变量后需要重新部署。
 
@@ -171,6 +192,7 @@ https://www.notion.so/workspace/xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx?v=yyyy
 2. 滚动到评论区，应该能看到 `Notion` 评论 Tab 或评论表单。
 3. 输入邮箱和评论内容并提交。
 4. 回到 Notion 评论数据库，确认新增了一条记录。
+5. 如果开启了审核，把这条记录的 `Status` 从 `Pending` 改为 `Approved`，刷新文章页后再确认显示。
 
 评论按文章的 Notion 页面 ID 写入 `PostId`，所以文章改 slug 不会丢失评论关联。
 
@@ -227,6 +249,7 @@ NotionComments 需要 `/api/notion-comments` 服务端接口来读取和写入 N
 - `NOTION_COMMENT_DATABASE_ID` 是否是评论数据库 ID。
 - 评论数据库是否已共享给对应 integration。
 - 数据库字段名称和类型是否与文档表格一致。
+- 如果开启了审核，`Status` 是否已经改成 `Approved`。
 
 ### 评论能写入，但页面不显示
 
@@ -240,7 +263,7 @@ NotionComments 需要 `/api/notion-comments` 服务端接口来读取和写入 N
 
 - 不要把 `NOTION_TOKEN` 写进 `blog.config.js` 或任何前端可见配置。
 - 不要给 integration 授权整个工作区，只共享评论数据库即可。
-- 公开评论表单没有审核队列，建议定期检查评论数据库。
+- 如果站点评论量变大，建议开启 `NOTION_COMMENT_REQUIRE_APPROVAL`，在 Notion 数据库里手动审核。
 - 评论内容会公开显示，不要让用户提交敏感信息。
 
 参考实现：[goldeye0351/notioncomments](https://github.com/goldeye0351/notioncomments)。

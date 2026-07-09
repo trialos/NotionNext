@@ -2,6 +2,7 @@ const {
   buildCommentTree,
   countReplies,
   formatNotionComment,
+  isPublicComment,
   validateCommentPayload
 } = require('@/lib/plugins/notionComments')
 
@@ -11,9 +12,16 @@ describe('notionComments helpers', () => {
       validateCommentPayload({
         postId: 'post-1',
         content: 'hello',
-        author: 'reader@example.com'
+        author: 'Reader@Example.com',
+        nickname: 'Reader'
       })
-    ).toMatchObject({ ok: true })
+    ).toMatchObject({
+      ok: true,
+      value: {
+        author: 'reader@example.com',
+        nickname: 'Reader'
+      }
+    })
 
     expect(
       validateCommentPayload({
@@ -30,6 +38,12 @@ describe('notionComments helpers', () => {
         author: 'bad-email'
       })
     ).toEqual({ ok: false, error: 'Invalid author email' })
+
+    expect(
+      validateCommentPayload({
+        website: 'https://spam.example'
+      })
+    ).toMatchObject({ ok: true, spam: true })
   })
 
   test('formats Notion database pages', () => {
@@ -44,8 +58,24 @@ describe('notionComments helpers', () => {
             type: 'rich_text',
             rich_text: [{ plain_text: 'hello' }]
           },
+          Nickname: {
+            type: 'rich_text',
+            rich_text: [{ plain_text: 'Alice' }]
+          },
+          EmailHash: {
+            type: 'rich_text',
+            rich_text: [{ plain_text: 'abc123' }]
+          },
+          Status: {
+            type: 'select',
+            select: { name: 'Approved' }
+          },
           Author: { type: 'email', email: 'reader@example.com' },
-          Level: { type: 'number', number: 1 }
+          Level: { type: 'number', number: 1 },
+          CreatedAt: {
+            type: 'date',
+            date: { start: '2026-07-09T00:01:00.000Z' }
+          }
         }
       })
     ).toEqual({
@@ -53,10 +83,19 @@ describe('notionComments helpers', () => {
       postId: 'post-1',
       parentId: null,
       content: 'hello',
-      author: 'reader',
+      author: 'Alice',
+      emailHash: 'abc123',
       level: 1,
-      createdTime: '2026-07-09T00:00:00.000Z'
+      status: 'Approved',
+      createdTime: '2026-07-09T00:01:00.000Z'
     })
+  })
+
+  test('filters non-public comments', () => {
+    expect(isPublicComment({ status: '' })).toBe(true)
+    expect(isPublicComment({ status: 'Approved' })).toBe(true)
+    expect(isPublicComment({ status: 'Pending' })).toBe(false)
+    expect(isPublicComment({ status: 'Spam' })).toBe(false)
   })
 
   test('builds nested comment trees', () => {

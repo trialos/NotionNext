@@ -1,12 +1,19 @@
 import { Client } from '@notionhq/client'
+import { createHash } from 'node:crypto'
 import {
   formatNotionComment,
   getPlainText,
+  isPublicComment,
+  PUBLIC_COMMENT_STATUS,
   validateCommentPayload
 } from '@/lib/plugins/notionComments'
 
 const databaseId = process.env.NOTION_COMMENT_DATABASE_ID
 const token = process.env.NOTION_TOKEN
+const requireApproval = process.env.NOTION_COMMENT_REQUIRE_APPROVAL === 'true'
+const rateWindowMs = 60 * 1000
+const rateLimit = Number(process.env.NOTION_COMMENT_RATE_LIMIT || 5)
+const ipHits = new Map()
 
 const getClient = () => {
   if (!databaseId || !token) {
@@ -23,6 +30,29 @@ const getClientIp = req => {
     .split(',')[0]
     .trim()
 }
+
+const isRateLimited = ip => {
+  const now = Date.now()
+  const hits = (ipHits.get(ip) || []).filter(time => now - time < rateWindowMs)
+  if (hits.length >= rateLimit) {
+    ipHits.set(ip, hits)
+    return true
+  }
+  hits.push(now)
+  ipHits.set(ip, hits)
+  return false
+}
+
+const hasProperty = (properties, name, type) =>
+  properties[name] && (!type || properties[name].type === type)
+
+const getDatabaseProperties = async notion => {
+  const database = await notion.databases.retrieve({ database_id: databaseId })
+  return database.properties || {}
+}
+
+const hashEmail = email =>
+  createHash('sha256').update(email).digest('hex').slice(0, 32)
 
 const fetchComments = async postId => {
   const notion = getClient()
@@ -44,6 +74,7 @@ const fetchComments = async postId => {
       ...response.results
         .filter(page => 'properties' in page)
         .map(formatNotionComment)
+        .filter(isPublicComment)
     )
     startCursor = response.has_more ? response.next_cursor : undefined
   } while (startCursor)
@@ -90,25 +121,63 @@ export default async function handler(req, res) {
 
   try {
     const notion = getClient()
-    const { postId, content, author, parentId } = validation.value
+    if (validation.spam) {
+      return res.status(200).json({ ok: true })
+    }
+
+    const ip = getClientIp(req) || 'unknown'
+    if (isRateLimited(ip)) {
+      return res.status(429).json({ error: 'Too many comments' })
+    }
+
+    const properties = await getDatabaseProperties(notion)
+    const { postId, content, author, nickname, parentId } = validation.value
     const level = (await getParentLevel(notion, parentId, postId)) + 1
+    const status = requireApproval ? 'Pending' : PUBLIC_COMMENT_STATUS
+    const pageProperties = {
+      PostId: { title: [{ text: { content: postId } }] },
+      ParentId: {
+        rich_text: parentId ? [{ text: { content: parentId } }] : []
+      },
+      Content: { rich_text: [{ text: { content } }] },
+      Author: { email: author },
+      Level: { number: level },
+      IpAddress: {
+        rich_text: [{ text: { content: ip } }]
+      }
+    }
+
+    if (nickname && hasProperty(properties, 'Nickname', 'rich_text')) {
+      pageProperties.Nickname = { rich_text: [{ text: { content: nickname } }] }
+    }
+    if (hasProperty(properties, 'EmailHash', 'rich_text')) {
+      pageProperties.EmailHash = {
+        rich_text: [{ text: { content: hashEmail(author) } }]
+      }
+    }
+    if (hasProperty(properties, 'Status', 'select')) {
+      pageProperties.Status = { select: { name: status } }
+    }
+    if (hasProperty(properties, 'CreatedAt', 'date')) {
+      pageProperties.CreatedAt = { date: { start: new Date().toISOString() } }
+    }
+    if (hasProperty(properties, 'UserAgent', 'rich_text')) {
+      pageProperties.UserAgent = {
+        rich_text: [
+          { text: { content: String(req.headers['user-agent'] || '') } }
+        ]
+      }
+    }
+
     const response = await notion.pages.create({
       parent: { database_id: databaseId },
-      properties: {
-        PostId: { title: [{ text: { content: postId } }] },
-        ParentId: {
-          rich_text: parentId ? [{ text: { content: parentId } }] : []
-        },
-        Content: { rich_text: [{ text: { content } }] },
-        Author: { email: author },
-        Level: { number: level },
-        IpAddress: {
-          rich_text: [{ text: { content: getClientIp(req) || 'unknown' } }]
-        }
-      }
+      properties: pageProperties
     })
 
-    return res.status(200).json(formatNotionComment(response))
+    return res.status(200).json({
+      comment: formatNotionComment(response),
+      pending: requireApproval
+    })
   } catch (error) {
     console.error('Failed to create Notion comment:', error)
     return res.status(500).json({ error: 'Failed to create comment' })
