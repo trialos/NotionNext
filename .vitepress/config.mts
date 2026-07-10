@@ -2,7 +2,6 @@ import { defineConfig } from 'vitepress'
 import { execFileSync } from 'node:child_process'
 import { existsSync, readFileSync, statSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
-import instructions from 'vitepress-chat/instructions'
 import { getThemeSidebarItems } from '../scripts/lib/builtin-themes.mjs'
 
 const themeDocLinks = getThemeSidebarItems()
@@ -101,7 +100,6 @@ export default defineConfig({
   cleanUrls: true,
   lastUpdated: true,
   vite: {
-    plugins: [instructions({ exclude: srcExclude })],
     css: {
       postcss: {
         plugins: []

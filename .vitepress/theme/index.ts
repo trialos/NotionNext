@@ -26,7 +26,7 @@ const chatLayout = chatApi
       headerUrl: null,
       initialMessage:
         '你好，我是 NotionNext 文档助手。你可以直接问我部署、主题、Notion 配置、评论插件等问题。',
-      filePath: 'instructions.txt'
+      filePath: 'ai-assistant-instructions.txt'
     })
   : { Layout }
 

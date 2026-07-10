@@ -12,6 +12,7 @@ type Env = {
   GOOGLE_GENERATIVE_AI_API_KEY?: string
   DOCS_CHAT_MODEL?: string
   DOCS_CHAT_CORS_ORIGINS?: string
+  DOCS_CHAT_MAX_SYSTEM_CHARS?: string
   DOCS_CHAT_MAX_TOKENS?: string
 }
 
@@ -25,7 +26,8 @@ type ChatRequestBody = {
   system?: string
 }
 
-const DEFAULT_MODEL = 'gemini-flash-latest'
+const DEFAULT_MODEL = 'gemini-flash-lite-latest'
+const DEFAULT_MAX_SYSTEM_CHARS = 12000
 const DEFAULT_MAX_TOKENS = 1200
 
 const json = (body: unknown, init: ResponseInit = {}) =>
@@ -63,6 +65,14 @@ const maxOutputTokens = (value: string | undefined) => {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_MAX_TOKENS
 }
 
+const limitSystem = (value: string, limitValue: string | undefined) => {
+  const parsed = Number(limitValue)
+  const limit =
+    Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_MAX_SYSTEM_CHARS
+
+  return value.length > limit ? value.slice(0, limit) : value
+}
+
 export const onRequestOptions = ({ request, env }: PagesContext) =>
   new Response(null, {
     status: 204,
@@ -84,7 +94,7 @@ export const onRequestPost = async ({ request, env }: PagesContext) => {
   const result = streamText({
     model: google(env.DOCS_CHAT_MODEL || DEFAULT_MODEL),
     messages: await convertToModelMessages(messages),
-    system,
+    system: limitSystem(system, env.DOCS_CHAT_MAX_SYSTEM_CHARS),
     maxOutputTokens: maxOutputTokens(env.DOCS_CHAT_MAX_TOKENS)
   })
 
