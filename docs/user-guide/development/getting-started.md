@@ -105,7 +105,7 @@ github 会临时分配给您一个临时的域名，用于开发调试
 
 Node.js® is a JavaScript runtime built on Chrome's V8 JavaScript engine.
 ::: tip 提示
-建议使用 **Node 20**（与仓库 README、`.nvmrc` 一致，例如 `20.20.0`）；若暂时仍在 18 系，请至少使用 **≥ 18.17.0**（如 18.20.4）。安装后执行 `node -v` 自检。
+建议使用 **Node 22**（与仓库 README、`.nvmrc` 一致）。安装后执行 `node -v` 自检。
 
 个别小版本若遇构建问题，请以 GitHub 仓库 README 与 Issues 的最新说明为准。
       - 安装成功检验

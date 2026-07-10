@@ -156,7 +156,7 @@ git clone https://github.com/tangly1024/NotionNext &&
 
 #### 1. Docker运行
 
-原先文档是推荐在服务器上使用NodeJS环境，奈何在NotionNext V4.0 之后的新版要用到 Node 20 及以上的环境，这里有部分服务器无法兼容安装。同时Docker本身的稳定性也更加适合在生产环境使用，因此我在2025年7月8日更新了这部分手册，加入了Docker运行方案。
+原先文档是推荐在服务器上使用NodeJS环境，奈何当前新版要用到 Node 22 及以上的环境，这里有部分服务器无法兼容安装。同时Docker本身的稳定性也更加适合在生产环境使用，因此我在2025年7月8日更新了这部分手册，加入了Docker运行方案。
 
 1. 安装Docker最新版(CentOS为例)
 ```Bash
@@ -193,7 +193,7 @@ cd NotionNext
 # 2.创建构建文件
 cat &gt; Dockerfile &lt;&lt;EOF
 # 第一阶段：基础镜像
-FROM swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/node:20-alpine AS base
+FROM swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/library/node:22-alpine AS base
 
 # 第二阶段：依赖安装
 FROM base AS deps
@@ -311,8 +311,8 @@ echo "source ~/.nvm/nvm.sh" &gt;&gt; ~/.bashrc
 # 2. 更新变量环境
 source ~/.bashrc
 
-# 3. 安装 nodejs ， 这里举例使用 Node 20（与官方 README 要求一致），其它版本请自行按需选择
-nvm install 20
+# 3. 安装 nodejs ， 这里举例使用 Node 22（与官方 README 要求一致），其它版本请自行按需选择
+nvm install 22
 ```
 ::: tip 提示
 题外话：
