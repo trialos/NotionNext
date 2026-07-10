@@ -25,7 +25,7 @@ type ChatRequestBody = {
   system?: string
 }
 
-const DEFAULT_MODEL = 'gemini-2.5-flash'
+const DEFAULT_MODEL = 'gemini-flash-latest'
 const DEFAULT_MAX_TOKENS = 1200
 
 const json = (body: unknown, init: ResponseInit = {}) =>
