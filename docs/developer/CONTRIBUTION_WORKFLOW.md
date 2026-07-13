@@ -45,6 +45,15 @@ yarn build
 
 如果复现步骤清楚，可以优先让 AI Agent 辅助处理，例如 Codex、Cursor、Claude Code、WorkBuddy 等支持自动读代码、改代码、提交 PR 的工具。NotionNext 已经内置开发文档、维护手册和文档站 AI 助手指令，适合先让 AI 阅读这些上下文，再执行最小修复。
 
+推荐 AI Agent 工作流：
+
+1. 读取 Issue，确认实际现象、期望现象和复现步骤是否完整。
+2. 阅读相关项目文档，例如 `docs/developer/README.md`、`docs/developer/PROJECT_STRUCTURE.md`、`docs/developer/CONTRIBUTION_WORKFLOW.md`、`docs/developer/MAINTAINER_RUNBOOK.zh-CN.md`，以及对应主题文档。
+3. 从最新 `main` 创建独立分支，保持工作区只包含本次修复。
+4. 先定位共享根因，再做最小代码改动，避免只修单一路径或顺手重构。
+5. 运行最小必要检查，例如目标文件语法检查、相关 lint/test、`git diff --check`。
+6. 提交 PR，描述改动范围、风险、验证步骤，并回到原 Issue 附上 PR 链接。
+
 建议给 AI Agent 的约束：
 
 ```text
@@ -52,7 +61,8 @@ yarn build
 要求：
 1. 只修复这个 Bug，不要混入我自己站点的个性化配置或无关改动。
 2. 在能修复相同问题的前提下，尽量改动最少的代码，降低对其他用户的影响。
-3. 保留必要的本地检查结果，并在 PR 描述中说明改动范围、风险和验证步骤。
+3. 修复前先阅读项目内置的开发文档、维护手册和相关主题文档。
+4. 保留必要的本地检查结果，并在 PR 描述中说明改动范围、风险和验证步骤。
 ```
 
 ## 5. PR 内容建议模板
