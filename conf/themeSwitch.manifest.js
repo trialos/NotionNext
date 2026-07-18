@@ -201,11 +201,13 @@ export const THEME_SWITCH_MANIFEST = {
     name: 'Magazine',
     summary: '杂志封面与大图列表风格。',
     palette: [
+      { key: 'MAGZINE_COLOR_PRIMARY', cssVar: '--magzine-color-primary', label: '主色', defaultValue: '#7BE986' },
       { key: 'MAGZINE_COLOR_BG', cssVar: '--magzine-color-bg', label: '页面背景', defaultValue: '#f6f6f1' },
       { key: 'MAGZINE_COLOR_CARD', cssVar: '--magzine-color-card', label: '卡片背景', defaultValue: '#ffffff' },
       { key: 'MAGZINE_COLOR_TEXT', cssVar: '--magzine-color-text', label: '主文字', defaultValue: '#111827' },
       { key: 'MAGZINE_COLOR_BORDER', cssVar: '--magzine-color-border', label: '边框', defaultValue: '#d1d5db' },
       { key: 'MAGZINE_COLOR_SCROLLBAR', cssVar: '--magzine-color-scrollbar', label: '滚动条', defaultValue: '#4e4e4e' },
+      { key: 'MAGZINE_COLOR_PRIMARY_DARK', cssVar: '--magzine-color-primary-dark', label: '深色模式：主色', defaultValue: '#62BA6B' },
       { key: 'MAGZINE_COLOR_BG_DARK', cssVar: '--magzine-color-bg-dark', label: '深色模式：页面背景', defaultValue: '#0b0f19' },
       { key: 'MAGZINE_COLOR_NAV_DARK', cssVar: '--magzine-color-nav-dark', label: '深色模式：导航背景', defaultValue: '#111827' },
       { key: 'MAGZINE_COLOR_CARD_DARK', cssVar: '--magzine-color-card-dark', label: '深色模式：卡片背景', defaultValue: '#1f2937' },

@@ -64,7 +64,7 @@ const THEME_COLOR_DEFAULTS = {
   },
   hexo: { PRIMARY: '#928CEE', BG: '#f5f5f5', TEXT: '#374151' },
   landing: { PRIMARY: '#ef4444' },
-  magzine: { BG: '#f6f6f1' },
+  magzine: { PRIMARY: '#7BE986', PRIMARY_DARK: '#62BA6B', BG: '#f6f6f1' },
   matery: { PRIMARY: '#4338ca', BG: '#f5f5f5' },
   medium: { PRIMARY: '#4f46e5' },
   movie: { PRIMARY: '#2563eb', PRIMARY_DARK: '#ca8a04' },
