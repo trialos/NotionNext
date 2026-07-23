@@ -46,6 +46,20 @@ const WorkflowNote = () => (
   </div>
 )
 
+const OpcFooter = () => (
+  <footer className='opc-footer px-5 pb-8 text-xs md:px-10'>
+    <div className='mx-auto flex max-w-6xl flex-col gap-2 border-t pt-5 sm:flex-row sm:items-center sm:justify-between'>
+      <div className='opc-muted'>
+        由 <SmartLink href='https://notionnext.tangly1024.com/'>NotionNext</SmartLink> 开发 · 主题 OPC
+      </div>
+      <div className='flex flex-wrap gap-3'>
+        <SmartLink href='https://notionnext.tangly1024.com/user-guide/start-here'>NotionNext 帮助</SmartLink>
+        <SmartLink href='https://notionnext.tangly1024.com/user-guide/themes/opc'>OPC 主题文档</SmartLink>
+      </div>
+    </div>
+  </footer>
+)
+
 const SERVICE_DETAILS = {
   游戏: '玩法原型 · 实验中',
   小说: '世界观与连载 · 持续记录',
@@ -234,6 +248,19 @@ const Style = () => (
       border-color: color-mix(in srgb, var(--opc-console-border) 90%, transparent);
     }
 
+    #theme-opc .opc-footer > div {
+      border-color: color-mix(in srgb, var(--opc-console-border) 90%, transparent);
+    }
+
+    #theme-opc .opc-footer a {
+      color: var(--opc-console-primary);
+    }
+
+    #theme-opc .opc-footer a:hover {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+
     #theme-opc .opc-cover {
       aspect-ratio: 16 / 9;
       border-color: color-mix(in srgb, var(--opc-console-border) 90%, transparent);
@@ -284,6 +311,7 @@ const LayoutBase = ({ children }) => (
   <div id='theme-opc' className={`${siteConfig('FONT_STYLE')} min-h-screen`}>
     <Style />
     {children}
+    <OpcFooter />
   </div>
 )
 
