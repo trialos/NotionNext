@@ -13,7 +13,10 @@ export default function BlogListPage(props) {
   const currentPage = +page
   const showPrev = currentPage > 1
   const showNext = page < totalPage
-  const pagePrefix = router.asPath.split('?')[0].replace(/\/page\/[1-9]\d*/, '').replace(/\/$/, '')
+  const pagePrefix = router.asPath
+    .split('?')[0]
+    .replace(/\/page\/[1-9]\d*/, '')
+    .replace(/\/$/, '')
 
   return (
     <div>
@@ -23,8 +26,15 @@ export default function BlogListPage(props) {
 
       <div className='flex justify-between items-center pt-6 gap-4'>
         <SmartLink
-          href={{ pathname: currentPage - 1 === 1 ? `${pagePrefix}/` : `${pagePrefix}/page/${currentPage - 1}`, query: router.query.s ? { s: router.query.s } : {} }}
-          className={`no-underline ${showPrev ? '' : 'pointer-events-none opacity-30'}`}>
+          href={{
+            pathname:
+              currentPage - 1 === 1
+                ? `${pagePrefix}/`
+                : `${pagePrefix}/page/${currentPage - 1}`,
+            query: router.query.s ? { s: router.query.s } : {}
+          }}
+          className={`no-underline ${showPrev ? '' : 'pointer-events-none opacity-30'}`}
+        >
           <span className='inline-block border-2 border-[#0284c7] rounded-sm shadow-[2px_2px_0px_0px_#0284c7] bg-[#ffffff] dark:bg-slate-800 px-4 py-2 font-black text-sm text-[#0284c7] uppercase tracking-wider hover:bg-[#0ea5e9] hover:text-white active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all'>
             {'\u2190'} Prev
           </span>
@@ -35,8 +45,12 @@ export default function BlogListPage(props) {
         </span>
 
         <SmartLink
-          href={{ pathname: `${pagePrefix}/page/${currentPage + 1}`, query: router.query.s ? { s: router.query.s } : {} }}
-          className={`no-underline ${showNext ? '' : 'pointer-events-none opacity-30'}`}>
+          href={{
+            pathname: `${pagePrefix}/page/${currentPage + 1}`,
+            query: router.query.s ? { s: router.query.s } : {}
+          }}
+          className={`no-underline ${showNext ? '' : 'pointer-events-none opacity-30'}`}
+        >
           <span className='inline-block border-2 border-[#0284c7] rounded-sm shadow-[2px_2px_0px_0px_#0284c7] bg-[#ffffff] dark:bg-slate-800 px-4 py-2 font-black text-sm text-[#0284c7] uppercase tracking-wider hover:bg-[#0ea5e9] hover:text-white active:translate-x-0.5 active:translate-y-0.5 active:shadow-none transition-all'>
             Next {'\u2192'}
           </span>

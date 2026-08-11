@@ -1,6 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 
-export default function Typewriter({ texts, speed = 80, deleteSpeed = 40, pause = 2000, loop = true }) {
+export default function Typewriter({
+  texts,
+  speed = 80,
+  deleteSpeed = 40,
+  pause = 2000,
+  loop = true
+}) {
   const [displayed, setDisplayed] = useState('')
   const [textIndex, setTextIndex] = useState(0)
   const [charIndex, setCharIndex] = useState(0)

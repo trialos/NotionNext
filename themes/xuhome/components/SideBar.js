@@ -42,8 +42,12 @@ export default function SideBar(props) {
           </h3>
           <nav className='space-y-1'>
             {post.toc.map(item => (
-              <a key={item.id} href={`#${item.id}`} className='block text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-[#0284c7] py-0.5'
-                style={{ paddingLeft: `${(item.indentLevel || 0) * 12 + 4}px` }}>
+              <a
+                key={item.id}
+                href={`#${item.id}`}
+                className='block text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-[#0284c7] py-0.5'
+                style={{ paddingLeft: `${(item.indentLevel || 0) * 12 + 4}px` }}
+              >
                 {item.text}
               </a>
             ))}
@@ -58,7 +62,11 @@ export default function SideBar(props) {
           </h3>
           <div className='space-y-1'>
             {categoryOptions.map(cat => (
-              <SmartLink key={cat.name} href={`/category/${cat.name}`} className='no-underline'>
+              <SmartLink
+                key={cat.name}
+                href={`/category/${cat.name}`}
+                className='no-underline'
+              >
                 <div className='flex justify-between text-xs font-extrabold text-slate-600 dark:text-slate-400 hover:text-[#0284c7] py-1.5 px-1 border-l-[3px] border-transparent hover:border-[#fde68a] transition-all'>
                   <span>{cat.name}</span>
                   <span className='tabular-nums'>{cat.count}</span>
@@ -76,7 +84,10 @@ export default function SideBar(props) {
           </h3>
           <div className='flex flex-wrap gap-1.5'>
             {tagOptions.slice(0, 15).map(tag => (
-              <SmartLink key={tag.name} href={`/tag/${encodeURIComponent(tag.name)}`}>
+              <SmartLink
+                key={tag.name}
+                href={`/tag/${encodeURIComponent(tag.name)}`}
+              >
                 <span className='inline-block border-2 border-[#0284c7] rounded-sm shadow-[1px_1px_0px_0px_#0284c7] px-2 py-0.5 text-xs font-black uppercase tracking-wider text-[#0284c7] bg-[#ffffff] dark:bg-slate-700 hover:bg-[#fde68a] transition-colors'>
                   {tag.name}
                 </span>
@@ -96,7 +107,11 @@ export default function SideBar(props) {
           </h3>
           <div className='space-y-1'>
             {latestPosts.slice(0, 5).map(p => (
-              <SmartLink key={p.id} href={`/${p.slug}`} className='no-underline'>
+              <SmartLink
+                key={p.id}
+                href={`/${p.slug}`}
+                className='no-underline'
+              >
                 <div className='text-xs font-extrabold text-slate-600 dark:text-slate-400 hover:text-[#0284c7] py-1 truncate transition-colors'>
                   {p.title}
                 </div>

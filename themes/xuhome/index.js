@@ -28,7 +28,10 @@ import JumpToTopButton from './components/JumpToTopButton'
 import HeroSection from './components/HeroSection'
 
 const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
-const AlgoliaSearchModal = dynamic(() => import('@/components/AlgoliaSearchModal'), { ssr: false })
+const AlgoliaSearchModal = dynamic(
+  () => import('@/components/AlgoliaSearchModal'),
+  { ssr: false }
+)
 
 const LayoutBase = props => {
   const { children } = props
@@ -37,13 +40,21 @@ const LayoutBase = props => {
   const bgImage = siteConfig('XUHOME_BG_IMAGE', null, CONFIG)
 
   return (
-    <div id='theme-xuhome' className='min-h-screen bg-[#faf8f5] dark:bg-slate-900 text-slate-900 dark:text-slate-100' style={bgImage ? {
-      backgroundImage: `url(${bgImage})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      backgroundAttachment: 'fixed'
-    } : {}}>
+    <div
+      id='theme-xuhome'
+      className='min-h-screen'
+      style={
+        bgImage
+          ? {
+              backgroundImage: `url(${bgImage})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              backgroundAttachment: 'fixed'
+            }
+          : {}
+      }
+    >
       <Style />
 
       <div className='fixed inset-0 bg-[#faf8f5]/55 dark:bg-slate-900/85 z-0 pointer-events-none' />
@@ -51,33 +62,34 @@ const LayoutBase = props => {
       <div className='relative z-10'>
         <NavBar {...props} />
 
-      <div className='max-w-6xl mx-auto px-4 md:px-6 pt-6 pb-4'>
-        <Header {...props} />
-      </div>
-
-      <div className='max-w-6xl mx-auto px-4 md:px-6' style={{ minHeight: 'calc(100vh - 200px)' }}>
-        <div className='flex flex-col lg:flex-row gap-8'>
-          <main className='flex-1 min-w-0 pb-16'>
-            {children}
-          </main>
-
-          {showSidebar && (
-            <aside className='w-60 shrink-0 hidden lg:block'>
-              <div className='top-24'>
-                <SideBar {...props} />
-              </div>
-            </aside>
-          )}
+        <div className='max-w-6xl mx-auto px-4 md:px-6 pt-6 pb-4'>
+          <Header {...props} />
         </div>
-      </div>
 
-      <Footer {...props} />
+        <div
+          className='max-w-6xl mx-auto px-4 md:px-6'
+          style={{ minHeight: 'calc(100vh - 200px)' }}
+        >
+          <div className='flex flex-col lg:flex-row gap-8'>
+            <main className='flex-1 min-w-0 pb-16'>{children}</main>
 
-      <div className='fixed right-4 bottom-4 z-30'>
-        <JumpToTopButton />
-      </div>
+            {showSidebar && (
+              <aside className='w-60 shrink-0 hidden lg:block'>
+                <div className='top-24'>
+                  <SideBar {...props} />
+                </div>
+              </aside>
+            )}
+          </div>
+        </div>
 
-      <AlgoliaSearchModal {...props} />
+        <Footer {...props} />
+
+        <div className='fixed right-4 bottom-4 z-30'>
+          <JumpToTopButton />
+        </div>
+
+        <AlgoliaSearchModal {...props} />
       </div>
     </div>
   )
@@ -133,7 +145,7 @@ const LayoutSearch = props => {
         }
       })
     }
-  }, [])
+  }, [keyword])
 
   return (
     <>
@@ -151,7 +163,11 @@ const LayoutArchive = props => {
   return (
     <div>
       {Object.keys(archivePosts).map(archiveTitle => (
-        <BlogArchiveItem key={archiveTitle} archiveTitle={archiveTitle} archivePosts={archivePosts[archiveTitle]} />
+        <BlogArchiveItem
+          key={archiveTitle}
+          archiveTitle={archiveTitle}
+          archivePosts={archivePosts[archiveTitle]}
+        />
       ))}
     </div>
   )
@@ -177,7 +193,10 @@ const LayoutSlug = props => {
 
           <ArticleInfo post={post} />
 
-          <div id='article-wrapper' className='border-2 border-[#0284c7] rounded-sm shadow-[4px_4px_0px_0px_#0284c7] bg-[#ffffff] dark:bg-slate-800 p-6 md:p-10 mt-6'>
+          <div
+            id='article-wrapper'
+            className='border-2 border-[#0284c7] rounded-sm shadow-[4px_4px_0px_0px_#0284c7] bg-[#ffffff] dark:bg-slate-800 p-6 md:p-10 mt-6'
+          >
             <NotionPage post={post} />
           </div>
 
@@ -209,23 +228,33 @@ const Layout404 = props => {
 
   useEffect(() => {
     if (!post) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         if (isBrowser) {
-          const article = document.querySelector('#article-wrapper #notion-article')
+          const article = document.querySelector(
+            '#article-wrapper #notion-article'
+          )
           if (!article) {
             router.push('/404').then(() => console.warn('Page not found'))
           }
         }
       }, waiting404)
+      return () => clearTimeout(timer)
     }
-  }, [post])
+  }, [post, router, waiting404])
 
   return (
     <div className='flex items-center justify-center min-h-[50vh] py-20'>
       <div className='text-center'>
-        <div className='text-8xl font-black text-[#0284c7] mb-4' style={{ textShadow: '4px 4px 0 #fde68a' }}>404</div>
+        <div
+          className='text-8xl font-black text-[#0284c7] mb-4'
+          style={{ textShadow: '4px 4px 0 #fde68a' }}
+        >
+          404
+        </div>
         <div className='border-2 border-[#0284c7] rounded-sm shadow-[2px_2px_0px_0px_#0284c7] bg-[#ffffff] dark:bg-slate-800 px-6 py-3 inline-block'>
-          <span className='font-black uppercase tracking-wider text-sm text-[#0284c7]'>Page not found</span>
+          <span className='font-black uppercase tracking-wider text-sm text-[#0284c7]'>
+            Page not found
+          </span>
         </div>
       </div>
     </div>
@@ -238,7 +267,12 @@ const LayoutCategoryIndex = props => {
   return (
     <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
       {categoryOptions?.map(category => (
-        <SmartLink key={category.name} href={`/category/${category.name}`} passHref legacyBehavior>
+        <SmartLink
+          key={category.name}
+          href={`/category/${category.name}`}
+          passHref
+          legacyBehavior
+        >
           <div className='border-2 border-[#0284c7] rounded-sm shadow-[4px_4px_0px_0px_#0284c7] bg-[#ffffff] dark:bg-slate-800 p-5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0px_0px_#0284c7] transition-all cursor-pointer group'>
             <div className='font-black text-lg text-[#0284c7] group-hover:text-[#0ea5e9] transition-colors uppercase tracking-wider'>
               {category.name}
@@ -259,10 +293,18 @@ const LayoutTagIndex = props => {
   return (
     <div className='flex flex-wrap gap-3'>
       {tagOptions.map(tag => (
-        <SmartLink key={tag.name} href={`/tag/${encodeURIComponent(tag.name)}`} passHref>
+        <SmartLink
+          key={tag.name}
+          href={`/tag/${encodeURIComponent(tag.name)}`}
+          passHref
+        >
           <span className='inline-flex items-center border-2 border-[#0284c7] rounded-sm shadow-[2px_2px_0px_0px_#0284c7] bg-[#ffffff] dark:bg-slate-800 hover:bg-[#fde68a] px-4 py-2 font-black text-sm text-[#0284c7] uppercase tracking-wider transition-all cursor-pointer active:translate-x-0.5 active:translate-y-0.5 active:shadow-none'>
             {tag.name}
-            {tag.count ? <span className='ml-2 text-xs opacity-70'>{tag.count}</span> : ''}
+            {tag.count ? (
+              <span className='ml-2 text-xs opacity-70'>{tag.count}</span>
+            ) : (
+              ''
+            )}
           </span>
         </SmartLink>
       ))}

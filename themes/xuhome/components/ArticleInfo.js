@@ -22,7 +22,10 @@ export default function ArticleInfo({ post }) {
             </span>
           </SmartLink>
         )}
-        <TwikooCommentCount post={post} className='text-xs font-black text-slate-400 dark:text-slate-500 uppercase' />
+        <TwikooCommentCount
+          post={post}
+          className='text-xs font-black text-slate-400 dark:text-slate-500 uppercase'
+        />
         {post?.tags?.map(t => (
           <SmartLink key={t} href={`/tag/${encodeURIComponent(t)}`}>
             <span className='text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-wider hover:text-[#0284c7] transition-colors'>

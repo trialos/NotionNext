@@ -16,7 +16,7 @@ export default function Uptime() {
   const since = siteConfig('XUHOME_UPTIME_SINCE', '', CONFIG)
   const title = siteConfig('XUHOME_UPTIME_TITLE', 'Running', CONFIG)
 
-  const [time, setTime] = useState(() => since ? calcElapsed(since) : null)
+  const [time, setTime] = useState(() => (since ? calcElapsed(since) : null))
 
   useEffect(() => {
     if (!enabled || !since) return
@@ -39,7 +39,10 @@ export default function Uptime() {
           { value: time.minutes, label: 'M' },
           { value: time.seconds, label: 'S' }
         ].map((item, i) => (
-          <div key={i} className='border-2 border-[#0284c7] rounded-sm shadow-[1px_1px_0px_0px_#0284c7] bg-[#fde68a] py-2'>
+          <div
+            key={i}
+            className='border-2 border-[#0284c7] rounded-sm shadow-[1px_1px_0px_0px_#0284c7] bg-[#fde68a] py-2'
+          >
             <div className='text-xl font-black text-[#0284c7] tabular-nums leading-none'>
               {String(item.value).padStart(2, '0')}
             </div>

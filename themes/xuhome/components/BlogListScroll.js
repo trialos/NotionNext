@@ -1,7 +1,7 @@
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import throttle from 'lodash.throttle'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import BlogItem from './BlogItem'
 
 export default function BlogListScroll(props) {
@@ -11,24 +11,36 @@ export default function BlogListScroll(props) {
   const POSTS_PER_PAGE = siteConfig('POSTS_PER_PAGE', null, NOTION_CONFIG)
 
   let hasMore = false
-  const postsToShow = posts ? Object.assign(posts).slice(0, POSTS_PER_PAGE * page) : []
+  const postsToShow = posts
+    ? Object.assign(posts).slice(0, POSTS_PER_PAGE * page)
+    : []
 
   if (posts) {
     hasMore = page * POSTS_PER_PAGE < posts.length
   }
-  const handleGetMore = () => { if (!hasMore) return; updatePage(page + 1) }
+  const handleGetMore = useCallback(() => {
+    if (!hasMore) return
+    updatePage(currentPage => currentPage + 1)
+  }, [hasMore])
   const targetRef = useRef(null)
 
-  const scrollTrigger = useCallback(throttle(() => {
-    const scrollS = window.scrollY + window.outerHeight
-    const clientHeight = targetRef?.current?.clientHeight || 0
-    if (scrollS > clientHeight + 100) handleGetMore()
-  }, 500))
+  const scrollTrigger = useMemo(
+    () =>
+      throttle(() => {
+        const scrollS = window.scrollY + window.outerHeight
+        const clientHeight = targetRef?.current?.clientHeight || 0
+        if (scrollS > clientHeight + 100) handleGetMore()
+      }, 500),
+    [handleGetMore]
+  )
 
   useEffect(() => {
     window.addEventListener('scroll', scrollTrigger, { passive: true })
-    return () => window.removeEventListener('scroll', scrollTrigger)
-  })
+    return () => {
+      window.removeEventListener('scroll', scrollTrigger)
+      scrollTrigger.cancel()
+    }
+  }, [scrollTrigger])
 
   return (
     <div ref={targetRef}>

@@ -30,7 +30,10 @@ export default function BlogItem({ post }) {
                 </span>
               </SmartLink>
             )}
-            <TwikooCommentCount post={post} className='text-slate-400 dark:text-slate-500' />
+            <TwikooCommentCount
+              post={post}
+              className='text-slate-400 dark:text-slate-500'
+            />
           </div>
         </div>
       </SmartLink>
