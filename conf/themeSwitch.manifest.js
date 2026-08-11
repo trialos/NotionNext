@@ -327,6 +327,24 @@ export const THEME_SWITCH_MANIFEST = {
       { key: 'THOUGHTLITE_COLOR_BORDER', cssVar: '--tl-border', label: '边框', defaultValue: '#e8e6e3' },
       { key: 'THOUGHTLITE_COLOR_ACCENT', cssVar: '--tl-accent', label: '强调色', defaultValue: '#2563eb' }
     ]
+  },
+  xuhome: {
+    name: 'XuHome',
+    summary: '新粗野主义博客主题，粗边框、偏移阴影、Hero 打字机与响应式导航。',
+    tier: 'free',
+    palette: [
+      { key: 'XUHOME_COLOR_PRIMARY', cssVar: '--xuhome-primary', label: '主色', defaultValue: '#0284c7' },
+      { key: 'XUHOME_COLOR_PRIMARY_HOVER', cssVar: '--xuhome-primary-hover', label: '主色 hover', defaultValue: '#0ea5e9' },
+      { key: 'XUHOME_COLOR_ACCENT', cssVar: '--xuhome-accent', label: '强调色', defaultValue: '#fde68a' },
+      { key: 'XUHOME_COLOR_BG', cssVar: '--xuhome-bg-light', label: '页面背景', defaultValue: '#faf8f5' },
+      { key: 'XUHOME_COLOR_SURFACE', cssVar: '--xuhome-surface-light', label: '卡片背景', defaultValue: '#ffffff' },
+      { key: 'XUHOME_COLOR_TEXT', cssVar: '--xuhome-text-light', label: '主文字', defaultValue: '#0f172a' },
+      { key: 'XUHOME_COLOR_MUTED', cssVar: '--xuhome-muted-light', label: '次级文字', defaultValue: '#475569' },
+      { key: 'XUHOME_COLOR_BG_DARK', cssVar: '--xuhome-bg-dark', label: '深色模式：页面背景', defaultValue: '#0f172a' },
+      { key: 'XUHOME_COLOR_SURFACE_DARK', cssVar: '--xuhome-surface-dark', label: '深色模式：卡片背景', defaultValue: '#1e293b' },
+      { key: 'XUHOME_COLOR_TEXT_DARK', cssVar: '--xuhome-text-dark', label: '深色模式：主文字', defaultValue: '#f1f5f9' },
+      { key: 'XUHOME_COLOR_MUTED_DARK', cssVar: '--xuhome-muted-dark', label: '深色模式：次级文字', defaultValue: '#94a3b8' }
+    ]
   }
 }
 
@@ -356,7 +374,8 @@ const THEME_CONFIGS = {
   simple: simpleConfig,
   starter: starterConfig,
   thoughtlite: thoughtliteConfig,
-  typography: typographyConfig
+  typography: typographyConfig,
+  xuhome: xuhomeConfig
 }
 
 function inferThemeSettings(themeId, manualSettings = []) {
@@ -599,3 +618,4 @@ import simpleConfig from '@/themes/simple/config'
 import starterConfig from '@/themes/starter/config'
 import thoughtliteConfig from '@/themes/thoughtlite/config'
 import typographyConfig from '@/themes/typography/config'
+import xuhomeConfig from '@/themes/xuhome/config'
