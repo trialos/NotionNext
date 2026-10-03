@@ -4,12 +4,15 @@ import { siteConfig } from '@/lib/config'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import CONFIG from '../config'
 
+const FLIP_MS = 340
+
 function coverOf(post) {
   return post?.pageCoverThumbnail || post?.pageCover || ''
 }
 
 /**
- * 首页报头：叠层抽牌 + 可选封面背景
+ * 首页报头：叠层抽牌
+ * outgoing 克隆飞出卸载；current 原位替换；under 仅 peek 不参与抬起动画
  */
 export default function LatestCard({ post, posts }) {
   const enabled = siteConfig('CIRCLELIFE_HOME_LATEST_CARD', true, CONFIG)
@@ -27,7 +30,8 @@ export default function LatestCard({ post, posts }) {
   }, [posts, post, max])
 
   const [index, setIndex] = useState(0)
-  const [anim, setAnim] = useState('')
+  const [outgoing, setOutgoing] = useState(null) // { slide, dir: 1|-1 }
+  const [swapInstant, setSwapInstant] = useState(false)
   const [paused, setPaused] = useState(false)
   const busyRef = useRef(false)
   const indexRef = useRef(0)
@@ -59,16 +63,27 @@ export default function LatestCard({ post, posts }) {
         direction = nextIndex > cur ? 1 : -1
       }
 
+      const leaving = slides[cur]
+      if (!leaving) return
+
       busyRef.current = true
-      setAnim(direction > 0 ? 'out-next' : 'out-prev')
+      // 1) mount outgoing at rest  2) swap current under it  3) fly outgoing
+      setOutgoing({ slide: leaving, dir: direction, flying: false })
+      setSwapInstant(true)
+      indexRef.current = nextIndex
+      setIndex(nextIndex)
+
+      window.requestAnimationFrame(() => {
+        setOutgoing(o => (o ? { ...o, flying: true } : o))
+        window.requestAnimationFrame(() => setSwapInstant(false))
+      })
+
       window.setTimeout(() => {
-        indexRef.current = nextIndex
-        setIndex(nextIndex)
-        setAnim('')
+        setOutgoing(null)
         busyRef.current = false
-      }, 340)
+      }, FLIP_MS)
     },
-    [count]
+    [count, slides]
   )
 
   useEffect(() => {
@@ -102,7 +117,7 @@ export default function LatestCard({ post, posts }) {
             {d ? <span className='cl-kicker-sep'>·</span> : null}
             {d ? <span>{d}</span> : null}
           </div>
-          <SmartLink href={slide.href} className='cl-latest-title'>
+          <SmartLink href={slide.href} className='cl-latest-title' tabIndex={faceClass.includes('outgoing') || faceClass.includes('under') ? -1 : undefined}>
             {slide.title}
           </SmartLink>
           {slide.summary ? (
@@ -120,11 +135,17 @@ export default function LatestCard({ post, posts }) {
     )
   }
 
+  const outClass = !outgoing?.flying
+    ? ''
+    : outgoing.dir > 0
+      ? 'is-fly-next'
+      : 'is-fly-prev'
+
   return (
     <aside
       className={`cl-latest-card cl-hero cl-deck ${
         cover ? 'cl-deck--covered' : ''
-      } ${anim ? `is-${anim}` : ''}`}
+      } ${swapInstant ? 'is-swap-instant' : ''} ${outgoing ? 'is-flipping' : ''}`}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       aria-roledescription='carousel'
@@ -135,9 +156,18 @@ export default function LatestCard({ post, posts }) {
             {renderFace(nextSlide, 'cl-deck-face--under')}
           </div>
         ) : null}
-        <div className='cl-deck-top'>
-          {renderFace(current, 'cl-deck-face--top')}
+
+        <div className='cl-deck-current'>
+          {renderFace(current, 'cl-deck-face--current')}
         </div>
+
+        {outgoing?.slide ? (
+          <div
+            className={`cl-deck-outgoing ${outClass}`}
+            aria-hidden='true'>
+            {renderFace(outgoing.slide, 'cl-deck-face--outgoing')}
+          </div>
+        ) : null}
       </div>
 
       <div className='cl-hero-toolbar cl-deck-toolbar'>

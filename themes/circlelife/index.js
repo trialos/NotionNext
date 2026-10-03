@@ -103,7 +103,7 @@ const LayoutBase = props => {
           </div>
 
           {showSidebar && (
-            <div className='w-full flex-shrink-0 md:w-64 md:sticky md:top-[3.25rem]'>
+            <div className='w-full flex-shrink-0 md:w-64 md:sticky md:top-[2.75rem]'>
               <SideBar {...props} />
             </div>
           )}

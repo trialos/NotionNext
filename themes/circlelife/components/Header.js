@@ -4,16 +4,26 @@ import { useEffect, useState } from 'react'
 import CONFIG from '../config'
 import { BrandLockup } from './BrandLockup'
 import { MenuList } from './MenuList'
+import ReadingProgress from './ReadingProgress'
 
 /**
- * 顶栏：锁头 + 菜单；下滚收成细条（英文锁头 + 图标菜单）
+ * 顶栏：迟滞收起 + 可选文章阅读进度
  */
 export const Header = props => {
+  const { post } = props
   const { isDarkMode, toggleDarkMode } = useGlobal()
   const [scrolled, setScrolled] = useState(false)
+  const showProgress = Boolean(post) && post?.type !== 'Page'
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 16)
+    const onScroll = () => {
+      const y = window.scrollY || 0
+      setScrolled(prev => {
+        if (!prev && y > 28) return true
+        if (prev && y < 10) return false
+        return prev
+      })
+    }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
@@ -27,7 +37,7 @@ export const Header = props => {
     <header
       className={`cl-header sticky top-0 z-40 w-full ${
         scrolled ? 'is-scrolled' : ''
-      }`}>
+      } ${showProgress ? 'cl-header--reading' : ''}`}>
       <div className='cl-header-inner'>
         <BrandLockup compact href='/' collapsed={scrolled} />
         <div className='cl-header-nav min-w-0 flex-1'>
@@ -56,6 +66,7 @@ export const Header = props => {
           </button>
         </div>
       </div>
+      {showProgress ? <ReadingProgress /> : null}
     </header>
   )
 }
