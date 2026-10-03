@@ -135,10 +135,13 @@ export const Header = props => {
           aria-modal='true'
           aria-label='站点菜单'>
           <div className='cl-drawer-head'>
-            <span className='cl-kicker'>菜单</span>
+            <div className='cl-drawer-brand'>
+              <span className='cl-drawer-eyebrow'>导航</span>
+              <span className='cl-drawer-title'>菜单</span>
+            </div>
             <button
               type='button'
-              className='cl-icon-btn'
+              className='cl-icon-btn cl-drawer-close'
               aria-label='关闭'
               onClick={closeDrawer}>
               <i className='fas fa-times' />
@@ -151,6 +154,7 @@ export const Header = props => {
             wing='drawer'
             onNavigate={closeDrawer}
           />
+          <p className='cl-drawer-foot'>Circle of Life</p>
         </div>
       </div>,
       document.body

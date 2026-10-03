@@ -72,7 +72,7 @@ const LayoutBase = props => {
   return (
     <div
       id='theme-circlelife'
-      className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth${isAlbumPage ? ' cl-is-album' : ''}`}>
+      className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth${isAlbumPage ? ' cl-is-album' : ''}${showSidebar ? ' cl-has-sidebar' : ''}`}>
       <Style />
 
       <Header {...props} />
