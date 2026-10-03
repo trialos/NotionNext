@@ -400,14 +400,38 @@ const Style = () => {
         will-change: transform;
       }
 
-      /* mobile drawer */
-      .cl-drawer-root,
+
+      /* mobile drawer — portal on body, own tokens */
       .cl-drawer-root {
         position: fixed;
         inset: 0;
         z-index: 200;
         pointer-events: none;
         visibility: hidden;
+        --cl-bg: #f5f0e4;
+        --cl-surface: #fcfaf4;
+        --cl-text: #20190f;
+        --cl-muted: #57493a;
+        --cl-faint: #948574;
+        --cl-border: rgba(32, 25, 15, 0.11);
+        --cl-accent: #b24a33;
+        --cl-accent-soft: #f0e0d6;
+        --cl-radius-sm: 6px;
+        --cl-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+        --cl-font-display: 'Newsreader', 'Noto Serif SC', 'Songti SC', serif;
+        --cl-font-mono: 'JetBrains Mono', 'Noto Sans SC', ui-monospace, monospace;
+        font-family: 'Hanken Grotesk', 'Noto Sans SC', system-ui, sans-serif;
+        color: var(--cl-text);
+      }
+      html.dark .cl-drawer-root {
+        --cl-bg: #14110e;
+        --cl-surface: #1a1612;
+        --cl-text: #f0e9dc;
+        --cl-muted: #c2b7a4;
+        --cl-faint: #8c8170;
+        --cl-border: rgba(240, 233, 220, 0.12);
+        --cl-accent: #e0a33e;
+        --cl-accent-soft: #3a2e18;
       }
       .cl-drawer-root.is-open {
         pointer-events: auto;
@@ -417,7 +441,7 @@ const Style = () => {
         position: absolute;
         inset: 0;
         border: 0;
-        background: color-mix(in srgb, var(--cl-text) 35%, transparent);
+        background: color-mix(in srgb, var(--cl-text) 42%, transparent);
         opacity: 0;
         transition: opacity 0.25s var(--cl-ease);
         cursor: pointer;
@@ -430,25 +454,54 @@ const Style = () => {
         top: 0;
         right: 0;
         height: 100%;
-        width: min(20rem, 88vw);
-        background: var(--cl-surface);
+        width: min(21rem, 90vw);
+        background: var(--cl-bg);
         border-left: 1px solid var(--cl-border);
-        padding: 1rem 1.1rem 2rem;
+        padding: 1.15rem 1.15rem 2.5rem;
         transform: translateX(104%);
         transition: transform 0.28s var(--cl-ease);
         overflow-y: auto;
-        box-shadow: none;
+        display: flex;
+        flex-direction: column;
+        box-shadow: -12px 0 40px color-mix(in srgb, var(--cl-text) 8%, transparent);
       }
       .cl-drawer-root.is-open .cl-drawer-panel {
         transform: translateX(0);
       }
       .cl-drawer-head {
         display: flex;
-        align-items: center;
+        align-items: flex-start;
         justify-content: space-between;
-        margin-bottom: 1rem;
-        padding-bottom: 0.65rem;
+        gap: 0.75rem;
+        margin-bottom: 1.15rem;
+        padding-bottom: 0.85rem;
         border-bottom: 1px solid var(--cl-border);
+      }
+      .cl-drawer-brand {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        min-width: 0;
+      }
+      .cl-drawer-eyebrow {
+        font-family: var(--cl-font-mono);
+        font-size: 0.62rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--cl-faint);
+        line-height: 1;
+      }
+      .cl-drawer-title {
+        font-family: var(--cl-font-display);
+        font-size: 1.35rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: var(--cl-text);
+        line-height: 1.2;
+      }
+      .cl-drawer-close {
+        color: var(--cl-muted) !important;
+        flex: none;
       }
       .cl-drawer-list {
         list-style: none;
@@ -456,30 +509,41 @@ const Style = () => {
         padding: 0;
         display: flex;
         flex-direction: column;
-        gap: 0.15rem;
+        gap: 0.2rem;
+        flex: 1 1 auto;
       }
       .cl-drawer-link {
         display: flex;
         align-items: center;
-        gap: 0.75rem;
+        gap: 0.85rem;
         width: 100%;
-        padding: 0.75rem 0.5rem;
+        padding: 0.85rem 0.7rem;
         border: 0;
         background: transparent;
         color: var(--cl-text);
-        font-size: 1rem;
+        font-size: 1.05rem;
         font-weight: 500;
         text-align: left;
-        border-radius: var(--cl-radius-sm);
+        border-radius: 10px;
         cursor: pointer;
+        text-decoration: none;
+        transition: background 0.15s ease, color 0.15s ease;
       }
-      .cl-drawer-link:hover {
-        background: color-mix(in srgb, var(--cl-accent-soft) 50%, transparent);
+      .cl-drawer-link .cl-nav-ico {
+        width: 1.15rem;
+        text-align: center;
+        color: var(--cl-muted);
+        font-size: 0.95rem;
+      }
+      .cl-drawer-link:hover,
+      .cl-drawer-link:active {
+        background: color-mix(in srgb, var(--cl-accent-soft) 70%, transparent);
+        color: var(--cl-text);
       }
       .cl-drawer-chevron {
         margin-left: auto;
         font-size: 0.7rem;
-        opacity: 0.55;
+        color: var(--cl-faint);
         transition: transform 0.2s var(--cl-ease);
       }
       .cl-drawer-chevron.is-open {
@@ -487,41 +551,30 @@ const Style = () => {
       }
       .cl-drawer-sub {
         list-style: none;
-        margin: 0 0 0.35rem 1.85rem;
+        margin: 0 0 0.4rem 2.2rem;
         padding: 0;
+        border-left: 1px solid var(--cl-border);
       }
       .cl-drawer-sublink {
         display: block;
-        padding: 0.45rem 0.35rem;
+        padding: 0.5rem 0.65rem;
         color: var(--cl-muted);
-        font-size: 0.9rem;
+        font-size: 0.92rem;
+        text-decoration: none;
       }
-
-      
-      /* portal drawer lives on body — duplicate tokens */
-      .cl-drawer-root {
-        --cl-bg: #f5f0e4;
-        --cl-surface: #fcfaf4;
-        --cl-text: #20190f;
-        --cl-muted: #57493a;
-        --cl-faint: #948574;
-        --cl-border: rgba(32, 25, 15, 0.11);
-        --cl-accent: #b24a33;
-        --cl-accent-soft: #f0e0d6;
-        --cl-radius-sm: 6px;
-        --cl-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
-        --cl-font-mono: 'JetBrains Mono', 'Noto Sans SC', ui-monospace, monospace;
-        font-family: 'Hanken Grotesk', 'Noto Sans SC', system-ui, sans-serif;
+      .cl-drawer-sublink:hover {
+        color: var(--cl-accent);
       }
-      html.dark .cl-drawer-root {
-        --cl-bg: #14110e;
-        --cl-surface: #1a1612;
-        --cl-text: #f0e9dc;
-        --cl-muted: #c2b7a4;
-        --cl-faint: #8c8170;
-        --cl-border: rgba(240, 233, 220, 0.12);
-        --cl-accent: #e0a33e;
-        --cl-accent-soft: #3a2e18;
+      .cl-drawer-foot {
+        margin: 1.5rem 0 0;
+        padding-top: 0.85rem;
+        border-top: 1px solid var(--cl-border);
+        font-family: var(--cl-font-mono);
+        font-size: 0.62rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--cl-faint);
+        text-align: center;
       }
 
       /* author badge */
@@ -1221,11 +1274,12 @@ const Style = () => {
         font-size: 0.75rem;
       }
 
-      /* back to top — content right gutter */
+      /* back to top */
       #theme-circlelife .cl-backtop {
         position: fixed;
         z-index: 30;
-        right: max(1rem, calc((100vw - 64rem) / 2 + 0.35rem));
+        /* 无侧栏：内容右 gutter（max-w-3xl≈48rem） */
+        right: max(1rem, calc((100vw - 48rem) / 2 + 0.5rem));
         bottom: 1.75rem;
         width: 2.65rem;
         height: 2.65rem;
@@ -1246,10 +1300,20 @@ const Style = () => {
           border-color 0.15s var(--cl-ease),
           background 0.15s var(--cl-ease),
           color 0.15s var(--cl-ease),
-          box-shadow 0.15s var(--cl-ease);
+          box-shadow 0.15s var(--cl-ease),
+          right 0.28s var(--cl-ease);
         box-shadow: 0 1px 0 color-mix(in srgb, var(--cl-text) 4%, transparent);
       }
-      @media (max-width: 1024px) {
+      /* 有目录侧栏：贴 TOC 左缘（max-w-5xl + w-64） */
+      @media (min-width: 768px) {
+        #theme-circlelife.cl-has-sidebar .cl-backtop {
+          right: max(1rem, calc((100vw - 64rem) / 2 + 16rem));
+        }
+        #theme-circlelife.cl-is-album .cl-backtop {
+          right: 1.25rem;
+        }
+      }
+      @media (max-width: 767px) {
         #theme-circlelife .cl-backtop {
           right: 1.1rem;
         }
@@ -1384,97 +1448,209 @@ const Style = () => {
       }
 
 
-      /* album shell + left frosted reel */
+
+      /* album shell + shelf + ink spine */
       #theme-circlelife .cl-album-shell {
         position: relative;
         width: 100%;
+      }
+      #theme-circlelife .cl-album-shell.is-shelf {
+        max-width: 56rem;
+        margin: 0 auto;
+        padding: 1.25rem 1rem 3rem;
+      }
+      #theme-circlelife .cl-album-shelf-head {
+        text-align: center;
+        margin-bottom: 1.75rem;
+      }
+      #theme-circlelife .cl-album-shelf-title {
+        margin: 0.35rem 0 0.4rem;
+        font-family: var(--cl-font-display);
+        font-size: clamp(1.6rem, 3.5vw, 2.1rem);
+        font-weight: 600;
+        letter-spacing: -0.03em;
+        color: var(--cl-text);
+      }
+      #theme-circlelife .cl-album-shelf-desc {
+        margin: 0;
+        font-size: 0.9rem;
+        color: var(--cl-muted);
+      }
+      #theme-circlelife .cl-album-shelf-grid {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem 0.85rem;
+      }
+      @media (min-width: 640px) {
+        #theme-circlelife .cl-album-shelf-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 1.25rem 1.1rem;
+        }
+      }
+      @media (min-width: 900px) {
+        #theme-circlelife .cl-album-shelf-grid {
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+      }
+      #theme-circlelife .cl-album-shelf-card {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        border: 0;
+        padding: 0;
+        background: transparent;
+        cursor: pointer;
+        text-align: left;
+        color: inherit;
+        border-radius: 12px;
+        transition: transform 0.2s var(--cl-ease);
+      }
+      #theme-circlelife .cl-album-shelf-card:hover {
+        transform: translateY(-3px);
+      }
+      #theme-circlelife .cl-album-shelf-cover {
+        display: block;
+        width: 100%;
+        aspect-ratio: 3 / 4;
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--cl-paper-2, var(--cl-surface));
+        border: 1px solid var(--cl-border);
+        box-shadow:
+          0 1px 0 color-mix(in srgb, #fff 40%, transparent),
+          0 10px 28px color-mix(in srgb, var(--cl-text) 8%, transparent);
+      }
+      #theme-circlelife .cl-album-shelf-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        display: block;
+      }
+      #theme-circlelife .cl-album-shelf-ph {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        font-family: var(--cl-font-mono);
+        font-size: 0.7rem;
+        color: var(--cl-faint);
+      }
+      #theme-circlelife .cl-album-shelf-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        padding: 0.55rem 0.15rem 0.25rem;
+      }
+      #theme-circlelife .cl-album-shelf-name {
+        font-family: var(--cl-font-display);
+        font-size: 1rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        color: var(--cl-text);
+        line-height: 1.25;
+      }
+      #theme-circlelife .cl-album-shelf-count {
+        font-family: var(--cl-font-mono);
+        font-size: 0.68rem;
+        letter-spacing: 0.08em;
+        color: var(--cl-faint);
+      }
+      #theme-circlelife .cl-album-gallery-bar {
+        position: absolute;
+        top: 0.55rem;
+        right: 0.75rem;
+        z-index: 8;
+      }
+      #theme-circlelife .cl-album-back-shelf {
+        border: 1px solid var(--cl-border);
+        background: color-mix(in srgb, var(--cl-surface) 78%, transparent);
+        color: var(--cl-text);
+        font-size: 0.82rem;
+        padding: 0.4rem 0.75rem;
+        border-radius: 9999px;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        transition:
+          border-color 0.15s ease,
+          color 0.15s ease,
+          background 0.15s ease;
+      }
+      #theme-circlelife .cl-album-back-shelf:hover {
+        border-color: var(--cl-accent);
+        color: var(--cl-accent);
+        background: var(--cl-accent-soft);
       }
       #theme-circlelife .cl-album-rail {
         display: none;
       }
       @media (min-width: 960px) {
-        #theme-circlelife .cl-album-rail {
+        #theme-circlelife .cl-album-shell.is-gallery .cl-album-rail {
           display: block;
           position: absolute;
-          left: max(0.5rem, calc((100% - 72rem) / 2));
+          left: max(0.35rem, calc((100% - 72rem) / 2));
           top: 50%;
           transform: translateY(-50%);
           z-index: 6;
+          width: 10rem;
           pointer-events: none;
-          width: 9.5rem;
-        }
-        #theme-circlelife .cl-album-rail-glass {
-          pointer-events: auto;
-          border-radius: 16px;
-          padding: 0.65rem 0.45rem 0.75rem;
-          background: color-mix(in srgb, var(--cl-surface) 55%, transparent);
-          border: 1px solid color-mix(in srgb, var(--cl-border) 70%, transparent);
-          box-shadow:
-            0 1px 0 color-mix(in srgb, #fff 35%, transparent),
-            0 12px 32px color-mix(in srgb, var(--cl-text) 8%, transparent);
-          backdrop-filter: blur(14px) saturate(1.1);
-          -webkit-backdrop-filter: blur(14px) saturate(1.1);
-        }
-        .dark #theme-circlelife .cl-album-rail-glass {
-          background: color-mix(in srgb, var(--cl-surface) 62%, transparent);
-          box-shadow: 0 12px 36px color-mix(in srgb, #000 40%, transparent);
-        }
-        #theme-circlelife .cl-album-rail-label {
-          font-family: var(--cl-font-mono);
-          font-size: 0.58rem;
-          letter-spacing: 0.18em;
-          text-transform: uppercase;
-          color: var(--cl-faint);
-          text-align: center;
-          margin-bottom: 0.35rem;
         }
         #theme-circlelife .cl-album-rail-window {
           position: relative;
-          height: 280px;
+          height: 300px;
           overflow: hidden;
+          pointer-events: auto;
           mask-image: linear-gradient(
             to bottom,
             transparent 0%,
-            #000 18%,
-            #000 82%,
+            #000 16%,
+            #000 84%,
             transparent 100%
           );
           -webkit-mask-image: linear-gradient(
             to bottom,
             transparent 0%,
-            #000 18%,
-            #000 82%,
+            #000 16%,
+            #000 84%,
             transparent 100%
           );
         }
-        #theme-circlelife .cl-album-rail-fade {
-          display: none; /* mask handles fade */
+        #theme-circlelife .cl-album-rail-spine {
+          position: absolute;
+          left: 0.55rem;
+          top: 0;
+          bottom: 0;
+          width: 1px;
+          background: color-mix(in srgb, var(--cl-text) 22%, transparent);
+          z-index: 0;
         }
         #theme-circlelife .cl-album-rail-track {
           position: absolute;
           left: 0;
           right: 0;
           top: 0;
+          z-index: 1;
           transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
           will-change: transform;
         }
         #theme-circlelife .cl-album-rail-item {
           display: flex;
           align-items: center;
-          gap: 0.45rem;
+          gap: 0.55rem;
           width: 100%;
-          height: 40px;
-          padding: 0 0.45rem;
+          height: 44px;
+          padding: 0 0.2rem 0 0.25rem;
           border: 0;
           background: transparent;
           cursor: pointer;
           color: var(--cl-faint);
           text-align: left;
-          transition:
-            color 0.25s ease,
-            opacity 0.25s ease,
-            transform 0.25s ease;
-          opacity: 0.45;
+          opacity: 0.4;
+          transition: color 0.25s ease, opacity 0.25s ease;
         }
         #theme-circlelife .cl-album-rail-item.is-near {
           opacity: 0.72;
@@ -1486,14 +1662,15 @@ const Style = () => {
         #theme-circlelife .cl-album-rail-item.is-active {
           opacity: 1;
           color: var(--cl-text);
-          transform: translateX(2px);
         }
         #theme-circlelife .cl-album-rail-dot {
-          width: 5px;
-          height: 5px;
+          width: 7px;
+          height: 7px;
           border-radius: 9999px;
           flex: none;
-          background: color-mix(in srgb, var(--cl-faint) 70%, transparent);
+          margin-left: 0.28rem;
+          background: color-mix(in srgb, var(--cl-text) 28%, transparent);
+          box-shadow: 0 0 0 2px var(--cl-bg);
           transition:
             background 0.25s ease,
             transform 0.25s ease,
@@ -1501,12 +1678,14 @@ const Style = () => {
         }
         #theme-circlelife .cl-album-rail-item.is-active .cl-album-rail-dot {
           background: var(--cl-accent);
-          transform: scale(1.35);
-          box-shadow: 0 0 0 3px color-mix(in srgb, var(--cl-accent) 22%, transparent);
+          transform: scale(1.25);
+          box-shadow:
+            0 0 0 2px var(--cl-bg),
+            0 0 0 4px color-mix(in srgb, var(--cl-accent) 28%, transparent);
         }
         #theme-circlelife .cl-album-rail-text {
           font-family: var(--cl-font-display);
-          font-size: 0.82rem;
+          font-size: 0.84rem;
           font-weight: 500;
           letter-spacing: -0.01em;
           line-height: 1.2;
@@ -1516,16 +1695,6 @@ const Style = () => {
         }
         #theme-circlelife .cl-album-rail-item.is-active .cl-album-rail-text {
           font-weight: 600;
-        }
-        /* give stage a bit of left breathing room so rail doesn't cover cards */
-        #theme-circlelife .cl-album-shell .cl-ag {
-          padding-left: 0.5rem;
-        }
-      }
-      @media (min-width: 1100px) {
-        #theme-circlelife .cl-album-rail {
-          width: 10.5rem;
-          left: max(0.75rem, calc((100% - 72rem) / 2 - 0.25rem));
         }
       }
 
@@ -1603,18 +1772,17 @@ const Style = () => {
         position: absolute;
         left: 50%;
         top: 50%;
-        width: 130%;
-        height: 130%;
+        width: 135%;
+        height: 135%;
         max-width: none;
         object-fit: cover;
         transform: translate(-50%, -50%);
-        filter: blur(64px) saturate(1.08) brightness(1.0);
+        filter: blur(58px) saturate(1.35) brightness(1.02);
         will-change: opacity;
-        transition: opacity 1.1s ease;
+        transition: opacity 1.15s ease;
       }
-      /* 单层常态 */
       #theme-circlelife .cl-ag-ambient-img.is-base {
-        opacity: 0.34;
+        opacity: 0.58;
         z-index: 0;
       }
       #theme-circlelife .cl-ag-ambient-img.is-base.is-out {
@@ -1625,28 +1793,28 @@ const Style = () => {
         z-index: 1;
       }
       #theme-circlelife .cl-ag-ambient-img.is-top.is-in {
-        opacity: 0.34;
+        opacity: 0.58;
       }
       .dark #theme-circlelife .cl-ag-ambient-img.is-base {
-        opacity: 0.28;
-        filter: blur(68px) saturate(1.12) brightness(0.98);
+        opacity: 0.48;
+        filter: blur(62px) saturate(1.4) brightness(0.98);
       }
       .dark #theme-circlelife .cl-ag-ambient-img.is-base.is-out {
         opacity: 0;
       }
       .dark #theme-circlelife .cl-ag-ambient-img.is-top.is-in {
-        opacity: 0.28;
-        filter: blur(68px) saturate(1.12) brightness(0.98);
+        opacity: 0.48;
+        filter: blur(62px) saturate(1.4) brightness(0.98);
       }
       #theme-circlelife .cl-ag-ambient-veil {
         position: absolute;
         inset: 0;
         z-index: 2;
-        background: color-mix(in srgb, var(--cl-bg) 68%, transparent);
+        background: color-mix(in srgb, var(--cl-bg) 48%, transparent);
         transition: background 0.6s ease;
       }
       .dark #theme-circlelife .cl-ag-ambient-veil {
-        background: color-mix(in srgb, var(--cl-bg) 72%, transparent);
+        background: color-mix(in srgb, var(--cl-bg) 55%, transparent);
       }
 
       /* make ambient cover whole section: position ag ambient fixed to section */
