@@ -1,21 +1,30 @@
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
+import { useEffect, useState } from 'react'
 import CONFIG from '../config'
 import { BrandLockup } from './BrandLockup'
 import { MenuList } from './MenuList'
 
 /**
- * 顶栏：锁头 + 可横滑菜单 + 搜索 / 深浅色
+ * 顶栏：锁头 + 菜单；滚动后压缩高度
  */
 export const Header = props => {
   const { isDarkMode, toggleDarkMode } = useGlobal()
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   const openSearch = () => {
     window.location.href = '/search'
   }
 
   return (
-    <header className='cl-header sticky top-0 z-40 w-full'>
+    <header className={`cl-header sticky top-0 z-40 w-full ${scrolled ? 'is-scrolled' : ''}`}>
       <div className='cl-header-inner'>
         <BrandLockup compact href='/' />
         <div className='cl-header-nav min-w-0 flex-1'>

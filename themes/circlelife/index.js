@@ -121,7 +121,7 @@ const LayoutBase = props => {
         <button
           type='button'
           title={locale.POST.TOP}
-          className='cl-icon-btn bg-[var(--cl-surface)] shadow-sm'
+          className='cl-icon-btn cl-backtop'
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
           <i className='fas fa-angle-up text-lg' />
         </button>
@@ -155,23 +155,25 @@ const LayoutPostList = props => {
     !router?.query?.s &&
     (router.pathname === '/' || router.pathname === '/page/[page]')
 
-  const latestCardPost = latestPosts?.[0] || posts?.[0]
+  const heroPosts =
+    (latestPosts?.length ? latestPosts : posts)?.filter(Boolean) || []
 
   return (
     <>
       {category && (
-        <div className='cl-timeline-day-label mb-4 border-0 pb-2'>
-          <i className='mr-1 fas fa-folder-open' />
-          {category}
+        <div className='cl-page-kicker mb-4'>
+          <span className='cl-kicker'>{category}</span>
         </div>
       )}
       {tag && (
-        <div className='cl-timeline-day-label mb-4 border-0 pb-2'>#{tag}</div>
+        <div className='cl-page-kicker mb-4'>
+          <span className='cl-kicker'>#{tag}</span>
+        </div>
       )}
 
       {useTimeline &&
         siteConfig('CIRCLELIFE_HOME_LATEST_CARD', true, CONFIG) && (
-          <LatestCard post={latestCardPost} />
+          <LatestCard posts={heroPosts} post={heroPosts[0]} />
         )}
 
       {siteConfig('POST_LIST_STYLE') === 'page' ? (

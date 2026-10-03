@@ -1,6 +1,5 @@
 /**
  * Circle of Life 主题配置
- * 视觉对齐封面工具 theme-ink；影集仅预留样式钩子
  */
 const CONFIG = {
   CIRCLELIFE_COLOR_BG: '#F5F0E4',
@@ -17,8 +16,11 @@ const CONFIG = {
 
   CIRCLELIFE_HOME_TIMELINE: true,
   CIRCLELIFE_HOME_LATEST_CARD: true,
-  /** 报头块默认 kicker（无分类时） */
   CIRCLELIFE_LATEST_KICKER: '最近',
+  /** 报头轮播篇数 */
+  CIRCLELIFE_HERO_COUNT: 5,
+  /** 自动切换毫秒；0 关闭 */
+  CIRCLELIFE_HERO_AUTO_MS: 6000,
   CIRCLELIFE_SIDEBAR_ONLY_ON_POST: true,
 
   CIRCLELIFE_POST_LIST_COVER: false,
@@ -26,7 +28,6 @@ const CONFIG = {
   CIRCLELIFE_HOME_MINIMAL_HEADER: true,
 
   CIRCLELIFE_ARTICLE_LAYOUT_VERTICAL: false,
-  /** 文章页不展示公告 */
   CIRCLELIFE_ARTICLE_HIDDEN_NOTIFICATION: true
 }
 export default CONFIG
