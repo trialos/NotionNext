@@ -67,17 +67,28 @@ const Style = () => {
       #theme-circlelife .cl-header {
         position: sticky;
         top: 0;
-        background-color: color-mix(in srgb, var(--cl-bg) 92%, transparent);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
+        background-color: color-mix(in srgb, var(--cl-bg) 72%, transparent);
+        backdrop-filter: blur(14px) saturate(1.1);
+        -webkit-backdrop-filter: blur(14px) saturate(1.1);
         border-bottom: 1px solid transparent;
         transition:
           border-color var(--cl-dur) var(--cl-ease),
-          background-color var(--cl-dur) var(--cl-ease);
+          background-color var(--cl-dur) var(--cl-ease),
+          backdrop-filter var(--cl-dur) var(--cl-ease);
       }
       #theme-circlelife .cl-header.is-scrolled {
-        border-bottom-color: var(--cl-border);
-        background-color: color-mix(in srgb, var(--cl-bg) 97%, transparent);
+        border-bottom-color: color-mix(in srgb, var(--cl-border) 70%, transparent);
+        background-color: color-mix(in srgb, var(--cl-bg) 82%, transparent);
+      }
+      /* 影集页更透一点，仍保留存在感 */
+      #theme-circlelife.cl-is-album .cl-header {
+        background-color: color-mix(in srgb, var(--cl-bg) 52%, transparent);
+        backdrop-filter: blur(16px) saturate(1.15);
+        -webkit-backdrop-filter: blur(16px) saturate(1.15);
+      }
+      #theme-circlelife.cl-is-album .cl-header.is-scrolled {
+        background-color: color-mix(in srgb, var(--cl-bg) 68%, transparent);
+        border-bottom-color: color-mix(in srgb, var(--cl-border) 55%, transparent);
       }
       #theme-circlelife .cl-header-inner {
         margin: 0 auto;
@@ -1425,36 +1436,45 @@ const Style = () => {
         z-index: 0;
         pointer-events: none;
         overflow: hidden;
-        opacity: 0;
-        transition: opacity 0.45s ease;
-      }
-      #theme-circlelife .cl-ag-ambient.is-on {
-        opacity: 1;
       }
       #theme-circlelife .cl-ag-ambient-img {
         position: absolute;
         left: 50%;
         top: 50%;
-        width: 140%;
-        height: 140%;
+        width: 145%;
+        height: 145%;
         max-width: none;
         object-fit: cover;
-        transform: translate(-50%, -50%) scale(1.15);
-        filter: blur(48px) saturate(1.25) brightness(1.05);
-        opacity: 0.55;
+        transform: translate(-50%, -50%) scale(1.12);
+        filter: blur(56px) saturate(1.2) brightness(1.04);
+        opacity: 0.5;
+        will-change: opacity;
       }
-      .dark #theme-circlelife .cl-ag-ambient-img {
-        opacity: 0.42;
-        filter: blur(52px) saturate(1.35) brightness(0.95);
+      #theme-circlelife .cl-ag-ambient-img.is-base {
+        opacity: 0.5;
+        z-index: 0;
+      }
+      #theme-circlelife .cl-ag-ambient-img.is-top {
+        opacity: 0;
+        z-index: 1;
+        transition: opacity 0.72s ease;
+      }
+      #theme-circlelife .cl-ag-ambient-img.is-top.is-on {
+        opacity: 0.5;
+      }
+      .dark #theme-circlelife .cl-ag-ambient-img.is-base,
+      .dark #theme-circlelife .cl-ag-ambient-img.is-top.is-on {
+        opacity: 0.4;
+        filter: blur(60px) saturate(1.3) brightness(0.96);
       }
       #theme-circlelife .cl-ag-ambient-veil {
         position: absolute;
         inset: 0;
-        background: color-mix(in srgb, var(--cl-bg) 55%, transparent);
-        backdrop-filter: blur(0px);
+        z-index: 2;
+        background: color-mix(in srgb, var(--cl-bg) 58%, transparent);
       }
       .dark #theme-circlelife .cl-ag-ambient-veil {
-        background: color-mix(in srgb, var(--cl-bg) 62%, transparent);
+        background: color-mix(in srgb, var(--cl-bg) 64%, transparent);
       }
 
       /* make ambient cover whole section: position ag ambient fixed to section */
@@ -1471,14 +1491,52 @@ const Style = () => {
       }
 
       #theme-circlelife .cl-ag-head {
-        text-align: center;
-        padding: 0.2rem 0.5rem 0.45rem;
+        text-align: left;
+        padding: 0.35rem 0.35rem 0.55rem;
         flex-shrink: 0;
+        display: flex;
+        justify-content: flex-start;
       }
-      #theme-circlelife .cl-ag-kicker {
+      @media (min-width: 768px) {
+        #theme-circlelife .cl-ag-head {
+          padding: 0.45rem 0.5rem 0.65rem 0.75rem;
+        }
+      }
+      #theme-circlelife .cl-ag-titlechip {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.15rem;
+        padding: 0.55rem 0.9rem 0.6rem;
+        border-radius: 14px;
+        background: color-mix(in srgb, var(--cl-surface) 72%, transparent);
+        border: 1px solid color-mix(in srgb, var(--cl-border) 80%, transparent);
+        box-shadow:
+          0 1px 0 color-mix(in srgb, #fff 40%, transparent),
+          0 8px 24px color-mix(in srgb, var(--cl-text) 8%, transparent);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        max-width: min(92%, 22rem);
+      }
+      .dark #theme-circlelife .cl-ag-titlechip {
+        background: color-mix(in srgb, var(--cl-surface) 78%, transparent);
+        box-shadow: 0 8px 28px color-mix(in srgb, #000 35%, transparent);
+      }
+      #theme-circlelife .cl-ag-titlechip-label {
+        font-family: var(--cl-font-mono);
+        font-size: 0.62rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--cl-faint);
+      }
+      #theme-circlelife .cl-ag-titlechip-name {
         margin: 0;
-        font-size: 0.78rem;
-        letter-spacing: 0.12em;
+        font-family: var(--cl-font-display);
+        font-size: clamp(1.15rem, 2.8vw, 1.55rem);
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        line-height: 1.25;
+        color: var(--cl-text);
       }
 
       #theme-circlelife .cl-ag-stage {
@@ -1495,9 +1553,25 @@ const Style = () => {
         -webkit-user-select: none;
         cursor: grab;
         overflow: visible;
+        --ag-dx: 0px;
+        --ag-rot: 0deg;
+        --ag-shift: 0px;
+        --ag-shift-far: 0px;
+        --ag-grow-r: 0;
+        --ag-grow-l: 0;
+        --ag-fade-main: 1;
+        --ag-dur: 0ms;
       }
       #theme-circlelife .cl-ag-stage:active {
         cursor: grabbing;
+      }
+      #theme-circlelife .cl-ag-stage.is-animating .cl-ag-card--main,
+      #theme-circlelife .cl-ag-stage.is-animating .cl-ag-card--side,
+      #theme-circlelife .cl-ag-stage.is-animating .cl-ag-card--far {
+        transition:
+          transform var(--ag-dur) cubic-bezier(0.22, 0.61, 0.36, 1),
+          opacity var(--ag-dur) cubic-bezier(0.22, 0.61, 0.36, 1),
+          filter var(--ag-dur) ease;
       }
       @media (min-width: 900px) {
         #theme-circlelife .cl-ag-stage {
@@ -1541,7 +1615,9 @@ const Style = () => {
       #theme-circlelife .cl-ag-card--main {
         z-index: 5;
         will-change: transform, opacity;
-        transform: translate3d(-50%, -50%, 0);
+        opacity: var(--ag-fade-main, 1);
+        transform: translate3d(calc(-50% + var(--ag-dx, 0px)), -50%, 0)
+          rotate(var(--ag-rot, 0deg));
       }
       #theme-circlelife .cl-ag-card--side {
         z-index: 3;
@@ -1549,31 +1625,39 @@ const Style = () => {
         opacity: 0.78;
         filter: brightness(0.94);
         cursor: pointer;
-        transition:
-          transform 0.35s var(--cl-ease, ease),
-          opacity 0.25s ease,
-          filter 0.25s ease;
       }
       #theme-circlelife .cl-ag-card--side:hover {
         opacity: 0.95;
         filter: brightness(1);
       }
       #theme-circlelife .cl-ag-card--left {
-        transform: translate(calc(-50% - min(36vw, 15rem)), -50%) scale(0.86)
-          rotate(-4deg);
+        transform: translate(
+            calc(-50% - min(36vw, 15rem) + var(--ag-shift, 0px)),
+            -50%
+          )
+          scale(calc(0.86 + var(--ag-grow-l, 0))) rotate(-4deg);
       }
       #theme-circlelife .cl-ag-card--right {
-        transform: translate(calc(-50% + min(36vw, 15rem)), -50%) scale(0.86)
-          rotate(4deg);
+        transform: translate(
+            calc(-50% + min(36vw, 15rem) + var(--ag-shift, 0px)),
+            -50%
+          )
+          scale(calc(0.86 + var(--ag-grow-r, 0))) rotate(4deg);
       }
       @media (min-width: 900px) {
         #theme-circlelife .cl-ag-card--left {
-          transform: translate(calc(-50% - min(30vw, 17.5rem)), -50%) scale(0.84)
-            rotate(-5deg);
+          transform: translate(
+              calc(-50% - min(30vw, 17.5rem) + var(--ag-shift, 0px)),
+              -50%
+            )
+            scale(calc(0.84 + var(--ag-grow-l, 0))) rotate(-5deg);
         }
         #theme-circlelife .cl-ag-card--right {
-          transform: translate(calc(-50% + min(30vw, 17.5rem)), -50%) scale(0.84)
-            rotate(5deg);
+          transform: translate(
+              calc(-50% + min(30vw, 17.5rem) + var(--ag-shift, 0px)),
+              -50%
+            )
+            scale(calc(0.84 + var(--ag-grow-r, 0))) rotate(5deg);
         }
       }
       #theme-circlelife .cl-ag-card--far {
@@ -1584,25 +1668,37 @@ const Style = () => {
         pointer-events: none;
       }
       #theme-circlelife .cl-ag-card--left2 {
-        transform: translate(calc(-50% - min(56vw, 25rem)), -50%) scale(0.7)
-          rotate(-8deg);
+        transform: translate(
+            calc(-50% - min(56vw, 25rem) + var(--ag-shift-far, 0px)),
+            -50%
+          )
+          scale(0.7) rotate(-8deg);
       }
       #theme-circlelife .cl-ag-card--right2 {
-        transform: translate(calc(-50% + min(56vw, 25rem)), -50%) scale(0.7)
-          rotate(8deg);
+        transform: translate(
+            calc(-50% + min(56vw, 25rem) + var(--ag-shift-far, 0px)),
+            -50%
+          )
+          scale(0.7) rotate(8deg);
       }
       @media (max-width: 639px) {
         #theme-circlelife .cl-ag-card--far {
           display: none;
         }
         #theme-circlelife .cl-ag-card--left {
-          transform: translate(calc(-50% - min(46vw, 9rem)), -50%) scale(0.78)
-            rotate(-3deg);
+          transform: translate(
+              calc(-50% - min(46vw, 9rem) + var(--ag-shift, 0px)),
+              -50%
+            )
+            scale(calc(0.78 + var(--ag-grow-l, 0))) rotate(-3deg);
           opacity: 0.55;
         }
         #theme-circlelife .cl-ag-card--right {
-          transform: translate(calc(-50% + min(46vw, 9rem)), -50%) scale(0.78)
-            rotate(3deg);
+          transform: translate(
+              calc(-50% + min(46vw, 9rem) + var(--ag-shift, 0px)),
+              -50%
+            )
+            scale(calc(0.78 + var(--ag-grow-r, 0))) rotate(3deg);
           opacity: 0.55;
         }
       }
