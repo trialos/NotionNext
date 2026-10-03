@@ -94,15 +94,21 @@ const SEO = props => {
   const pwaConfig = pwaEnabled
     ? getPwaConfig({ siteInfo, notionConfig: NOTION_CONFIG })
     : null
-  // Prefer paper/light brand color over pure black browser chrome
-  const BACKGROUND_LIGHT = siteConfig('BACKGROUND_LIGHT', '#F5F0E4', NOTION_CONFIG)
+  // Prefer paper brand chrome; avoid pure black / generic #eeeeee defaults
   const PWA_THEME_COLOR = siteConfig('PWA_THEME_COLOR', '', NOTION_CONFIG)
+  const BACKGROUND_LIGHT = siteConfig('BACKGROUND_LIGHT', '', NOTION_CONFIG)
+  const paperChrome = '#F5F0E4'
+  const light =
+    BACKGROUND_LIGHT &&
+    String(BACKGROUND_LIGHT).toLowerCase() !== '#eeeeee' &&
+    String(BACKGROUND_LIGHT).toLowerCase() !== '#eee'
+      ? BACKGROUND_LIGHT
+      : paperChrome
   const browserThemeColor =
     (pwaEnabled && pwaConfig?.themeColor) ||
     PWA_THEME_COLOR ||
-    BACKGROUND_LIGHT ||
-    BACKGROUND_DARK ||
-    '#F5F0E4'
+    light ||
+    paperChrome
 
   const COMMENT_WEBMENTION_ENABLE = siteConfig(
     'COMMENT_WEBMENTION_ENABLE',
