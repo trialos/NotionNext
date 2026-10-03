@@ -1,25 +1,9 @@
 import SmartLink from '@/components/SmartLink'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { ICON_FALLBACK, linkTitle } from './navConfig'
 
 const HOVER_CLOSE_MS = 120
-
-const ICON_FALLBACK = {
-  首页: 'fas fa-home',
-  随笔: 'fas fa-pen',
-  时间线: 'fas fa-clock-rotate-left',
-  往期整理: 'fas fa-archive',
-  关于: 'fas fa-user',
-  文章分类: 'fas fa-th',
-  文章标签: 'fas fa-tag',
-  分类: 'fas fa-th',
-  标签: 'fas fa-tag',
-  搜索: 'fas fa-search',
-  Archive: 'fas fa-archive',
-  Category: 'fas fa-folder',
-  Tags: 'fas fa-tag',
-  Search: 'fas fa-search'
-}
 
 function resolveIcon(link) {
   const raw = (link?.icon || '').trim()
@@ -27,18 +11,15 @@ function resolveIcon(link) {
     if (raw.includes('fa-')) return raw.startsWith('fa') ? raw : `fas ${raw}`
     return raw
   }
-  const title = link?.name || link?.title || ''
+  const title = linkTitle(link)
   return ICON_FALLBACK[title] || 'fas fa-circle'
-}
-
-function linkLabel(link) {
-  return link?.name || link?.title || ''
 }
 
 export const MenuItemDrop = ({
   link,
   variant = 'default',
-  collapsed = false
+  collapsed = false,
+  onNavigate
 }) => {
   const [show, changeShow] = useState(false)
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0 })
@@ -46,8 +27,9 @@ export const MenuItemDrop = ({
   const closeTimerRef = useRef(null)
   const hasSubMenu = link?.subMenus?.length > 0
   const isInline = variant === 'inline'
+  const isDrawer = variant === 'drawer'
   const iconClass = resolveIcon(link)
-  const label = linkLabel(link)
+  const label = linkTitle(link)
 
   const clearCloseTimer = useCallback(() => {
     if (closeTimerRef.current) {
@@ -85,6 +67,54 @@ export const MenuItemDrop = ({
 
   if (link?.show === false) return null
 
+  if (isDrawer) {
+    return (
+      <li className='cl-drawer-item'>
+        {!hasSubMenu ? (
+          <SmartLink
+            href={link?.href}
+            target={link?.target}
+            className='cl-drawer-link'
+            onClick={onNavigate}>
+            <i className={`${iconClass} cl-nav-ico`} aria-hidden='true' />
+            <span>{label}</span>
+          </SmartLink>
+        ) : (
+          <div className='cl-drawer-group'>
+            <button
+              type='button'
+              className='cl-drawer-link cl-drawer-toggle'
+              aria-expanded={show}
+              onClick={() => changeShow(v => !v)}>
+              <i className={`${iconClass} cl-nav-ico`} aria-hidden='true' />
+              <span>{label}</span>
+              <i
+                className={`fas fa-chevron-down cl-drawer-chevron ${
+                  show ? 'is-open' : ''
+                }`}
+              />
+            </button>
+            {show ? (
+              <ul className='cl-drawer-sub'>
+                {link.subMenus.map((s, i) => (
+                  <li key={i}>
+                    <SmartLink
+                      href={s.href}
+                      target={link?.target}
+                      className='cl-drawer-sublink'
+                      onClick={onNavigate}>
+                      {s.title || s.name}
+                    </SmartLink>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        )}
+      </li>
+    )
+  }
+
   const itemShell = isInline ? 'relative flex-shrink-0' : 'cursor-pointer'
   const linkBox = isInline
     ? `rounded-md cl-nav-link no-underline inline-flex items-center whitespace-nowrap px-2 py-1.5 gap-1.5 ${
@@ -120,7 +150,7 @@ export const MenuItemDrop = ({
             }`
           : `${
               show ? 'visible opacity-100' : 'hidden pointer-events-none opacity-0'
-            } absolute z-30 transition-all duration-200 left-0 top-12 block border bg-[var(--cl-surface)] border-[var(--cl-border)] dark:bg-black`
+            } absolute z-30 transition-all duration-200 left-0 top-12 block border bg-[var(--cl-surface)] border-[var(--cl-border)]`
       }
       style={
         isInline && show

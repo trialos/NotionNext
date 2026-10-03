@@ -17,13 +17,9 @@ const CONFIG = {
   CIRCLELIFE_HOME_TIMELINE: true,
   CIRCLELIFE_HOME_LATEST_CARD: true,
   CIRCLELIFE_LATEST_KICKER: '最近',
-  /** 报头抽牌篇数 */
   CIRCLELIFE_HERO_COUNT: 5,
-  /** 自动切换毫秒；0 关闭 */
   CIRCLELIFE_HERO_AUTO_MS: 6000,
-  /** 报头使用文章封面作背景 */
   CIRCLELIFE_HERO_COVER: true,
-  /** 文章页短片头条封面 */
   CIRCLELIFE_ARTICLE_COVER: true,
 
   CIRCLELIFE_SIDEBAR_ONLY_ON_POST: true,
@@ -33,6 +29,31 @@ const CONFIG = {
   CIRCLELIFE_HOME_MINIMAL_HEADER: true,
 
   CIRCLELIFE_ARTICLE_LAYOUT_VERTICAL: false,
-  CIRCLELIFE_ARTICLE_HIDDEN_NOTIFICATION: true
+  CIRCLELIFE_ARTICLE_HIDDEN_NOTIFICATION: true,
+
+  /**
+   * 三作者：Notion 文章「作者」字段匹配 name/id
+   * avatar 可选公开图 URL；不填则仅显示名或首字母
+   */
+  CIRCLELIFE_AUTHORS: [
+    {
+      id: 'andrew',
+      name: 'Andrew',
+      avatar: '',
+      blurb: '喜欢生活和思考'
+    },
+    {
+      id: 'felix',
+      name: 'Felix',
+      avatar: '',
+      blurb: 'ex-通信 · 折腾 AI'
+    },
+    {
+      id: 'barry',
+      name: 'Barry',
+      avatar: '',
+      blurb: '期权观察 · 周报'
+    }
+  ]
 }
 export default CONFIG

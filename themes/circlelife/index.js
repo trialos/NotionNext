@@ -267,6 +267,22 @@ const LayoutSlug = props => {
  * @param {*} props
  * @returns
  */
+
+/**
+ * 影集占位
+ */
+const LayoutAlbum = () => {
+  return (
+    <div className='cl-page-hero w-full py-16 text-center'>
+      <p className='cl-kicker mb-3'>影集</p>
+      <h1 className='cl-article-title !mb-3'>即将到来</h1>
+      <p className='cl-post-summary mx-auto max-w-md'>
+        影像与随手记录会在这里慢慢铺开。目录已挂上，内容稍后再补。
+      </p>
+    </div>
+  )
+}
+
 const Layout404 = props => {
   const router = useRouter()
   useEffect(() => {
@@ -423,6 +439,7 @@ export {
   LayoutArchive,
   LayoutBase,
   LayoutCategoryIndex,
+  LayoutAlbum,
   LayoutIndex,
   LayoutPostList,
   LayoutSearch,
