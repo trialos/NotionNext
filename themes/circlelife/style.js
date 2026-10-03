@@ -1404,16 +1404,19 @@ const Style = () => {
       }
       #theme-circlelife .cl-album-stage {
         position: relative;
-        height: min(62vw, 22rem);
-        max-height: 26rem;
+        height: min(72vw, 28rem);
+        max-height: 32rem;
+        min-height: 16rem;
         touch-action: none;
         user-select: none;
         margin: 0 auto 1rem;
         perspective: 900px;
+        background: transparent;
       }
       @media (min-width: 768px) {
         #theme-circlelife .cl-album-stage {
-          height: 26rem;
+          height: 30rem;
+          max-height: 34rem;
         }
       }
       #theme-circlelife .cl-album-stack {
@@ -1426,13 +1429,13 @@ const Style = () => {
       }
       #theme-circlelife .cl-album-card {
         position: absolute;
-        width: min(86%, 22rem);
+        width: min(92%, 24rem);
         height: 100%;
-        max-height: 26rem;
+        max-height: inherit;
         border-radius: 14px;
         overflow: hidden;
         border: 1px solid var(--cl-border);
-        background: var(--cl-surface);
+        background: var(--cl-paper-2);
         box-shadow:
           0 1px 0 color-mix(in srgb, var(--cl-text) 5%, transparent),
           0 12px 28px color-mix(in srgb, var(--cl-text) 8%, transparent);
@@ -1463,9 +1466,10 @@ const Style = () => {
       #theme-circlelife .cl-album-card-img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
         object-position: center;
         display: block;
+        background: var(--cl-paper-2);
       }
       #theme-circlelife .cl-album-card-placeholder {
         width: 100%;
@@ -1479,18 +1483,7 @@ const Style = () => {
         text-align: center;
       }
       #theme-circlelife .cl-album-card-shade {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        height: 42%;
-        pointer-events: none;
-        background: linear-gradient(
-          180deg,
-          transparent 0%,
-          color-mix(in srgb, var(--cl-surface) 55%, transparent) 55%,
-          color-mix(in srgb, var(--cl-surface) 88%, transparent) 100%
-        );
+        display: none;
       }
       #theme-circlelife .cl-album-nav-btns {
         display: none;
@@ -1638,8 +1631,8 @@ const Style = () => {
       }
       #theme-circlelife .cl-album-lightbox-img {
         width: 100%;
-        max-height: 55vh;
-        object-fit: cover;
+        max-height: 70vh;
+        object-fit: contain;
         display: block;
         background: var(--cl-paper-2);
       }

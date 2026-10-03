@@ -138,9 +138,9 @@ export default function AlbumStage({ pages }) {
         <ul className='cl-album-howto'>
           <li>type 选 <strong>Photo</strong></li>
           <li>status 为 Published</li>
-          <li>设页面封面为主图，summary/正文写描述</li>
-          <li>可选 Select「专辑」做上下滑分辑</li>
-          <li>可选「作者」挂 Andrew / Felix / Barry</li>
+          <li>正文里插入多张图片（左右滑切换）</li>
+          <li>封面可选；有封面会作为第一张</li>
+          <li>summary 写描述；「专辑」「作者」可选</li>
         </ul>
       </div>
     )
@@ -240,7 +240,7 @@ export default function AlbumStage({ pages }) {
               <div
                 key={photo.id || idx}
                 className={`cl-album-card ${isMain ? 'is-main' : 'is-back'} ${
-                  photo.cover ? 'has-cover' : ''
+                  (photo.cover || photo.url) ? 'has-cover' : ''
                 }`}
                 style={style}
                 onClick={e => {
@@ -250,9 +250,9 @@ export default function AlbumStage({ pages }) {
                   setExpanded(true)
                 }}>
                 <div className='cl-album-card-frame'>
-                  {photo.cover ? (
+                  {(photo.cover || photo.url) ? (
                     <LazyImage
-                      src={photo.cover}
+                      src={photo.cover || photo.url}
                       alt={photo.title || ''}
                       className='cl-album-card-img'
                     />
@@ -345,7 +345,7 @@ export default function AlbumStage({ pages }) {
               onClick={() => setExpanded(false)}>
               <i className='fas fa-times' />
             </button>
-            {current.cover ? (
+            {(current.cover || current.url) ? (
               <LazyImage
                 src={current.cover}
                 alt={current.title || ''}
