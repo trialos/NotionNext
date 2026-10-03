@@ -1,19 +1,26 @@
 import LazyImage from '@/components/LazyImage'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import AuthorBadge from './AuthorBadge'
 
-const THRESH = 0.22
-const MAX_X = 260
+const THRESH = 0.2
 const TAP_MAX = 10
+const OUT_MS = 280
+const IN_MS = 320
+const EASE = 'cubic-bezier(0.22, 0.61, 0.36, 1)'
 
 /**
- * 单辑横向循环翻卡（pointer ref 跟手，本辑内循环）
+ * 单辑横向循环翻卡 + 玻璃浮层 + 模糊光晕 + 全屏灯箱
+ * albumName = Notion 页面标题
  */
 export default function AlbumGallery({ albumName, photos }) {
   const n = photos?.length || 0
   const [index, setIndex] = useState(0)
   const [expanded, setExpanded] = useState(false)
-  const [tick, setTick] = useState(0)
+  const [glowSrc, setGlowSrc] = useState('')
+  const [glowOn, setGlowOn] = useState(false)
+  const [portalReady, setPortalReady] = useState(false)
+
   const dragRef = useRef({
     active: false,
     locked: null,
@@ -26,25 +33,29 @@ export default function AlbumGallery({ albumName, photos }) {
   const rootRef = useRef(null)
   const mainRef = useRef(null)
   const stageRef = useRef(null)
-  const idxRef = useRef(0)
   const busyRef = useRef(false)
   const activeRef = useRef(false)
+  const indexRef = useRef(0)
 
   useEffect(() => {
-    idxRef.current = index
+    indexRef.current = index
   }, [index])
 
-  // 仅当前分辑在视口时响应左右键 / 避免多辑同时改 index
+  useEffect(() => {
+    setPortalReady(true)
+  }, [])
+
   useEffect(() => {
     const el = rootRef.current
     if (!el || typeof IntersectionObserver === 'undefined') {
       activeRef.current = true
-      return
+      return undefined
     }
     const io = new IntersectionObserver(
       entries => {
-        const hit = entries.some(e => e.isIntersecting && e.intersectionRatio >= 0.45)
-        activeRef.current = hit
+        activeRef.current = entries.some(
+          e => e.isIntersecting && e.intersectionRatio >= 0.4
+        )
       },
       { threshold: [0.35, 0.55, 0.75] }
     )
@@ -52,36 +63,68 @@ export default function AlbumGallery({ albumName, photos }) {
     return () => io.disconnect()
   }, [])
 
-  const go = useCallback(
-    delta => {
+  const cardWidth = () =>
+    mainRef.current?.offsetWidth ||
+    Math.min(stageRef.current?.clientWidth || 320, 360)
+
+  const applyTransform = (x, withTransition, duration = OUT_MS) => {
+    const el = mainRef.current
+    if (!el) return
+    const rot = x * 0.035
+    el.style.transition = withTransition
+      ? `transform ${duration}ms ${EASE}, opacity ${duration}ms ${EASE}`
+      : 'none'
+    el.style.opacity = Math.abs(x) > cardWidth() * 0.7 ? '0.35' : '1'
+    el.style.transform = `translate3d(calc(-50% + ${x}px), -50%, 0) rotate(${rot}deg)`
+  }
+
+  const resetMain = () => {
+    const el = mainRef.current
+    if (!el) return
+    el.style.transition = 'none'
+    el.style.opacity = '1'
+    el.style.transform = 'translate3d(-50%, -50%, 0) rotate(0deg)'
+  }
+
+  /** dir: +1 下一张（向左飞出）, -1 上一张 */
+  const animateTo = useCallback(
+    dir => {
       if (n <= 1 || busyRef.current) return
-      setIndex(i => (i + delta + n) % n)
+      busyRef.current = true
+      const w = cardWidth()
+      const outX = dir > 0 ? -w * 1.05 : w * 1.05
+      const inX = dir > 0 ? w * 0.42 : -w * 0.42
+
+      applyTransform(outX, true, OUT_MS)
+      window.setTimeout(() => {
+        setIndex(i => (i + dir + n) % n)
+        // 入场起始位
+        applyTransform(inX, false)
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            applyTransform(0, true, IN_MS)
+            window.setTimeout(() => {
+              resetMain()
+              busyRef.current = false
+            }, IN_MS + 20)
+          })
+        })
+      }, OUT_MS)
     },
     [n]
   )
 
-  const applyTransform = (x, withTransition) => {
-    const el = mainRef.current
-    if (!el) return
-    const rot = x * 0.04
-    el.style.transition = withTransition
-      ? 'transform 0.34s cubic-bezier(0.22, 0.61, 0.36, 1)'
-      : 'none'
-    // 保留 CSS 居中 translate(-50%, -50%)
-    el.style.transform = `translate3d(calc(-50% + ${x}px), -50%, 0) rotate(${rot}deg)`
-  }
-
-  const finishSwipe = (dir, width) => {
-    busyRef.current = true
-    const out = dir > 0 ? -width * 0.92 : width * 0.92
-    applyTransform(out, true)
-    window.setTimeout(() => {
-      go(dir)
-      applyTransform(0, false)
-      busyRef.current = false
-      setTick(t => t + 1)
-    }, 210)
-  }
+  const go = useCallback(
+    dir => {
+      if (n <= 1) return
+      if (expanded) {
+        setIndex(i => (i + dir + n) % n)
+        return
+      }
+      animateTo(dir)
+    },
+    [n, expanded, animateTo]
+  )
 
   const onPointerDown = e => {
     if (expanded || busyRef.current) return
@@ -110,11 +153,10 @@ export default function AlbumGallery({ albumName, photos }) {
 
     if (!d.locked) {
       if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return
-      // 纵向意图：交给分辑 snap，取消横拖
       if (Math.abs(dy) > Math.abs(dx) * 1.15) {
         d.active = false
         d.locked = 'v'
-        applyTransform(0, true)
+        applyTransform(0, true, 200)
         try {
           e.currentTarget.releasePointerCapture(d.pid)
         } catch (_) {}
@@ -122,17 +164,16 @@ export default function AlbumGallery({ albumName, photos }) {
       }
       d.locked = 'h'
     }
-
     if (d.locked !== 'h') return
     if (e.cancelable) e.preventDefault()
-    let x = dx
-    x = Math.max(-MAX_X, Math.min(MAX_X, x))
+    const maxX = Math.max(120, cardWidth() * 0.75)
+    const x = Math.max(-maxX, Math.min(maxX, dx))
     d.x = x
     if (Math.abs(x) > TAP_MAX) d.moved = true
     applyTransform(x, false)
   }
 
-  const onPointerUp = e => {
+  const onPointerUp = () => {
     const d = dragRef.current
     if (!d.active) {
       d.active = false
@@ -140,18 +181,46 @@ export default function AlbumGallery({ albumName, photos }) {
     }
     const x = d.x
     const moved = d.moved
-    const w = stageRef.current?.clientWidth || e.currentTarget?.clientWidth || 320
-    const th = Math.max(52, w * THRESH)
+    const w = cardWidth()
+    const th = Math.max(48, w * THRESH)
     d.active = false
     d.locked = null
 
     if (n > 1 && x <= -th) {
-      finishSwipe(1, w)
+      // 继续沿当前位移飞出再换页
+      busyRef.current = true
+      applyTransform(-w * 1.05, true, OUT_MS)
+      window.setTimeout(() => {
+        setIndex(i => (i + 1) % n)
+        applyTransform(w * 0.42, false)
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            applyTransform(0, true, IN_MS)
+            window.setTimeout(() => {
+              resetMain()
+              busyRef.current = false
+            }, IN_MS + 20)
+          })
+        })
+      }, OUT_MS)
     } else if (n > 1 && x >= th) {
-      finishSwipe(-1, w)
+      busyRef.current = true
+      applyTransform(w * 1.05, true, OUT_MS)
+      window.setTimeout(() => {
+        setIndex(i => (i - 1 + n) % n)
+        applyTransform(-w * 0.42, false)
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            applyTransform(0, true, IN_MS)
+            window.setTimeout(() => {
+              resetMain()
+              busyRef.current = false
+            }, IN_MS + 20)
+          })
+        })
+      }, OUT_MS)
     } else {
-      applyTransform(0, true)
-      // 轻点打开灯箱
+      applyTransform(0, true, 220)
       if (!moved && Math.abs(x) <= TAP_MAX) {
         setExpanded(true)
       }
@@ -160,11 +229,33 @@ export default function AlbumGallery({ albumName, photos }) {
     d.moved = false
   }
 
+  // 光晕跟随当前图
   useEffect(() => {
-    applyTransform(0, false)
-  }, [index, tick])
+    if (!n) return
+    const safe = ((index % n) + n) % n
+    const url = photos[safe]?.url || photos[safe]?.cover || ''
+    if (!url) {
+      setGlowOn(false)
+      return
+    }
+    setGlowOn(false)
+    const t = window.setTimeout(() => {
+      setGlowSrc(url)
+      setGlowOn(true)
+    }, 40)
+    return () => window.clearTimeout(t)
+  }, [index, n, photos])
 
-  // 灯箱 Esc；仅当前可见分辑响应左右键
+  // 灯箱 body 锁滚
+  useEffect(() => {
+    if (!expanded) return undefined
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [expanded])
+
   useEffect(() => {
     const onKey = e => {
       if (expanded) {
@@ -199,18 +290,81 @@ export default function AlbumGallery({ albumName, photos }) {
   const prev = photos[(safe - 1 + n) % n]
   const next = photos[(safe + 1) % n]
   const prev2 = n > 2 ? photos[(safe - 2 + n) % n] : null
-  const next2 = n > 2 ? photos[(safe + 2 + n) % n] : null
+  const next2 = n > 2 ? photos[(safe + 2) % n] : null
   const caption = current.caption || ''
+  const pageTitle = albumName || current.title || ''
+  const showCaptionTitle =
+    current.title && current.title.trim() && current.title.trim() !== pageTitle
+
+  const lightbox =
+    expanded && portalReady
+      ? createPortal(
+          <div className='cl-ag-lb' role='dialog' aria-modal='true'>
+            <button
+              type='button'
+              className='cl-ag-lb-mask'
+              aria-label='关闭'
+              onClick={() => setExpanded(false)}
+            />
+            <button
+              type='button'
+              className='cl-ag-lb-close'
+              aria-label='关闭'
+              onClick={() => setExpanded(false)}>
+              <i className='fas fa-times' />
+            </button>
+            {n > 1 ? (
+              <>
+                <button
+                  type='button'
+                  className='cl-ag-lb-nav cl-ag-lb-nav--prev'
+                  aria-label='上一张'
+                  onClick={() => go(-1)}>
+                  ‹
+                </button>
+                <button
+                  type='button'
+                  className='cl-ag-lb-nav cl-ag-lb-nav--next'
+                  aria-label='下一张'
+                  onClick={() => go(1)}>
+                  ›
+                </button>
+              </>
+            ) : null}
+            <div className='cl-ag-lb-stage'>
+              <img
+                src={current.url || current.cover}
+                alt={pageTitle || ''}
+                className='cl-ag-lb-img'
+                draggable={false}
+              />
+              <div className='cl-ag-lb-meta'>
+                {pageTitle ? <p className='cl-ag-lb-title'>{pageTitle}</p> : null}
+                <p className='cl-ag-lb-count'>
+                  {String(safe + 1).padStart(2, '0')} /{' '}
+                  {String(n).padStart(2, '0')}
+                </p>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )
+      : null
 
   return (
     <div className='cl-ag' ref={rootRef}>
+      {/* 整辑区域模糊光晕 */}
+      <div className={`cl-ag-ambient${glowOn && glowSrc ? ' is-on' : ''}`} aria-hidden>
+        {glowSrc ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={glowSrc} alt='' className='cl-ag-ambient-img' />
+        ) : null}
+        <div className='cl-ag-ambient-veil' />
+      </div>
+
       <header className='cl-ag-head'>
-        <div className='cl-kicker'>影集 · FILM</div>
-        <div className='cl-ag-head-row'>
-          <h2 className='cl-ag-album-name'>{albumName}</h2>
-          <span className='cl-ag-count'>
-            {String(safe + 1).padStart(2, '0')} / {String(n).padStart(2, '0')}
-          </span>
+        <div className='cl-kicker cl-ag-kicker'>
+          影集 · {pageTitle || '未命名'}
         </div>
       </header>
 
@@ -222,24 +376,22 @@ export default function AlbumGallery({ albumName, photos }) {
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}>
         {prev2 ? (
-          <div
-            className='cl-ag-card cl-ag-card--far cl-ag-card--left2'
-            aria-hidden>
+          <div className='cl-ag-card cl-ag-card--far cl-ag-card--left2' aria-hidden>
             <LazyImage
               src={prev2.url || prev2.cover}
               alt=''
               className='cl-ag-img'
+              priority={false}
             />
           </div>
         ) : null}
         {next2 ? (
-          <div
-            className='cl-ag-card cl-ag-card--far cl-ag-card--right2'
-            aria-hidden>
+          <div className='cl-ag-card cl-ag-card--far cl-ag-card--right2' aria-hidden>
             <LazyImage
               src={next2.url || next2.cover}
               alt=''
               className='cl-ag-img'
+              priority={false}
             />
           </div>
         ) : null}
@@ -282,12 +434,14 @@ export default function AlbumGallery({ albumName, photos }) {
           ref={mainRef}
           className='cl-ag-card cl-ag-card--main'
           role='img'
-          aria-label={current.title || '照片'}>
+          aria-label={pageTitle || '照片'}>
           {current.url || current.cover ? (
             <LazyImage
+              key={current.id || safe}
               src={current.url || current.cover}
-              alt={current.title || ''}
+              alt={pageTitle || ''}
               className='cl-ag-img cl-ag-img--main'
+              priority
             />
           ) : (
             <div className='cl-ag-placeholder'>无图</div>
@@ -295,7 +449,7 @@ export default function AlbumGallery({ albumName, photos }) {
         </div>
 
         {n > 1 ? (
-          <div className='cl-ag-arrows' aria-hidden={false}>
+          <div className='cl-ag-arrows'>
             <button
               type='button'
               className='cl-ag-arrow'
@@ -320,8 +474,15 @@ export default function AlbumGallery({ albumName, photos }) {
         ) : null}
       </div>
 
+      {/* 计数在图下 */}
+      <div className='cl-ag-countline' aria-live='polite'>
+        {String(safe + 1).padStart(2, '0')} / {String(n).padStart(2, '0')}
+      </div>
+
       <div className='cl-ag-caption'>
-        {current.title ? <h3 className='cl-ag-title'>{current.title}</h3> : null}
+        {showCaptionTitle ? (
+          <h3 className='cl-ag-title'>{current.title}</h3>
+        ) : null}
         {caption ? <p className='cl-ag-cap'>{caption}</p> : null}
         {current.summary ? (
           <p className='cl-ag-summary'>{current.summary}</p>
@@ -345,68 +506,25 @@ export default function AlbumGallery({ albumName, photos }) {
               role='tab'
               aria-selected={i === safe}
               className={`cl-ag-dot ${i === safe ? 'is-active' : ''}`}
-              onClick={() => setIndex(i)}
+              onClick={() => {
+                if (busyRef.current || i === safe) return
+                const dir = i > safe ? 1 : -1
+                // 远跳直接切 + 短 fade，避免多圈动画
+                busyRef.current = true
+                applyTransform(dir > 0 ? -40 : 40, true, 160)
+                window.setTimeout(() => {
+                  setIndex(i)
+                  resetMain()
+                  busyRef.current = false
+                }, 160)
+              }}
               aria-label={`第 ${i + 1} 张`}
             />
           ))}
         </div>
       ) : null}
 
-      {expanded ? (
-        <div className='cl-ag-lightbox' role='dialog' aria-modal='true'>
-          <button
-            type='button'
-            className='cl-ag-lightbox-mask'
-            aria-label='关闭'
-            onClick={() => setExpanded(false)}
-          />
-          <div className='cl-ag-lightbox-panel'>
-            <button
-              type='button'
-              className='cl-icon-btn cl-ag-lightbox-close'
-              onClick={() => setExpanded(false)}
-              aria-label='关闭'>
-              <i className='fas fa-times' />
-            </button>
-            <LazyImage
-              src={current.url || current.cover}
-              alt={current.title || ''}
-              className='cl-ag-lightbox-img'
-            />
-            <div className='cl-ag-lightbox-body'>
-              {current.title ? (
-                <h3 className='cl-ag-title'>{current.title}</h3>
-              ) : null}
-              {caption ? <p className='cl-ag-cap'>{caption}</p> : null}
-              {current.summary ? (
-                <p className='cl-ag-summary'>{current.summary}</p>
-              ) : null}
-              {n > 1 ? (
-                <div className='cl-ag-lightbox-nav'>
-                  <button
-                    type='button'
-                    className='cl-ag-arrow'
-                    aria-label='上一张'
-                    onClick={() => go(-1)}>
-                    ‹
-                  </button>
-                  <span className='cl-ag-count'>
-                    {String(safe + 1).padStart(2, '0')} /{' '}
-                    {String(n).padStart(2, '0')}
-                  </span>
-                  <button
-                    type='button'
-                    className='cl-ag-arrow'
-                    aria-label='下一张'
-                    onClick={() => go(1)}>
-                    ›
-                  </button>
-                </div>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      ) : null}
+      {lightbox}
     </div>
   )
 }
