@@ -3,7 +3,7 @@ import CONFIG from './config'
 import { themeConsoleStyle } from '@/lib/themeConsoleStyle'
 
 /**
- * Circle of Life — 抽牌修复 + 细条顶栏 + 进度条 + 细轨目录
+ * Circle of Life — 中轴导航 + 三作者 + 汉堡 + 横排页脚
  */
 const Style = () => {
   return (
@@ -63,8 +63,10 @@ const Style = () => {
         text-decoration: none;
       }
 
-      /* —— Header —— */
+      /* —— Header：中轴桌面 + 手机汉堡 —— */
       #theme-circlelife .cl-header {
+        position: sticky;
+        top: 0;
         background-color: color-mix(in srgb, var(--cl-bg) 92%, transparent);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
@@ -79,64 +81,79 @@ const Style = () => {
       }
       #theme-circlelife .cl-header-inner {
         margin: 0 auto;
-        max-width: 48rem;
+        max-width: 56rem;
         display: flex;
         align-items: center;
-        gap: 0.65rem 0.85rem;
-        padding: 0.7rem 1rem;
-        min-height: 3.25rem;
+        padding: 0.75rem 1.1rem;
+        min-height: 3.4rem;
+        gap: 0.75rem;
         transition:
-          padding 0.22s var(--cl-ease),
-          min-height 0.22s var(--cl-ease),
-          gap 0.22s var(--cl-ease);
+          padding 0.28s var(--cl-ease),
+          min-height 0.28s var(--cl-ease),
+          gap 0.28s var(--cl-ease);
       }
       #theme-circlelife .cl-header.is-scrolled .cl-header-inner {
-        padding-top: 0.22rem;
-        padding-bottom: 0.22rem;
-        min-height: 2.4rem;
-        gap: 0.35rem 0.5rem;
+        padding-top: 0.35rem;
+        padding-bottom: 0.35rem;
+        min-height: 2.55rem;
       }
-      #theme-circlelife .cl-lockup-cn {
-        font-family: var(--cl-font-display);
-        font-size: 0.98rem;
-        line-height: 1.1;
-        max-height: 1.25em;
-        opacity: 1;
-        overflow: hidden;
-        transition:
-          opacity 0.2s var(--cl-ease),
-          max-height 0.22s var(--cl-ease),
-          margin 0.22s var(--cl-ease);
-      }
-      #theme-circlelife .cl-lockup-en {
-        font-family: var(--cl-font-mono);
-        font-size: 0.62rem;
-        letter-spacing: 0.16em;
-        margin-top: 0.28rem;
-        transition: margin 0.22s var(--cl-ease), font-size 0.22s var(--cl-ease);
-      }
-      #theme-circlelife .cl-lockup--collapsed .cl-lockup-cn {
-        opacity: 0;
-        max-height: 0;
-        margin: 0;
-        pointer-events: none;
-      }
-      #theme-circlelife .cl-lockup--collapsed .cl-lockup-en {
-        margin-top: 0;
-        font-size: 0.58rem;
-        letter-spacing: 0.14em;
-      }
-      #theme-circlelife .cl-lockup-mark {
-        transition: width 0.22s var(--cl-ease), height 0.22s var(--cl-ease);
-      }
-      #theme-circlelife .cl-header-nav {
-        overflow-x: auto;
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-      }
-      #theme-circlelife .cl-header-nav::-webkit-scrollbar {
+
+      /* desktop three-column */
+      #theme-circlelife .cl-header-inner--desktop {
         display: none;
       }
+      @media (min-width: 768px) {
+        #theme-circlelife .cl-header-inner--desktop {
+          display: grid;
+          grid-template-columns: 1fr auto 1fr;
+          align-items: center;
+          column-gap: 1rem;
+        }
+        #theme-circlelife .cl-header-inner--mobile {
+          display: none !important;
+        }
+      }
+      #theme-circlelife .cl-header-inner--mobile {
+        display: flex;
+        justify-content: space-between;
+      }
+      #theme-circlelife .cl-header-mobile-spacer {
+        width: 5.5rem;
+        flex: none;
+      }
+
+      #theme-circlelife .cl-header-center {
+        display: flex;
+        justify-content: center;
+        justify-self: center;
+        z-index: 2;
+      }
+      #theme-circlelife .cl-header-wing {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        min-width: 0;
+        transition: transform 0.32s var(--cl-ease), gap 0.32s var(--cl-ease);
+      }
+      #theme-circlelife .cl-header-wing--left {
+        justify-content: flex-end;
+        justify-self: end;
+      }
+      #theme-circlelife .cl-header-wing--right {
+        justify-content: flex-start;
+        justify-self: start;
+        gap: 0.5rem;
+      }
+      /* 下滚：两翼向中聚拢 */
+      #theme-circlelife .cl-header.is-scrolled .cl-header-wing--left.is-gathered {
+        transform: translateX(12%);
+        gap: 0.15rem;
+      }
+      #theme-circlelife .cl-header.is-scrolled .cl-header-wing--right.is-gathered {
+        transform: translateX(-12%);
+        gap: 0.25rem;
+      }
+
       #theme-circlelife .cl-header-actions {
         display: flex;
         flex-shrink: 0;
@@ -147,9 +164,58 @@ const Style = () => {
         width: 1.85rem;
         height: 1.85rem;
       }
+
+      /* lockup — no clip on Chinese */
       #theme-circlelife .cl-brand:hover {
         opacity: 0.86;
       }
+      #theme-circlelife .cl-lockup-cn {
+        font-family: var(--cl-font-display);
+        font-size: 1.02rem;
+        line-height: 1.35;
+        padding-top: 0.08em;
+        padding-bottom: 0.06em;
+        opacity: 1;
+        /* never overflow:hidden — was clipping 时光的弧线 */
+      }
+      #theme-circlelife .cl-lockup-en {
+        font-family: var(--cl-font-mono);
+        font-size: 0.62rem;
+        letter-spacing: 0.16em;
+        margin-top: 0.22rem;
+        line-height: 1.2;
+        transition: margin 0.22s var(--cl-ease), opacity 0.2s var(--cl-ease), font-size 0.22s var(--cl-ease);
+      }
+      #theme-circlelife .cl-lockup--collapsed .cl-lockup-cn {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+      #theme-circlelife .cl-lockup--collapsed .cl-lockup-en {
+        margin-top: 0;
+        font-size: 0.58rem;
+      }
+      #theme-circlelife .cl-lockup--collapsed .cl-lockup-text {
+        position: relative;
+      }
+      #theme-circlelife .cl-lockup--row .cl-lockup-cn--row {
+        font-size: 0.95rem;
+        line-height: 1.3;
+      }
+      #theme-circlelife .cl-lockup--row .cl-lockup-en--row {
+        margin-top: 0;
+        font-size: 0.58rem;
+      }
+      #theme-circlelife .cl-lockup-sep {
+        opacity: 0.55;
+      }
+
       #theme-circlelife .cl-nav-link {
         position: relative;
         color: var(--cl-muted);
@@ -159,8 +225,7 @@ const Style = () => {
         transition:
           color 0.15s var(--cl-ease),
           background 0.15s var(--cl-ease),
-          padding 0.2s var(--cl-ease),
-          min-width 0.2s var(--cl-ease);
+          padding 0.2s var(--cl-ease);
       }
       #theme-circlelife .cl-nav-link:hover {
         color: var(--cl-text);
@@ -171,17 +236,12 @@ const Style = () => {
         opacity: 0.85;
         width: 0.95em;
         text-align: center;
-        transition: opacity 0.2s var(--cl-ease), font-size 0.2s var(--cl-ease);
       }
       #theme-circlelife .cl-nav-text {
         display: inline-block;
         max-width: 6.5rem;
-        overflow: hidden;
         opacity: 1;
-        transition:
-          opacity 0.18s var(--cl-ease),
-          max-width 0.22s var(--cl-ease),
-          margin 0.22s var(--cl-ease);
+        transition: opacity 0.18s var(--cl-ease), max-width 0.28s var(--cl-ease);
       }
       #theme-circlelife .cl-nav-link--icon {
         min-width: 1.85rem;
@@ -190,20 +250,16 @@ const Style = () => {
         padding-left: 0.4rem;
         padding-right: 0.4rem;
       }
-      #theme-circlelife .cl-nav-link--icon .cl-nav-text {
-        opacity: 0;
-        max-width: 0;
-        margin: 0;
-        pointer-events: none;
-      }
+      #theme-circlelife .cl-nav-link--icon .cl-nav-text,
       #theme-circlelife .cl-nav-link--icon .cl-nav-chevron {
         opacity: 0;
         max-width: 0;
         margin: 0;
         overflow: hidden;
+        pointer-events: none;
       }
       #theme-circlelife .cl-nav-link--icon .cl-nav-ico {
-        font-size: 0.88rem;
+        font-size: 0.9rem;
         opacity: 1;
       }
       #theme-circlelife .cl-nav-tip {
@@ -217,7 +273,6 @@ const Style = () => {
         background: var(--cl-surface);
         color: var(--cl-text);
         font-size: 0.68rem;
-        letter-spacing: 0.02em;
         white-space: nowrap;
         opacity: 0;
         pointer-events: none;
@@ -232,6 +287,8 @@ const Style = () => {
       #theme-circlelife .cl-nav-link--text .cl-nav-tip {
         display: none;
       }
+
+      /* reading progress */
       #theme-circlelife .cl-read-progress {
         position: absolute;
         left: 0;
@@ -250,11 +307,140 @@ const Style = () => {
         background: var(--cl-accent);
         will-change: transform;
       }
-      #theme-circlelife .cl-header {
-        position: sticky;
+
+      /* mobile drawer */
+      #theme-circlelife .cl-drawer-root {
+        position: fixed;
+        inset: 0;
+        z-index: 45;
+        pointer-events: none;
+        visibility: hidden;
       }
-      #theme-circlelife .cl-header.cl-header--reading {
-        /* progress lives inside */
+      #theme-circlelife .cl-drawer-root.is-open {
+        pointer-events: auto;
+        visibility: visible;
+      }
+      #theme-circlelife .cl-drawer-mask {
+        position: absolute;
+        inset: 0;
+        border: 0;
+        background: color-mix(in srgb, var(--cl-text) 35%, transparent);
+        opacity: 0;
+        transition: opacity 0.25s var(--cl-ease);
+        cursor: pointer;
+      }
+      #theme-circlelife .cl-drawer-root.is-open .cl-drawer-mask {
+        opacity: 1;
+      }
+      #theme-circlelife .cl-drawer-panel {
+        position: absolute;
+        top: 0;
+        right: 0;
+        height: 100%;
+        width: min(20rem, 88vw);
+        background: var(--cl-surface);
+        border-left: 1px solid var(--cl-border);
+        padding: 1rem 1.1rem 2rem;
+        transform: translateX(104%);
+        transition: transform 0.28s var(--cl-ease);
+        overflow-y: auto;
+        box-shadow: none;
+      }
+      #theme-circlelife .cl-drawer-root.is-open .cl-drawer-panel {
+        transform: translateX(0);
+      }
+      #theme-circlelife .cl-drawer-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+        padding-bottom: 0.65rem;
+        border-bottom: 1px solid var(--cl-border);
+      }
+      #theme-circlelife .cl-drawer-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+      }
+      #theme-circlelife .cl-drawer-link {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        width: 100%;
+        padding: 0.75rem 0.5rem;
+        border: 0;
+        background: transparent;
+        color: var(--cl-text);
+        font-size: 1rem;
+        font-weight: 500;
+        text-align: left;
+        border-radius: var(--cl-radius-sm);
+        cursor: pointer;
+      }
+      #theme-circlelife .cl-drawer-link:hover {
+        background: color-mix(in srgb, var(--cl-accent-soft) 50%, transparent);
+      }
+      #theme-circlelife .cl-drawer-chevron {
+        margin-left: auto;
+        font-size: 0.7rem;
+        opacity: 0.55;
+        transition: transform 0.2s var(--cl-ease);
+      }
+      #theme-circlelife .cl-drawer-chevron.is-open {
+        transform: rotate(180deg);
+      }
+      #theme-circlelife .cl-drawer-sub {
+        list-style: none;
+        margin: 0 0 0.35rem 1.85rem;
+        padding: 0;
+      }
+      #theme-circlelife .cl-drawer-sublink {
+        display: block;
+        padding: 0.45rem 0.35rem;
+        color: var(--cl-muted);
+        font-size: 0.9rem;
+      }
+
+      /* author badge */
+      #theme-circlelife .cl-author-avatar {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 9999px;
+        overflow: hidden;
+        flex: none;
+        border: 1px solid var(--cl-border);
+        background: var(--cl-paper-2);
+      }
+      #theme-circlelife .cl-author-avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+      #theme-circlelife .cl-author-initial {
+        font-family: var(--cl-font-mono);
+        font-size: 0.62rem;
+        color: var(--cl-muted);
+        line-height: 1;
+      }
+      #theme-circlelife .cl-author-name {
+        font-family: var(--cl-font-mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.04em;
+      }
+      #theme-circlelife .cl-deck-author {
+        margin-right: 0.35rem;
+      }
+      #theme-circlelife .cl-deck-chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.4rem;
+        margin-top: 0.35rem;
       }
 
       #theme-circlelife .cl-kicker {
@@ -863,7 +1049,10 @@ const Style = () => {
       #theme-circlelife .cl-footer {
         border-top: 1px solid var(--cl-border);
         background: transparent;
+        padding-top: 1.75rem;
+        padding-bottom: 1.75rem;
       }
+
       #theme-circlelife .cl-page-hero {
         margin-bottom: 1.5rem;
         padding-bottom: 0.9rem;

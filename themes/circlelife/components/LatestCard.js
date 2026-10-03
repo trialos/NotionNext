@@ -3,6 +3,8 @@ import SmartLink from '@/components/SmartLink'
 import { siteConfig } from '@/lib/config'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import CONFIG from '../config'
+import AuthorBadge from './AuthorBadge'
+import { resolveAuthor } from './authors'
 
 const FLIP_MS = 340
 
@@ -123,13 +125,19 @@ export default function LatestCard({ post, posts }) {
           {slide.summary ? (
             <p className='cl-latest-summary'>{slide.summary}</p>
           ) : null}
-          {slide.category ? (
-            <div className='cl-deck-chip-row'>
+          <div className='cl-deck-chip-row'>
+            {(() => {
+              const a = resolveAuthor(slide)
+              return a?.name ? (
+                <AuthorBadge author={a} size={20} className='cl-deck-author' />
+              ) : null
+            })()}
+            {slide.category ? (
               <span className='cl-chip cl-chip--soft cl-chip--on-cover'>
                 {slide.category}
               </span>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </div>
       </div>
     )

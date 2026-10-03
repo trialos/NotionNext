@@ -1,56 +1,23 @@
-import { siteConfig } from '@/lib/config'
+import SmartLink from '@/components/SmartLink'
 import { useGlobal } from '@/lib/global'
 import { formatDateFmt } from '@/lib/utils/formatDate'
-import SmartLink from '@/components/SmartLink'
-
-function personName(p) {
-  if (!p) return ''
-  if (typeof p === 'string') return p.trim()
-  const full = [p.first_name, p.last_name].filter(Boolean).join(' ').trim()
-  if (full) return full
-  return (p.name || p.full_name || p.nickname || '').trim()
-}
-
-function resolveAuthor(post) {
-  if (!post) return ''
-  const candidates = [
-    post.author,
-    post.Author,
-    post['作者'],
-    post.writer,
-    post.Writer
-  ]
-  for (const c of candidates) {
-    if (!c) continue
-    if (typeof c === 'string' && c.trim()) return c.trim()
-    if (Array.isArray(c) && c.length) {
-      const names = c.map(personName).filter(Boolean)
-      if (names.length) return names.join(' · ')
-    }
-    if (typeof c === 'object') {
-      const n = personName(c)
-      if (n) return n
-    }
-  }
-  return siteConfig('AUTHOR') || ''
-}
+import AuthorBadge from './AuthorBadge'
+import { resolveAuthorOrSite } from './authors'
 
 /**
- * 文章元信息：作者 · 日期 · 分类(chip)
+ * 作者（头像）· 日期 · 分类 chip
  */
 export const PostMeta = props => {
   const { post } = props
   const { locale } = useGlobal()
   if (!post || post.type === 'Page') return null
 
-  const author = resolveAuthor(post)
+  const author = resolveAuthorOrSite(post)
   const parts = []
 
-  if (author) {
+  if (author?.name) {
     parts.push(
-      <span key='author' className='cl-meta-author'>
-        {author}
-      </span>
+      <AuthorBadge key='author' author={author} size={22} className='cl-meta-author' />
     )
   }
 
@@ -81,14 +48,24 @@ export const PostMeta = props => {
   return (
     <div className='cl-meta cl-article-meta'>
       {parts.map((node, i) => (
-        <span key={node.key || i} className='cl-meta-item inline-flex items-center gap-2'>
-          {i > 0 ? <span className='cl-dot' aria-hidden='true'>·</span> : null}
+        <span
+          key={node.key || i}
+          className='cl-meta-item inline-flex items-center gap-2'>
+          {i > 0 ? (
+            <span className='cl-dot' aria-hidden='true'>
+              ·
+            </span>
+          ) : null}
           {node}
         </span>
       ))}
       {post.lastEditedDay ? (
         <span className='cl-meta-item inline-flex items-center gap-2'>
-          {parts.length ? <span className='cl-dot' aria-hidden='true'>·</span> : null}
+          {parts.length ? (
+            <span className='cl-dot' aria-hidden='true'>
+              ·
+            </span>
+          ) : null}
           <span className='cl-meta-muted'>
             {locale.COMMON.LAST_EDITED_TIME} {post.lastEditedDay}
           </span>

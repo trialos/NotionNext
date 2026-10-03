@@ -30,34 +30,54 @@ export function ArcMark({ size = 28, className = '' }) {
 }
 
 /**
- * collapsed：仅弧标 + Circle of Life（中文用 CSS 交叉隐藏，减少抽搐）
+ * @param {'stack'|'row'} layout stack=中文上英文下；row=弧标·中文·英文横排
  */
 export function BrandLockup({
   compact = false,
   collapsed = false,
+  layout = 'stack',
   href = '/',
   className = ''
 }) {
-  const mark = collapsed ? 20 : compact ? 26 : 32
+  const isRow = layout === 'row'
+  const mark = isRow ? (compact ? 22 : 26) : collapsed ? 22 : compact ? 26 : 32
 
   const inner = (
     <span
-      className={`cl-lockup inline-flex items-center gap-2 ${
-        collapsed ? 'cl-lockup--collapsed' : 'cl-lockup--expanded'
-      } ${className}`}>
+      className={`cl-lockup inline-flex items-center ${
+        isRow ? 'cl-lockup--row gap-2' : 'gap-2.5'
+      } ${collapsed && !isRow ? 'cl-lockup--collapsed' : 'cl-lockup--expanded'} ${className}`}>
       <ArcMark size={mark} className='cl-lockup-mark' />
-      <span className='cl-lockup-text flex min-w-0 flex-col leading-none'>
-        <span
-          className='cl-lockup-cn font-medium tracking-[0.04em] text-[var(--cl-text)]'
-          style={{ fontFamily: 'var(--cl-font-display)' }}>
-          时光的弧线
+      {isRow ? (
+        <span className='cl-lockup-row-text inline-flex items-baseline gap-2 min-w-0'>
+          <span
+            className='cl-lockup-cn cl-lockup-cn--row font-medium tracking-[0.04em] text-[var(--cl-text)]'
+            style={{ fontFamily: 'var(--cl-font-display)' }}>
+            时光的弧线
+          </span>
+          <span className='cl-lockup-sep text-[var(--cl-faint)]' aria-hidden='true'>
+            ·
+          </span>
+          <span
+            className='cl-lockup-en cl-lockup-en--row uppercase tracking-[0.14em] text-[var(--cl-muted)]'
+            style={{ fontFamily: 'var(--cl-font-mono)' }}>
+            Circle of Life
+          </span>
         </span>
-        <span
-          className='cl-lockup-en uppercase tracking-[0.16em] text-[var(--cl-muted)]'
-          style={{ fontFamily: 'var(--cl-font-mono)' }}>
-          Circle of Life
+      ) : (
+        <span className='cl-lockup-text flex min-w-0 flex-col leading-none'>
+          <span
+            className='cl-lockup-cn font-medium tracking-[0.04em] text-[var(--cl-text)]'
+            style={{ fontFamily: 'var(--cl-font-display)' }}>
+            时光的弧线
+          </span>
+          <span
+            className='cl-lockup-en uppercase tracking-[0.16em] text-[var(--cl-muted)]'
+            style={{ fontFamily: 'var(--cl-font-mono)' }}>
+            Circle of Life
+          </span>
         </span>
-      </span>
+      )}
     </span>
   )
 
