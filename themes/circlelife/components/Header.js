@@ -1,21 +1,27 @@
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import CONFIG from '../config'
 import { BrandLockup } from './BrandLockup'
 import { MenuList } from './MenuList'
 import ReadingProgress from './ReadingProgress'
 
 /**
- * 桌面：左 | 中品牌 | 右，下滚聚拢
- * 手机：中品牌 + 汉堡抽屉
+ * 桌面：左 | 中品牌 | 右（疏朗 + 轻聚拢）
+ * 手机：中品牌 + 汉堡；抽屉 portal 到 body
  */
 export const Header = props => {
   const { post, customMenu, customNav } = props
   const { isDarkMode, toggleDarkMode } = useGlobal()
   const [scrolled, setScrolled] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const showProgress = Boolean(post) && post?.type !== 'Page'
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   useEffect(() => {
     const onScroll = () => {
@@ -51,101 +57,44 @@ export const Header = props => {
 
   const closeDrawer = () => setDrawerOpen(false)
 
-  return (
-    <header
-      className={`cl-header sticky top-0 z-40 w-full ${
-        scrolled ? 'is-scrolled' : ''
-      } ${showProgress ? 'cl-header--reading' : ''} ${
-        drawerOpen ? 'is-drawer-open' : ''
-      }`}>
-      {/* Desktop axis */}
-      <div className='cl-header-inner cl-header-inner--desktop'>
-        <div className={`cl-header-wing cl-header-wing--left ${scrolled ? 'is-gathered' : ''}`}>
-          <MenuList
-            {...props}
-            variant='header'
-            wing='left'
-            collapsed={scrolled}
-          />
-        </div>
+  const actions = (mobile = false) => (
+    <div className={`cl-header-actions ${mobile ? 'cl-header-actions--mobile' : ''}`}>
+      {siteConfig('CIRCLELIFE_MENU_SEARCH', null, CONFIG) && (
+        <button
+          type='button'
+          className='cl-icon-btn'
+          onClick={openSearch}
+          aria-label='Search'
+          title='搜索'>
+          <i className='fas fa-search' />
+        </button>
+      )}
+      <button
+        type='button'
+        className='cl-icon-btn'
+        onClick={toggleDarkMode}
+        aria-label={isDarkMode ? 'Light mode' : 'Dark mode'}
+        title={isDarkMode ? '浅色' : '深色'}>
+        <span className='cl-icon-btn-glyph' aria-hidden='true'>
+          {isDarkMode ? '☀' : '☾'}
+        </span>
+      </button>
+      {mobile ? (
+        <button
+          type='button'
+          className='cl-icon-btn cl-hamburger'
+          aria-label={drawerOpen ? '关闭菜单' : '打开菜单'}
+          aria-expanded={drawerOpen}
+          onClick={() => setDrawerOpen(v => !v)}>
+          <i className={`fas ${drawerOpen ? 'fa-times' : 'fa-bars'}`} />
+        </button>
+      ) : null}
+    </div>
+  )
 
-        <div className='cl-header-center'>
-          <BrandLockup compact href='/' collapsed={scrolled} />
-        </div>
-
-        <div className={`cl-header-wing cl-header-wing--right ${scrolled ? 'is-gathered' : ''}`}>
-          <MenuList
-            {...props}
-            variant='header'
-            wing='right'
-            collapsed={scrolled}
-          />
-          <div className='cl-header-actions'>
-            {siteConfig('CIRCLELIFE_MENU_SEARCH', null, CONFIG) && (
-              <button
-                type='button'
-                className='cl-icon-btn'
-                onClick={openSearch}
-                aria-label='Search'
-                title='搜索'>
-                <i className='fas fa-search text-sm' />
-              </button>
-            )}
-            <button
-              type='button'
-              className='cl-icon-btn'
-              onClick={toggleDarkMode}
-              aria-label={isDarkMode ? 'Light mode' : 'Dark mode'}
-              title={isDarkMode ? '浅色' : '深色'}>
-              <span className='text-base leading-none'>
-                {isDarkMode ? '☀' : '☾'}
-              </span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile bar */}
-      <div className='cl-header-inner cl-header-inner--mobile'>
-        <div className='cl-header-mobile-spacer' aria-hidden='true' />
-        <div className='cl-header-center'>
-          <BrandLockup compact href='/' collapsed={false} />
-        </div>
-        <div className='cl-header-actions cl-header-actions--mobile'>
-          {siteConfig('CIRCLELIFE_MENU_SEARCH', null, CONFIG) && (
-            <button
-              type='button'
-              className='cl-icon-btn'
-              onClick={openSearch}
-              aria-label='Search'
-              title='搜索'>
-              <i className='fas fa-search text-sm' />
-            </button>
-          )}
-          <button
-            type='button'
-            className='cl-icon-btn'
-            onClick={toggleDarkMode}
-            aria-label={isDarkMode ? 'Light mode' : 'Dark mode'}
-            title={isDarkMode ? '浅色' : '深色'}>
-            <span className='text-base leading-none'>
-              {isDarkMode ? '☀' : '☾'}
-            </span>
-          </button>
-          <button
-            type='button'
-            className='cl-icon-btn cl-hamburger'
-            aria-label={drawerOpen ? '关闭菜单' : '打开菜单'}
-            aria-expanded={drawerOpen}
-            onClick={() => setDrawerOpen(v => !v)}>
-            <i className={`fas ${drawerOpen ? 'fa-times' : 'fa-bars'} text-sm`} />
-          </button>
-        </div>
-      </div>
-
-      {showProgress ? <ReadingProgress /> : null}
-
-      {/* Mobile drawer */}
+  const drawer = !mounted
+    ? null
+    : createPortal(
       <div
         className={`cl-drawer-root ${drawerOpen ? 'is-open' : ''}`}
         aria-hidden={!drawerOpen}>
@@ -153,9 +102,14 @@ export const Header = props => {
           type='button'
           className='cl-drawer-mask'
           aria-label='关闭菜单'
+          tabIndex={drawerOpen ? 0 : -1}
           onClick={closeDrawer}
         />
-        <div className='cl-drawer-panel' role='dialog' aria-modal='true'>
+        <div
+          className='cl-drawer-panel'
+          role='dialog'
+          aria-modal='true'
+          aria-label='站点菜单'>
           <div className='cl-drawer-head'>
             <span className='cl-kicker'>菜单</span>
             <button
@@ -174,7 +128,48 @@ export const Header = props => {
             onNavigate={closeDrawer}
           />
         </div>
+      </div>,
+      document.body
+    )
+
+  return (
+    <header
+      className={`cl-header sticky top-0 z-40 w-full ${
+        scrolled ? 'is-scrolled' : ''
+      } ${showProgress ? 'cl-header--reading' : ''} ${
+        drawerOpen ? 'is-drawer-open' : ''
+      }`}>
+      <div className='cl-header-inner cl-header-inner--desktop'>
+        <div
+          className={`cl-header-wing cl-header-wing--left ${
+            scrolled ? 'is-gathered' : ''
+          }`}>
+          <MenuList {...props} variant='header' wing='left' collapsed={scrolled} />
+        </div>
+
+        <div className='cl-header-center'>
+          <BrandLockup compact href='/' collapsed={scrolled} />
+        </div>
+
+        <div
+          className={`cl-header-wing cl-header-wing--right ${
+            scrolled ? 'is-gathered' : ''
+          }`}>
+          <MenuList {...props} variant='header' wing='right' collapsed={scrolled} />
+          {actions(false)}
+        </div>
       </div>
+
+      <div className='cl-header-inner cl-header-inner--mobile'>
+        <div className='cl-header-mobile-spacer' aria-hidden='true' />
+        <div className='cl-header-center'>
+          <BrandLockup compact href='/' collapsed={false} />
+        </div>
+        {actions(true)}
+      </div>
+
+      {showProgress ? <ReadingProgress /> : null}
+      {drawer}
     </header>
   )
 }

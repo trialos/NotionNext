@@ -145,7 +145,7 @@ export const MenuItemDrop = ({
     <ul
       className={
         isInline
-          ? `cl-card min-w-[10rem] py-1 border border-[var(--cl-border)] bg-[var(--cl-surface)] transition-all duration-200 ${
+          ? `cl-submenu min-w-[11rem] py-1.5 transition-all duration-200 ${
               show ? 'visible opacity-100' : 'hidden pointer-events-none opacity-0'
             }`
           : `${
@@ -162,12 +162,10 @@ export const MenuItemDrop = ({
       {link.subMenus.map((sLink, index) => (
         <li
           key={index}
-          className='border-0 text-[var(--cl-text)] hover:bg-[var(--cl-accent-soft)] tracking-widest transition-all duration-200 py-3 pr-6 pl-3'>
-          <SmartLink href={sLink.href} target={link?.target}>
-            <span className='text-sm text-nowrap font-extralight'>
-              {sLink?.icon ? <i className={sLink.icon}> &nbsp; </i> : null}
-              {sLink.title || sLink.name}
-            </span>
+          className='cl-submenu-item'>
+          <SmartLink href={sLink.href} target={link?.target} className='cl-submenu-link'>
+            {sLink?.icon ? <i className={`${sLink.icon} cl-submenu-ico`} /> : null}
+            <span>{sLink.title || sLink.name}</span>
           </SmartLink>
         </li>
       ))}

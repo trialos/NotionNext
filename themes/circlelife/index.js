@@ -23,6 +23,7 @@ import { useEffect } from 'react'
 import BlogListArchive from './components/BlogListArchive'
 import { BlogListPage } from './components/BlogListPage'
 import { BlogListScroll } from './components/BlogListScroll'
+import BackToTop from './components/BackToTop'
 import { Footer } from './components/Footer'
 import { Header } from './components/Header'
 import LatestCard from './components/LatestCard'
@@ -118,15 +119,7 @@ const LayoutBase = props => {
 
       <Footer />
 
-      <div className='fixed bottom-4 right-4 z-10'>
-        <button
-          type='button'
-          title={locale.POST.TOP}
-          className='cl-icon-btn cl-backtop'
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <i className='fas fa-angle-up text-lg' />
-        </button>
-      </div>
+      <BackToTop label={locale?.POST?.TOP || '返回顶部'} />
     </div>
   )
 }

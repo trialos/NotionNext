@@ -49,13 +49,13 @@ export function BrandLockup({
       } ${collapsed && !isRow ? 'cl-lockup--collapsed' : 'cl-lockup--expanded'} ${className}`}>
       <ArcMark size={mark} className='cl-lockup-mark' />
       {isRow ? (
-        <span className='cl-lockup-row-text inline-flex items-baseline gap-2 min-w-0'>
+        <span className='cl-lockup-row-text inline-flex items-center gap-2.5 min-w-0'>
           <span
             className='cl-lockup-cn cl-lockup-cn--row font-medium tracking-[0.04em] text-[var(--cl-text)]'
             style={{ fontFamily: 'var(--cl-font-display)' }}>
             时光的弧线
           </span>
-          <span className='cl-lockup-sep text-[var(--cl-faint)]' aria-hidden='true'>
+          <span className='cl-lockup-sep' aria-hidden='true'>
             ·
           </span>
           <span
