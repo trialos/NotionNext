@@ -3,7 +3,7 @@ import CONFIG from './config'
 import { themeConsoleStyle } from '@/lib/themeConsoleStyle'
 
 /**
- * Circle of Life — 更扁纸感 + 报头轮播 + 微动效
+ * Circle of Life — 抽牌报头 + 细条顶栏 + 封面映射
  */
 const Style = () => {
   return (
@@ -71,11 +71,12 @@ const Style = () => {
         border-bottom: 1px solid transparent;
         transition:
           border-color var(--cl-dur) var(--cl-ease),
-          background-color var(--cl-dur) var(--cl-ease);
+          background-color var(--cl-dur) var(--cl-ease),
+          box-shadow var(--cl-dur) var(--cl-ease);
       }
       #theme-circlelife .cl-header.is-scrolled {
         border-bottom-color: var(--cl-border);
-        background-color: color-mix(in srgb, var(--cl-bg) 94%, transparent);
+        background-color: color-mix(in srgb, var(--cl-bg) 96%, transparent);
       }
       #theme-circlelife .cl-header-inner {
         margin: 0 auto;
@@ -84,11 +85,63 @@ const Style = () => {
         align-items: center;
         gap: 0.75rem 1rem;
         padding: 0.9rem 1rem;
-        transition: padding var(--cl-dur) var(--cl-ease);
+        min-height: 3.75rem;
+        transition:
+          padding var(--cl-dur) var(--cl-ease),
+          min-height var(--cl-dur) var(--cl-ease),
+          gap var(--cl-dur) var(--cl-ease);
       }
       #theme-circlelife .cl-header.is-scrolled .cl-header-inner {
-        padding-top: 0.55rem;
-        padding-bottom: 0.55rem;
+        padding-top: 0.35rem;
+        padding-bottom: 0.35rem;
+        min-height: 2.85rem;
+        gap: 0.5rem 0.65rem;
+      }
+      #theme-circlelife .cl-lockup--collapsed .cl-lockup-en {
+        letter-spacing: 0.14em;
+      }
+      #theme-circlelife .cl-nav-link--icon {
+        position: relative;
+        min-width: 2rem;
+        min-height: 2rem;
+      }
+      #theme-circlelife .cl-nav-link--icon .cl-nav-ico {
+        font-size: 0.92rem;
+        width: 1.1em;
+        text-align: center;
+      }
+      #theme-circlelife .cl-nav-link--icon .cl-nav-text {
+        display: none;
+      }
+      #theme-circlelife .cl-nav-tip {
+        position: absolute;
+        left: 50%;
+        top: calc(100% + 6px);
+        transform: translateX(-50%) translateY(-2px);
+        padding: 0.28rem 0.55rem;
+        border-radius: var(--cl-radius-sm);
+        border: 1px solid var(--cl-border);
+        background: var(--cl-surface);
+        color: var(--cl-text);
+        font-size: 0.72rem;
+        font-family: var(--cl-font-body);
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.15s var(--cl-ease), transform 0.15s var(--cl-ease);
+        z-index: 60;
+      }
+      #theme-circlelife .cl-nav-link--icon:hover .cl-nav-tip,
+      #theme-circlelife .cl-nav-link--icon:focus-within .cl-nav-tip {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      #theme-circlelife .cl-header.is-scrolled .cl-nav-link:not(.cl-nav-link--icon) .cl-nav-text {
+        /* when collapsed class not applied yet */
+      }
+      #theme-circlelife .cl-nav--collapsed .cl-nav-chevron {
+        margin-left: 0.15rem;
       }
       #theme-circlelife .cl-header-nav {
         overflow-x: auto;
@@ -211,22 +264,130 @@ const Style = () => {
         background: var(--cl-accent-soft);
       }
 
-      /* —— Hero carousel —— */
+      /* —— Hero deck (抽牌) —— */
       #theme-circlelife .cl-latest-card,
-      #theme-circlelife .cl-hero {
-        background: var(--cl-surface);
+      #theme-circlelife .cl-hero,
+      #theme-circlelife .cl-deck {
+        position: relative;
+        margin-bottom: 1.75rem;
+        border: none;
+        background: transparent;
+        box-shadow: none;
+        padding: 0;
+      }
+      #theme-circlelife .cl-deck-stage {
+        position: relative;
+        min-height: 11.5rem;
+        perspective: 1200px;
+      }
+      #theme-circlelife .cl-deck-under,
+      #theme-circlelife .cl-deck-top {
+        position: absolute;
+        inset: 0;
+      }
+      #theme-circlelife .cl-deck-under {
+        z-index: 0;
+        transform: translateY(10px) scale(0.975);
+        opacity: 0.72;
+        filter: saturate(0.92);
+      }
+      #theme-circlelife .cl-deck-top {
+        z-index: 1;
+        transform-origin: 70% 100%;
+        transition:
+          transform 0.34s var(--cl-ease),
+          opacity 0.34s var(--cl-ease),
+          filter 0.34s var(--cl-ease);
+      }
+      #theme-circlelife .cl-deck.is-out-next .cl-deck-top {
+        transform: translateX(18%) rotate(4deg) translateY(-6px);
+        opacity: 0;
+        filter: blur(0.4px);
+      }
+      #theme-circlelife .cl-deck.is-out-prev .cl-deck-top {
+        transform: translateX(-18%) rotate(-4deg) translateY(-6px);
+        opacity: 0;
+        filter: blur(0.4px);
+      }
+      #theme-circlelife .cl-deck.is-out-next .cl-deck-under,
+      #theme-circlelife .cl-deck.is-out-prev .cl-deck-under {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+        transition:
+          transform 0.34s var(--cl-ease),
+          opacity 0.34s var(--cl-ease);
+      }
+      #theme-circlelife .cl-deck-face {
+        position: relative;
+        height: 100%;
+        min-height: 11.5rem;
         border: 1px solid var(--cl-border);
         border-radius: var(--cl-radius);
-        box-shadow: none;
-        padding: 1.25rem 1.3rem 1.15rem;
-        margin-bottom: 2rem;
+        background: var(--cl-surface);
+        overflow: hidden;
+        box-shadow: 0 1px 0 color-mix(in srgb, var(--cl-text) 4%, transparent);
       }
-      #theme-circlelife .cl-hero-toolbar {
+      #theme-circlelife .cl-deck-face--under {
+        box-shadow: none;
+      }
+      #theme-circlelife .cl-deck-cover {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+      }
+      #theme-circlelife .cl-deck-cover-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        display: block;
+      }
+      #theme-circlelife .cl-deck-cover-shade {
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--cl-surface) 18%, transparent) 0%,
+            color-mix(in srgb, var(--cl-surface) 55%, transparent) 42%,
+            color-mix(in srgb, var(--cl-surface) 92%, transparent) 78%,
+            var(--cl-surface) 100%
+          ),
+          linear-gradient(
+            90deg,
+            color-mix(in srgb, var(--cl-surface) 35%, transparent) 0%,
+            transparent 40%
+          );
+      }
+      .dark #theme-circlelife .cl-deck-cover-shade {
+        background:
+          linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--cl-surface) 30%, transparent) 0%,
+            color-mix(in srgb, var(--cl-surface) 70%, transparent) 50%,
+            var(--cl-surface) 100%
+          );
+      }
+      #theme-circlelife .cl-deck-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        min-height: 11.5rem;
+        padding: 1.05rem 1.15rem 1.15rem;
+        gap: 0.35rem;
+      }
+      #theme-circlelife .cl-deck-face.has-cover .cl-latest-title {
+        text-shadow: 0 1px 0 color-mix(in srgb, var(--cl-surface) 40%, transparent);
+      }
+      #theme-circlelife .cl-hero-toolbar,
+      #theme-circlelife .cl-deck-toolbar {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        gap: 0.75rem;
-        margin-bottom: 0.75rem;
+        margin-top: 0.65rem;
+        gap: 0.5rem;
       }
       #theme-circlelife .cl-hero-controls {
         display: flex;
@@ -236,6 +397,12 @@ const Style = () => {
         font-size: 0.68rem;
         color: var(--cl-faint);
         letter-spacing: 0.06em;
+      }
+      #theme-circlelife .cl-hero-count {
+        font-family: var(--cl-font-mono);
+        font-size: 0.68rem;
+        color: var(--cl-faint);
+        letter-spacing: 0.08em;
       }
       #theme-circlelife .cl-hero-nav {
         width: 1.75rem;
@@ -257,18 +424,6 @@ const Style = () => {
         border-color: var(--cl-accent);
         background: var(--cl-accent-soft);
       }
-      #theme-circlelife .cl-hero-body {
-        min-height: 5.5rem;
-        transition: opacity 0.16s var(--cl-ease), transform 0.16s var(--cl-ease);
-      }
-      #theme-circlelife .cl-hero-body.is-out {
-        opacity: 0;
-        transform: translateY(4px);
-      }
-      #theme-circlelife .cl-hero-body.is-in {
-        opacity: 1;
-        transform: translateY(0);
-      }
       #theme-circlelife .cl-latest-title {
         display: inline;
         background-image: linear-gradient(var(--cl-accent), var(--cl-accent));
@@ -279,57 +434,70 @@ const Style = () => {
         font-size: clamp(1.3rem, 3.2vw, 1.7rem);
         font-weight: 600;
         letter-spacing: -0.02em;
-        line-height: 1.32;
+        line-height: 1.3;
         color: var(--cl-text);
-        margin: 0 0 0.5rem;
-        transition:
-          color 0.18s var(--cl-ease),
-          background-size 0.22s var(--cl-ease);
+        transition: background-size 0.2s var(--cl-ease), color 0.15s var(--cl-ease);
       }
       #theme-circlelife .cl-latest-title:hover {
         color: var(--cl-accent);
         background-size: 100% 1px;
       }
       #theme-circlelife .cl-latest-summary {
-        margin: 0.35rem 0 0;
-        font-size: 0.92rem;
-        line-height: 1.7;
+        margin: 0.15rem 0 0;
+        font-size: 0.88rem;
+        line-height: 1.6;
         color: var(--cl-muted);
         display: -webkit-box;
-        -webkit-line-clamp: 3;
+        -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        max-width: 36em;
+      }
+      #theme-circlelife .cl-deck-chip-row {
+        margin-top: 0.35rem;
+      }
+      #theme-circlelife .cl-chip--on-cover {
+        backdrop-filter: blur(4px);
       }
       #theme-circlelife .cl-hero-meta,
       #theme-circlelife .cl-latest-meta {
-        margin-top: 1rem;
-        padding-top: 0.85rem;
-        border-top: 1px solid var(--cl-border);
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 0.75rem;
+        margin-top: 0.75rem;
       }
-      #theme-circlelife .cl-hero-dots {
+      #theme-circlelife .cl-hero-dots,
+      #theme-circlelife .cl-deck-dots {
         display: flex;
-        align-items: center;
+        justify-content: center;
         gap: 0.4rem;
+        margin-top: 0.55rem;
       }
       #theme-circlelife .cl-hero-dot {
         width: 6px;
         height: 6px;
-        border-radius: 9999px;
-        border: 0;
         padding: 0;
-        background: var(--cl-paper-3);
+        border-radius: 9999px;
+        border: 1px solid var(--cl-border-strong);
+        background: transparent;
         cursor: pointer;
         transition:
           background 0.15s var(--cl-ease),
+          border-color 0.15s var(--cl-ease),
           transform 0.15s var(--cl-ease);
       }
       #theme-circlelife .cl-hero-dot.is-active {
         background: var(--cl-accent);
+        border-color: var(--cl-accent);
         transform: scale(1.2);
+      }
+      @media (max-width: 640px) {
+        #theme-circlelife .cl-deck-stage,
+        #theme-circlelife .cl-deck-face,
+        #theme-circlelife .cl-deck-content {
+          min-height: 10.25rem;
+        }
       }
 
       /* —— Timeline —— */
@@ -477,6 +645,56 @@ const Style = () => {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+      }
+
+      /* —— Article cover band —— */
+      #theme-circlelife .cl-article-card {
+        padding: 0;
+      }
+      #theme-circlelife .cl-article-cover {
+        position: relative;
+        height: 180px;
+        overflow: hidden;
+        border-radius: var(--cl-radius) var(--cl-radius) 0 0;
+        background: var(--cl-paper-2);
+      }
+      @media (min-width: 768px) {
+        #theme-circlelife .cl-article-cover {
+          height: 200px;
+        }
+      }
+      @media (max-width: 640px) {
+        #theme-circlelife .cl-article-cover {
+          height: 150px;
+        }
+      }
+      #theme-circlelife .cl-article-cover-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        display: block;
+      }
+      #theme-circlelife .cl-article-cover-fade {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 55%;
+        pointer-events: none;
+        background: linear-gradient(
+          180deg,
+          transparent 0%,
+          color-mix(in srgb, var(--cl-surface) 55%, transparent) 55%,
+          var(--cl-surface) 100%
+        );
+      }
+      #theme-circlelife .cl-article-inner {
+        position: relative;
+        z-index: 1;
+      }
+      #theme-circlelife .cl-article-card .cl-article-hero {
+        margin-top: 0;
       }
 
       /* —— Article —— */

@@ -6,11 +6,11 @@ import { MenuItemDrop } from './MenuItemDrop'
 /**
  * 导航菜单列表
  * @param {*} props
- * @param {'stack'|'header'} [props.variant] stack：旧版通栏导航；header：顶栏内横向滚动
- * @returns
+ * @param {'stack'|'header'} [props.variant]
+ * @param {boolean} [props.collapsed] 顶栏收起：仅图标 + 悬停出字
  */
 export const MenuList = props => {
-  const { customNav, customMenu, variant = 'stack' } = props
+  const { customNav, customMenu, variant = 'stack', collapsed = false } = props
   const { locale } = useGlobal()
 
   let links = [
@@ -48,7 +48,6 @@ export const MenuList = props => {
     links = links.concat(customNav)
   }
 
-  // 如果 开启自定义菜单，则不再使用 Page生成菜单。
   if (siteConfig('CUSTOM_MENU')) {
     links = customMenu
   }
@@ -59,12 +58,21 @@ export const MenuList = props => {
 
   if (variant === 'header') {
     return (
-      <nav aria-label='Main' className='flex-1 min-w-0 flex justify-center overflow-visible'>
+      <nav
+        aria-label='Main'
+        className={`flex-1 min-w-0 flex justify-center overflow-visible ${
+          collapsed ? 'cl-nav--collapsed' : ''
+        }`}>
         <ul className='flex items-center gap-0.5 sm:gap-1 overflow-x-auto max-w-full py-1 no-scrollbar overflow-y-visible'>
           {links
             .filter(link => link?.show !== false)
             .map((link, index) => (
-              <MenuItemDrop key={link.id ?? index} link={link} variant='inline' />
+              <MenuItemDrop
+                key={link.id ?? index}
+                link={link}
+                variant='inline'
+                collapsed={collapsed}
+              />
             ))}
         </ul>
       </nav>
@@ -79,9 +87,6 @@ export const MenuList = props => {
             <MenuItemDrop key={index} link={link} />
           ))}
         </ul>
-        {/* <div className="w-full md:w-1/3 text-center md:text-right"> */}
-        {/* <!-- extra links --> */}
-        {/* </div> */}
       </div>
     </nav>
   )

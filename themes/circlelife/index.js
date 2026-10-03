@@ -8,6 +8,7 @@
  */
 
 import replaceSearchResult from '@/components/Mark'
+import LazyImage from '@/components/LazyImage'
 import NotionIcon from '@/components/NotionIcon'
 import NotionPage from '@/components/NotionPage'
 import ShareBar from '@/components/ShareBar'
@@ -102,7 +103,7 @@ const LayoutBase = props => {
           </div>
 
           {showSidebar && (
-            <div className='w-full flex-shrink-0 md:w-64 md:sticky md:top-24'>
+            <div className='w-full flex-shrink-0 md:w-64 md:sticky md:top-[3.25rem]'>
               <SideBar {...props} />
             </div>
           )}
@@ -219,7 +220,19 @@ const LayoutSlug = props => {
         <PostLock validPassword={validPassword} />
       ) : (
         post && (
-          <article className='cl-card overflow-hidden px-5 py-6 md:px-8 md:py-9'>
+          <article className='cl-card cl-article-card overflow-hidden'>
+            {siteConfig('CIRCLELIFE_ARTICLE_COVER', true, CONFIG) &&
+            (post.pageCoverThumbnail || post.pageCover) ? (
+              <div className='cl-article-cover'>
+                <LazyImage
+                  src={post.pageCoverThumbnail || post.pageCover}
+                  alt=''
+                  className='cl-article-cover-img'
+                />
+                <div className='cl-article-cover-fade' aria-hidden='true' />
+              </div>
+            ) : null}
+            <div className='cl-article-inner px-5 py-6 md:px-8 md:py-9'>
             <header className='cl-article-hero'>
               <h1 className='cl-article-title'>
                 {siteConfig('POST_TITLE_ICON') && (
@@ -241,6 +254,7 @@ const LayoutSlug = props => {
               </h2>
               <Comment frontMatter={post} />
             </section>
+            </div>
           </article>
         )
       )}

@@ -6,14 +6,14 @@ import { BrandLockup } from './BrandLockup'
 import { MenuList } from './MenuList'
 
 /**
- * 顶栏：锁头 + 菜单；滚动后压缩高度
+ * 顶栏：锁头 + 菜单；下滚收成细条（英文锁头 + 图标菜单）
  */
 export const Header = props => {
   const { isDarkMode, toggleDarkMode } = useGlobal()
   const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12)
+    const onScroll = () => setScrolled(window.scrollY > 16)
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
@@ -24,11 +24,14 @@ export const Header = props => {
   }
 
   return (
-    <header className={`cl-header sticky top-0 z-40 w-full ${scrolled ? 'is-scrolled' : ''}`}>
+    <header
+      className={`cl-header sticky top-0 z-40 w-full ${
+        scrolled ? 'is-scrolled' : ''
+      }`}>
       <div className='cl-header-inner'>
-        <BrandLockup compact href='/' />
+        <BrandLockup compact href='/' collapsed={scrolled} />
         <div className='cl-header-nav min-w-0 flex-1'>
-          <MenuList {...props} variant='header' />
+          <MenuList {...props} variant='header' collapsed={scrolled} />
         </div>
         <div className='cl-header-actions'>
           {siteConfig('CIRCLELIFE_MENU_SEARCH', null, CONFIG) && (
@@ -36,7 +39,8 @@ export const Header = props => {
               type='button'
               className='cl-icon-btn'
               onClick={openSearch}
-              aria-label='Search'>
+              aria-label='Search'
+              title='搜索'>
               <i className='fas fa-search text-sm' />
             </button>
           )}
@@ -44,7 +48,8 @@ export const Header = props => {
             type='button'
             className='cl-icon-btn'
             onClick={toggleDarkMode}
-            aria-label={isDarkMode ? 'Light mode' : 'Dark mode'}>
+            aria-label={isDarkMode ? 'Light mode' : 'Dark mode'}
+            title={isDarkMode ? '浅色' : '深色'}>
             <span className='text-base leading-none'>
               {isDarkMode ? '☀' : '☾'}
             </span>

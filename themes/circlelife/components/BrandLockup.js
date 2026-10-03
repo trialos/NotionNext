@@ -2,7 +2,7 @@ import SmartLink from '@/components/SmartLink'
 
 /**
  * 时光的弧线 lockup：弧线 mark + 中文名 + CIRCLE OF LIFE
- * 与封面工具保持一致，三件套不拆开。
+ * collapsed：仅弧标 + 英文 Circle of Life
  */
 export function ArcMark({ size = 28, className = '' }) {
   return (
@@ -34,24 +34,36 @@ export function ArcMark({ size = 28, className = '' }) {
 }
 
 /**
- * @param {{ compact?: boolean, href?: string | null, className?: string }} props
+ * @param {{ compact?: boolean, collapsed?: boolean, href?: string | null, className?: string }} props
  */
-export function BrandLockup({ compact = false, href = '/', className = '' }) {
-  const mark = compact ? 26 : 32
+export function BrandLockup({
+  compact = false,
+  collapsed = false,
+  href = '/',
+  className = ''
+}) {
+  const mark = collapsed ? 22 : compact ? 26 : 32
   const cn = compact ? 'text-[15px]' : 'text-base md:text-lg'
-  const en = compact ? 'text-[9px]' : 'text-[10px]'
+  const en = collapsed ? 'text-[9px]' : compact ? 'text-[9px]' : 'text-[10px]'
 
   const inner = (
-    <span className={`cl-lockup inline-flex items-center gap-2.5 ${className}`}>
+    <span
+      className={`cl-lockup inline-flex items-center gap-2.5 ${
+        collapsed ? 'cl-lockup--collapsed' : ''
+      } ${className}`}>
       <ArcMark size={mark} />
       <span className='flex min-w-0 flex-col leading-none'>
+        {!collapsed ? (
+          <span
+            className={`cl-lockup-cn font-medium tracking-[0.04em] text-[var(--cl-text)] ${cn}`}
+            style={{ fontFamily: 'var(--cl-font-display)' }}>
+            时光的弧线
+          </span>
+        ) : null}
         <span
-          className={`cl-lockup-cn font-medium tracking-[0.04em] text-[var(--cl-text)] ${cn}`}
-          style={{ fontFamily: 'var(--cl-font-display)' }}>
-          时光的弧线
-        </span>
-        <span
-          className={`cl-lockup-en mt-1 uppercase tracking-[0.16em] text-[var(--cl-muted)] ${en}`}
+          className={`cl-lockup-en uppercase tracking-[0.16em] text-[var(--cl-muted)] ${en} ${
+            collapsed ? 'mt-0' : 'mt-1'
+          }`}
           style={{ fontFamily: 'var(--cl-font-mono)' }}>
           Circle of Life
         </span>
@@ -64,7 +76,8 @@ export function BrandLockup({ compact = false, href = '/', className = '' }) {
   return (
     <SmartLink
       href={href}
-      className='cl-brand inline-flex flex-shrink-0 no-underline hover:opacity-85'>
+      className='cl-brand inline-flex flex-shrink-0 no-underline hover:opacity-85'
+      aria-label='时光的弧线 · Circle of Life'>
       {inner}
     </SmartLink>
   )
