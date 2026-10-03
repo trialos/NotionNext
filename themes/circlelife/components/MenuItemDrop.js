@@ -73,12 +73,12 @@ export const MenuItemDrop = ({ link, variant = 'default' }) => {
     <ul
       className={
         isInline
-          ? `cl-card min-w-[10rem] py-1 shadow-lg border border-[var(--cl-border)] bg-[var(--cl-surface)]   transition-all duration-200 ${
+          ? `cl-card min-w-[10rem] py-1 border border-[var(--cl-border)] bg-[var(--cl-surface)] transition-all duration-200 ${
               show ? 'visible opacity-100' : 'hidden pointer-events-none opacity-0'
             }`
           : `${
               show ? 'visible opacity-100' : 'hidden pointer-events-none opacity-0'
-            } absolute z-30 transition-all duration-200 left-0 top-12 block border border-gray-100 bg-[var(--cl-surface)] drop-shadow-lg border-[var(--cl-border)] dark:bg-black`
+            } absolute z-30 transition-all duration-200 left-0 top-12 block border bg-[var(--cl-surface)] border-[var(--cl-border)] dark:bg-black`
       }
       style={
         isInline && show

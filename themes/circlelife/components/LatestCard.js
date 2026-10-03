@@ -20,6 +20,7 @@ export default function LatestCard({ post, posts }) {
 
   const [index, setIndex] = useState(0)
   const [fade, setFade] = useState(true)
+  const [paused, setPaused] = useState(false)
   const count = slides.length
   const current = slides[index] || slides[0]
 
@@ -39,10 +40,10 @@ export default function LatestCard({ post, posts }) {
   )
 
   useEffect(() => {
-    if (count <= 1 || autoMs <= 0) return undefined
+    if (count <= 1 || autoMs <= 0 || paused) return undefined
     const t = window.setInterval(() => go(i => i + 1), autoMs)
     return () => window.clearInterval(t)
-  }, [count, autoMs, go, index])
+  }, [count, autoMs, go, index, paused])
 
   if (!enabled || !current?.href) return null
 
@@ -54,7 +55,8 @@ export default function LatestCard({ post, posts }) {
   return (
     <aside
       className='cl-latest-card cl-hero'
-      onMouseEnter={() => {}}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
       aria-roledescription='carousel'
       aria-label='精选文章'>
       <div className='cl-hero-toolbar'>

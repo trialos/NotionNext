@@ -94,6 +94,15 @@ const SEO = props => {
   const pwaConfig = pwaEnabled
     ? getPwaConfig({ siteInfo, notionConfig: NOTION_CONFIG })
     : null
+  // Prefer paper/light brand color over pure black browser chrome
+  const BACKGROUND_LIGHT = siteConfig('BACKGROUND_LIGHT', '#F5F0E4', NOTION_CONFIG)
+  const PWA_THEME_COLOR = siteConfig('PWA_THEME_COLOR', '', NOTION_CONFIG)
+  const browserThemeColor =
+    (pwaEnabled && pwaConfig?.themeColor) ||
+    PWA_THEME_COLOR ||
+    BACKGROUND_LIGHT ||
+    BACKGROUND_DARK ||
+    '#F5F0E4'
 
   const COMMENT_WEBMENTION_ENABLE = siteConfig(
     'COMMENT_WEBMENTION_ENABLE',
@@ -128,7 +137,7 @@ const SEO = props => {
       <title>{title}</title>
       <meta
         name='theme-color'
-        content={pwaEnabled ? pwaConfig.themeColor : BACKGROUND_DARK}
+        content={browserThemeColor}
       />
       <meta
         name='viewport'
