@@ -1383,6 +1383,152 @@ const Style = () => {
         font-weight: 600;
       }
 
+
+      /* album shell + left frosted reel */
+      #theme-circlelife .cl-album-shell {
+        position: relative;
+        width: 100%;
+      }
+      #theme-circlelife .cl-album-rail {
+        display: none;
+      }
+      @media (min-width: 960px) {
+        #theme-circlelife .cl-album-rail {
+          display: block;
+          position: absolute;
+          left: max(0.5rem, calc((100% - 72rem) / 2));
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 6;
+          pointer-events: none;
+          width: 9.5rem;
+        }
+        #theme-circlelife .cl-album-rail-glass {
+          pointer-events: auto;
+          border-radius: 16px;
+          padding: 0.65rem 0.45rem 0.75rem;
+          background: color-mix(in srgb, var(--cl-surface) 55%, transparent);
+          border: 1px solid color-mix(in srgb, var(--cl-border) 70%, transparent);
+          box-shadow:
+            0 1px 0 color-mix(in srgb, #fff 35%, transparent),
+            0 12px 32px color-mix(in srgb, var(--cl-text) 8%, transparent);
+          backdrop-filter: blur(14px) saturate(1.1);
+          -webkit-backdrop-filter: blur(14px) saturate(1.1);
+        }
+        .dark #theme-circlelife .cl-album-rail-glass {
+          background: color-mix(in srgb, var(--cl-surface) 62%, transparent);
+          box-shadow: 0 12px 36px color-mix(in srgb, #000 40%, transparent);
+        }
+        #theme-circlelife .cl-album-rail-label {
+          font-family: var(--cl-font-mono);
+          font-size: 0.58rem;
+          letter-spacing: 0.18em;
+          text-transform: uppercase;
+          color: var(--cl-faint);
+          text-align: center;
+          margin-bottom: 0.35rem;
+        }
+        #theme-circlelife .cl-album-rail-window {
+          position: relative;
+          height: 280px;
+          overflow: hidden;
+          mask-image: linear-gradient(
+            to bottom,
+            transparent 0%,
+            #000 18%,
+            #000 82%,
+            transparent 100%
+          );
+          -webkit-mask-image: linear-gradient(
+            to bottom,
+            transparent 0%,
+            #000 18%,
+            #000 82%,
+            transparent 100%
+          );
+        }
+        #theme-circlelife .cl-album-rail-fade {
+          display: none; /* mask handles fade */
+        }
+        #theme-circlelife .cl-album-rail-track {
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 0;
+          transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+          will-change: transform;
+        }
+        #theme-circlelife .cl-album-rail-item {
+          display: flex;
+          align-items: center;
+          gap: 0.45rem;
+          width: 100%;
+          height: 40px;
+          padding: 0 0.45rem;
+          border: 0;
+          background: transparent;
+          cursor: pointer;
+          color: var(--cl-faint);
+          text-align: left;
+          transition:
+            color 0.25s ease,
+            opacity 0.25s ease,
+            transform 0.25s ease;
+          opacity: 0.45;
+        }
+        #theme-circlelife .cl-album-rail-item.is-near {
+          opacity: 0.72;
+          color: var(--cl-muted);
+        }
+        #theme-circlelife .cl-album-rail-item.is-far {
+          opacity: 0.28;
+        }
+        #theme-circlelife .cl-album-rail-item.is-active {
+          opacity: 1;
+          color: var(--cl-text);
+          transform: translateX(2px);
+        }
+        #theme-circlelife .cl-album-rail-dot {
+          width: 5px;
+          height: 5px;
+          border-radius: 9999px;
+          flex: none;
+          background: color-mix(in srgb, var(--cl-faint) 70%, transparent);
+          transition:
+            background 0.25s ease,
+            transform 0.25s ease,
+            box-shadow 0.25s ease;
+        }
+        #theme-circlelife .cl-album-rail-item.is-active .cl-album-rail-dot {
+          background: var(--cl-accent);
+          transform: scale(1.35);
+          box-shadow: 0 0 0 3px color-mix(in srgb, var(--cl-accent) 22%, transparent);
+        }
+        #theme-circlelife .cl-album-rail-text {
+          font-family: var(--cl-font-display);
+          font-size: 0.82rem;
+          font-weight: 500;
+          letter-spacing: -0.01em;
+          line-height: 1.2;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        #theme-circlelife .cl-album-rail-item.is-active .cl-album-rail-text {
+          font-weight: 600;
+        }
+        /* give stage a bit of left breathing room so rail doesn't cover cards */
+        #theme-circlelife .cl-album-shell .cl-ag {
+          padding-left: 0.5rem;
+        }
+      }
+      @media (min-width: 1100px) {
+        #theme-circlelife .cl-album-rail {
+          width: 10.5rem;
+          left: max(0.75rem, calc((100% - 72rem) / 2 - 0.25rem));
+        }
+      }
+
       #theme-circlelife .cl-album-snap {
         height: calc(100dvh - 3.25rem);
         max-height: calc(100dvh - 3.25rem);
@@ -1457,40 +1603,50 @@ const Style = () => {
         position: absolute;
         left: 50%;
         top: 50%;
-        width: 145%;
-        height: 145%;
+        width: 130%;
+        height: 130%;
         max-width: none;
         object-fit: cover;
-        transform: translate(-50%, -50%) scale(1.12);
-        filter: blur(56px) saturate(1.2) brightness(1.04);
-        opacity: 0.5;
+        transform: translate(-50%, -50%);
+        filter: blur(64px) saturate(1.08) brightness(1.0);
         will-change: opacity;
+        transition: opacity 1.1s ease;
       }
+      /* 单层常态 */
       #theme-circlelife .cl-ag-ambient-img.is-base {
-        opacity: 0.5;
+        opacity: 0.34;
         z-index: 0;
+      }
+      #theme-circlelife .cl-ag-ambient-img.is-base.is-out {
+        opacity: 0;
       }
       #theme-circlelife .cl-ag-ambient-img.is-top {
         opacity: 0;
         z-index: 1;
-        transition: opacity 0.72s ease;
       }
-      #theme-circlelife .cl-ag-ambient-img.is-top.is-on {
-        opacity: 0.5;
+      #theme-circlelife .cl-ag-ambient-img.is-top.is-in {
+        opacity: 0.34;
       }
-      .dark #theme-circlelife .cl-ag-ambient-img.is-base,
-      .dark #theme-circlelife .cl-ag-ambient-img.is-top.is-on {
-        opacity: 0.4;
-        filter: blur(60px) saturate(1.3) brightness(0.96);
+      .dark #theme-circlelife .cl-ag-ambient-img.is-base {
+        opacity: 0.28;
+        filter: blur(68px) saturate(1.12) brightness(0.98);
+      }
+      .dark #theme-circlelife .cl-ag-ambient-img.is-base.is-out {
+        opacity: 0;
+      }
+      .dark #theme-circlelife .cl-ag-ambient-img.is-top.is-in {
+        opacity: 0.28;
+        filter: blur(68px) saturate(1.12) brightness(0.98);
       }
       #theme-circlelife .cl-ag-ambient-veil {
         position: absolute;
         inset: 0;
         z-index: 2;
-        background: color-mix(in srgb, var(--cl-bg) 58%, transparent);
+        background: color-mix(in srgb, var(--cl-bg) 68%, transparent);
+        transition: background 0.6s ease;
       }
       .dark #theme-circlelife .cl-ag-ambient-veil {
-        background: color-mix(in srgb, var(--cl-bg) 64%, transparent);
+        background: color-mix(in srgb, var(--cl-bg) 72%, transparent);
       }
 
       /* make ambient cover whole section: position ag ambient fixed to section */

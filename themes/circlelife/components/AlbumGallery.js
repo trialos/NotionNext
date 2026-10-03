@@ -7,7 +7,7 @@ const THRESH = 0.2
 const TAP_MAX = 10
 const OUT_MS = 300
 const IN_MS = 320
-const GLOW_MS = 720
+const GLOW_MS = 1100
 const EASE = 'cubic-bezier(0.22, 0.61, 0.36, 1)'
 
 /**
@@ -18,10 +18,10 @@ export default function AlbumGallery({ albumName, photos }) {
   const [index, setIndex] = useState(0)
   const [expanded, setExpanded] = useState(false)
   const [portalReady, setPortalReady] = useState(false)
-  /** 双层光晕：底常驻，顶层淡入后并入底 */
+  /** 双层交叉淡化：底淡出 + 顶淡入，总亮度近似恒定，避免末尾闪一下 */
   const [glowBase, setGlowBase] = useState('')
   const [glowTop, setGlowTop] = useState('')
-  const [glowTopOn, setGlowTopOn] = useState(false)
+  const [glowPhase, setGlowPhase] = useState('idle') // idle | cross
 
   const dragRef = useRef({
     active: false,
@@ -211,7 +211,7 @@ export default function AlbumGallery({ albumName, photos }) {
     d.moved = false
   }
 
-  // 柔和双层光晕：不先关旧层，新层淡入后再换底
+  // 交叉淡化光晕（总亮度不叠高、结尾不压暗闪）
   useEffect(() => {
     if (!n) return undefined
     const safe = ((index % n) + n) % n
@@ -220,23 +220,20 @@ export default function AlbumGallery({ albumName, photos }) {
 
     if (!glowBase) {
       setGlowBase(url)
+      setGlowPhase('idle')
       return undefined
     }
-    if (url === glowBase) return undefined
-
+    if (url === glowBase && glowPhase === 'idle') return undefined
+    // 快速连翻：直接改 top 目标，延长交叉
     window.clearTimeout(glowTimer.current)
     setGlowTop(url)
-    setGlowTopOn(false)
-    const raf = requestAnimationFrame(() => {
-      requestAnimationFrame(() => setGlowTopOn(true))
-    })
+    setGlowPhase('cross')
     glowTimer.current = window.setTimeout(() => {
       setGlowBase(url)
-      setGlowTopOn(false)
       setGlowTop('')
+      setGlowPhase('idle')
     }, GLOW_MS)
     return () => {
-      cancelAnimationFrame(raf)
       window.clearTimeout(glowTimer.current)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -348,16 +345,20 @@ export default function AlbumGallery({ albumName, photos }) {
 
   return (
     <div className='cl-ag' ref={rootRef}>
-      <div className='cl-ag-ambient' aria-hidden>
+      <div
+        className={`cl-ag-ambient${glowPhase === 'cross' ? ' is-cross' : ''}`}
+        aria-hidden>
         {glowBase ? (
-          <img src={glowBase} alt='' className='cl-ag-ambient-img is-base' />
+          <img
+            src={glowBase}
+            alt=''
+            className={`cl-ag-ambient-img is-base${
+              glowPhase === 'cross' ? ' is-out' : ''
+            }`}
+          />
         ) : null}
         {glowTop ? (
-          <img
-            src={glowTop}
-            alt=''
-            className={`cl-ag-ambient-img is-top${glowTopOn ? ' is-on' : ''}`}
-          />
+          <img src={glowTop} alt='' className='cl-ag-ambient-img is-top is-in' />
         ) : null}
         <div className='cl-ag-ambient-veil' />
       </div>
