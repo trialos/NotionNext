@@ -1312,260 +1312,389 @@ const Style = () => {
       }
 
       
-      /* —— Album card stage —— */
+      /* —— Album: full-page snap + looping film cards —— */
+      #theme-circlelife.cl-is-album #container-inner,
+      #theme-circlelife.cl-is-album #container-wrapper {
+        max-width: none;
+        width: 100%;
+      }
       #theme-circlelife .cl-album-page {
         width: 100%;
-        max-width: 28rem;
-        margin: 0 auto;
-        padding: 0.5rem 0 2rem;
-      }
-      @media (min-width: 768px) {
-        #theme-circlelife .cl-album-page {
-          max-width: 32rem;
-        }
+        max-width: none;
+        margin: 0;
+        padding: 0;
       }
       #theme-circlelife .cl-album-empty {
         text-align: center;
-        padding: 3rem 1rem 4rem;
+        padding: 3.5rem 1.25rem 4rem;
+        max-width: 28rem;
+        margin: 0 auto;
       }
       #theme-circlelife .cl-album-howto {
         text-align: left;
         max-width: 22rem;
         margin: 1.5rem auto 0;
         padding: 1rem 1.15rem;
+        border-radius: 12px;
         border: 1px solid var(--cl-border);
-        border-radius: var(--cl-radius);
         background: var(--cl-surface);
-        color: var(--cl-muted);
         font-size: 0.88rem;
-        line-height: 1.7;
+        line-height: 1.65;
+        color: var(--cl-muted);
         list-style: disc;
         padding-left: 1.75rem;
+      }
+      #theme-circlelife .cl-album-howto li + li {
+        margin-top: 0.35rem;
       }
       #theme-circlelife .cl-album-howto strong {
         color: var(--cl-text);
         font-weight: 600;
       }
-      #theme-circlelife .cl-album-head {
-        margin-bottom: 0.75rem;
-        padding: 0 0.25rem;
+
+      /* vertical snap scroller: one album per screen */
+      #theme-circlelife .cl-album-snap {
+        height: calc(100dvh - 3.25rem);
+        max-height: calc(100dvh - 3.25rem);
+        overflow-x: hidden;
+        overflow-y: auto;
+        scroll-snap-type: y mandatory;
+        scroll-behavior: smooth;
+        overscroll-behavior-y: contain;
+        -webkit-overflow-scrolling: touch;
+        width: 100%;
       }
-      #theme-circlelife .cl-album-head-meta {
+      @media (min-width: 768px) {
+        #theme-circlelife .cl-album-snap {
+          height: calc(100dvh - 3.6rem);
+          max-height: calc(100dvh - 3.6rem);
+        }
+      }
+      #theme-circlelife .cl-album-section {
+        box-sizing: border-box;
+        min-height: 100%;
+        height: 100%;
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 0.65rem 0 1rem;
+        position: relative;
+      }
+      #theme-circlelife .cl-album-snap-hint {
+        text-align: center;
+        font-family: var(--cl-font-mono);
+        font-size: 0.62rem;
+        letter-spacing: 0.1em;
+        color: var(--cl-faint);
+        margin: 0.55rem 0 0;
+        flex-shrink: 0;
+      }
+
+      /* —— single-album gallery —— */
+      #theme-circlelife .cl-ag {
+        display: flex;
+        flex-direction: column;
+        flex: 1 1 auto;
+        min-height: 0;
+        width: 100%;
+        max-width: 72rem;
+        margin: 0 auto;
+        padding: 0 0.5rem;
+      }
+      @media (min-width: 768px) {
+        #theme-circlelife .cl-ag {
+          padding: 0 1.25rem;
+        }
+      }
+      #theme-circlelife .cl-ag-head {
+        text-align: center;
+        padding: 0.15rem 0.5rem 0.55rem;
+        flex-shrink: 0;
+      }
+      #theme-circlelife .cl-ag-head-row {
         display: flex;
         align-items: baseline;
-        justify-content: space-between;
+        justify-content: center;
         gap: 0.75rem;
-        margin-top: 0.35rem;
+        flex-wrap: wrap;
       }
-      #theme-circlelife .cl-album-name {
+      #theme-circlelife .cl-ag-album-name {
         font-family: var(--cl-font-display);
-        font-size: 1.25rem;
+        font-size: clamp(1.35rem, 3.2vw, 1.85rem);
         font-weight: 600;
-        color: var(--cl-text);
         letter-spacing: -0.02em;
+        color: var(--cl-text);
+        margin: 0;
+        line-height: 1.2;
       }
-      #theme-circlelife .cl-album-count {
+      #theme-circlelife .cl-ag-count {
         font-family: var(--cl-font-mono);
         font-size: 0.72rem;
         letter-spacing: 0.08em;
         color: var(--cl-faint);
       }
-      #theme-circlelife .cl-album-rail {
-        display: flex;
-        gap: 0.35rem;
-        overflow-x: auto;
-        padding: 0.15rem 0.1rem 0.85rem;
-        margin-bottom: 0.25rem;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-      }
-      #theme-circlelife .cl-album-rail::-webkit-scrollbar {
-        display: none;
-      }
-      #theme-circlelife .cl-album-rail-item {
-        flex: none;
-        border: 1px solid var(--cl-border);
-        background: transparent;
-        color: var(--cl-muted);
-        border-radius: 9999px;
-        padding: 0.28rem 0.75rem;
-        font-size: 0.78rem;
-        font-weight: 500;
-        cursor: pointer;
-        transition:
-          color 0.15s var(--cl-ease),
-          border-color 0.15s var(--cl-ease),
-          background 0.15s var(--cl-ease);
-      }
-      #theme-circlelife .cl-album-rail-item.is-active {
-        color: var(--cl-accent);
-        border-color: var(--cl-accent);
-        background: var(--cl-accent-soft);
-      }
-      #theme-circlelife .cl-album-stage {
+
+      #theme-circlelife .cl-ag-stage {
         position: relative;
-        height: min(72vw, 28rem);
-        max-height: 32rem;
-        min-height: 16rem;
-        touch-action: none;
+        flex: 1 1 auto;
+        min-height: 12rem;
+        height: clamp(16rem, 52dvh, 28rem);
+        max-height: 58dvh;
+        width: 100%;
+        margin: 0 auto;
+        touch-action: pan-y;
         user-select: none;
-        margin: 0 auto 1rem;
-        perspective: 900px;
-        background: transparent;
-      }
-      @media (min-width: 768px) {
-        #theme-circlelife .cl-album-stage {
-          height: 30rem;
-          max-height: 34rem;
-        }
-      }
-      #theme-circlelife .cl-album-stack {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: transform 0.28s var(--cl-ease);
-      }
-      #theme-circlelife .cl-album-card {
-        position: absolute;
-        width: min(92%, 24rem);
-        height: 100%;
-        max-height: inherit;
-        border-radius: 14px;
-        overflow: hidden;
-        border: 1px solid var(--cl-border);
-        background: var(--cl-paper-2);
-        box-shadow:
-          0 1px 0 color-mix(in srgb, var(--cl-text) 5%, transparent),
-          0 12px 28px color-mix(in srgb, var(--cl-text) 8%, transparent);
-        transition:
-          transform 0.32s var(--cl-ease),
-          opacity 0.32s var(--cl-ease);
-        will-change: transform;
-      }
-      #theme-circlelife .cl-album-stage.is-dragging .cl-album-card.is-main {
-        transition: none;
-      }
-      #theme-circlelife .cl-album-card.is-main {
+        -webkit-user-select: none;
         cursor: grab;
-        z-index: 10;
+        overflow: visible;
       }
-      #theme-circlelife .cl-album-stage.is-dragging .cl-album-card.is-main {
+      #theme-circlelife .cl-ag-stage:active {
         cursor: grabbing;
       }
-      #theme-circlelife .cl-album-card.is-back {
+      @media (min-width: 900px) {
+        #theme-circlelife .cl-ag-stage {
+          height: clamp(18rem, 56dvh, 32rem);
+          max-height: 62dvh;
+        }
+      }
+
+      /* photo IS the card — no paper frame / white mat */
+      #theme-circlelife .cl-ag-card {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin: 0;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        border-radius: 4px;
+        overflow: hidden;
+        box-shadow:
+          0 1px 2px color-mix(in srgb, var(--cl-text) 6%, transparent),
+          0 14px 36px color-mix(in srgb, var(--cl-text) 12%, transparent);
+        transform-origin: center center;
+        display: block;
+        line-height: 0;
+      }
+      #theme-circlelife .cl-ag-card--main {
+        z-index: 5;
+        width: min(86vw, 28rem);
+        max-height: 100%;
+        transform: translate(-50%, -50%);
+        will-change: transform;
+      }
+      @media (min-width: 768px) {
+        #theme-circlelife .cl-ag-card--main {
+          width: min(62vw, 34rem);
+        }
+      }
+      @media (min-width: 1100px) {
+        #theme-circlelife .cl-ag-card--main {
+          width: min(48vw, 38rem);
+        }
+      }
+      #theme-circlelife .cl-ag-card--side {
+        z-index: 3;
+        width: min(42vw, 14rem);
+        max-height: 78%;
+        opacity: 0.72;
+        filter: brightness(0.92);
+        cursor: pointer;
+        transition:
+          transform 0.35s var(--cl-ease, ease),
+          opacity 0.25s ease;
+      }
+      #theme-circlelife .cl-ag-card--side:hover {
+        opacity: 0.9;
+        filter: brightness(1);
+      }
+      #theme-circlelife .cl-ag-card--left {
+        transform: translate(calc(-50% - min(38vw, 15.5rem)), -50%) scale(0.86)
+          rotate(-4deg);
+      }
+      #theme-circlelife .cl-ag-card--right {
+        transform: translate(calc(-50% + min(38vw, 15.5rem)), -50%) scale(0.86)
+          rotate(4deg);
+      }
+      @media (min-width: 900px) {
+        #theme-circlelife .cl-ag-card--left {
+          transform: translate(calc(-50% - min(32vw, 18rem)), -50%) scale(0.84)
+            rotate(-5deg);
+        }
+        #theme-circlelife .cl-ag-card--right {
+          transform: translate(calc(-50% + min(32vw, 18rem)), -50%) scale(0.84)
+            rotate(5deg);
+        }
+      }
+      #theme-circlelife .cl-ag-card--far {
+        z-index: 1;
+        width: min(28vw, 10rem);
+        max-height: 58%;
+        opacity: 0.35;
+        filter: brightness(0.85);
         pointer-events: none;
       }
-      #theme-circlelife .cl-album-card-frame {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        background: var(--cl-paper-2);
+      #theme-circlelife .cl-ag-card--left2 {
+        transform: translate(calc(-50% - min(58vw, 26rem)), -50%) scale(0.7)
+          rotate(-8deg);
       }
-      #theme-circlelife .cl-album-card-img {
+      #theme-circlelife .cl-ag-card--right2 {
+        transform: translate(calc(-50% + min(58vw, 26rem)), -50%) scale(0.7)
+          rotate(8deg);
+      }
+      @media (max-width: 639px) {
+        #theme-circlelife .cl-ag-card--far {
+          display: none;
+        }
+        #theme-circlelife .cl-ag-card--left {
+          transform: translate(calc(-50% - min(48vw, 9.5rem)), -50%) scale(0.78)
+            rotate(-3deg);
+          opacity: 0.55;
+        }
+        #theme-circlelife .cl-ag-card--right {
+          transform: translate(calc(-50% + min(48vw, 9.5rem)), -50%) scale(0.78)
+            rotate(3deg);
+          opacity: 0.55;
+        }
+      }
+
+      #theme-circlelife .cl-ag-img {
+        display: block;
         width: 100%;
-        height: 100%;
+        height: auto;
+        max-height: inherit;
         object-fit: contain;
         object-position: center;
-        display: block;
-        background: var(--cl-paper-2);
+        background: transparent;
+        pointer-events: none;
+        -webkit-user-drag: none;
       }
-      #theme-circlelife .cl-album-card-placeholder {
+      #theme-circlelife .cl-ag-img--main {
+        max-height: min(52dvh, 28rem);
         width: 100%;
-        height: 100%;
+        height: auto;
+      }
+      @media (min-width: 900px) {
+        #theme-circlelife .cl-ag-img--main {
+          max-height: min(56dvh, 32rem);
+        }
+      }
+      #theme-circlelife .cl-ag-card--side .cl-ag-img,
+      #theme-circlelife .cl-ag-card--far .cl-ag-img {
+        max-height: min(40dvh, 18rem);
+        width: 100%;
+      }
+      #theme-circlelife .cl-ag-placeholder {
+        width: min(70vw, 20rem);
+        height: 12rem;
         display: flex;
         align-items: center;
         justify-content: center;
+        background: var(--cl-paper-2, var(--cl-surface));
         color: var(--cl-faint);
-        font-family: var(--cl-font-display);
-        padding: 1rem;
-        text-align: center;
+        font-family: var(--cl-font-mono);
+        font-size: 0.75rem;
+        border-radius: 4px;
+        border: 1px dashed var(--cl-border);
+        line-height: 1.4;
       }
-      #theme-circlelife .cl-album-card-shade {
+
+      #theme-circlelife .cl-ag-arrows {
+        position: absolute;
+        inset: 0;
+        z-index: 8;
         display: none;
-      }
-      #theme-circlelife .cl-album-nav-btns {
-        display: none;
+        align-items: center;
+        justify-content: space-between;
+        pointer-events: none;
+        padding: 0 0.25rem;
       }
       @media (min-width: 768px) {
-        #theme-circlelife .cl-album-nav-btns {
+        #theme-circlelife .cl-ag-arrows {
           display: flex;
-          position: absolute;
-          inset: 0;
-          align-items: center;
-          justify-content: space-between;
-          pointer-events: none;
-          padding: 0 0.15rem;
-          z-index: 20;
-        }
-        #theme-circlelife .cl-album-nav-btn {
-          pointer-events: auto;
+          padding: 0 0.5rem;
         }
       }
-      #theme-circlelife .cl-album-nav-btn {
-        width: 2.35rem;
-        height: 2.35rem;
+      #theme-circlelife .cl-ag-arrow {
+        pointer-events: auto;
+        width: 2.4rem;
+        height: 2.4rem;
         border-radius: 9999px;
         border: 1px solid var(--cl-border);
-        background: var(--cl-surface);
+        background: color-mix(in srgb, var(--cl-surface) 92%, transparent);
         color: var(--cl-text);
-        font-size: 1.25rem;
+        font-size: 1.35rem;
         line-height: 1;
         cursor: pointer;
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        backdrop-filter: blur(6px);
         transition:
-          color 0.15s var(--cl-ease),
-          border-color 0.15s var(--cl-ease),
-          background 0.15s var(--cl-ease);
+          color 0.15s ease,
+          border-color 0.15s ease,
+          background 0.15s ease,
+          transform 0.15s ease;
       }
-      #theme-circlelife .cl-album-nav-btn:hover {
+      #theme-circlelife .cl-ag-arrow:hover {
         color: var(--cl-accent);
         border-color: var(--cl-accent);
-        background: var(--cl-accent-soft);
+        background: var(--cl-accent-soft, color-mix(in srgb, var(--cl-accent) 12%, var(--cl-surface)));
+        transform: translateY(-1px);
       }
-      #theme-circlelife .cl-album-caption {
-        padding: 0.15rem 0.35rem 0.5rem;
+
+      #theme-circlelife .cl-ag-caption {
         text-align: center;
+        padding: 0.65rem 0.75rem 0.15rem;
+        flex-shrink: 0;
       }
-      #theme-circlelife .cl-album-title {
+      #theme-circlelife .cl-ag-title {
         font-family: var(--cl-font-display);
-        font-size: 1.35rem;
+        font-size: 1.2rem;
         font-weight: 600;
         letter-spacing: -0.02em;
         color: var(--cl-text);
-        margin: 0 0 0.4rem;
+        margin: 0 0 0.3rem;
         line-height: 1.3;
       }
-      #theme-circlelife .cl-album-summary {
-        margin: 0 auto 0.65rem;
-        max-width: 28em;
-        font-size: 0.92rem;
+      #theme-circlelife .cl-ag-cap {
+        margin: 0 auto 0.35rem;
+        max-width: 36em;
+        font-size: 0.86rem;
+        line-height: 1.55;
+        color: var(--cl-muted);
+      }
+      #theme-circlelife .cl-ag-summary {
+        margin: 0 auto 0.55rem;
+        max-width: 34em;
+        font-size: 0.9rem;
         line-height: 1.65;
         color: var(--cl-muted);
       }
-      #theme-circlelife .cl-album-meta {
+      #theme-circlelife .cl-ag-meta {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem 0.85rem;
+        gap: 0.45rem 0.85rem;
       }
-      #theme-circlelife .cl-album-date {
+      #theme-circlelife .cl-ag-date {
         font-family: var(--cl-font-mono);
-        font-size: 0.72rem;
+        font-size: 0.7rem;
         letter-spacing: 0.06em;
         color: var(--cl-faint);
       }
-      #theme-circlelife .cl-album-dots {
+      #theme-circlelife .cl-ag-dots {
         display: flex;
         justify-content: center;
-        gap: 0.4rem;
-        padding: 0.5rem 0 0.25rem;
+        flex-wrap: wrap;
+        gap: 0.38rem;
+        padding: 0.45rem 0 0.1rem;
+        flex-shrink: 0;
       }
-      #theme-circlelife .cl-album-dot {
+      #theme-circlelife .cl-ag-dot {
         width: 6px;
         height: 6px;
         padding: 0;
@@ -1573,29 +1702,18 @@ const Style = () => {
         border: 1px solid var(--cl-border-strong, var(--cl-border));
         background: transparent;
         cursor: pointer;
+        transition:
+          background 0.15s ease,
+          border-color 0.15s ease,
+          transform 0.15s ease;
       }
-      #theme-circlelife .cl-album-dot.is-active {
+      #theme-circlelife .cl-ag-dot.is-active {
         background: var(--cl-accent);
         border-color: var(--cl-accent);
-        transform: scale(1.2);
+        transform: scale(1.25);
       }
-      #theme-circlelife .cl-album-hint {
-        text-align: center;
-        font-family: var(--cl-font-mono);
-        font-size: 0.65rem;
-        letter-spacing: 0.08em;
-        color: var(--cl-faint);
-        margin: 0.75rem 0 0;
-      }
-      #theme-circlelife .cl-album-hint-desk {
-        display: none;
-      }
-      @media (min-width: 768px) {
-        #theme-circlelife .cl-album-hint-desk {
-          display: inline;
-        }
-      }
-      #theme-circlelife .cl-album-lightbox {
+
+      #theme-circlelife .cl-ag-lightbox {
         position: fixed;
         inset: 0;
         z-index: 180;
@@ -1604,50 +1722,50 @@ const Style = () => {
         justify-content: center;
         padding: 1rem;
       }
-      #theme-circlelife .cl-album-lightbox-mask {
+      #theme-circlelife .cl-ag-lightbox-mask {
         position: absolute;
         inset: 0;
         border: 0;
-        background: color-mix(in srgb, var(--cl-text) 45%, transparent);
+        background: color-mix(in srgb, var(--cl-text) 48%, transparent);
         cursor: pointer;
       }
-      #theme-circlelife .cl-album-lightbox-panel {
+      #theme-circlelife .cl-ag-lightbox-panel {
         position: relative;
         z-index: 1;
-        width: min(100%, 28rem);
-        max-height: min(92vh, 40rem);
+        width: min(100%, 40rem);
+        max-height: min(92dvh, 48rem);
         overflow: auto;
-        border-radius: 14px;
+        border-radius: 12px;
         border: 1px solid var(--cl-border);
         background: var(--cl-surface);
-        box-shadow: 0 16px 40px color-mix(in srgb, var(--cl-text) 18%, transparent);
+        box-shadow: 0 18px 48px color-mix(in srgb, var(--cl-text) 22%, transparent);
       }
-      #theme-circlelife .cl-album-lightbox-close {
+      #theme-circlelife .cl-ag-lightbox-close {
         position: absolute;
         top: 0.65rem;
         right: 0.65rem;
         z-index: 2;
         background: var(--cl-surface);
       }
-      #theme-circlelife .cl-album-lightbox-img {
+      #theme-circlelife .cl-ag-lightbox-img {
         width: 100%;
-        max-height: 70vh;
+        max-height: 72dvh;
+        height: auto;
         object-fit: contain;
         display: block;
-        background: var(--cl-paper-2);
+        background: color-mix(in srgb, var(--cl-text) 4%, var(--cl-surface));
       }
-      #theme-circlelife .cl-album-lightbox-body {
+      #theme-circlelife .cl-ag-lightbox-body {
         padding: 1rem 1.15rem 1.25rem;
         text-align: center;
       }
-      #theme-circlelife .cl-album-lightbox-nav {
+      #theme-circlelife .cl-ag-lightbox-nav {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 0.75rem;
-        margin-top: 1rem;
+        gap: 0.85rem;
+        margin-top: 0.85rem;
       }
-
 
       /* media hooks reserved */
       #theme-circlelife .cl-media-grid {

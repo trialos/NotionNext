@@ -31,14 +31,26 @@ export function photoAlbumName(p) {
   return siteConfig('CIRCLELIFE_ALBUM_DEFAULT_NAME', '未分辑', CONFIG)
 }
 
+/** caption 与 title/summary 相同时不展示 */
+export function uniqueCaption(caption, title, summary) {
+  const c = (caption || '').trim()
+  if (!c) return ''
+  const t = (title || '').trim()
+  const s = (summary || '').trim()
+  if (c === t || c === s) return ''
+  return c
+}
+
 /**
- * 将一条 Photo 页展开为可滑动的多图卡片
- * p.images: [{url, caption, id}] 优先；否则退回单封面
+ * 一条 Photo 页 → 多张可滑卡片
+ * title 始终用页面标题；caption 单独；summary 只用页面摘要
  */
 export function expandPhotoPage(p) {
   if (!p) return []
   const author = resolveAuthor(p)
   const album = photoAlbumName(p)
+  const pageTitle = (p.title || '').trim()
+  const pageSummary = (p.summary || p.description || '').trim()
   const base = {
     pageId: p.id,
     href: p.href || '',
@@ -46,25 +58,28 @@ export function expandPhotoPage(p) {
     publishDate: p.publishDate || 0,
     album,
     author,
-    pageTitle: p.title || '',
-    pageSummary: p.summary || p.description || ''
+    title: pageTitle,
+    summary: pageSummary
   }
 
   const imgs = Array.isArray(p.images) ? p.images.filter(i => i?.url) : []
   if (imgs.length) {
-    return imgs.map((img, i) => ({
-      ...base,
-      id: `${p.id}-${img.id || i}`,
-      url: img.url,
-      caption: img.caption || '',
-      title: img.caption || (i === 0 ? p.title : `${p.title || ''} · ${i + 1}`),
-      summary: i === 0 ? base.pageSummary : img.caption || '',
-      cover: img.url
-    }))
+    return imgs.map((img, i) => {
+      const caption = uniqueCaption(img.caption || '', pageTitle, pageSummary)
+      return {
+        ...base,
+        id: `${p.id}-${img.id || i}`,
+        url: img.url,
+        cover: img.url,
+        caption,
+        indexInPage: i,
+        totalInPage: imgs.length
+      }
+    })
   }
 
   const cover = photoCover(p)
-  if (!cover && !p.title) return []
+  if (!cover && !pageTitle) return []
   return [
     {
       ...base,
@@ -72,15 +87,12 @@ export function expandPhotoPage(p) {
       url: cover,
       cover,
       caption: '',
-      title: p.title || '',
-      summary: base.pageSummary
+      indexInPage: 0,
+      totalInPage: 1
     }
   ]
 }
 
-/**
- * @returns {{ name: string, photos: object[] }[]}
- */
 export function buildAlbumDecks(pages) {
   const cards = []
   for (const p of pages || []) {
