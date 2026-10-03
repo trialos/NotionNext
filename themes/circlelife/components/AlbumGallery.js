@@ -5,8 +5,8 @@ import AuthorBadge from './AuthorBadge'
 
 const THRESH = 0.2
 const TAP_MAX = 10
-const OUT_MS = 340
-const IN_MS = 380
+const OUT_MS = 300
+const IN_MS = 320
 const GLOW_MS = 720
 const EASE = 'cubic-bezier(0.22, 0.61, 0.36, 1)'
 
@@ -71,18 +71,14 @@ export default function AlbumGallery({ albumName, photos }) {
   const setStack = (x, withTransition, duration = OUT_MS) => {
     const stage = stageRef.current
     if (!stage) return
-    const w = Math.max(cardWidth(), 1)
-    const p = Math.max(-1, Math.min(1, x / w)) // -1..1
+    // 只做平移/微旋，不做 scale 放大缩小，避免「先缩后弹」
     stage.style.setProperty('--ag-dx', `${x}px`)
-    stage.style.setProperty('--ag-rot', `${x * 0.032}deg`)
-    // 侧卡跟移（约 45%），并随方向略放大「即将成为主图」的那一侧
-    stage.style.setProperty('--ag-shift', `${x * 0.45}px`)
-    stage.style.setProperty('--ag-shift-far', `${x * 0.28}px`)
-    const growR = p < 0 ? Math.min(0.14, -p * 0.14) : 0
-    const growL = p > 0 ? Math.min(0.14, p * 0.14) : 0
-    stage.style.setProperty('--ag-grow-r', String(growR))
-    stage.style.setProperty('--ag-grow-l', String(growL))
-    stage.style.setProperty('--ag-fade-main', String(Math.max(0.4, 1 - Math.abs(p) * 0.35)))
+    stage.style.setProperty('--ag-rot', `${x * 0.022}deg`)
+    stage.style.setProperty('--ag-shift', `${x * 0.42}px`)
+    stage.style.setProperty('--ag-shift-far', `${x * 0.26}px`)
+    stage.style.setProperty('--ag-grow-r', '0')
+    stage.style.setProperty('--ag-grow-l', '0')
+    stage.style.setProperty('--ag-fade-main', '1')
     if (withTransition) {
       stage.classList.add('is-animating')
       stage.style.setProperty('--ag-dur', `${duration}ms`)
@@ -111,12 +107,12 @@ export default function AlbumGallery({ albumName, photos }) {
       if (n <= 1 || busyRef.current) return
       busyRef.current = true
       const w = cardWidth()
-      const outX = dir > 0 ? -w * 1.08 : w * 1.08
+      const outX = dir > 0 ? -w * 0.92 : w * 0.92
       setStack(outX, true, OUT_MS)
       window.setTimeout(() => {
         setIndex(i => (i + dir + n) % n)
         // 新主图从对侧入场，侧卡也跟着归位
-        const inX = dir > 0 ? w * 0.38 : -w * 0.38
+        const inX = dir > 0 ? w * 0.18 : -w * 0.18
         setStack(inX, false)
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
@@ -367,9 +363,9 @@ export default function AlbumGallery({ albumName, photos }) {
       </div>
 
       <header className='cl-ag-head'>
-        <div className='cl-ag-titlechip'>
-          <span className='cl-ag-titlechip-label'>影集</span>
-          <h2 className='cl-ag-titlechip-name'>{pageTitle || '未命名'}</h2>
+        <div className='cl-ag-mast'>
+          <span className='cl-ag-mast-kicker'>影集</span>
+          <h2 className='cl-ag-mast-title'>{pageTitle || '未命名'}</h2>
         </div>
       </header>
 

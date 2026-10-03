@@ -67,9 +67,9 @@ const Style = () => {
       #theme-circlelife .cl-header {
         position: sticky;
         top: 0;
-        background-color: color-mix(in srgb, var(--cl-bg) 72%, transparent);
-        backdrop-filter: blur(14px) saturate(1.1);
-        -webkit-backdrop-filter: blur(14px) saturate(1.1);
+        background-color: color-mix(in srgb, var(--cl-bg) 48%, transparent);
+        backdrop-filter: blur(16px) saturate(1.12);
+        -webkit-backdrop-filter: blur(16px) saturate(1.12);
         border-bottom: 1px solid transparent;
         transition:
           border-color var(--cl-dur) var(--cl-ease),
@@ -77,18 +77,18 @@ const Style = () => {
           backdrop-filter var(--cl-dur) var(--cl-ease);
       }
       #theme-circlelife .cl-header.is-scrolled {
-        border-bottom-color: color-mix(in srgb, var(--cl-border) 70%, transparent);
-        background-color: color-mix(in srgb, var(--cl-bg) 82%, transparent);
+        border-bottom-color: color-mix(in srgb, var(--cl-border) 55%, transparent);
+        background-color: color-mix(in srgb, var(--cl-bg) 62%, transparent);
       }
-      /* 影集页更透一点，仍保留存在感 */
+      /* 影集页：更高透，靠模糊保可读 */
       #theme-circlelife.cl-is-album .cl-header {
-        background-color: color-mix(in srgb, var(--cl-bg) 52%, transparent);
-        backdrop-filter: blur(16px) saturate(1.15);
-        -webkit-backdrop-filter: blur(16px) saturate(1.15);
+        background-color: color-mix(in srgb, var(--cl-bg) 28%, transparent);
+        backdrop-filter: blur(18px) saturate(1.18);
+        -webkit-backdrop-filter: blur(18px) saturate(1.18);
       }
       #theme-circlelife.cl-is-album .cl-header.is-scrolled {
-        background-color: color-mix(in srgb, var(--cl-bg) 68%, transparent);
-        border-bottom-color: color-mix(in srgb, var(--cl-border) 55%, transparent);
+        background-color: color-mix(in srgb, var(--cl-bg) 42%, transparent);
+        border-bottom-color: color-mix(in srgb, var(--cl-border) 40%, transparent);
       }
       #theme-circlelife .cl-header-inner {
         margin: 0 auto;
@@ -127,12 +127,28 @@ const Style = () => {
         }
       }
       #theme-circlelife .cl-header-inner--mobile {
-        display: flex;
-        justify-content: space-between;
+        display: grid;
+        grid-template-columns: minmax(4.5rem, 1fr) auto minmax(4.5rem, 1fr);
+        align-items: center;
+        column-gap: 0.35rem;
       }
-      #theme-circlelife .cl-header-mobile-spacer {
-        width: 5.5rem;
-        flex: none;
+      #theme-circlelife .cl-header-mobile-side {
+        display: flex;
+        align-items: center;
+        min-width: 0;
+      }
+      #theme-circlelife .cl-header-mobile-side--left {
+        justify-content: flex-start;
+      }
+      #theme-circlelife .cl-header-mobile-side--right {
+        justify-content: flex-end;
+      }
+      #theme-circlelife .cl-header-actions--mobile {
+        gap: 0.1rem;
+      }
+      /* 手机展开：logo 双行；上滑收起：单行英文（BrandLockup collapsed） */
+      #theme-circlelife .cl-header-inner--mobile .cl-header-center {
+        justify-self: center;
       }
 
       #theme-circlelife .cl-header-center {
@@ -1492,50 +1508,41 @@ const Style = () => {
 
       #theme-circlelife .cl-ag-head {
         text-align: left;
-        padding: 0.35rem 0.35rem 0.55rem;
+        padding: 0.45rem 0.5rem 0.7rem 0.85rem;
         flex-shrink: 0;
         display: flex;
         justify-content: flex-start;
       }
       @media (min-width: 768px) {
         #theme-circlelife .cl-ag-head {
-          padding: 0.45rem 0.5rem 0.65rem 0.75rem;
+          padding: 0.55rem 0.75rem 0.85rem 1.1rem;
         }
       }
-      #theme-circlelife .cl-ag-titlechip {
-        display: inline-flex;
+      /* 杂志刊头：无厚卡片，左侧朱砂细条 + 字重 */
+      #theme-circlelife .cl-ag-mast {
+        display: flex;
         flex-direction: column;
         align-items: flex-start;
-        gap: 0.15rem;
-        padding: 0.55rem 0.9rem 0.6rem;
-        border-radius: 14px;
-        background: color-mix(in srgb, var(--cl-surface) 72%, transparent);
-        border: 1px solid color-mix(in srgb, var(--cl-border) 80%, transparent);
-        box-shadow:
-          0 1px 0 color-mix(in srgb, #fff 40%, transparent),
-          0 8px 24px color-mix(in srgb, var(--cl-text) 8%, transparent);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        max-width: min(92%, 22rem);
+        gap: 0.28rem;
+        max-width: min(94%, 26rem);
+        padding: 0.15rem 0 0.15rem 0.85rem;
+        border-left: 2px solid var(--cl-accent);
       }
-      .dark #theme-circlelife .cl-ag-titlechip {
-        background: color-mix(in srgb, var(--cl-surface) 78%, transparent);
-        box-shadow: 0 8px 28px color-mix(in srgb, #000 35%, transparent);
-      }
-      #theme-circlelife .cl-ag-titlechip-label {
+      #theme-circlelife .cl-ag-mast-kicker {
         font-family: var(--cl-font-mono);
-        font-size: 0.62rem;
-        letter-spacing: 0.16em;
+        font-size: 0.68rem;
+        letter-spacing: 0.2em;
         text-transform: uppercase;
         color: var(--cl-faint);
+        line-height: 1;
       }
-      #theme-circlelife .cl-ag-titlechip-name {
+      #theme-circlelife .cl-ag-mast-title {
         margin: 0;
         font-family: var(--cl-font-display);
-        font-size: clamp(1.15rem, 2.8vw, 1.55rem);
+        font-size: clamp(1.35rem, 3.4vw, 1.85rem);
         font-weight: 600;
-        letter-spacing: -0.02em;
-        line-height: 1.25;
+        letter-spacing: -0.025em;
+        line-height: 1.2;
         color: var(--cl-text);
       }
 
@@ -1614,8 +1621,8 @@ const Style = () => {
       }
       #theme-circlelife .cl-ag-card--main {
         z-index: 5;
-        will-change: transform, opacity;
-        opacity: var(--ag-fade-main, 1);
+        will-change: transform;
+        opacity: 1;
         transform: translate3d(calc(-50% + var(--ag-dx, 0px)), -50%, 0)
           rotate(var(--ag-rot, 0deg));
       }
@@ -1635,14 +1642,14 @@ const Style = () => {
             calc(-50% - min(36vw, 15rem) + var(--ag-shift, 0px)),
             -50%
           )
-          scale(calc(0.86 + var(--ag-grow-l, 0))) rotate(-4deg);
+          scale(0.86) rotate(-4deg);
       }
       #theme-circlelife .cl-ag-card--right {
         transform: translate(
             calc(-50% + min(36vw, 15rem) + var(--ag-shift, 0px)),
             -50%
           )
-          scale(calc(0.86 + var(--ag-grow-r, 0))) rotate(4deg);
+          scale(0.86) rotate(4deg);
       }
       @media (min-width: 900px) {
         #theme-circlelife .cl-ag-card--left {
@@ -1650,14 +1657,14 @@ const Style = () => {
               calc(-50% - min(30vw, 17.5rem) + var(--ag-shift, 0px)),
               -50%
             )
-            scale(calc(0.84 + var(--ag-grow-l, 0))) rotate(-5deg);
+            scale(0.84) rotate(-5deg);
         }
         #theme-circlelife .cl-ag-card--right {
           transform: translate(
               calc(-50% + min(30vw, 17.5rem) + var(--ag-shift, 0px)),
               -50%
             )
-            scale(calc(0.84 + var(--ag-grow-r, 0))) rotate(5deg);
+            scale(0.84) rotate(5deg);
         }
       }
       #theme-circlelife .cl-ag-card--far {
@@ -1690,7 +1697,7 @@ const Style = () => {
               calc(-50% - min(46vw, 9rem) + var(--ag-shift, 0px)),
               -50%
             )
-            scale(calc(0.78 + var(--ag-grow-l, 0))) rotate(-3deg);
+            scale(0.78) rotate(-3deg);
           opacity: 0.55;
         }
         #theme-circlelife .cl-ag-card--right {
@@ -1698,7 +1705,7 @@ const Style = () => {
               calc(-50% + min(46vw, 9rem) + var(--ag-shift, 0px)),
               -50%
             )
-            scale(calc(0.78 + var(--ag-grow-r, 0))) rotate(3deg);
+            scale(0.78) rotate(3deg);
           opacity: 0.55;
         }
       }

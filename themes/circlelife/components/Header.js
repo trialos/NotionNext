@@ -1,5 +1,6 @@
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
+import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import CONFIG from '../config'
@@ -23,9 +24,17 @@ export const Header = props => {
     setMounted(true)
   }, [])
 
+  const router = useRouter()
+
   useEffect(() => {
+    const readY = () => {
+      // 影集页滚动在 .cl-album-snap 内，window.scrollY 几乎为 0
+      const album = document.querySelector('.cl-album-snap')
+      if (album) return album.scrollTop || 0
+      return window.scrollY || document.documentElement.scrollTop || 0
+    }
     const onScroll = () => {
-      const y = window.scrollY || 0
+      const y = readY()
       setScrolled(prev => {
         if (!prev && y > 28) return true
         if (prev && y < 10) return false
@@ -34,8 +43,23 @@ export const Header = props => {
     }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+    const album = document.querySelector('.cl-album-snap')
+    album?.addEventListener('scroll', onScroll, { passive: true })
+    // 路由进入影集后再绑一次（snap 可能稍后挂载）
+    const t = window.setTimeout(() => {
+      const a2 = document.querySelector('.cl-album-snap')
+      if (a2 && a2 !== album) {
+        a2.addEventListener('scroll', onScroll, { passive: true })
+      }
+      onScroll()
+    }, 120)
+    return () => {
+      window.clearTimeout(t)
+      window.removeEventListener('scroll', onScroll)
+      album?.removeEventListener('scroll', onScroll)
+      document.querySelector('.cl-album-snap')?.removeEventListener('scroll', onScroll)
+    }
+  }, [router?.asPath])
 
   useEffect(() => {
     if (!drawerOpen) return undefined
@@ -161,11 +185,13 @@ export const Header = props => {
       </div>
 
       <div className='cl-header-inner cl-header-inner--mobile'>
-        <div className='cl-header-mobile-spacer' aria-hidden='true' />
+        <div className='cl-header-mobile-side cl-header-mobile-side--left' aria-hidden='true' />
         <div className='cl-header-center'>
-          <BrandLockup compact href='/' collapsed={false} />
+          <BrandLockup compact href='/' collapsed={scrolled} />
         </div>
-        {actions(true)}
+        <div className='cl-header-mobile-side cl-header-mobile-side--right'>
+          {actions(true)}
+        </div>
       </div>
 
       {showProgress ? <ReadingProgress /> : null}
