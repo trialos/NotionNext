@@ -3,12 +3,6 @@ import { useGlobal } from '@/lib/global'
 import CONFIG from '../config'
 import { MenuItemDrop } from './MenuItemDrop'
 
-/**
- * 导航菜单列表
- * @param {*} props
- * @param {'stack'|'header'} [props.variant]
- * @param {boolean} [props.collapsed] 顶栏收起：仅图标 + 悬停出字
- */
 export const MenuList = props => {
   const { customNav, customMenu, variant = 'stack', collapsed = false } = props
   const { locale } = useGlobal()
@@ -44,26 +38,18 @@ export const MenuList = props => {
     }
   ]
 
-  if (customNav) {
-    links = links.concat(customNav)
-  }
-
-  if (siteConfig('CUSTOM_MENU')) {
-    links = customMenu
-  }
-
-  if (!links || links.length === 0) {
-    return null
-  }
+  if (customNav) links = links.concat(customNav)
+  if (siteConfig('CUSTOM_MENU')) links = customMenu
+  if (!links || links.length === 0) return null
 
   if (variant === 'header') {
     return (
       <nav
         aria-label='Main'
-        className={`flex-1 min-w-0 flex justify-center overflow-visible ${
-          collapsed ? 'cl-nav--collapsed' : ''
+        className={`cl-main-nav flex-1 min-w-0 flex justify-center overflow-visible ${
+          collapsed ? 'cl-nav--collapsed' : 'cl-nav--expanded'
         }`}>
-        <ul className='flex items-center gap-0.5 sm:gap-1 overflow-x-auto max-w-full py-1 no-scrollbar overflow-y-visible'>
+        <ul className='flex items-center gap-0.5 sm:gap-1 overflow-x-auto max-w-full py-0.5 no-scrollbar overflow-y-visible'>
           {links
             .filter(link => link?.show !== false)
             .map((link, index) => (

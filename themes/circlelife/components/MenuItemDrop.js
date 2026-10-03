@@ -24,7 +24,6 @@ const ICON_FALLBACK = {
 function resolveIcon(link) {
   const raw = (link?.icon || '').trim()
   if (raw) {
-    // Notion sometimes stores "fas fa-home" or just "fa-home"
     if (raw.includes('fa-')) return raw.startsWith('fa') ? raw : `fas ${raw}`
     return raw
   }
@@ -36,10 +35,6 @@ function linkLabel(link) {
   return link?.name || link?.title || ''
 }
 
-/**
- * 支持下拉二级的菜单
- * header 顶栏（inline）子菜单 portal + fixed；collapsed 时仅图标 + 悬停出字
- */
 export const MenuItemDrop = ({
   link,
   variant = 'default',
@@ -71,73 +66,48 @@ export const MenuItemDrop = ({
     closeTimerRef.current = setTimeout(() => changeShow(false), HOVER_CLOSE_MS)
   }, [clearCloseTimer])
 
-  useEffect(() => {
-    return () => clearCloseTimer()
-  }, [clearCloseTimer])
+  useEffect(() => () => clearCloseTimer(), [clearCloseTimer])
 
   useEffect(() => {
     if (!show || !isInline || !hasSubMenu || !triggerRef.current) return
-
     const updatePosition = () => {
       const rect = triggerRef.current.getBoundingClientRect()
-      setMenuPos({
-        top: rect.bottom + 4,
-        left: rect.left
-      })
+      setMenuPos({ top: rect.bottom + 4, left: rect.left })
     }
-
     updatePosition()
     window.addEventListener('scroll', updatePosition, { passive: true })
     window.addEventListener('resize', updatePosition)
     return () => {
-      window.removeEventListener('scroll', updatePosition, { passive: true })
+      window.removeEventListener('scroll', updatePosition)
       window.removeEventListener('resize', updatePosition)
     }
   }, [show, isInline, hasSubMenu])
 
-  if (link?.show === false) {
-    return null
-  }
+  if (link?.show === false) return null
 
   const itemShell = isInline ? 'relative flex-shrink-0' : 'cursor-pointer'
-
   const linkBox = isInline
-    ? `rounded-md cl-nav-link no-underline flex items-center whitespace-nowrap ${
-        collapsed
-          ? 'cl-nav-link--icon px-2 py-1.5 justify-center gap-0'
-          : 'px-2 py-1.5 gap-1.5'
+    ? `rounded-md cl-nav-link no-underline inline-flex items-center whitespace-nowrap px-2 py-1.5 gap-1.5 ${
+        collapsed ? 'cl-nav-link--icon' : 'cl-nav-link--text'
       }`
     : 'rounded px-2 md:pl-0 md:mr-3 my-4 md:pr-3 text-[var(--cl-text)] no-underline md:border-r border-gray-light'
-
-  const labelEl =
-    isInline && collapsed ? (
-      <span className='cl-nav-tip' role='tooltip'>
-        {label}
-      </span>
-    ) : (
-      <span className='cl-nav-text'>{label}</span>
-    )
-
-  const chevron =
-    hasSubMenu && !collapsed ? (
-      <i
-        className={`ml-1 fas fa-chevron-down text-[0.65em] duration-300 transition-transform ${
-          show ? 'rotate-180' : ''
-        }`}
-      />
-    ) : hasSubMenu && collapsed ? (
-      <i
-        className={`cl-nav-chevron fas fa-caret-down text-[0.55em] opacity-70 ${
-          show ? 'opacity-100' : ''
-        }`}
-      />
-    ) : null
 
   const innerContent = (
     <>
       <i className={`${iconClass} cl-nav-ico`} aria-hidden='true' />
-      {labelEl}
-      {chevron}
+      <span className='cl-nav-text'>{label}</span>
+      {hasSubMenu ? (
+        <i
+          className={`cl-nav-chevron fas fa-chevron-down text-[0.65em] duration-300 transition-transform ${
+            show ? 'rotate-180' : ''
+          }`}
+        />
+      ) : null}
+      {isInline ? (
+        <span className='cl-nav-tip' role='tooltip'>
+          {label}
+        </span>
+      ) : null}
     </>
   )
 
@@ -146,24 +116,15 @@ export const MenuItemDrop = ({
       className={
         isInline
           ? `cl-card min-w-[10rem] py-1 border border-[var(--cl-border)] bg-[var(--cl-surface)] transition-all duration-200 ${
-              show
-                ? 'visible opacity-100'
-                : 'hidden pointer-events-none opacity-0'
+              show ? 'visible opacity-100' : 'hidden pointer-events-none opacity-0'
             }`
           : `${
-              show
-                ? 'visible opacity-100'
-                : 'hidden pointer-events-none opacity-0'
+              show ? 'visible opacity-100' : 'hidden pointer-events-none opacity-0'
             } absolute z-30 transition-all duration-200 left-0 top-12 block border bg-[var(--cl-surface)] border-[var(--cl-border)] dark:bg-black`
       }
       style={
         isInline && show
-          ? {
-              position: 'fixed',
-              top: menuPos.top,
-              left: menuPos.left,
-              zIndex: 50
-            }
+          ? { position: 'fixed', top: menuPos.top, left: menuPos.left, zIndex: 50 }
           : undefined
       }
       onMouseEnter={isInline ? openMenu : undefined}
@@ -171,9 +132,7 @@ export const MenuItemDrop = ({
       {link.subMenus.map((sLink, index) => (
         <li
           key={index}
-          className={`border-b text-[var(--cl-text)] hover:bg-[var(--cl-accent-soft)] tracking-widest transition-all duration-200 border-[var(--cl-border)] py-3 pr-6 pl-3 ${
-            isInline ? 'border-0 hover:bg-[var(--cl-accent-soft)]' : ''
-          }`}>
+          className='border-0 text-[var(--cl-text)] hover:bg-[var(--cl-accent-soft)] tracking-widest transition-all duration-200 py-3 pr-6 pl-3'>
           <SmartLink href={sLink.href} target={link?.target}>
             <span className='text-sm text-nowrap font-extralight'>
               {sLink?.icon ? <i className={sLink.icon}> &nbsp; </i> : null}
