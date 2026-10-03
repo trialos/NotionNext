@@ -3,28 +3,13 @@ import { uuidToId } from 'notion-utils'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 /**
- * 目录导航组件
- * @param toc
- * @returns {JSX.Element}
- * @constructor
+ * 文章目录：当前章节高亮 + 轻滚动跟随
  */
 const Catalog = ({ toc }) => {
-  // 监听滚动事件
-  useEffect(() => {
-    window.addEventListener('scroll', actionSectionScrollSpy, { passive: true })
-    actionSectionScrollSpy()
-    return () => {
-      window.removeEventListener('scroll', actionSectionScrollSpy)
-    }
-  }, [])
-
-  // 目录自动滚动
   const tRef = useRef(null)
-  const tocIds = []
-
-  // 同步选中目录事件
+  const tocIdsRef = useRef([])
   const [activeSection, setActiveSection] = useState(null)
-  const throttleMs = 200
+
   const actionSectionScrollSpy = useCallback(
     throttle(() => {
       const sections = document.getElementsByClassName('notion-h')
@@ -38,54 +23,50 @@ const Catalog = ({ toc }) => {
         }
         const bbox = section.getBoundingClientRect()
         const prevHeight = prevBBox ? bbox.top - prevBBox.bottom : 0
-        const offset = Math.max(150, prevHeight / 4)
-        // GetBoundingClientRect returns values relative to viewport
+        const offset = Math.max(140, prevHeight / 4)
         if (bbox.top - offset < 0) {
           currentSectionId = section.getAttribute('data-id')
           prevBBox = bbox
           continue
         }
-        // No need to continue loop, if last element has been detected
         break
       }
       setActiveSection(currentSectionId)
-      const index = tocIds.indexOf(currentSectionId) || 0
+      const index = tocIdsRef.current.indexOf(currentSectionId) || 0
       tRef?.current?.scrollTo({ top: 28 * index, behavior: 'smooth' })
-    }, throttleMs)
+    }, 200),
+    [activeSection]
   )
 
-  // 无目录就直接返回空
+  useEffect(() => {
+    window.addEventListener('scroll', actionSectionScrollSpy, { passive: true })
+    actionSectionScrollSpy()
+    return () => {
+      window.removeEventListener('scroll', actionSectionScrollSpy)
+    }
+  }, [actionSectionScrollSpy])
+
   if (!toc || toc.length < 1) {
-    return <></>
+    return null
   }
 
+  tocIdsRef.current = []
+
   return (
-    <div className='px-3'>
-      <div
-        className='overflow-y-auto max-h-96 overscroll-none scroll-hidden'
-        ref={tRef}>
-        <nav className='h-full text-[var(--cl-muted)]'>
+    <div className='cl-toc px-2 pb-2 pt-1'>
+      <div className='cl-toc-scroll overflow-y-auto overscroll-none' ref={tRef}>
+        <nav className='cl-toc-nav'>
           {toc.map(tocItem => {
             const id = uuidToId(tocItem.id)
-            tocIds.push(id)
+            tocIdsRef.current.push(id)
+            const active = activeSection === id
             return (
               <a
                 key={id}
                 href={`#${id}`}
-                className={`notion-table-of-contents-item duration-300 transform font-light
-              notion-table-of-contents-item-indent-level-${tocItem.indentLevel} catalog-item `}>
-                <span
-                  style={{
-                    display: 'inline-block',
-                    marginLeft: tocItem.indentLevel * 16
-                  }}
-                  className={`truncate ${
-                    activeSection === id
-                      ? 'font-semibold text-[var(--cl-accent)] underline decoration-[var(--cl-accent)]/40'
-                      : 'hover:text-[var(--cl-text)]'
-                  }`}>
-                  {tocItem.text}
-                </span>
+                className={`cl-toc-item ${active ? 'is-active' : ''}`}
+                style={{ paddingLeft: 10 + tocItem.indentLevel * 12 }}>
+                <span className='cl-toc-item-text'>{tocItem.text}</span>
               </a>
             )
           })}
