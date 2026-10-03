@@ -35,6 +35,10 @@ const CONFIG = {
    * 三作者：Notion 文章「作者」字段匹配 name/id
    * avatar 可选公开图 URL；不填则仅显示名或首字母
    */
+  /** 影集：Notion type=Photo；专辑字段默认「专辑」 */
+  CIRCLELIFE_ALBUM_EMPTY_HINT: '在 Notion 新增 type 为 Photo 的条目，并填写封面与描述。',
+  CIRCLELIFE_ALBUM_DEFAULT_NAME: '未分辑',
+
   CIRCLELIFE_AUTHORS: [
     {
       id: 'andrew',

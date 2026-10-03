@@ -23,6 +23,8 @@ module.exports = {
       process.env.NEXT_PUBLIC_NOTION_PROPERTY_TYPE_MEMBER || 'Member', // 社区成员资料
     type_event:
       process.env.NEXT_PUBLIC_NOTION_PROPERTY_TYPE_EVENT || 'Event', // 社区活动
+    type_photo:
+      process.env.NEXT_PUBLIC_NOTION_PROPERTY_TYPE_PHOTO || 'Photo', // 影集影像条目
     title: process.env.NEXT_PUBLIC_NOTION_PROPERTY_TITLE || 'title', // 文章标题
     status: process.env.NEXT_PUBLIC_NOTION_PROPERTY_STATUS || 'status',
     status_publish:
@@ -33,6 +35,7 @@ module.exports = {
     slug: process.env.NEXT_PUBLIC_NOTION_PROPERTY_SLUG || 'slug',
     category: process.env.NEXT_PUBLIC_NOTION_PROPERTY_CATEGORY || 'category',
     author: process.env.NEXT_PUBLIC_NOTION_PROPERTY_AUTHOR || '作者',
+    album: process.env.NEXT_PUBLIC_NOTION_PROPERTY_ALBUM || '专辑',
     date: process.env.NEXT_PUBLIC_NOTION_PROPERTY_DATE || 'date',
     tags: process.env.NEXT_PUBLIC_NOTION_PROPERTY_TAGS || 'tags',
     icon: process.env.NEXT_PUBLIC_NOTION_PROPERTY_ICON || 'icon',

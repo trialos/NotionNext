@@ -23,6 +23,7 @@ import { useEffect } from 'react'
 import BlogListArchive from './components/BlogListArchive'
 import { BlogListPage } from './components/BlogListPage'
 import { BlogListScroll } from './components/BlogListScroll'
+import AlbumStage from './components/AlbumStage'
 import BackToTop from './components/BackToTop'
 import { Footer } from './components/Footer'
 import { Header } from './components/Header'
@@ -262,16 +263,12 @@ const LayoutSlug = props => {
  */
 
 /**
- * 影集占位
+ * 影集：卡片舞台
  */
-const LayoutAlbum = () => {
+const LayoutAlbum = props => {
   return (
-    <div className='cl-page-hero w-full py-16 text-center'>
-      <p className='cl-kicker mb-3'>影集</p>
-      <h1 className='cl-article-title !mb-3'>即将到来</h1>
-      <p className='cl-post-summary mx-auto max-w-md'>
-        影像与随手记录会在这里慢慢铺开。目录已挂上，内容稍后再补。
-      </p>
+    <div className='cl-album-page w-full'>
+      <AlbumStage pages={props.photos || []} />
     </div>
   )
 }
