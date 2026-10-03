@@ -14,49 +14,74 @@ export default function AlbumStage({ pages }) {
   const scrollerRef = useRef(null)
   const [view, setView] = useState('shelf') // shelf | gallery
   const [activeIndex, setActiveIndex] = useState(0)
-  const pendingFocus = useRef(null)
+  /** 进入画廊要落到的辑；与 activeIndex 解耦，避免 spy 抢跑 */
+  const entryIndexRef = useRef(null)
+  const spyLockedRef = useRef(false)
 
-  const scrollToDeck = useCallback(i => {
+  const scrollToDeck = useCallback((i, { smooth = true } = {}) => {
     const root = scrollerRef.current
-    if (!root) return
+    if (!root) return false
     const sections = root.querySelectorAll('.cl-album-section')
     const el = sections[i]
-    if (!el) return
-    root.scrollTo({ top: el.offsetTop, behavior: 'smooth' })
+    if (!el) return false
+    root.scrollTo({
+      top: el.offsetTop,
+      behavior: smooth ? 'smooth' : 'auto'
+    })
     setActiveIndex(i)
+    return true
   }, [])
 
-  const openGallery = useCallback(
-    i => {
-      pendingFocus.current = i
-      setActiveIndex(i)
-      setView('gallery')
-    },
-    []
-  )
+  const openGallery = useCallback(i => {
+    entryIndexRef.current = i
+    spyLockedRef.current = true
+    setActiveIndex(i)
+    setView('gallery')
+  }, [])
 
   const backToShelf = useCallback(() => {
     setView('shelf')
-    pendingFocus.current = null
+    entryIndexRef.current = null
+    spyLockedRef.current = false
   }, [])
 
-  // 进入画廊后滚到目标辑
+  // 进入画廊：只跑一次定位，不依赖 activeIndex
   useEffect(() => {
     if (view !== 'gallery') return undefined
-    const i = pendingFocus.current ?? activeIndex
-    const t = window.setTimeout(() => {
-      scrollToDeck(i)
-      pendingFocus.current = null
-    }, 40)
-    return () => window.clearTimeout(t)
-  }, [view, activeIndex, scrollToDeck])
+    const target =
+      entryIndexRef.current != null ? entryIndexRef.current : activeIndex
 
-  // scroll spy（仅画廊）
+    let cancelled = false
+    const run = () => {
+      if (cancelled) return
+      const ok = scrollToDeck(target, { smooth: false })
+      if (!ok) {
+        window.requestAnimationFrame(run)
+        return
+      }
+      // 布局稳定后再解 spy 锁
+      window.setTimeout(() => {
+        if (cancelled) return
+        scrollToDeck(target, { smooth: false })
+        entryIndexRef.current = null
+        spyLockedRef.current = false
+      }, 80)
+    }
+    const t = window.setTimeout(run, 16)
+    return () => {
+      cancelled = true
+      window.clearTimeout(t)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [view, scrollToDeck])
+
+  // scroll spy（首屏定位锁定期不写 active）
   useEffect(() => {
     if (view !== 'gallery') return undefined
     const root = scrollerRef.current
     if (!root || !decks.length) return undefined
     const onScroll = () => {
+      if (spyLockedRef.current) return
       const sections = [...root.querySelectorAll('.cl-album-section')]
       if (!sections.length) return
       const mid = root.scrollTop + root.clientHeight * 0.35
@@ -72,15 +97,13 @@ export default function AlbumStage({ pages }) {
       })
       setActiveIndex(best)
     }
-    onScroll()
     root.addEventListener('scroll', onScroll, { passive: true })
     return () => root.removeEventListener('scroll', onScroll)
   }, [decks.length, view])
 
   useEffect(() => {
     if (view !== 'gallery') return undefined
-    const root = scrollerRef.current
-    if (!root || decks.length <= 1) return undefined
+    if (decks.length <= 1) return undefined
 
     const onKey = e => {
       if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return
@@ -90,7 +113,7 @@ export default function AlbumStage({ pages }) {
         e.key === 'ArrowDown'
           ? Math.min(decks.length - 1, activeIndex + 1)
           : Math.max(0, activeIndex - 1)
-      scrollToDeck(next)
+      scrollToDeck(next, { smooth: true })
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -132,18 +155,10 @@ export default function AlbumStage({ pages }) {
 
   return (
     <div className='cl-album-shell is-gallery'>
-      <div className='cl-album-gallery-bar'>
-        <button
-          type='button'
-          className='cl-album-back-shelf'
-          onClick={backToShelf}>
-          ← 全部影集
-        </button>
-      </div>
       <AlbumRail
         decks={decks}
         activeIndex={activeIndex}
-        onSelect={scrollToDeck}
+        onSelect={i => scrollToDeck(i, { smooth: true })}
       />
       <div className='cl-album-snap' ref={scrollerRef}>
         {decks.map((deck, i) => (
@@ -153,7 +168,12 @@ export default function AlbumStage({ pages }) {
             data-album={deck.name}
             data-index={i}
             aria-label={`影集 ${deck.name}`}>
-            <AlbumGallery albumName={deck.name} photos={deck.photos} />
+            <AlbumGallery
+              albumName={deck.name}
+              photos={deck.photos}
+              onBackToShelf={backToShelf}
+              hideLeftArrow
+            />
             {i < decks.length - 1 ? (
               <p className='cl-album-snap-hint'>继续下滑 · 下一辑</p>
             ) : (

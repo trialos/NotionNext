@@ -1460,20 +1460,39 @@ const Style = () => {
         padding: 1.25rem 1rem 3rem;
       }
       #theme-circlelife .cl-album-shelf-head {
-        text-align: center;
-        margin-bottom: 1.75rem;
+        text-align: left;
+        margin: 0 auto 1.85rem;
+        max-width: 36rem;
+        padding: 0 0.25rem;
+      }
+      #theme-circlelife .cl-album-shelf-mast {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+        padding: 0.15rem 0 0.15rem 0.85rem;
+        border-left: 2px solid var(--cl-accent);
+      }
+      #theme-circlelife .cl-album-shelf-kicker {
+        font-family: var(--cl-font-mono);
+        font-size: 0.68rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--cl-faint);
+        line-height: 1;
       }
       #theme-circlelife .cl-album-shelf-title {
-        margin: 0.35rem 0 0.4rem;
+        margin: 0;
         font-family: var(--cl-font-display);
-        font-size: clamp(1.6rem, 3.5vw, 2.1rem);
+        font-size: clamp(1.55rem, 3.4vw, 2rem);
         font-weight: 600;
         letter-spacing: -0.03em;
         color: var(--cl-text);
+        line-height: 1.2;
       }
       #theme-circlelife .cl-album-shelf-desc {
-        margin: 0;
-        font-size: 0.9rem;
+        margin: 0.65rem 0 0 0.85rem;
+        font-size: 0.88rem;
         color: var(--cl-muted);
       }
       #theme-circlelife .cl-album-shelf-grid {
@@ -1511,34 +1530,66 @@ const Style = () => {
       #theme-circlelife .cl-album-shelf-card:hover {
         transform: translateY(-3px);
       }
-      #theme-circlelife .cl-album-shelf-cover {
+      #theme-circlelife .cl-album-shelf-stack {
+        position: relative;
         display: block;
         width: 100%;
-        aspect-ratio: 3 / 4;
-        border-radius: 12px;
-        overflow: hidden;
-        background: var(--cl-paper-2, var(--cl-surface));
-        border: 1px solid var(--cl-border);
-        box-shadow:
-          0 1px 0 color-mix(in srgb, #fff 40%, transparent),
-          0 10px 28px color-mix(in srgb, var(--cl-text) 8%, transparent);
+        min-height: 9.5rem;
+        height: clamp(9.5rem, 28vw, 13.5rem);
+        margin: 0 auto;
       }
-      #theme-circlelife .cl-album-shelf-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: center;
+      #theme-circlelife .cl-album-shelf-shot {
+        position: absolute;
+        left: 50%;
+        top: 50%;
         display: block;
+        width: auto;
+        height: auto;
+        max-width: 78%;
+        max-height: 92%;
+        object-fit: contain;
+        border-radius: 10px;
+        background: transparent;
+        box-shadow:
+          0 0 0 1px color-mix(in srgb, var(--cl-text) 10%, transparent),
+          0 10px 28px color-mix(in srgb, var(--cl-text) 12%, transparent);
+        transform-origin: center center;
+      }
+      #theme-circlelife .cl-album-shelf-shot--0 {
+        z-index: 3;
+        transform: translate(-50%, -50%) rotate(-2deg);
+      }
+      #theme-circlelife .cl-album-shelf-shot--1 {
+        z-index: 2;
+        transform: translate(-58%, -54%) rotate(-8deg);
+        opacity: 0.92;
+      }
+      #theme-circlelife .cl-album-shelf-shot--2 {
+        z-index: 1;
+        transform: translate(-40%, -48%) rotate(7deg);
+        opacity: 0.88;
+      }
+      #theme-circlelife .cl-album-shelf-card:hover .cl-album-shelf-shot--0 {
+        transform: translate(-50%, -52%) rotate(-1deg);
+      }
+      #theme-circlelife .cl-album-shelf-card:hover .cl-album-shelf-shot--1 {
+        transform: translate(-62%, -56%) rotate(-10deg);
+      }
+      #theme-circlelife .cl-album-shelf-shot {
+        transition: transform 0.25s var(--cl-ease), opacity 0.2s ease;
       }
       #theme-circlelife .cl-album-shelf-ph {
+        position: absolute;
+        inset: 12% 18%;
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 100%;
-        height: 100%;
+        border-radius: 10px;
+        border: 1px dashed var(--cl-border);
         font-family: var(--cl-font-mono);
         font-size: 0.7rem;
         color: var(--cl-faint);
+        background: var(--cl-paper-2, var(--cl-surface));
       }
       #theme-circlelife .cl-album-shelf-meta {
         display: flex;
@@ -1560,30 +1611,27 @@ const Style = () => {
         letter-spacing: 0.08em;
         color: var(--cl-faint);
       }
-      #theme-circlelife .cl-album-gallery-bar {
-        position: absolute;
-        top: 0.55rem;
-        right: 0.75rem;
-        z-index: 8;
+      #theme-circlelife .cl-ag-head-row {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.45rem;
+        width: 100%;
+        max-width: min(36rem, 100%);
       }
       #theme-circlelife .cl-album-back-shelf {
-        border: 1px solid var(--cl-border);
-        background: color-mix(in srgb, var(--cl-surface) 78%, transparent);
-        color: var(--cl-text);
-        font-size: 0.82rem;
-        padding: 0.4rem 0.75rem;
-        border-radius: 9999px;
+        border: 0;
+        background: transparent;
+        color: var(--cl-muted);
+        font-family: var(--cl-font-mono);
+        font-size: 0.68rem;
+        letter-spacing: 0.08em;
+        padding: 0.15rem 0;
         cursor: pointer;
-        backdrop-filter: blur(8px);
-        transition:
-          border-color 0.15s ease,
-          color 0.15s ease,
-          background 0.15s ease;
+        transition: color 0.15s ease;
       }
       #theme-circlelife .cl-album-back-shelf:hover {
-        border-color: var(--cl-accent);
         color: var(--cl-accent);
-        background: var(--cl-accent-soft);
       }
       #theme-circlelife .cl-album-rail {
         display: none;
@@ -1595,7 +1643,7 @@ const Style = () => {
           left: max(0.35rem, calc((100% - 72rem) / 2));
           top: 50%;
           transform: translateY(-50%);
-          z-index: 6;
+          z-index: 20;
           width: 10rem;
           pointer-events: none;
         }
@@ -1781,29 +1829,30 @@ const Style = () => {
         will-change: opacity;
         transition: opacity 1.15s ease;
       }
-      #theme-circlelife .cl-ag-ambient-img.is-base {
+      #theme-circlelife .cl-ag-ambient-img.is-front {
         opacity: 0.58;
-        z-index: 0;
+        z-index: 2;
       }
-      #theme-circlelife .cl-ag-ambient-img.is-base.is-out {
-        opacity: 0;
+      #theme-circlelife .cl-ag-ambient-img.is-entering {
+        opacity: 0.58;
+        z-index: 3;
       }
-      #theme-circlelife .cl-ag-ambient-img.is-top {
+      #theme-circlelife .cl-ag-ambient-img.is-leaving {
         opacity: 0;
         z-index: 1;
       }
-      #theme-circlelife .cl-ag-ambient-img.is-top.is-in {
-        opacity: 0.58;
+      #theme-circlelife .cl-ag-ambient-img.is-back {
+        opacity: 0;
+        z-index: 0;
       }
-      .dark #theme-circlelife .cl-ag-ambient-img.is-base {
+      .dark #theme-circlelife .cl-ag-ambient-img.is-front,
+      .dark #theme-circlelife .cl-ag-ambient-img.is-entering {
         opacity: 0.48;
         filter: blur(62px) saturate(1.4) brightness(0.98);
       }
-      .dark #theme-circlelife .cl-ag-ambient-img.is-base.is-out {
+      .dark #theme-circlelife .cl-ag-ambient-img.is-leaving,
+      .dark #theme-circlelife .cl-ag-ambient-img.is-back {
         opacity: 0;
-      }
-      .dark #theme-circlelife .cl-ag-ambient-img.is-top.is-in {
-        opacity: 0.48;
         filter: blur(62px) saturate(1.4) brightness(0.98);
       }
       #theme-circlelife .cl-ag-ambient-veil {
@@ -2125,6 +2174,21 @@ const Style = () => {
           border-color 0.15s ease,
           background 0.15s ease,
           transform 0.15s ease;
+      }
+
+      #theme-circlelife .cl-ag-arrows--no-left {
+        justify-content: flex-end;
+      }
+      #theme-circlelife .cl-ag-arrow-spacer {
+        width: 2.4rem;
+        height: 2.4rem;
+        pointer-events: none;
+        visibility: hidden;
+      }
+      @media (min-width: 960px) {
+        #theme-circlelife .cl-album-shell.is-gallery .cl-ag-arrow--prev {
+          display: none;
+        }
       }
       #theme-circlelife .cl-ag-arrow:hover {
         color: var(--cl-accent);
