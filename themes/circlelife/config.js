@@ -17,10 +17,15 @@ const CONFIG = {
   CIRCLELIFE_HOME_TIMELINE: true,
   CIRCLELIFE_HOME_LATEST_CARD: true,
   CIRCLELIFE_LATEST_KICKER: '最近',
-  /** 报头轮播篇数 */
+  /** 报头抽牌篇数 */
   CIRCLELIFE_HERO_COUNT: 5,
   /** 自动切换毫秒；0 关闭 */
   CIRCLELIFE_HERO_AUTO_MS: 6000,
+  /** 报头使用文章封面作背景 */
+  CIRCLELIFE_HERO_COVER: true,
+  /** 文章页短片头条封面 */
+  CIRCLELIFE_ARTICLE_COVER: true,
+
   CIRCLELIFE_SIDEBAR_ONLY_ON_POST: true,
 
   CIRCLELIFE_POST_LIST_COVER: false,
