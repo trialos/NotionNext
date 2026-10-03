@@ -1,13 +1,11 @@
-import LazyImage from '@/components/LazyImage'
 import NotionIcon from '@/components/NotionIcon'
-import TwikooCommentCount from '@/components/TwikooCommentCount'
 import { siteConfig } from '@/lib/config'
 import SmartLink from '@/components/SmartLink'
 import CONFIG from '../config'
+import LazyImage from '@/components/LazyImage'
 
 /**
- * 博客列表的单个卡片
- * @param {{ post: object, variant?: 'default' | 'timeline' }} props
+ * 列表 / 时间线条目
  */
 const BlogItem = ({ post, variant = 'default' }) => {
   const showPageCover =
@@ -17,14 +15,11 @@ const BlogItem = ({ post, variant = 'default' }) => {
 
   if (variant === 'timeline') {
     return (
-      <article className='cl-timeline-post py-2'>
-        <div className='flex flex-wrap items-baseline gap-x-2 gap-y-0.5'>
-          <SmartLink
-            href={post?.href}
-            className='group font-medium leading-snug text-[var(--cl-text)] no-underline hover:text-[var(--cl-accent)]'
-            style={{ fontFamily: 'var(--cl-font-display)' }}>
+      <article className='cl-timeline-post'>
+        <div className='cl-timeline-post-row'>
+          <SmartLink href={post?.href} className='cl-post-title'>
             {siteConfig('POST_TITLE_ICON') && (
-              <span className='mr-1 inline-flex align-middle'>
+              <span className='mr-1 inline-flex align-middle opacity-70'>
                 <NotionIcon icon={post.pageIcon} />
               </span>
             )}
@@ -33,86 +28,60 @@ const BlogItem = ({ post, variant = 'default' }) => {
           {post?.type !== 'Page' && post?.category && (
             <SmartLink
               href={`/category/${post.category}`}
-              className='cl-meta text-xs text-[var(--cl-faint)] no-underline hover:text-[var(--cl-accent)]'>
-              #{post.category}
+              className='cl-chip cl-chip--soft'>
+              {post.category}
             </SmartLink>
           )}
         </div>
         {post.summary && !post.results ? (
-          <p className='mt-1 mb-0 text-sm text-[var(--cl-muted)] line-clamp-2 leading-relaxed'>
-            {post.summary}
-          </p>
+          <p className='cl-post-summary'>{post.summary}</p>
         ) : null}
         {post.results ? (
-          <p className='mt-1 mb-0 text-sm text-[var(--cl-muted)] line-clamp-2'>
+          <p className='cl-post-summary'>
             {post.results.map((r, index) => (
               <span key={index}>{r}</span>
             ))}
           </p>
         ) : null}
-        <div className='mt-1 text-xs text-[var(--cl-faint)]'>
-          <TwikooCommentCount post={post} className='mr-2' />
-        </div>
       </article>
     )
   }
 
   return (
-    <article
-      className={`${showPageCover ? 'flex md:flex-row flex-col-reverse' : ''} replace mb-12 `}>
-      <div className={`${showPageCover ? 'md:w-7/12' : ''}`}>
-        <h2 className='mb-4'>
-          <SmartLink
-            href={post?.href}
-            className='text-[var(--cl-text)] text-xl md:text-2xl no-underline hover:underline'>
+    <article className='cl-list-post'>
+      <div className={showPageCover ? 'flex gap-4' : ''}>
+        <div className='min-w-0 flex-1'>
+          <SmartLink href={post?.href} className='cl-post-title'>
             {siteConfig('POST_TITLE_ICON') && (
-              <NotionIcon icon={post.pageIcon} />
+              <span className='mr-1 inline-flex align-middle opacity-70'>
+                <NotionIcon icon={post.pageIcon} />
+              </span>
             )}
             {post?.title}
           </SmartLink>
-        </h2>
-
-        <div className='mb-4 text-sm text-[var(--cl-muted)]'>
-          by{' '}
-          <span className='text-[var(--cl-muted)]'>{siteConfig('AUTHOR')}</span>
-          {' '}
-          on {post.date?.start_date || post.createdTime}
-          <TwikooCommentCount post={post} className='pl-1' />
-          {post.category && (
-            <>
-              <span className='font-bold mx-1'> | </span>
-              <SmartLink
-                href={`/category/${post.category}`}
-                className='text-[var(--cl-muted)] hover:underline'>
-                {post.category}
-              </SmartLink>
-            </>
-          )}
+          <div className='cl-meta mt-1.5'>
+            {post?.publishDay ? <span>{post.publishDay}</span> : null}
+            {post?.category ? (
+              <>
+                <span className='cl-dot'>·</span>
+                <SmartLink href={`/category/${post.category}`}>
+                  {post.category}
+                </SmartLink>
+              </>
+            ) : null}
+          </div>
+          {post.summary ? <p className='cl-post-summary'>{post.summary}</p> : null}
         </div>
-
-        {!post.results && (
-          <p className='line-clamp-3 text-[var(--cl-muted)] leading-normal'>
-            {post.summary}
-          </p>
-        )}
-        {post.results && (
-          <p className='line-clamp-3 mt-4 text-[var(--cl-muted)] text-sm font-light leading-7'>
-            {post.results.map((r, index) => (
-              <span key={index}>{r}</span>
-            ))}
-          </p>
-        )}
-      </div>
-      {showPageCover && (
-        <div className='md:w-5/12 w-full h-44 overflow-hidden p-1'>
-          <SmartLink href={post?.href} passHref legacyBehavior>
+        {showPageCover ? (
+          <SmartLink href={post?.href} className='cl-media-card cl-media-card--sm'>
             <LazyImage
-              src={post?.pageCoverThumbnail}
-              className='w-full bg-cover hover:scale-110 duration-200'
+              src={post.pageCoverThumbnail}
+              alt={post.title}
+              className='h-full w-full object-cover'
             />
           </SmartLink>
-        </div>
-      )}
+        ) : null}
+      </div>
     </article>
   )
 }

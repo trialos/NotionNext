@@ -5,7 +5,7 @@ import { BrandLockup } from './BrandLockup'
 import { MenuList } from './MenuList'
 
 /**
- * Circle of Life 顶栏：品牌锁头 + 菜单 + 搜索 / 深浅色
+ * 顶栏：锁头 + 可横滑菜单 + 搜索 / 深浅色
  */
 export const Header = props => {
   const { isDarkMode, toggleDarkMode } = useGlobal()
@@ -16,14 +16,12 @@ export const Header = props => {
 
   return (
     <header className='cl-header sticky top-0 z-40 w-full'>
-      <div className='mx-auto flex max-w-3xl items-center gap-3 px-4 py-3 overflow-visible'>
+      <div className='cl-header-inner'>
         <BrandLockup compact href='/' />
-
-        <div className='min-w-0 flex-1'>
+        <div className='cl-header-nav min-w-0 flex-1'>
           <MenuList {...props} variant='header' />
         </div>
-
-        <div className='flex flex-shrink-0 items-center gap-1'>
+        <div className='cl-header-actions'>
           {siteConfig('CIRCLELIFE_MENU_SEARCH', null, CONFIG) && (
             <button
               type='button'

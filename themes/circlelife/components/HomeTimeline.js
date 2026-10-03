@@ -2,8 +2,7 @@ import { useMemo } from 'react'
 import BlogItem from './BlogItem'
 
 /**
- * 按「发布日」分组的时间线列表（对齐 CircleLife 首页观感）。
- * @param {{ posts: object[] }} props
+ * 按发布日分组的时间线
  */
 export default function HomeTimeline({ posts }) {
   const groups = useMemo(() => {
