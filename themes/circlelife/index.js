@@ -217,8 +217,8 @@ const LayoutSlug = props => {
         <PostLock validPassword={validPassword} />
       ) : (
         post && (
-          <article className='cl-card overflow-hidden p-5 md:p-8'>
-            <header className='cl-article-hero mb-6 border-b border-[var(--cl-border)] pb-6'>
+          <article className='cl-card overflow-hidden px-5 py-6 md:px-8 md:py-9'>
+            <header className='cl-article-hero'>
               <h1 className='cl-article-title'>
                 {siteConfig('POST_TITLE_ICON') && (
                   <NotionIcon icon={post.pageIcon} />
@@ -234,12 +234,8 @@ const LayoutSlug = props => {
             <section
               className='mt-8 border-t border-[var(--cl-border)] pt-6'
               aria-label={locale?.COMMON?.COMMENTS || 'Comments'}>
-              <h2 className='mb-4 flex items-center gap-2 text-base font-semibold text-[var(--cl-text)]'>
-                <i
-                  className='far fa-comments text-[var(--cl-muted)]'
-                  aria-hidden='true'
-                />
-                {locale?.COMMON?.COMMENTS || 'Comments'}
+              <h2 className='cl-kicker mb-4 !text-[var(--cl-muted)]'>
+                {locale?.COMMON?.COMMENTS || '评论'}
               </h2>
               <Comment frontMatter={post} />
             </section>
