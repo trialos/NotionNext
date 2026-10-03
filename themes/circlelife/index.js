@@ -49,6 +49,11 @@ const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
 const LayoutBase = props => {
   const { children, post } = props
   const { onLoading, fullWidth, locale } = useGlobal()
+  const router = useRouter()
+  const isAlbumPage =
+    router?.pathname === '/album' ||
+    (typeof router?.asPath === 'string' &&
+      router.asPath.split('?')[0].replace(/\/$/, '') === '/album')
 
   const LAYOUT_VERTICAL =
     post && siteConfig('CIRCLELIFE_ARTICLE_LAYOUT_VERTICAL', false, CONFIG)
@@ -60,13 +65,14 @@ const LayoutBase = props => {
     true,
     CONFIG
   )
+  const wide = fullWidth || isAlbumPage
   const showSidebar =
-    !fullWidth && (!sidebarOnlyPost || Boolean(post)) && !LAYOUT_VERTICAL
+    !wide && (!sidebarOnlyPost || Boolean(post)) && !LAYOUT_VERTICAL
 
   return (
     <div
       id='theme-circlelife'
-      className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth`}>
+      className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth${isAlbumPage ? ' cl-is-album' : ''}`}>
       <Style />
 
       <Header {...props} />
@@ -75,19 +81,24 @@ const LayoutBase = props => {
       <div id='container-inner' className='relative z-10 w-full flex-1'>
         <div
           id='container-wrapper'
-          className={`relative mx-auto flex justify-center px-4 py-8 md:px-6
-          ${LAYOUT_SIDEBAR_REVERSE ? 'md:flex-row-reverse' : ''} 
-          ${
-            LAYOUT_VERTICAL
-              ? 'max-w-5xl flex-col items-center'
-              : showSidebar
-                ? 'max-w-5xl flex-col items-start gap-8 md:flex-row md:gap-10'
-                : 'max-w-3xl flex-col items-start'
-          } 
-          `}>
+          className={`relative mx-auto flex justify-center ${
+            isAlbumPage
+              ? 'max-w-none w-full flex-col items-stretch px-0 py-0'
+              : `px-4 py-8 md:px-6 ${LAYOUT_SIDEBAR_REVERSE ? 'md:flex-row-reverse' : ''} ${
+                  LAYOUT_VERTICAL
+                    ? 'max-w-5xl flex-col items-center'
+                    : showSidebar
+                      ? 'max-w-5xl flex-col items-start gap-8 md:flex-row md:gap-10'
+                      : 'max-w-3xl flex-col items-start'
+                }`
+          }`}>
           <div
             className={`min-w-0 flex-1 ${
-              fullWidth ? 'w-full' : LAYOUT_VERTICAL ? 'w-full max-w-5xl' : 'w-full max-w-3xl'
+              wide
+                ? 'w-full max-w-none'
+                : LAYOUT_VERTICAL
+                  ? 'w-full max-w-5xl'
+                  : 'w-full max-w-3xl'
             }`}>
             <Transition
               show={!onLoading}
@@ -110,7 +121,7 @@ const LayoutBase = props => {
             </div>
           )}
 
-          {LAYOUT_VERTICAL && !fullWidth && (
+          {LAYOUT_VERTICAL && !wide && (
             <div className='flex w-full max-w-5xl flex-col justify-center space-y-0 px-0 md:flex-row md:space-x-2 md:space-y-0'>
               <SideBar {...props} />
             </div>

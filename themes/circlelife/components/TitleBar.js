@@ -24,6 +24,11 @@ export default function TitleBar(props) {
     return null
   }
 
+  // 影集自带分屏标题，不要再叠一层站点 TitleBar
+  if (router.pathname === '/album') {
+    return null
+  }
+
   const title = siteConfig('TITLE')
   const description = siteConfig('AUTHOR')
   const headerImage = siteInfo?.pageCover
