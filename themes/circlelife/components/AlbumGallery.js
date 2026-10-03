@@ -13,15 +13,23 @@ const EASE = 'cubic-bezier(0.22, 0.61, 0.36, 1)'
 /**
  * 单辑：整叠跟手翻卡 + 双层柔光晕 + 玻璃浮层 + 全屏灯箱
  */
-export default function AlbumGallery({ albumName, photos }) {
+export default function AlbumGallery({
+  albumName,
+  photos,
+  onBackToShelf,
+  hideLeftArrow = false
+}) {
   const n = photos?.length || 0
   const [index, setIndex] = useState(0)
   const [expanded, setExpanded] = useState(false)
   const [portalReady, setPortalReady] = useState(false)
-  /** 双层交叉淡化：底淡出 + 顶淡入，总亮度近似恒定，避免末尾闪一下 */
-  const [glowBase, setGlowBase] = useState('')
-  const [glowTop, setGlowTop] = useState('')
-  const [glowPhase, setGlowPhase] = useState('idle') // idle | cross
+  /* 氛围光双槽常驻：A/B 不卸载，onload 后交叉，结尾不空窗 */
+  const [glowA, setGlowA] = useState('')
+  const [glowB, setGlowB] = useState('')
+  const [frontSlot, setFrontSlot] = useState('a')
+  const [crossOn, setCrossOn] = useState(false)
+  const glowFrontRef = useRef('a')
+  const glowUrlRef = useRef('')
 
   const dragRef = useRef({
     active: false,
@@ -36,7 +44,6 @@ export default function AlbumGallery({ albumName, photos }) {
   const stageRef = useRef(null)
   const busyRef = useRef(false)
   const activeRef = useRef(false)
-  const glowTimer = useRef(0)
 
   useEffect(() => {
     setPortalReady(true)
@@ -211,32 +218,55 @@ export default function AlbumGallery({ albumName, photos }) {
     d.moved = false
   }
 
-  // 交叉淡化光晕（总亮度不叠高、结尾不压暗闪）
+  // 氛围光：隐藏槽换 src → onload → 交叉 → 切换 front，不卸 DOM
   useEffect(() => {
     if (!n) return undefined
     const safe = ((index % n) + n) % n
     const url = photos[safe]?.url || photos[safe]?.cover || ''
-    if (!url) return undefined
+    if (!url || url === glowUrlRef.current) return undefined
 
-    if (!glowBase) {
-      setGlowBase(url)
-      setGlowPhase('idle')
+    if (!glowUrlRef.current) {
+      glowUrlRef.current = url
+      setGlowA(url)
+      setFrontSlot('a')
+      glowFrontRef.current = 'a'
+      setCrossOn(false)
       return undefined
     }
-    if (url === glowBase && glowPhase === 'idle') return undefined
-    // 快速连翻：直接改 top 目标，延长交叉
-    window.clearTimeout(glowTimer.current)
-    setGlowTop(url)
-    setGlowPhase('cross')
-    glowTimer.current = window.setTimeout(() => {
-      setGlowBase(url)
-      setGlowTop('')
-      setGlowPhase('idle')
-    }, GLOW_MS)
-    return () => {
-      window.clearTimeout(glowTimer.current)
+
+    const front = glowFrontRef.current
+    const writeA = front === 'b'
+    if (writeA) setGlowA(url)
+    else setGlowB(url)
+
+    let cancelled = false
+    let settleTimer = 0
+    const img = new Image()
+    img.onload = () => {
+      if (cancelled) return
+      setCrossOn(true)
+      settleTimer = window.setTimeout(() => {
+        if (cancelled) return
+        const next = writeA ? 'a' : 'b'
+        glowFrontRef.current = next
+        setFrontSlot(next)
+        setCrossOn(false)
+        glowUrlRef.current = url
+      }, GLOW_MS)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    img.onerror = () => {
+      if (cancelled) return
+      const next = writeA ? 'a' : 'b'
+      glowFrontRef.current = next
+      setFrontSlot(next)
+      setCrossOn(false)
+      glowUrlRef.current = url
+    }
+    img.src = url
+    return () => {
+      cancelled = true
+      if (settleTimer) window.clearTimeout(settleTimer)
+    }
   }, [index, n, photos])
 
   useEffect(() => {
@@ -345,28 +375,58 @@ export default function AlbumGallery({ albumName, photos }) {
 
   return (
     <div className='cl-ag' ref={rootRef}>
-      <div
-        className={`cl-ag-ambient${glowPhase === 'cross' ? ' is-cross' : ''}`}
-        aria-hidden>
-        {glowBase ? (
+      <div className='cl-ag-ambient' aria-hidden>
+        {glowA ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
-            src={glowBase}
+            src={glowA}
             alt=''
-            className={`cl-ag-ambient-img is-base${
-              glowPhase === 'cross' ? ' is-out' : ''
-            }`}
+            className={
+              'cl-ag-ambient-img ' +
+              (frontSlot === 'a'
+                ? crossOn
+                  ? 'is-leaving'
+                  : 'is-front'
+                : crossOn
+                  ? 'is-entering'
+                  : 'is-back')
+            }
           />
         ) : null}
-        {glowTop ? (
-          <img src={glowTop} alt='' className='cl-ag-ambient-img is-top is-in' />
+        {glowB ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={glowB}
+            alt=''
+            className={
+              'cl-ag-ambient-img ' +
+              (frontSlot === 'b'
+                ? crossOn
+                  ? 'is-leaving'
+                  : 'is-front'
+                : crossOn
+                  ? 'is-entering'
+                  : 'is-back')
+            }
+          />
         ) : null}
         <div className='cl-ag-ambient-veil' />
       </div>
 
       <header className='cl-ag-head'>
-        <div className='cl-ag-mast'>
-          <span className='cl-ag-mast-kicker'>影集</span>
-          <h2 className='cl-ag-mast-title'>{pageTitle || '未命名'}</h2>
+        <div className='cl-ag-head-row'>
+          {typeof onBackToShelf === 'function' ? (
+            <button
+              type='button'
+              className='cl-album-back-shelf'
+              onClick={onBackToShelf}>
+              ← 全部影集
+            </button>
+          ) : null}
+          <div className='cl-ag-mast'>
+            <span className='cl-ag-mast-kicker'>影集</span>
+            <h2 className='cl-ag-mast-title'>{pageTitle || '未命名'}</h2>
+          </div>
         </div>
       </header>
 
@@ -432,20 +492,27 @@ export default function AlbumGallery({ albumName, photos }) {
         </div>
 
         {n > 1 ? (
-          <div className='cl-ag-arrows'>
+          <div
+            className={`cl-ag-arrows${
+              hideLeftArrow ? ' cl-ag-arrows--no-left' : ''
+            }`}>
+            {!hideLeftArrow ? (
+              <button
+                type='button'
+                className='cl-ag-arrow cl-ag-arrow--prev'
+                aria-label='上一张'
+                onClick={e => {
+                  e.stopPropagation()
+                  go(-1)
+                }}>
+                ‹
+              </button>
+            ) : (
+              <span className='cl-ag-arrow-spacer' aria-hidden />
+            )}
             <button
               type='button'
-              className='cl-ag-arrow'
-              aria-label='上一张'
-              onClick={e => {
-                e.stopPropagation()
-                go(-1)
-              }}>
-              ‹
-            </button>
-            <button
-              type='button'
-              className='cl-ag-arrow'
+              className='cl-ag-arrow cl-ag-arrow--next'
               aria-label='下一张'
               onClick={e => {
                 e.stopPropagation()
