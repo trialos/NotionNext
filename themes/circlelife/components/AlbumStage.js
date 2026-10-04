@@ -37,13 +37,43 @@ export default function AlbumStage({ pages }) {
     spyLockedRef.current = true
     setActiveIndex(i)
     setView('gallery')
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('cl-album-view', { detail: { view: 'gallery' } })
+      )
+    }
   }, [])
 
   const backToShelf = useCallback(() => {
     setView('shelf')
     entryIndexRef.current = null
     spyLockedRef.current = false
+    setActiveIndex(0)
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(
+        new CustomEvent('cl-album-view', { detail: { view: 'shelf' } })
+      )
+    }
   }, [])
+
+  // 画廊态：藏页脚 + 通知顶栏绑定 snap
+  useEffect(() => {
+    if (typeof document === 'undefined') return undefined
+    const root = document.documentElement
+    if (view === 'gallery') {
+      root.classList.add('cl-album-gallery-active')
+    } else {
+      root.classList.remove('cl-album-gallery-active')
+    }
+    return () => root.classList.remove('cl-album-gallery-active')
+  }, [view])
+
+  // 导航「影集」同页回书架
+  useEffect(() => {
+    const onGoShelf = () => backToShelf()
+    window.addEventListener('cl-album-go-shelf', onGoShelf)
+    return () => window.removeEventListener('cl-album-go-shelf', onGoShelf)
+  }, [backToShelf])
 
   // 进入画廊：只跑一次定位，不依赖 activeIndex
   useEffect(() => {
@@ -68,6 +98,17 @@ export default function AlbumStage({ pages }) {
       }, 80)
     }
     const t = window.setTimeout(run, 16)
+    // 通知 Header 绑定内滚
+    const notify = () => {
+      const el = scrollerRef.current
+      if (!el) return
+      el.setAttribute('data-cl-scrollroot', '1')
+      window.dispatchEvent(
+        new CustomEvent('cl-album-scrollroot', { detail: { el } })
+      )
+    }
+    window.setTimeout(notify, 20)
+    window.setTimeout(notify, 100)
     return () => {
       cancelled = true
       window.clearTimeout(t)

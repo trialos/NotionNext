@@ -27,9 +27,12 @@ export const Header = props => {
   const router = useRouter()
 
   useEffect(() => {
+    let snapEl = null
     const readY = () => {
-      // 影集页滚动在 .cl-album-snap 内，window.scrollY 几乎为 0
-      const album = document.querySelector('.cl-album-snap')
+      const album =
+        snapEl ||
+        document.querySelector('.cl-album-snap') ||
+        document.querySelector('[data-cl-scrollroot]')
       if (album) return album.scrollTop || 0
       return window.scrollY || document.documentElement.scrollTop || 0
     }
@@ -41,23 +44,48 @@ export const Header = props => {
         return prev
       })
     }
+    const unbindSnap = () => {
+      if (snapEl) {
+        snapEl.removeEventListener('scroll', onScroll)
+        snapEl = null
+      }
+    }
+    const bindSnap = el => {
+      if (!el || el === snapEl) {
+        onScroll()
+        return
+      }
+      unbindSnap()
+      snapEl = el
+      snapEl.addEventListener('scroll', onScroll, { passive: true })
+      onScroll()
+    }
+    const tryBind = () => {
+      const el =
+        document.querySelector('.cl-album-snap') ||
+        document.querySelector('[data-cl-scrollroot]')
+      if (el) bindSnap(el)
+      else {
+        unbindSnap()
+        onScroll()
+      }
+    }
+
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
-    const album = document.querySelector('.cl-album-snap')
-    album?.addEventListener('scroll', onScroll, { passive: true })
-    // 路由进入影集后再绑一次（snap 可能稍后挂载）
-    const t = window.setTimeout(() => {
-      const a2 = document.querySelector('.cl-album-snap')
-      if (a2 && a2 !== album) {
-        a2.addEventListener('scroll', onScroll, { passive: true })
-      }
-      onScroll()
-    }, 120)
+    tryBind()
+    // shelf→gallery 同路由挂载 snap
+    window.addEventListener('cl-album-scrollroot', tryBind)
+    window.addEventListener('cl-album-view', tryBind)
+    const t1 = window.setTimeout(tryBind, 50)
+    const t2 = window.setTimeout(tryBind, 300)
     return () => {
-      window.clearTimeout(t)
+      window.clearTimeout(t1)
+      window.clearTimeout(t2)
       window.removeEventListener('scroll', onScroll)
-      album?.removeEventListener('scroll', onScroll)
-      document.querySelector('.cl-album-snap')?.removeEventListener('scroll', onScroll)
+      window.removeEventListener('cl-album-scrollroot', tryBind)
+      window.removeEventListener('cl-album-view', tryBind)
+      unbindSnap()
     }
   }, [router?.asPath])
 
