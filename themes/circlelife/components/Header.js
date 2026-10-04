@@ -1,9 +1,9 @@
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
-import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import CONFIG from '../config'
+import { useAlbumUI } from './albumContext'
 import { BrandLockup } from './BrandLockup'
 import { MenuList } from './MenuList'
 import ReadingProgress from './ReadingProgress'
@@ -19,21 +19,16 @@ export const Header = props => {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const showProgress = Boolean(post) && post?.type !== 'Page'
+  // 影集画廊的滚动根由 AlbumStage 经 Context 注册；null 时回退 window 滚动
+  const { scrollRoot } = useAlbumUI() || {}
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  const router = useRouter()
-
   useEffect(() => {
-    let snapEl = null
     const readY = () => {
-      const album =
-        snapEl ||
-        document.querySelector('.cl-album-snap') ||
-        document.querySelector('[data-cl-scrollroot]')
-      if (album) return album.scrollTop || 0
+      if (scrollRoot) return scrollRoot.scrollTop || 0
       return window.scrollY || document.documentElement.scrollTop || 0
     }
     const onScroll = () => {
@@ -44,50 +39,18 @@ export const Header = props => {
         return prev
       })
     }
-    const unbindSnap = () => {
-      if (snapEl) {
-        snapEl.removeEventListener('scroll', onScroll)
-        snapEl = null
-      }
-    }
-    const bindSnap = el => {
-      if (!el || el === snapEl) {
-        onScroll()
-        return
-      }
-      unbindSnap()
-      snapEl = el
-      snapEl.addEventListener('scroll', onScroll, { passive: true })
-      onScroll()
-    }
-    const tryBind = () => {
-      const el =
-        document.querySelector('.cl-album-snap') ||
-        document.querySelector('[data-cl-scrollroot]')
-      if (el) bindSnap(el)
-      else {
-        unbindSnap()
-        onScroll()
-      }
-    }
-
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
-    tryBind()
-    // shelf→gallery 同路由挂载 snap
-    window.addEventListener('cl-album-scrollroot', tryBind)
-    window.addEventListener('cl-album-view', tryBind)
-    const t1 = window.setTimeout(tryBind, 50)
-    const t2 = window.setTimeout(tryBind, 300)
-    return () => {
-      window.clearTimeout(t1)
-      window.clearTimeout(t2)
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('cl-album-scrollroot', tryBind)
-      window.removeEventListener('cl-album-view', tryBind)
-      unbindSnap()
+    if (scrollRoot) {
+      scrollRoot.addEventListener('scroll', onScroll, { passive: true })
     }
-  }, [router?.asPath])
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      if (scrollRoot) {
+        scrollRoot.removeEventListener('scroll', onScroll)
+      }
+    }
+  }, [scrollRoot])
 
   useEffect(() => {
     if (!drawerOpen) return undefined

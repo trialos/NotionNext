@@ -2,6 +2,7 @@ import SmartLink from '@/components/SmartLink'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useAlbumUI } from './albumContext'
 import { isAlbumPath } from './albumRoute'
 import { ICON_FALLBACK, linkTitle } from './navConfig'
 
@@ -24,6 +25,7 @@ export const MenuItemDrop = ({
   onNavigate
 }) => {
   const router = useRouter()
+  const albumUI = useAlbumUI()
   const [show, changeShow] = useState(false)
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0 })
   const triggerRef = useRef(null)
@@ -40,16 +42,16 @@ export const MenuItemDrop = ({
       const path = (router?.asPath || '').split('?')[0].replace(/\/$/, '')
       const onAlbum = path === '/album'
       if (!onAlbum) return false
-      // 已在影集页：画廊→书架；书架保持
+      // 已在影集页：画廊→书架；书架保持。Context 未就绪则退回普通导航
+      const goShelf = albumUI?.goShelf
+      if (!goShelf) return false
       e.preventDefault()
       e.stopPropagation?.()
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(new CustomEvent('cl-album-go-shelf'))
-      }
+      goShelf()
       onNavigate?.()
       return true
     },
-    [link?.href, router?.asPath, onNavigate]
+    [link?.href, router?.asPath, onNavigate, albumUI]
   )
 
   const clearCloseTimer = useCallback(() => {

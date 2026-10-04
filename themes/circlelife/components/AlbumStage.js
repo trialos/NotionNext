@@ -2,6 +2,7 @@ import { siteConfig } from '@/lib/config'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import CONFIG from '../config'
+import { useAlbumUI } from './albumContext'
 import AlbumGallery from './AlbumGallery'
 import AlbumRail from './AlbumRail'
 import AlbumShelf from './AlbumShelf'
@@ -17,6 +18,7 @@ import { buildAlbumDecks } from './albumUtils'
  */
 export default function AlbumStage({ pages }) {
   const router = useRouter()
+  const albumUI = useAlbumUI()
   const decks = useMemo(() => buildAlbumDecks(pages), [pages])
   const scrollerRef = useRef(null)
   const [view, setView] = useState('shelf')
@@ -24,6 +26,16 @@ export default function AlbumStage({ pages }) {
   const entryIndexRef = useRef(null)
   const spyLockedRef = useRef(false)
   const urlSyncLockRef = useRef(false)
+
+  // 滚动根同时喂给本地 spy 与 Context（Header 收起监听）
+  const registerScrollRoot = albumUI?.registerScrollRoot
+  const snapRef = useCallback(
+    el => {
+      scrollerRef.current = el
+      if (registerScrollRoot) registerScrollRoot(el)
+    },
+    [registerScrollRoot]
+  )
 
   const scrollToDeck = useCallback((i, { smooth = true } = {}) => {
     const root = scrollerRef.current
@@ -64,11 +76,6 @@ export default function AlbumStage({ pages }) {
       setActiveIndex(i)
       setView('gallery')
       replaceAlbumUrl({ view: 'gallery', deckId: deck.id })
-      if (typeof window !== 'undefined') {
-        window.dispatchEvent(
-          new CustomEvent('cl-album-view', { detail: { view: 'gallery' } })
-        )
-      }
     },
     [decks, replaceAlbumUrl]
   )
@@ -79,11 +86,6 @@ export default function AlbumStage({ pages }) {
     spyLockedRef.current = false
     setActiveIndex(0)
     replaceAlbumUrl({ view: 'shelf' })
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(
-        new CustomEvent('cl-album-view', { detail: { view: 'shelf' } })
-      )
-    }
   }, [replaceAlbumUrl])
 
   // URL → 状态（权威）
@@ -124,11 +126,12 @@ export default function AlbumStage({ pages }) {
     return () => root.classList.remove('cl-album-gallery-active')
   }, [view])
 
+  // 点导航「影集」回书架：经 Context 注册，替代 cl-album-go-shelf 事件
   useEffect(() => {
-    const onGoShelf = () => backToShelf()
-    window.addEventListener('cl-album-go-shelf', onGoShelf)
-    return () => window.removeEventListener('cl-album-go-shelf', onGoShelf)
-  }, [backToShelf])
+    if (!albumUI?.registerGoShelf) return undefined
+    albumUI.registerGoShelf(backToShelf)
+    return () => albumUI.registerGoShelf(null)
+  }, [albumUI, backToShelf])
 
   // 进入画廊定位
   useEffect(() => {
@@ -152,16 +155,6 @@ export default function AlbumStage({ pages }) {
       }, 80)
     }
     const t = window.setTimeout(run, 16)
-    const notify = () => {
-      const el = scrollerRef.current
-      if (!el) return
-      el.setAttribute('data-cl-scrollroot', '1')
-      window.dispatchEvent(
-        new CustomEvent('cl-album-scrollroot', { detail: { el } })
-      )
-    }
-    window.setTimeout(notify, 20)
-    window.setTimeout(notify, 100)
     return () => {
       cancelled = true
       window.clearTimeout(t)
@@ -278,7 +271,7 @@ export default function AlbumStage({ pages }) {
           }, 400)
         }}
       />
-      <div className='cl-album-snap' ref={scrollerRef}>
+      <div className='cl-album-snap' ref={snapRef}>
         {decks.map((deck, i) => (
           <section
             key={deck.id || deck.name}
