@@ -1,17 +1,17 @@
 import LazyImage from '@/components/LazyImage'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { createPortal } from 'react-dom'
 import AuthorBadge from './AuthorBadge'
+import AlbumLightbox from './AlbumLightbox'
+import { useAmbientGlow } from './albumGlow'
+import { getCardWidth, useDeckGesture } from './albumGesture'
 
-const THRESH = 0.2
-const TAP_MAX = 10
 const OUT_MS = 300
 const IN_MS = 320
-const GLOW_MS = 1100
-const EASE = 'cubic-bezier(0.22, 0.61, 0.36, 1)'
 
 /**
  * 单辑：整叠跟手翻卡 + 双层柔光晕 + 玻璃浮层 + 全屏灯箱
+ * 手势在 albumGesture、氛围光在 albumGlow、灯箱在 AlbumLightbox；
+ * 这里只留 index/翻卡时序（CSS 变量）与渲染编排。
  */
 export default function AlbumGallery({
   albumName,
@@ -21,32 +21,17 @@ export default function AlbumGallery({
   const n = photos?.length || 0
   const [index, setIndex] = useState(0)
   const [expanded, setExpanded] = useState(false)
-  const [portalReady, setPortalReady] = useState(false)
-  /* 氛围光双槽常驻：A/B 不卸载，onload 后交叉，结尾不空窗 */
-  const [glowA, setGlowA] = useState('')
-  const [glowB, setGlowB] = useState('')
-  const [frontSlot, setFrontSlot] = useState('a')
-  const [crossOn, setCrossOn] = useState(false)
-  const glowFrontRef = useRef('a')
-  const glowUrlRef = useRef('')
 
-  const dragRef = useRef({
-    active: false,
-    locked: null,
-    x: 0,
-    startX: 0,
-    startY: 0,
-    moved: false,
-    pid: null
-  })
   const rootRef = useRef(null)
   const stageRef = useRef(null)
   const busyRef = useRef(false)
   const activeRef = useRef(false)
 
-  useEffect(() => {
-    setPortalReady(true)
-  }, [])
+  const safe = n ? ((index % n) + n) % n : 0
+  const current = n ? photos[safe] : null
+  const { glowA, glowB, frontSlot, crossOn } = useAmbientGlow(
+    current?.url || current?.cover || ''
+  )
 
   useEffect(() => {
     const el = rootRef.current
@@ -65,13 +50,6 @@ export default function AlbumGallery({
     io.observe(el)
     return () => io.disconnect()
   }, [])
-
-  const cardWidth = () => {
-    const stage = stageRef.current
-    if (!stage) return 320
-    const main = stage.querySelector('.cl-ag-card--main')
-    return main?.offsetWidth || Math.min(stage.clientWidth * 0.7, 360)
-  }
 
   /** 整叠位移：主卡 + 侧/远卡用 CSS 变量一起动 */
   const setStack = (x, withTransition, duration = OUT_MS) => {
@@ -112,7 +90,7 @@ export default function AlbumGallery({
     dir => {
       if (n <= 1 || busyRef.current) return
       busyRef.current = true
-      const w = cardWidth()
+      const w = getCardWidth(stageRef)
       const outX = dir > 0 ? -w * 0.92 : w * 0.92
       setStack(outX, true, OUT_MS)
       window.setTimeout(() => {
@@ -146,164 +124,25 @@ export default function AlbumGallery({
     [n, expanded, commitFlip]
   )
 
-  const onPointerDown = e => {
-    if (expanded || busyRef.current) return
-    if (e.button != null && e.button !== 0) return
-    if (e.target.closest?.('button, a')) return
-    dragRef.current = {
-      active: true,
-      locked: null,
-      x: 0,
-      startX: e.clientX,
-      startY: e.clientY,
-      moved: false,
-      pid: e.pointerId
-    }
-    try {
-      e.currentTarget.setPointerCapture(e.pointerId)
-    } catch (_) {}
-    setStack(0, false)
-  }
+  const {
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+    onPointerCancel
+  } = useDeckGesture({
+    stageRef,
+    busyRef,
+    count: n,
+    disabled: expanded,
+    setStack,
+    onFlip: commitFlip,
+    onCenterTap: () => setExpanded(true)
+  })
 
-  const onPointerMove = e => {
-    const d = dragRef.current
-    if (!d.active) return
-    const dx = e.clientX - d.startX
-    const dy = e.clientY - d.startY
-    if (!d.locked) {
-      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return
-      if (Math.abs(dy) > Math.abs(dx) * 1.15) {
-        d.active = false
-        d.locked = 'v'
-        setStack(0, true, 220)
-        try {
-          e.currentTarget.releasePointerCapture(d.pid)
-        } catch (_) {}
-        return
-      }
-      d.locked = 'h'
-    }
-    if (d.locked !== 'h') return
-    if (e.cancelable) e.preventDefault()
-    const maxX = Math.max(130, cardWidth() * 0.8)
-    const x = Math.max(-maxX, Math.min(maxX, dx))
-    d.x = x
-    if (Math.abs(x) > TAP_MAX) d.moved = true
-    setStack(x, false)
-  }
-
-  const onPointerUp = e => {
-    const d = dragRef.current
-    if (!d.active) {
-      d.active = false
-      return
-    }
-    const x = d.x
-    const moved = d.moved
-    const w = cardWidth()
-    const th = Math.max(48, w * THRESH)
-    d.active = false
-    d.locked = null
-
-    if (n > 1 && x <= -th) {
-      commitFlip(1)
-    } else if (n > 1 && x >= th) {
-      commitFlip(-1)
-    } else {
-      setStack(0, true, 240)
-      if (!moved && Math.abs(x) <= TAP_MAX) {
-        // 轻点：左/右 1/3 翻页，中区开灯箱
-        const stage = stageRef.current
-        const rect = stage?.getBoundingClientRect()
-        const cx = e?.clientX ?? d.startX
-        if (rect && n > 1) {
-          const rel = (cx - rect.left) / rect.width
-          if (rel < 0.33) commitFlip(-1)
-          else if (rel > 0.67) commitFlip(1)
-          else setExpanded(true)
-        } else {
-          setExpanded(true)
-        }
-      }
-    }
-    d.x = 0
-    d.moved = false
-  }
-
-  // 氛围光：隐藏槽换 src → onload → 交叉 → 切换 front，不卸 DOM
-  useEffect(() => {
-    if (!n) return undefined
-    const safe = ((index % n) + n) % n
-    const url = photos[safe]?.url || photos[safe]?.cover || ''
-    if (!url || url === glowUrlRef.current) return undefined
-
-    if (!glowUrlRef.current) {
-      glowUrlRef.current = url
-      setGlowA(url)
-      setFrontSlot('a')
-      glowFrontRef.current = 'a'
-      setCrossOn(false)
-      return undefined
-    }
-
-    const front = glowFrontRef.current
-    const writeA = front === 'b'
-    if (writeA) setGlowA(url)
-    else setGlowB(url)
-
-    let cancelled = false
-    let settleTimer = 0
-    const img = new Image()
-    img.onload = () => {
-      if (cancelled) return
-      setCrossOn(true)
-      settleTimer = window.setTimeout(() => {
-        if (cancelled) return
-        const next = writeA ? 'a' : 'b'
-        glowFrontRef.current = next
-        setFrontSlot(next)
-        setCrossOn(false)
-        glowUrlRef.current = url
-      }, GLOW_MS)
-    }
-    img.onerror = () => {
-      if (cancelled) return
-      const next = writeA ? 'a' : 'b'
-      glowFrontRef.current = next
-      setFrontSlot(next)
-      setCrossOn(false)
-      glowUrlRef.current = url
-    }
-    img.src = url
-    return () => {
-      cancelled = true
-      if (settleTimer) window.clearTimeout(settleTimer)
-    }
-  }, [index, n, photos])
-
-  useEffect(() => {
-    if (!expanded) return undefined
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.body.style.overflow = prev
-    }
-  }, [expanded])
-
+  // 灯箱开时键盘由 AlbumLightbox 接管，这里只管舞台态
   useEffect(() => {
     const onKey = e => {
-      if (expanded) {
-        if (e.key === 'Escape') setExpanded(false)
-        if (e.key === 'ArrowLeft') {
-          e.preventDefault()
-          go(-1)
-        }
-        if (e.key === 'ArrowRight') {
-          e.preventDefault()
-          go(1)
-        }
-        return
-      }
+      if (expanded) return
       if (!activeRef.current) return
       if (e.key === 'ArrowLeft') {
         e.preventDefault()
@@ -319,8 +158,6 @@ export default function AlbumGallery({
 
   if (!n) return null
 
-  const safe = ((index % n) + n) % n
-  const current = photos[safe]
   const prev = photos[(safe - 1 + n) % n]
   const next = photos[(safe + 1) % n]
   const prev2 = n > 2 ? photos[(safe - 2 + n) % n] : null
@@ -329,56 +166,6 @@ export default function AlbumGallery({
   const pageTitle = albumName || current.title || ''
   const showCaptionTitle =
     current.title && current.title.trim() && current.title.trim() !== pageTitle
-
-  const lightbox =
-    expanded && portalReady
-      ? createPortal(
-          <div className='cl-ag-lb' role='dialog' aria-modal='true'>
-            <button
-              type='button'
-              className='cl-ag-lb-mask'
-              aria-label='关闭'
-              onClick={() => setExpanded(false)}
-            />
-            <button
-              type='button'
-              className='cl-ag-lb-close'
-              aria-label='关闭'
-              onClick={() => setExpanded(false)}>
-              <i className='fas fa-times' />
-            </button>
-            <div
-              className='cl-ag-lb-stage'
-              onClick={e => {
-                const stage = e.currentTarget
-                const rect = stage.getBoundingClientRect()
-                const rel = (e.clientX - rect.left) / rect.width
-                if (rel < 0.33) {
-                  if (n > 1) go(-1)
-                } else if (rel > 0.67) {
-                  if (n > 1) go(1)
-                } else {
-                  setExpanded(false)
-                }
-              }}>
-              <img
-                src={current.url || current.cover}
-                alt={pageTitle || ''}
-                className='cl-ag-lb-img'
-                draggable={false}
-              />
-              <div className='cl-ag-lb-meta'>
-                {pageTitle ? <p className='cl-ag-lb-title'>{pageTitle}</p> : null}
-                <p className='cl-ag-lb-count'>
-                  {String(safe + 1).padStart(2, '0')} /{' '}
-                  {String(n).padStart(2, '0')}
-                </p>
-              </div>
-            </div>
-          </div>,
-          document.body
-        )
-      : null
 
   return (
     <div className='cl-ag' ref={rootRef}>
@@ -443,7 +230,7 @@ export default function AlbumGallery({
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}>
+        onPointerCancel={onPointerCancel}>
         {prev2 ? (
           <div className='cl-ag-card cl-ag-card--far cl-ag-card--left2' aria-hidden>
             <LazyImage src={prev2.url || prev2.cover} alt='' className='cl-ag-img' />
@@ -549,7 +336,16 @@ export default function AlbumGallery({
         </div>
       ) : null}
 
-      {lightbox}
+      {expanded ? (
+        <AlbumLightbox
+          title={pageTitle}
+          photo={current}
+          index={safe}
+          total={n}
+          onClose={() => setExpanded(false)}
+          onGo={go}
+        />
+      ) : null}
     </div>
   )
 }
