@@ -3,7 +3,7 @@ import { uuidToId } from 'notion-utils'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 /**
- * 桌面目录：细轨墨线 + 朱砂游标随章节滑动 + 当前项轻移
+ * 桌面目录：细轨 + 朱砂游标 + 主/子层级
  */
 const Catalog = ({ toc }) => {
   const tRef = useRef(null)
@@ -68,7 +68,7 @@ const Catalog = ({ toc }) => {
 
   return (
     <div className='cl-toc px-1 pb-2 pt-1'>
-      <div className='cl-toc-scroll overflow-y-auto overscroll-none' ref={tRef}>
+      <div className='cl-toc-scroll' ref={tRef}>
         <nav className='cl-toc-nav' aria-label='目录' ref={navRef}>
           <span
             className='cl-toc-cursor'
@@ -79,13 +79,16 @@ const Catalog = ({ toc }) => {
             const id = uuidToId(tocItem.id)
             tocIdsRef.current.push(id)
             const active = activeSection === id
+            const level = tocItem.indentLevel || 0
+            const levelClass =
+              level <= 0 ? 'cl-toc-item--h1' : level === 1 ? 'cl-toc-item--h2' : 'cl-toc-item--h3'
             return (
               <a
                 key={id}
                 href={`#${id}`}
                 data-toc-id={id}
-                className={`cl-toc-item ${active ? 'is-active' : ''}`}
-                style={{ paddingLeft: 14 + tocItem.indentLevel * 12 }}>
+                className={`cl-toc-item ${levelClass} ${active ? 'is-active' : ''}`}
+                style={{ paddingLeft: `${0.75 + level * 0.7}rem` }}>
                 <span className='cl-toc-item-text'>{tocItem.text}</span>
               </a>
             )
