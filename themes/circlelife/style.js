@@ -737,13 +737,14 @@ const Style = () => {
           opacity 0.34s var(--cl-ease),
           filter 0.34s var(--cl-ease);
       }
+      /* next：左滑飞出；prev：右滑飞出 */
       #theme-circlelife .cl-deck-outgoing.is-fly-next {
-        transform: translateX(22%) rotate(5deg) translateY(-8px);
+        transform: translateX(-22%) rotate(-5deg) translateY(-8px);
         opacity: 0;
         filter: blur(0.3px);
       }
       #theme-circlelife .cl-deck-outgoing.is-fly-prev {
-        transform: translateX(-22%) rotate(-5deg) translateY(-8px);
+        transform: translateX(22%) rotate(5deg) translateY(-8px);
         opacity: 0;
         filter: blur(0.3px);
       }
@@ -2013,6 +2014,47 @@ const Style = () => {
         }
       }
       /* 杂志刊头：无厚卡片，左侧朱砂细条 + 字重 */
+      /* 全站列表刊头（与影集 mast 同系） */
+      #theme-circlelife .cl-page-mast {
+        text-align: left;
+        margin: 0 0 1.5rem;
+        max-width: 40rem;
+      }
+      #theme-circlelife .cl-page-mast-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+        padding: 0.15rem 0 0.15rem 0.85rem;
+        border-left: 2px solid var(--cl-accent);
+      }
+      #theme-circlelife .cl-page-mast-kicker {
+        font-family: var(--cl-font-mono);
+        font-size: 0.68rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--cl-faint);
+        line-height: 1;
+      }
+      #theme-circlelife .cl-page-mast-title {
+        margin: 0;
+        font-family: var(--cl-font-display);
+        font-size: clamp(1.45rem, 3.2vw, 1.9rem);
+        font-weight: 600;
+        letter-spacing: -0.03em;
+        color: var(--cl-text);
+        line-height: 1.2;
+      }
+      #theme-circlelife .cl-page-mast-desc {
+        margin: 0.55rem 0 0 0.85rem;
+        font-size: 0.88rem;
+        line-height: 1.55;
+        color: var(--cl-muted);
+      }
+      #theme-circlelife .cl-page-mast--list {
+        margin-bottom: 1.75rem;
+      }
+
       #theme-circlelife .cl-ag-mast {
         display: flex;
         flex-direction: column;

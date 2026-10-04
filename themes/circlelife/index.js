@@ -35,6 +35,7 @@ import { PostMeta } from './components/PostMeta'
 import SearchInput from './components/SearchInput'
 import { SideBar } from './components/SideBar'
 import TitleBar from './components/TitleBar'
+import PageMast from './components/PageMast'
 import TlPageHero from './components/TlPageHero'
 import CONFIG from './config'
 import { Style } from './style'
@@ -168,16 +169,12 @@ const LayoutPostList = props => {
 
   return (
     <>
-      {category && (
-        <div className='cl-page-kicker mb-4'>
-          <span className='cl-kicker'>{category}</span>
-        </div>
-      )}
-      {tag && (
-        <div className='cl-page-kicker mb-4'>
-          <span className='cl-kicker'>#{tag}</span>
-        </div>
-      )}
+      {category ? (
+        <PageMast eyebrow='分类' title={category} />
+      ) : null}
+      {tag ? (
+        <PageMast eyebrow='标签' title={String(tag)} />
+      ) : null}
 
       {useTimeline &&
         siteConfig('CIRCLELIFE_HOME_LATEST_CARD', true, CONFIG) && (
@@ -240,7 +237,7 @@ const LayoutSlug = props => {
               </div>
             ) : null}
             <div className='cl-article-inner px-5 py-6 md:px-8 md:py-9'>
-            <ArticleBack className='cl-article-back--top' />
+            <ArticleBack className='cl-article-back--top' postId={post?.id} />
             <header className='cl-article-hero'>
               <h1 className='cl-article-title'>
                 {siteConfig('POST_TITLE_ICON') && (
@@ -252,19 +249,23 @@ const LayoutSlug = props => {
             </header>
             <div id='article-wrapper' className='cl-prose-wrap'>
               <NotionPage post={post} />
-              <ShareBar post={post} />
+              {siteConfig('CIRCLELIFE_SHOW_SHARE', false, CONFIG) ? (
+                <ShareBar post={post} />
+              ) : null}
             </div>
             <div className='cl-article-back-row'>
-              <ArticleBack className='cl-article-back--bottom' />
+              <ArticleBack className='cl-article-back--bottom' postId={post?.id} />
             </div>
-            <section
-              className='mt-8 border-t border-[var(--cl-border)] pt-6'
-              aria-label={locale?.COMMON?.COMMENTS || 'Comments'}>
-              <h2 className='cl-kicker mb-4 !text-[var(--cl-muted)]'>
-                {locale?.COMMON?.COMMENTS || '评论'}
-              </h2>
-              <Comment frontMatter={post} />
-            </section>
+            {siteConfig('CIRCLELIFE_SHOW_COMMENT', false, CONFIG) ? (
+              <section
+                className='mt-8 border-t border-[var(--cl-border)] pt-6'
+                aria-label={locale?.COMMON?.COMMENTS || 'Comments'}>
+                <h2 className='cl-kicker mb-4 !text-[var(--cl-muted)]'>
+                  {locale?.COMMON?.COMMENTS || '评论'}
+                </h2>
+                <Comment frontMatter={post} />
+              </section>
+            ) : null}
             </div>
           </article>
         )
@@ -345,8 +346,8 @@ const LayoutSearch = props => {
   return (
     <>
       <TlPageHero
-        title={locale?.NAV?.SEARCH || 'Search'}
-        description={keyword ? `「${keyword}」` : undefined}
+        eyebrow='搜索'
+        title={keyword ? String(keyword) : locale?.NAV?.SEARCH || '搜索'}
       />
       <div className='mb-8'>
         <SearchInput {...props} />
@@ -372,7 +373,7 @@ const LayoutArchive = props => {
   )
   return (
     <>
-      <TlPageHero title={locale?.NAV?.ARCHIVE || 'Archive'} />
+      <TlPageHero eyebrow='时间线' title={locale?.NAV?.ARCHIVE || '时间线'} />
       <div className='w-full pb-16'>
         {keys.map(archiveTitle => (
           <BlogListArchive
@@ -396,7 +397,7 @@ const LayoutCategoryIndex = props => {
   const { locale } = useGlobal()
   return (
     <>
-      <TlPageHero title={locale?.COMMON?.CATEGORY || 'Categories'} />
+      <TlPageHero eyebrow='导航' title={locale?.COMMON?.CATEGORY || '分类'} />
       <div id='category-list' className='flex flex-wrap'>
         {categoryOptions?.map(category => (
           <SmartLink
@@ -423,7 +424,7 @@ const LayoutTagIndex = props => {
   const { locale } = useGlobal()
   return (
     <>
-      <TlPageHero title={locale?.COMMON?.TAGS || 'Tags'} />
+      <TlPageHero eyebrow='导航' title={locale?.COMMON?.TAGS || '标签'} />
       <div id='tags-list' className='flex flex-wrap'>
         {tagOptions.map(tag => (
           <SmartLink

@@ -88,7 +88,18 @@ const Catalog = ({ toc }) => {
                 href={`#${id}`}
                 data-toc-id={id}
                 className={`cl-toc-item ${levelClass} ${active ? 'is-active' : ''}`}
-                style={{ paddingLeft: `${0.75 + level * 0.7}rem` }}>
+                style={{ paddingLeft: `${0.75 + level * 0.7}rem` }}
+                onClick={e => {
+                  e.preventDefault()
+                  const el =
+                    document.getElementById(id) ||
+                    document.querySelector(`.notion-h[data-id="${id}"]`)
+                  if (el) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                  }
+                  setActiveSection(id)
+                  syncCursor(id)
+                }}>
                 <span className='cl-toc-item-text'>{tocItem.text}</span>
               </a>
             )
