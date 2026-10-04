@@ -110,7 +110,12 @@ export default function ListScrollMemory() {
         return
       }
       if (u.origin !== window.location.origin) return
-      rememberScroll(u.pathname + u.search, window.scrollY || 0)
+      // 按「当前页」路径记账：返回到哪一页就按哪一页查找；
+      // 记目标页路径会让恢复查找永远落空
+      rememberScroll(
+        window.location.pathname + window.location.search,
+        window.scrollY || 0
+      )
     }
     document.addEventListener('click', onClick, { capture: true })
     return () =>
