@@ -4,13 +4,13 @@
 import { resolveArticleBackHref } from '@/themes/circlelife/components/articleBackHref'
 
 describe('resolveArticleBackHref', () => {
-  const origin = 'https://felixorb.com'
+  const origin = 'https://example.com'
 
   it('uses stored when present', () => {
     expect(
       resolveArticleBackHref({
         stored: '/archive',
-        referrer: 'https://felixorb.com/tag/x',
+        referrer: 'https://example.com/tag/x',
         currentPath: '/article/foo',
         origin
       })
@@ -20,7 +20,7 @@ describe('resolveArticleBackHref', () => {
   it('parses same-origin referrer', () => {
     expect(
       resolveArticleBackHref({
-        referrer: 'https://felixorb.com/category/life',
+        referrer: 'https://example.com/category/life',
         currentPath: '/article/foo',
         origin
       })
@@ -40,7 +40,7 @@ describe('resolveArticleBackHref', () => {
   it('falls back when referrer is current article', () => {
     expect(
       resolveArticleBackHref({
-        referrer: 'https://felixorb.com/article/foo',
+        referrer: 'https://example.com/article/foo',
         currentPath: '/article/foo',
         origin
       })
