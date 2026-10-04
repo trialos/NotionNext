@@ -10,7 +10,8 @@ const Style = () => {
     <style jsx global>{`
       @import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500&family=Newsreader:ital,wght@0,500;0,600;1,500&family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@500;600&display=swap');
 
-      #theme-circlelife {
+      /* tokens 在 :root 一份：body 上的 portal（抽屉/子菜单/灯箱/手机目录）直接继承 */
+      :root {
         --cl-bg: #f5f0e4;
         --cl-surface: #fcfaf4;
         --cl-paper-2: #eae1cf;
@@ -35,14 +36,9 @@ const Style = () => {
         --cl-media-ratio: 4 / 3;
         --cl-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
         --cl-dur: 0.28s;
-
-        background-color: var(--cl-bg);
-        color: var(--cl-text);
-        font-family: var(--cl-font-body);
-        -webkit-font-smoothing: antialiased;
       }
 
-      .dark #theme-circlelife {
+      .dark {
         --cl-bg: #14110e;
         --cl-surface: #1a1612;
         --cl-paper-2: #1c1814;
@@ -56,6 +52,13 @@ const Style = () => {
         --cl-accent-press: #c98a26;
         --cl-accent-soft: #3a2e18;
         --cl-accent-ink: #14110e;
+      }
+
+      #theme-circlelife {
+        background-color: var(--cl-bg);
+        color: var(--cl-text);
+        font-family: var(--cl-font-body);
+        -webkit-font-smoothing: antialiased;
       }
 
       #theme-circlelife a {
@@ -401,7 +404,7 @@ const Style = () => {
       }
 
 
-      /* mobile drawer — portal on body, own tokens */
+      /* mobile drawer — portal on body, tokens inherit from :root */
       .cl-drawer-root {
         position: fixed;
         inset: 0;
@@ -409,30 +412,8 @@ const Style = () => {
         pointer-events: none;
         visibility: hidden;
         transition: visibility 0s linear 0.32s;
-        --cl-bg: #f5f0e4;
-        --cl-surface: #fcfaf4;
-        --cl-text: #20190f;
-        --cl-muted: #57493a;
-        --cl-faint: #948574;
-        --cl-border: rgba(32, 25, 15, 0.11);
-        --cl-accent: #b24a33;
-        --cl-accent-soft: #f0e0d6;
-        --cl-radius-sm: 6px;
-        --cl-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
-        --cl-font-display: 'Newsreader', 'Noto Serif SC', 'Songti SC', serif;
-        --cl-font-mono: 'JetBrains Mono', 'Noto Sans SC', ui-monospace, monospace;
         font-family: 'Hanken Grotesk', 'Noto Sans SC', system-ui, sans-serif;
         color: var(--cl-text);
-      }
-      html.dark .cl-drawer-root {
-        --cl-bg: #14110e;
-        --cl-surface: #1a1612;
-        --cl-text: #f0e9dc;
-        --cl-muted: #c2b7a4;
-        --cl-faint: #8c8170;
-        --cl-border: rgba(240, 233, 220, 0.12);
-        --cl-accent: #e0a33e;
-        --cl-accent-soft: #3a2e18;
       }
       .cl-drawer-root.is-open {
         pointer-events: auto;
@@ -1310,34 +1291,27 @@ const Style = () => {
       }
 
       
-      /* desktop dropdown submenu (portal) */
-      #theme-circlelife .cl-submenu,
+      /* desktop dropdown submenu (portal on body) */
       .cl-submenu {
         list-style: none;
         margin: 0;
         padding: 0.4rem 0;
         min-width: 11rem;
-        border-radius: var(--cl-radius, 10px);
-        border: 1px solid var(--cl-border, rgba(32, 25, 15, 0.13));
-        background: var(--cl-surface, #fcfaf4) !important;
-        color: var(--cl-text, #20190f);
-        box-shadow: 0 8px 24px color-mix(in srgb, var(--cl-text, #20190f) 8%, transparent);
+        border-radius: var(--cl-radius);
+        border: 1px solid var(--cl-border);
+        background: var(--cl-surface) !important;
+        color: var(--cl-text);
+        box-shadow: 0 8px 24px color-mix(in srgb, var(--cl-text) 8%, transparent);
         z-index: 120;
       }
-      html.dark .cl-submenu,
       .dark .cl-submenu {
-        background: #1a1612 !important;
-        border-color: rgba(240, 233, 220, 0.14);
-        color: #f0e9dc;
         box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
       }
-      #theme-circlelife .cl-submenu-item,
       .cl-submenu-item {
         margin: 0;
         padding: 0;
         list-style: none;
       }
-      #theme-circlelife .cl-submenu-link,
       .cl-submenu-link {
         display: flex;
         align-items: center;
@@ -1350,15 +1324,9 @@ const Style = () => {
         text-decoration: none;
         transition: background 0.15s ease, color 0.15s ease;
       }
-      #theme-circlelife .cl-submenu-link:hover,
       .cl-submenu-link:hover {
-        background: var(--cl-accent-soft, #f0e0d6);
-        color: var(--cl-accent, #b24a33);
-      }
-      html.dark .cl-submenu-link:hover,
-      .dark .cl-submenu-link:hover {
-        background: #3a2e18;
-        color: #e0a33e;
+        background: var(--cl-accent-soft);
+        color: var(--cl-accent);
       }
       .cl-submenu-ico {
         opacity: 0.7;
@@ -2424,8 +2392,7 @@ const Style = () => {
         transform: scale(1.25);
       }
 
-      /* fullscreen immersive lightbox */
-      #theme-circlelife .cl-ag-lb,
+      /* fullscreen immersive lightbox (portal on body) */
       .cl-ag-lb {
         position: fixed;
         inset: 0;
@@ -2604,26 +2571,8 @@ const Style = () => {
         z-index: 210;
         pointer-events: none;
         visibility: hidden;
-        --cl-bg: #f5f0e4;
-        --cl-surface: #fcfaf4;
-        --cl-text: #20190f;
-        --cl-muted: #57493a;
-        --cl-faint: #948574;
-        --cl-border: rgba(32, 25, 15, 0.11);
-        --cl-accent: #b24a33;
-        --cl-accent-soft: #f0e0d6;
         font-family: 'Hanken Grotesk', 'Noto Sans SC', system-ui, sans-serif;
         color: var(--cl-text);
-      }
-      html.dark .cl-toc-drawer-root {
-        --cl-bg: #14110e;
-        --cl-surface: #1a1612;
-        --cl-text: #f0e9dc;
-        --cl-muted: #c2b7a4;
-        --cl-faint: #8c8170;
-        --cl-border: rgba(240, 233, 220, 0.12);
-        --cl-accent: #e0a33e;
-        --cl-accent-soft: #3a2e18;
       }
       .cl-toc-drawer-root.is-open {
         pointer-events: auto;
