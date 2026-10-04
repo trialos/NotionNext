@@ -205,6 +205,8 @@ const LayoutSlug = props => {
   const router = useRouter()
   const { locale } = useGlobal()
   const waiting404 = siteConfig('POST_WAITING_TIME_FOR_404') * 1000
+  // Notion Page 型页面（关于/往期整理等）用统一刊头；普通文章保持 hero+meta
+  const isPage = post?.type === 'Page'
   useEffect(() => {
     // 404
     if (!post) {
@@ -243,15 +245,23 @@ const LayoutSlug = props => {
             ) : null}
             <div className='cl-article-inner px-5 py-6 md:px-8 md:py-9'>
             <ArticleBack className='cl-article-back--top' postId={post?.id} />
-            <header className='cl-article-hero'>
-              <h1 className='cl-article-title'>
-                {siteConfig('POST_TITLE_ICON') && (
-                  <NotionIcon icon={post.pageIcon} />
-                )}
-                {post.title}
-              </h1>
-              <PostMeta post={post} />
-            </header>
+            {isPage ? (
+              <PageMast
+                title={post.title}
+                description={post.summary || undefined}
+                className='cl-page-mast--article'
+              />
+            ) : (
+              <header className='cl-article-hero'>
+                <h1 className='cl-article-title'>
+                  {siteConfig('POST_TITLE_ICON') && (
+                    <NotionIcon icon={post.pageIcon} />
+                  )}
+                  {post.title}
+                </h1>
+                <PostMeta post={post} />
+              </header>
+            )}
             <div id='article-wrapper' className='cl-prose-wrap'>
               <NotionPage post={post} />
               {siteConfig('CIRCLELIFE_SHOW_SHARE', false, CONFIG) ? (
