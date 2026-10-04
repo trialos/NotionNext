@@ -41,6 +41,8 @@ const CONFIG = {
   /** 影集：Notion type=Photo；专辑字段默认「专辑」 */
   CIRCLELIFE_ALBUM_EMPTY_HINT: '在 Notion 新增 type 为 Photo 的条目，并填写封面与描述。',
   CIRCLELIFE_ALBUM_DEFAULT_NAME: '未分辑',
+  /** 构建时并行拉取 Photo 正文图的批次大小（1–8） */
+  CIRCLELIFE_ALBUM_FETCH_BATCH: 4,
 
   CIRCLELIFE_AUTHORS: [
     {

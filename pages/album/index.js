@@ -10,6 +10,11 @@ import { extractImagesFromBlockMap } from '@/themes/circlelife/components/extrac
 
 /**
  * 影集：拉取 Photo 页正文图片
+ *
+ * 缓存：ISR 使用站级 NEXT_REVALIDATE_SECOND。
+ * Notion 更新后请对 /album 调用 POST /api/revalidate
+ *   Body: { "path": "/album" } 或 paths 含 "/album"
+ *   Header: Authorization: Bearer <REVALIDATION_TOKEN>
  */
 const AlbumIndex = props => {
   const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
@@ -47,9 +52,21 @@ export async function getStaticProps({ locale }) {
     )
   )
 
-  // parallel fetch body images (limit concurrency lightly)
+  // parallel fetch body images（批次可配置，避免 Photo 增多打爆 Notion/构建）
   const enriched = []
-  const batch = 4
+  const batch = Math.max(
+    1,
+    Math.min(
+      8,
+      Number(
+        siteConfig(
+          'CIRCLELIFE_ALBUM_FETCH_BATCH',
+          4,
+          props.NOTION_CONFIG
+        )
+      ) || 4
+    )
+  )
   for (let i = 0; i < photoPages.length; i += batch) {
     const slice = photoPages.slice(i, i + batch)
     const parts = await Promise.all(

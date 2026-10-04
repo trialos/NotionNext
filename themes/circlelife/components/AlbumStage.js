@@ -1,22 +1,29 @@
 import { siteConfig } from '@/lib/config'
+import { useRouter } from 'next/router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import CONFIG from '../config'
 import AlbumGallery from './AlbumGallery'
 import AlbumRail from './AlbumRail'
 import AlbumShelf from './AlbumShelf'
+import {
+  buildAlbumHref,
+  findDeckIndexById,
+  parseAlbumQuery
+} from './albumRoute'
 import { buildAlbumDecks } from './albumUtils'
 
 /**
- * 影集：默认书架 · 点开长画廊（可邻辑）· 墨线轴
+ * 影集：默认书架 · 点开长画廊（可邻辑）· URL ?view=&deck=
  */
 export default function AlbumStage({ pages }) {
+  const router = useRouter()
   const decks = useMemo(() => buildAlbumDecks(pages), [pages])
   const scrollerRef = useRef(null)
-  const [view, setView] = useState('shelf') // shelf | gallery
+  const [view, setView] = useState('shelf')
   const [activeIndex, setActiveIndex] = useState(0)
-  /** 进入画廊要落到的辑；与 activeIndex 解耦，避免 spy 抢跑 */
   const entryIndexRef = useRef(null)
   const spyLockedRef = useRef(false)
+  const urlSyncLockRef = useRef(false)
 
   const scrollToDeck = useCallback((i, { smooth = true } = {}) => {
     const root = scrollerRef.current
@@ -32,50 +39,98 @@ export default function AlbumStage({ pages }) {
     return true
   }, [])
 
-  const openGallery = useCallback(i => {
-    entryIndexRef.current = i
-    spyLockedRef.current = true
-    setActiveIndex(i)
-    setView('gallery')
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(
-        new CustomEvent('cl-album-view', { detail: { view: 'gallery' } })
+  const replaceAlbumUrl = useCallback(
+    ({ view: v, deckId }) => {
+      if (!router?.replace) return
+      urlSyncLockRef.current = true
+      const href = buildAlbumHref({ view: v, deckId })
+      router.replace(href, undefined, { shallow: true, scroll: false }).finally(
+        () => {
+          window.setTimeout(() => {
+            urlSyncLockRef.current = false
+          }, 50)
+        }
       )
-    }
-  }, [])
+    },
+    [router]
+  )
+
+  const openGallery = useCallback(
+    i => {
+      const deck = decks[i]
+      if (!deck) return
+      entryIndexRef.current = i
+      spyLockedRef.current = true
+      setActiveIndex(i)
+      setView('gallery')
+      replaceAlbumUrl({ view: 'gallery', deckId: deck.id })
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('cl-album-view', { detail: { view: 'gallery' } })
+        )
+      }
+    },
+    [decks, replaceAlbumUrl]
+  )
 
   const backToShelf = useCallback(() => {
     setView('shelf')
     entryIndexRef.current = null
     spyLockedRef.current = false
     setActiveIndex(0)
+    replaceAlbumUrl({ view: 'shelf' })
     if (typeof window !== 'undefined') {
       window.dispatchEvent(
         new CustomEvent('cl-album-view', { detail: { view: 'shelf' } })
       )
     }
-  }, [])
+  }, [replaceAlbumUrl])
 
-  // 画廊态：藏页脚 + 通知顶栏绑定 snap
+  // URL → 状态（权威）
+  useEffect(() => {
+    if (!router.isReady) return
+    if (urlSyncLockRef.current) return
+    const { view: qView, deck } = parseAlbumQuery(router.query)
+    if (qView === 'gallery') {
+      const i = findDeckIndexById(decks, deck)
+      if (i < 0) {
+        setView('shelf')
+        setActiveIndex(0)
+        if (deck || router.query.view === 'gallery') {
+          replaceAlbumUrl({ view: 'shelf' })
+        }
+        return
+      }
+      if (view !== 'gallery' || activeIndex !== i) {
+        entryIndexRef.current = i
+        spyLockedRef.current = true
+        setActiveIndex(i)
+        setView('gallery')
+      }
+    } else if (view !== 'shelf') {
+      setView('shelf')
+      entryIndexRef.current = null
+      spyLockedRef.current = false
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.isReady, router.query.view, router.query.deck, decks, replaceAlbumUrl])
+
+  // 画廊态：藏页脚 + 通知顶栏
   useEffect(() => {
     if (typeof document === 'undefined') return undefined
     const root = document.documentElement
-    if (view === 'gallery') {
-      root.classList.add('cl-album-gallery-active')
-    } else {
-      root.classList.remove('cl-album-gallery-active')
-    }
+    if (view === 'gallery') root.classList.add('cl-album-gallery-active')
+    else root.classList.remove('cl-album-gallery-active')
     return () => root.classList.remove('cl-album-gallery-active')
   }, [view])
 
-  // 导航「影集」同页回书架
   useEffect(() => {
     const onGoShelf = () => backToShelf()
     window.addEventListener('cl-album-go-shelf', onGoShelf)
     return () => window.removeEventListener('cl-album-go-shelf', onGoShelf)
   }, [backToShelf])
 
-  // 进入画廊：只跑一次定位，不依赖 activeIndex
+  // 进入画廊定位
   useEffect(() => {
     if (view !== 'gallery') return undefined
     const target =
@@ -89,7 +144,6 @@ export default function AlbumStage({ pages }) {
         window.requestAnimationFrame(run)
         return
       }
-      // 布局稳定后再解 spy 锁
       window.setTimeout(() => {
         if (cancelled) return
         scrollToDeck(target, { smooth: false })
@@ -98,7 +152,6 @@ export default function AlbumStage({ pages }) {
       }, 80)
     }
     const t = window.setTimeout(run, 16)
-    // 通知 Header 绑定内滚
     const notify = () => {
       const el = scrollerRef.current
       if (!el) return
@@ -116,7 +169,7 @@ export default function AlbumStage({ pages }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, scrollToDeck])
 
-  // scroll spy（首屏定位锁定期不写 active）
+  // scroll spy + URL deck 同步
   useEffect(() => {
     if (view !== 'gallery') return undefined
     const root = scrollerRef.current
@@ -136,16 +189,22 @@ export default function AlbumStage({ pages }) {
           best = i
         }
       })
-      setActiveIndex(best)
+      setActiveIndex(prev => {
+        if (prev === best) return prev
+        const id = decks[best]?.id
+        if (id && router.query.deck !== String(id)) {
+          replaceAlbumUrl({ view: 'gallery', deckId: id })
+        }
+        return best
+      })
     }
     root.addEventListener('scroll', onScroll, { passive: true })
     return () => root.removeEventListener('scroll', onScroll)
-  }, [decks.length, view])
+  }, [decks, view, replaceAlbumUrl, router.query.deck])
 
   useEffect(() => {
     if (view !== 'gallery') return undefined
     if (decks.length <= 1) return undefined
-
     const onKey = e => {
       if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return
       if (document.querySelector('.cl-ag-lb')) return
@@ -154,11 +213,19 @@ export default function AlbumStage({ pages }) {
         e.key === 'ArrowDown'
           ? Math.min(decks.length - 1, activeIndex + 1)
           : Math.max(0, activeIndex - 1)
+      const id = decks[next]?.id
+      entryIndexRef.current = next
+      spyLockedRef.current = true
+      setActiveIndex(next)
       scrollToDeck(next, { smooth: true })
+      if (id) replaceAlbumUrl({ view: 'gallery', deckId: id })
+      window.setTimeout(() => {
+        spyLockedRef.current = false
+      }, 400)
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [decks.length, activeIndex, scrollToDeck, view])
+  }, [decks, activeIndex, scrollToDeck, view, replaceAlbumUrl])
 
   const emptyHint = siteConfig(
     'CIRCLELIFE_ALBUM_EMPTY_HINT',
@@ -199,7 +266,17 @@ export default function AlbumStage({ pages }) {
       <AlbumRail
         decks={decks}
         activeIndex={activeIndex}
-        onSelect={i => scrollToDeck(i, { smooth: true })}
+        onSelect={i => {
+          const id = decks[i]?.id
+          entryIndexRef.current = i
+          spyLockedRef.current = true
+          setActiveIndex(i)
+          scrollToDeck(i, { smooth: true })
+          if (id) replaceAlbumUrl({ view: 'gallery', deckId: id })
+          window.setTimeout(() => {
+            spyLockedRef.current = false
+          }, 400)
+        }}
       />
       <div className='cl-album-snap' ref={scrollerRef}>
         {decks.map((deck, i) => (
@@ -207,6 +284,7 @@ export default function AlbumStage({ pages }) {
             key={deck.id || deck.name}
             className='cl-album-section'
             data-album={deck.name}
+            data-deck-id={deck.id}
             data-index={i}
             aria-label={`影集 ${deck.name}`}>
             <AlbumGallery
