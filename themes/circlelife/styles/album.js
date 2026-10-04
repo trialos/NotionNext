@@ -553,6 +553,9 @@ export const albumStyle = `
       #theme-circlelife .cl-page-mast--list {
         margin-bottom: 1.75rem;
       }
+      #theme-circlelife .cl-page-mast--article {
+        margin-bottom: 2rem;
+      }
 
       #theme-circlelife .cl-ag-mast {
         display: flex;
