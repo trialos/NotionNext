@@ -2,21 +2,10 @@ import SmartLink from '@/components/SmartLink'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { isAlbumPath } from './albumRoute'
 import { ICON_FALLBACK, linkTitle } from './navConfig'
 
 const HOVER_CLOSE_MS = 120
-
-function isAlbumHref(href) {
-  if (!href || typeof href !== 'string') return false
-  try {
-    const path = href.startsWith('http')
-      ? new URL(href).pathname
-      : href.split('?')[0].split('#')[0]
-    return path.replace(/\/$/, '') === '/album'
-  } catch (_) {
-    return href.replace(/\/$/, '').split('?')[0] === '/album'
-  }
-}
 
 function resolveIcon(link) {
   const raw = (link?.icon || '').trim()
@@ -47,7 +36,7 @@ export const MenuItemDrop = ({
 
   const handleAlbumNavClick = useCallback(
     e => {
-      if (!isAlbumHref(link?.href)) return false
+      if (!isAlbumPath(link?.href)) return false
       const path = (router?.asPath || '').split('?')[0].replace(/\/$/, '')
       const onAlbum = path === '/album'
       if (!onAlbum) return false

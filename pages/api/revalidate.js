@@ -11,10 +11,11 @@ import { cleanCache } from '@/lib/cache/local_file_cache'
  *   Authorization: Bearer <REVALIDATION_TOKEN>
  *   Body: { "path": "/article/my-post" }        — 刷新单个页面
  *   Body: { "paths": ["/", "/article/post-1"] }  — 批量刷新
- *   Body: { "all": true }                        — 全站刷新
+ *   Body: { "all": true }                        — 全站刷新（含 / 与 /album）
+ *   Body: { "path": "/album" }                   — 仅刷新影集（Photo 更新后建议调用）
  *
  * 环境变量：
- *   REVALIDATION_TOKEN — API 鉴权 Token（必须设置）
+ *   REVALIDATION_TOKEN — API 鉴权 Token（必须设置，勿提交到仓库）
  */
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -49,15 +50,20 @@ export default async function handler(req, res) {
     if (all) {
       cleanCache()
       const results = []
-      try {
-        await res.revalidate('/')
-        results.push({ path: '/', revalidated: true })
-      } catch (e) {
-        results.push({ path: '/', revalidated: false, error: e.message })
+      // 首页 + 影集（circlelife Photo 聚合页需显式刷）
+      const seedPaths = ['/', '/album']
+      for (const p of seedPaths) {
+        try {
+          await res.revalidate(p)
+          results.push({ path: p, revalidated: true })
+        } catch (e) {
+          results.push({ path: p, revalidated: false, error: e.message })
+        }
       }
       return res.status(200).json({
         ok: true,
-        message: 'Full site cache cleared. Homepage revalidated. Other pages will refresh on next visit.',
+        message:
+          'Full site cache cleared. Homepage and /album revalidated. Other pages refresh on next visit or path list.',
         results
       })
     }
