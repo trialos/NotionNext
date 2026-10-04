@@ -1,6 +1,7 @@
 import { useRouter } from 'next/router'
 import { useEffect, useRef } from 'react'
 import { resolveArticleBackHref } from './articleBackHref'
+import { setBackIntent } from './ListScrollMemory'
 
 /**
  * 文章返回：回到进文前页面（不受目录 # 历史影响）
@@ -40,7 +41,9 @@ export default function ArticleBack({ className = '', postId = '' }) {
   }, [postId, router.asPath])
 
   const go = () => {
-    router.push(targetRef.current || '/')
+    // 定位交给 ListScrollMemory：有记录恢复原位，无记录回顶
+    setBackIntent()
+    router.push(targetRef.current || '/', undefined, { scroll: false })
   }
 
   return (
