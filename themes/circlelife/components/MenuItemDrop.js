@@ -1,9 +1,22 @@
 import SmartLink from '@/components/SmartLink'
+import { useRouter } from 'next/router'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { ICON_FALLBACK, linkTitle } from './navConfig'
 
 const HOVER_CLOSE_MS = 120
+
+function isAlbumHref(href) {
+  if (!href || typeof href !== 'string') return false
+  try {
+    const path = href.startsWith('http')
+      ? new URL(href).pathname
+      : href.split('?')[0].split('#')[0]
+    return path.replace(/\/$/, '') === '/album'
+  } catch (_) {
+    return href.replace(/\/$/, '').split('?')[0] === '/album'
+  }
+}
 
 function resolveIcon(link) {
   const raw = (link?.icon || '').trim()
@@ -21,6 +34,7 @@ export const MenuItemDrop = ({
   collapsed = false,
   onNavigate
 }) => {
+  const router = useRouter()
   const [show, changeShow] = useState(false)
   const [menuPos, setMenuPos] = useState({ top: 0, left: 0 })
   const triggerRef = useRef(null)
@@ -30,6 +44,24 @@ export const MenuItemDrop = ({
   const isDrawer = variant === 'drawer'
   const iconClass = resolveIcon(link)
   const label = linkTitle(link)
+
+  const handleAlbumNavClick = useCallback(
+    e => {
+      if (!isAlbumHref(link?.href)) return false
+      const path = (router?.asPath || '').split('?')[0].replace(/\/$/, '')
+      const onAlbum = path === '/album'
+      if (!onAlbum) return false
+      // 已在影集页：画廊→书架；书架保持
+      e.preventDefault()
+      e.stopPropagation?.()
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('cl-album-go-shelf'))
+      }
+      onNavigate?.()
+      return true
+    },
+    [link?.href, router?.asPath, onNavigate]
+  )
 
   const clearCloseTimer = useCallback(() => {
     if (closeTimerRef.current) {
@@ -75,7 +107,10 @@ export const MenuItemDrop = ({
             href={link?.href}
             target={link?.target}
             className='cl-drawer-link'
-            onClick={onNavigate}>
+            onClick={e => {
+              if (handleAlbumNavClick(e)) return
+              onNavigate?.(e)
+            }}>
             <i className={`${iconClass} cl-nav-ico`} aria-hidden='true' />
             <span>{label}</span>
           </SmartLink>
@@ -184,7 +219,10 @@ export const MenuItemDrop = ({
             href={link?.href}
             target={link?.target}
             className='cl-nav-hit inline-flex items-center gap-1.5'
-            aria-label={label}>
+            aria-label={label}
+            onClick={e => {
+              if (handleAlbumNavClick(e)) return
+            }}>
             {innerContent}
           </SmartLink>
         </div>

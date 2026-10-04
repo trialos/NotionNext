@@ -1410,6 +1410,14 @@ const Style = () => {
         max-width: none;
         width: 100%;
       }
+      /* 画廊全屏：藏页脚，避免贴在 snap 下假底部 */
+      html.cl-album-gallery-active #theme-circlelife .cl-footer,
+      html.cl-album-gallery-active .cl-footer {
+        display: none !important;
+      }
+      html.cl-album-gallery-active #theme-circlelife {
+        /* 外层不额外出页脚高度 */
+      }
       #theme-circlelife.cl-is-album #container-inner {
         position: relative;
         z-index: 10;
@@ -1829,17 +1837,18 @@ const Style = () => {
         will-change: opacity;
         transition: opacity 1.15s ease;
       }
+      /* 光层始终在 veil 下，交叉只改 opacity，结束不掉层级 */
       #theme-circlelife .cl-ag-ambient-img.is-front {
         opacity: 0.58;
-        z-index: 2;
+        z-index: 1;
       }
       #theme-circlelife .cl-ag-ambient-img.is-entering {
         opacity: 0.58;
-        z-index: 3;
+        z-index: 1;
       }
       #theme-circlelife .cl-ag-ambient-img.is-leaving {
         opacity: 0;
-        z-index: 1;
+        z-index: 0;
       }
       #theme-circlelife .cl-ag-ambient-img.is-back {
         opacity: 0;
@@ -1860,7 +1869,7 @@ const Style = () => {
         inset: 0;
         z-index: 2;
         background: color-mix(in srgb, var(--cl-bg) 48%, transparent);
-        transition: background 0.6s ease;
+        pointer-events: none;
       }
       .dark #theme-circlelife .cl-ag-ambient-veil {
         background: color-mix(in srgb, var(--cl-bg) 55%, transparent);
