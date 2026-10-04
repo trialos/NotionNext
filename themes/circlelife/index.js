@@ -24,6 +24,7 @@ import BlogListArchive from './components/BlogListArchive'
 import { BlogListPage } from './components/BlogListPage'
 import { BlogListScroll } from './components/BlogListScroll'
 import AlbumStage from './components/AlbumStage'
+import { AlbumUIProvider } from './components/albumContext'
 import ArticleBack from './components/ArticleBack'
 import BackToTop from './components/BackToTop'
 import { Footer } from './components/Footer'
@@ -73,6 +74,7 @@ const LayoutBase = props => {
     !wide && (!sidebarOnlyPost || Boolean(post)) && !LAYOUT_VERTICAL
 
   return (
+    <AlbumUIProvider>
     <div
       id='theme-circlelife'
       className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth${isAlbumPage ? ' cl-is-album' : ''}${showSidebar ? ' cl-has-sidebar' : ''}`}>
@@ -136,6 +138,7 @@ const LayoutBase = props => {
 
       <BackToTop label={locale?.POST?.TOP || '返回顶部'} />
     </div>
+    </AlbumUIProvider>
   )
 }
 
