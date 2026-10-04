@@ -3,12 +3,25 @@ import { uuidToId } from 'notion-utils'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 /**
- * 文章目录：细轨墨线 + 当前章节高亮
+ * 桌面目录：细轨墨线 + 朱砂游标随章节滑动 + 当前项轻移
  */
 const Catalog = ({ toc }) => {
   const tRef = useRef(null)
+  const navRef = useRef(null)
   const tocIdsRef = useRef([])
   const [activeSection, setActiveSection] = useState(null)
+  const [cursorY, setCursorY] = useState(8)
+
+  const syncCursor = useCallback(id => {
+    const nav = navRef.current
+    if (!nav || !id) return
+    const el = nav.querySelector(`[data-toc-id="${id}"]`)
+    if (!el) return
+    const navBox = nav.getBoundingClientRect()
+    const box = el.getBoundingClientRect()
+    const y = box.top - navBox.top + nav.scrollTop + box.height / 2 - 6
+    setCursorY(Math.max(4, y))
+  }, [])
 
   const actionSectionScrollSpy = useCallback(
     throttle(() => {
@@ -32,10 +45,11 @@ const Catalog = ({ toc }) => {
         break
       }
       setActiveSection(currentSectionId)
+      syncCursor(currentSectionId)
       const index = tocIdsRef.current.indexOf(currentSectionId) || 0
       tRef?.current?.scrollTo({ top: 28 * index, behavior: 'smooth' })
-    }, 200),
-    [activeSection]
+    }, 160),
+    [activeSection, syncCursor]
   )
 
   useEffect(() => {
@@ -44,6 +58,10 @@ const Catalog = ({ toc }) => {
     return () => window.removeEventListener('scroll', actionSectionScrollSpy)
   }, [actionSectionScrollSpy])
 
+  useEffect(() => {
+    syncCursor(activeSection)
+  }, [activeSection, syncCursor, toc])
+
   if (!toc || toc.length < 1) return null
 
   tocIdsRef.current = []
@@ -51,7 +69,12 @@ const Catalog = ({ toc }) => {
   return (
     <div className='cl-toc px-1 pb-2 pt-1'>
       <div className='cl-toc-scroll overflow-y-auto overscroll-none' ref={tRef}>
-        <nav className='cl-toc-nav' aria-label='目录'>
+        <nav className='cl-toc-nav' aria-label='目录' ref={navRef}>
+          <span
+            className='cl-toc-cursor'
+            style={{ transform: `translateY(${cursorY}px)` }}
+            aria-hidden
+          />
           {toc.map(tocItem => {
             const id = uuidToId(tocItem.id)
             tocIdsRef.current.push(id)
@@ -60,8 +83,9 @@ const Catalog = ({ toc }) => {
               <a
                 key={id}
                 href={`#${id}`}
+                data-toc-id={id}
                 className={`cl-toc-item ${active ? 'is-active' : ''}`}
-                style={{ paddingLeft: 12 + tocItem.indentLevel * 12 }}>
+                style={{ paddingLeft: 14 + tocItem.indentLevel * 12 }}>
                 <span className='cl-toc-item-text'>{tocItem.text}</span>
               </a>
             )

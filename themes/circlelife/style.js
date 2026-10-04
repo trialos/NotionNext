@@ -1005,6 +1005,11 @@ const Style = () => {
         border: 1px solid var(--cl-border);
         box-shadow: none;
       }
+      @media (max-width: 767px) {
+        #theme-circlelife .cl-toc-card--desktop {
+          display: none !important;
+        }
+      }
       #theme-circlelife .cl-toc-card h3,
       #theme-circlelife .cl-sidebar-title {
         border-bottom: none;
@@ -1031,44 +1036,51 @@ const Style = () => {
         position: relative;
         display: flex;
         flex-direction: column;
-        gap: 0.15rem;
-        padding: 0.2rem 0 0.55rem 0.15rem;
-        margin-left: 0.35rem;
+        gap: 0.2rem;
+        padding: 0.25rem 0 0.55rem 0.55rem;
+        margin-left: 0.45rem;
         border-left: 1px solid var(--cl-border);
+      }
+      #theme-circlelife .cl-toc-cursor {
+        position: absolute;
+        left: -3.5px;
+        top: 0;
+        width: 6px;
+        height: 12px;
+        margin-top: 0;
+        border-radius: 9999px;
+        background: var(--cl-accent);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--cl-accent) 22%, transparent);
+        transition: transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1);
+        pointer-events: none;
+        z-index: 2;
       }
       #theme-circlelife .cl-toc-item {
         position: relative;
         display: block;
-        padding: 0.32rem 0.45rem 0.32rem 0.85rem;
-        margin-left: -1px;
-        border-left: 2px solid transparent;
+        padding: 0.34rem 0.45rem 0.34rem 0.75rem;
+        margin-left: 0;
+        border-left: 0;
         font-size: 0.78rem;
         line-height: 1.45;
         color: var(--cl-muted);
         background: transparent;
-        transition: color 0.15s var(--cl-ease), border-color 0.15s var(--cl-ease);
+        transition:
+          color 0.18s var(--cl-ease),
+          transform 0.22s var(--cl-ease),
+          opacity 0.18s var(--cl-ease);
       }
       #theme-circlelife .cl-toc-item:hover {
         color: var(--cl-text);
-        background: transparent;
+        transform: translateX(3px);
       }
       #theme-circlelife .cl-toc-item.is-active {
         color: var(--cl-text);
-        border-left-color: var(--cl-accent);
-        font-weight: 500;
+        font-weight: 600;
+        transform: translateX(5px);
         background: transparent;
       }
-      #theme-circlelife .cl-toc-item.is-active::before {
-        content: '';
-        position: absolute;
-        left: -3.5px;
-        top: 50%;
-        width: 5px;
-        height: 5px;
-        border-radius: 9999px;
-        background: var(--cl-accent);
-        transform: translateY(-50%);
-      }
+      /* cursor replaces active dot */
       #theme-circlelife .cl-toc-item-text {
         display: inline-block;
         max-width: 100%;
@@ -1379,23 +1391,31 @@ const Style = () => {
       #theme-circlelife .cl-pager {
         display: inline-flex;
         align-items: center;
-        gap: 0.35rem;
-        padding: 0.4rem 0.9rem;
+        justify-content: center;
+        gap: 0.4rem;
+        min-height: 2.65rem;
+        padding: 0.55rem 1.25rem;
         border-radius: 9999px;
         border: 1px solid var(--cl-border-strong);
-        font-size: 0.8rem;
-        font-weight: 500;
+        font-size: 0.9rem;
+        font-weight: 550;
+        letter-spacing: 0.02em;
         color: var(--cl-text);
-        background: transparent;
+        background: var(--cl-surface);
+        box-shadow: 0 1px 0 color-mix(in srgb, var(--cl-text) 5%, transparent);
         transition:
           border-color 0.15s var(--cl-ease),
           color 0.15s var(--cl-ease),
-          background 0.15s var(--cl-ease);
+          background 0.15s var(--cl-ease),
+          transform 0.15s var(--cl-ease),
+          box-shadow 0.15s var(--cl-ease);
       }
       #theme-circlelife .cl-pager:hover:not(.cl-pager--disabled) {
         border-color: var(--cl-accent);
         color: var(--cl-accent);
         background: var(--cl-accent-soft);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px color-mix(in srgb, var(--cl-text) 8%, transparent);
       }
       #theme-circlelife .cl-pager--disabled {
         visibility: hidden;
@@ -1660,6 +1680,7 @@ const Style = () => {
           height: 300px;
           overflow: hidden;
           pointer-events: auto;
+          --cl-rail-x: 0.85rem;
           mask-image: linear-gradient(
             to bottom,
             transparent 0%,
@@ -1677,10 +1698,11 @@ const Style = () => {
         }
         #theme-circlelife .cl-album-rail-spine {
           position: absolute;
-          left: 0.55rem;
+          left: var(--cl-rail-x, 0.85rem);
           top: 0;
           bottom: 0;
           width: 1px;
+          transform: translateX(-50%);
           background: color-mix(in srgb, var(--cl-text) 22%, transparent);
           z-index: 0;
         }
@@ -1699,7 +1721,7 @@ const Style = () => {
           gap: 0.55rem;
           width: 100%;
           height: 44px;
-          padding: 0 0.2rem 0 0.25rem;
+          padding: 0 0.35rem 0 0;
           border: 0;
           background: transparent;
           cursor: pointer;
@@ -1724,7 +1746,7 @@ const Style = () => {
           height: 7px;
           border-radius: 9999px;
           flex: none;
-          margin-left: 0.28rem;
+          margin-left: calc(var(--cl-rail-x, 0.85rem) - 3.5px);
           background: color-mix(in srgb, var(--cl-text) 28%, transparent);
           box-shadow: 0 0 0 2px var(--cl-bg);
           transition:
@@ -1839,11 +1861,11 @@ const Style = () => {
       }
       /* 光层始终在 veil 下，交叉只改 opacity，结束不掉层级 */
       #theme-circlelife .cl-ag-ambient-img.is-front {
-        opacity: 0.58;
+        opacity: 0.77;
         z-index: 1;
       }
       #theme-circlelife .cl-ag-ambient-img.is-entering {
-        opacity: 0.58;
+        opacity: 0.77;
         z-index: 1;
       }
       #theme-circlelife .cl-ag-ambient-img.is-leaving {
@@ -1856,23 +1878,23 @@ const Style = () => {
       }
       .dark #theme-circlelife .cl-ag-ambient-img.is-front,
       .dark #theme-circlelife .cl-ag-ambient-img.is-entering {
-        opacity: 0.48;
-        filter: blur(62px) saturate(1.4) brightness(0.98);
+        opacity: 0.64;
+        filter: blur(62px) saturate(1.45) brightness(1.0);
       }
       .dark #theme-circlelife .cl-ag-ambient-img.is-leaving,
       .dark #theme-circlelife .cl-ag-ambient-img.is-back {
         opacity: 0;
-        filter: blur(62px) saturate(1.4) brightness(0.98);
+        filter: blur(62px) saturate(1.45) brightness(1.0);
       }
       #theme-circlelife .cl-ag-ambient-veil {
         position: absolute;
         inset: 0;
         z-index: 2;
-        background: color-mix(in srgb, var(--cl-bg) 48%, transparent);
+        background: color-mix(in srgb, var(--cl-bg) 36%, transparent);
         pointer-events: none;
       }
       .dark #theme-circlelife .cl-ag-ambient-veil {
-        background: color-mix(in srgb, var(--cl-bg) 55%, transparent);
+        background: color-mix(in srgb, var(--cl-bg) 40%, transparent);
       }
 
       /* make ambient cover whole section: position ag ambient fixed to section */
@@ -2148,21 +2170,8 @@ const Style = () => {
         line-height: 1.4;
       }
 
-      #theme-circlelife .cl-ag-arrows {
-        position: absolute;
-        inset: 0;
-        z-index: 8;
-        display: none;
-        align-items: center;
-        justify-content: space-between;
-        pointer-events: none;
-        padding: 0 0.35rem;
-      }
-      @media (min-width: 768px) {
-        #theme-circlelife .cl-ag-arrows {
-          display: flex;
-        }
-      }
+      #theme-circlelife .cl-ag-arrows { display: none !important; }
+      /* album arrows removed — left/right hot zones */
       #theme-circlelife .cl-ag-arrow {
         pointer-events: auto;
         width: 2.4rem;
@@ -2403,6 +2412,163 @@ const Style = () => {
         font-size: 0.7rem;
         letter-spacing: 0.1em;
         opacity: 0.7;
+      }
+
+
+      /* article back */
+      #theme-circlelife .cl-article-back {
+        border: 0;
+        background: transparent;
+        color: var(--cl-muted);
+        font-family: var(--cl-font-mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
+        padding: 0.2rem 0;
+        cursor: pointer;
+        transition: color 0.15s ease;
+      }
+      #theme-circlelife .cl-article-back:hover {
+        color: var(--cl-accent);
+      }
+      #theme-circlelife .cl-article-back--top {
+        margin-bottom: 0.75rem;
+      }
+      #theme-circlelife .cl-article-back-row {
+        margin-top: 1.5rem;
+        padding-top: 0.85rem;
+        border-top: 1px solid var(--cl-border);
+      }
+
+      /* mobile TOC fab + drawer */
+      #theme-circlelife .cl-toc-fab {
+        display: none;
+      }
+      @media (max-width: 767px) {
+        #theme-circlelife .cl-toc-fab {
+          display: inline-flex;
+          position: fixed;
+          right: 1rem;
+          bottom: 5.25rem;
+          z-index: 35;
+          align-items: center;
+          justify-content: center;
+          min-height: 2.6rem;
+          padding: 0.45rem 0.95rem;
+          border-radius: 9999px;
+          border: 1px solid var(--cl-border-strong);
+          background: var(--cl-surface);
+          color: var(--cl-text);
+          font-size: 0.82rem;
+          font-weight: 600;
+          box-shadow: 0 6px 20px color-mix(in srgb, var(--cl-text) 12%, transparent);
+          cursor: pointer;
+        }
+      }
+      .cl-toc-drawer-root {
+        position: fixed;
+        inset: 0;
+        z-index: 210;
+        pointer-events: none;
+        visibility: hidden;
+        --cl-bg: #f5f0e4;
+        --cl-surface: #fcfaf4;
+        --cl-text: #20190f;
+        --cl-muted: #57493a;
+        --cl-faint: #948574;
+        --cl-border: rgba(32, 25, 15, 0.11);
+        --cl-accent: #b24a33;
+        --cl-accent-soft: #f0e0d6;
+        font-family: 'Hanken Grotesk', 'Noto Sans SC', system-ui, sans-serif;
+        color: var(--cl-text);
+      }
+      html.dark .cl-toc-drawer-root {
+        --cl-bg: #14110e;
+        --cl-surface: #1a1612;
+        --cl-text: #f0e9dc;
+        --cl-muted: #c2b7a4;
+        --cl-faint: #8c8170;
+        --cl-border: rgba(240, 233, 220, 0.12);
+        --cl-accent: #e0a33e;
+        --cl-accent-soft: #3a2e18;
+      }
+      .cl-toc-drawer-root.is-open {
+        pointer-events: auto;
+        visibility: visible;
+      }
+      .cl-toc-drawer-mask {
+        position: absolute;
+        inset: 0;
+        border: 0;
+        background: color-mix(in srgb, var(--cl-text) 40%, transparent);
+        opacity: 0;
+        transition: opacity 0.25s ease;
+        cursor: pointer;
+      }
+      .cl-toc-drawer-root.is-open .cl-toc-drawer-mask {
+        opacity: 1;
+      }
+      .cl-toc-drawer-panel {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        max-height: min(72vh, 32rem);
+        background: var(--cl-bg);
+        border-radius: 16px 16px 0 0;
+        border-top: 1px solid var(--cl-border);
+        padding: 0.85rem 1rem 1.5rem;
+        transform: translateY(105%);
+        transition: transform 0.28s cubic-bezier(0.22, 0.61, 0.36, 1);
+        overflow: auto;
+        box-shadow: 0 -12px 40px color-mix(in srgb, var(--cl-text) 12%, transparent);
+      }
+      .cl-toc-drawer-root.is-open .cl-toc-drawer-panel {
+        transform: translateY(0);
+      }
+      .cl-toc-drawer-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 0.65rem;
+        padding-bottom: 0.55rem;
+        border-bottom: 1px solid var(--cl-border);
+      }
+      .cl-toc-drawer-title {
+        font-family: var(--cl-font-mono, ui-monospace, monospace);
+        font-size: 0.72rem;
+        letter-spacing: 0.12em;
+        color: var(--cl-faint);
+      }
+      .cl-toc-drawer-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .cl-toc-drawer-item {
+        display: block;
+        width: 100%;
+        text-align: left;
+        border: 0;
+        background: transparent;
+        color: var(--cl-text);
+        font-size: 0.95rem;
+        line-height: 1.45;
+        padding: 0.7rem 0.35rem;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      .cl-toc-drawer-item:hover,
+      .cl-toc-drawer-item:active {
+        background: color-mix(in srgb, var(--cl-accent-soft) 70%, transparent);
+      }
+
+      #theme-circlelife .cl-deck-stage {
+        touch-action: pan-y;
+        cursor: grab;
+        user-select: none;
+      }
+      #theme-circlelife .cl-deck-stage:active {
+        cursor: grabbing;
       }
 
       /* media hooks reserved */

@@ -24,10 +24,12 @@ import BlogListArchive from './components/BlogListArchive'
 import { BlogListPage } from './components/BlogListPage'
 import { BlogListScroll } from './components/BlogListScroll'
 import AlbumStage from './components/AlbumStage'
+import ArticleBack from './components/ArticleBack'
 import BackToTop from './components/BackToTop'
 import { Footer } from './components/Footer'
 import { Header } from './components/Header'
 import LatestCard from './components/LatestCard'
+import MobileToc from './components/MobileToc'
 import { PostLock } from './components/PostLock'
 import { PostMeta } from './components/PostMeta'
 import SearchInput from './components/SearchInput'
@@ -238,6 +240,7 @@ const LayoutSlug = props => {
               </div>
             ) : null}
             <div className='cl-article-inner px-5 py-6 md:px-8 md:py-9'>
+            <ArticleBack className='cl-article-back--top' />
             <header className='cl-article-hero'>
               <h1 className='cl-article-title'>
                 {siteConfig('POST_TITLE_ICON') && (
@@ -251,6 +254,9 @@ const LayoutSlug = props => {
               <NotionPage post={post} />
               <ShareBar post={post} />
             </div>
+            <div className='cl-article-back-row'>
+              <ArticleBack className='cl-article-back--bottom' />
+            </div>
             <section
               className='mt-8 border-t border-[var(--cl-border)] pt-6'
               aria-label={locale?.COMMON?.COMMENTS || 'Comments'}>
@@ -263,6 +269,7 @@ const LayoutSlug = props => {
           </article>
         )
       )}
+      {post?.toc && post.toc.length > 2 ? <MobileToc toc={post.toc} /> : null}
     </>
   )
 }

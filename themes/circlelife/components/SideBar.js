@@ -1,7 +1,7 @@
 import Catalog from './Catalog'
 
 /**
- * 侧栏：文章页只保留目录（无公告 / 分类 / 最新 / 挂件）
+ * 侧栏：桌面文章目录（手机用 MobileToc 浮层）
  */
 export const SideBar = props => {
   const { post } = props
@@ -11,7 +11,7 @@ export const SideBar = props => {
   }
 
   return (
-    <aside className='cl-card cl-toc-card mb-6 w-full overflow-hidden pb-3'>
+    <aside className='cl-card cl-toc-card cl-toc-card--desktop mb-6 w-full overflow-hidden pb-3'>
       <h3 className='cl-sidebar-title'>目录</h3>
       <Catalog toc={post.toc} />
     </aside>

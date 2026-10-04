@@ -35,6 +35,8 @@ export default function LatestCard({ post, posts }) {
   const [outgoing, setOutgoing] = useState(null) // { slide, dir: 1|-1 }
   const [swapInstant, setSwapInstant] = useState(false)
   const [paused, setPaused] = useState(false)
+  const dragRef = useRef({ active: false, x: 0, startX: 0, moved: false })
+  const stageDragRef = useRef(null)
   const busyRef = useRef(false)
   const indexRef = useRef(0)
   const count = slides.length
@@ -119,7 +121,15 @@ export default function LatestCard({ post, posts }) {
             {d ? <span className='cl-kicker-sep'>·</span> : null}
             {d ? <span>{d}</span> : null}
           </div>
-          <SmartLink href={slide.href} className='cl-latest-title' tabIndex={faceClass.includes('outgoing') || faceClass.includes('under') ? -1 : undefined}>
+          <SmartLink
+            href={slide.href}
+            className='cl-latest-title'
+            tabIndex={faceClass.includes('outgoing') || faceClass.includes('under') ? -1 : undefined}
+            onClick={e => {
+              if (dragRef.current?.moved) {
+                e.preventDefault()
+              }
+            }}>
             {slide.title}
           </SmartLink>
           {slide.summary ? (
@@ -149,6 +159,42 @@ export default function LatestCard({ post, posts }) {
       ? 'is-fly-next'
       : 'is-fly-prev'
 
+
+  const onHeroPointerDown = e => {
+    if (count <= 1 || busyRef.current) return
+    if (e.button != null && e.button !== 0) return
+    if (e.target.closest?.('a, button')) return
+    dragRef.current = {
+      active: true,
+      x: 0,
+      startX: e.clientX,
+      moved: false
+    }
+    setPaused(true)
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId)
+    } catch (_) {}
+  }
+  const onHeroPointerMove = e => {
+    const d = dragRef.current
+    if (!d.active) return
+    const dx = e.clientX - d.startX
+    d.x = dx
+    if (Math.abs(dx) > 10) d.moved = true
+  }
+  const onHeroPointerUp = () => {
+    const d = dragRef.current
+    if (!d.active) return
+    d.active = false
+    const dx = d.x
+    setPaused(false)
+    if (d.moved && Math.abs(dx) > 48) {
+      advance(dx < 0 ? 1 : -1)
+    }
+    d.x = 0
+    d.moved = false
+  }
+
   return (
     <aside
       className={`cl-latest-card cl-hero cl-deck ${
@@ -158,7 +204,12 @@ export default function LatestCard({ post, posts }) {
       onMouseLeave={() => setPaused(false)}
       aria-roledescription='carousel'
       aria-label='精选文章'>
-      <div className='cl-deck-stage'>
+      <div
+        className='cl-deck-stage'
+        onPointerDown={onHeroPointerDown}
+        onPointerMove={onHeroPointerMove}
+        onPointerUp={onHeroPointerUp}
+        onPointerCancel={onHeroPointerUp}>
         {count > 1 && nextSlide ? (
           <div className='cl-deck-under' aria-hidden='true'>
             {renderFace(nextSlide, 'cl-deck-face--under')}

@@ -1,5 +1,4 @@
 import SmartLink from '@/components/SmartLink'
-import { useGlobal } from '@/lib/global'
 import { formatDateFmt } from '@/lib/utils/formatDate'
 import AuthorBadge from './AuthorBadge'
 import { resolveAuthorOrSite } from './authors'
@@ -9,7 +8,6 @@ import { resolveAuthorOrSite } from './authors'
  */
 export const PostMeta = props => {
   const { post } = props
-  const { locale } = useGlobal()
   if (!post || post.type === 'Page') return null
 
   const author = resolveAuthorOrSite(post)
@@ -43,7 +41,7 @@ export const PostMeta = props => {
     )
   }
 
-  if (!parts.length && !post.lastEditedDay) return null
+  if (!parts.length) return null
 
   return (
     <div className='cl-meta cl-article-meta'>
@@ -59,18 +57,6 @@ export const PostMeta = props => {
           {node}
         </span>
       ))}
-      {post.lastEditedDay ? (
-        <span className='cl-meta-item inline-flex items-center gap-2'>
-          {parts.length ? (
-            <span className='cl-dot' aria-hidden='true'>
-              ·
-            </span>
-          ) : null}
-          <span className='cl-meta-muted'>
-            {locale.COMMON.LAST_EDITED_TIME} {post.lastEditedDay}
-          </span>
-        </span>
-      ) : null}
     </div>
   )
 }
