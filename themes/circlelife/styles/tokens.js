@@ -1,7 +1,7 @@
 /**
  * Circle of Life — tokens：字体引入 + :root 设计变量（.dark 覆盖）+ 主题根基础
  */
-export const tokensStyle = `
+export const tokenStyle = `
       @import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500&family=Newsreader:ital,wght@0,500;0,600;1,500&family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@500;600&display=swap');
 
       /* tokens 在 :root 一份：body 上的 portal（抽屉/子菜单/灯箱/手机目录）直接继承 */
