@@ -30,6 +30,9 @@ const CONFIG = {
 
   CIRCLELIFE_ARTICLE_LAYOUT_VERTICAL: false,
   CIRCLELIFE_ARTICLE_HIDDEN_NOTIFICATION: true,
+  /** 文章底部分享条 / 评论：默认关，改 true 可恢复 */
+  CIRCLELIFE_SHOW_SHARE: false,
+  CIRCLELIFE_SHOW_COMMENT: false,
 
   /**
    * 三作者：Notion 文章「作者」字段匹配 name/id
