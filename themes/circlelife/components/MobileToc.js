@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { uuidToId } from 'notion-utils'
 
 /**
- * 手机目录：右下浮钮 + 半屏抽屉
+ * 手机目录：右下浮钮 + 半屏抽屉（防穿透）
  */
 export default function MobileToc({ toc }) {
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const panelRef = useRef(null)
 
   useEffect(() => {
     setMounted(true)
@@ -15,15 +16,50 @@ export default function MobileToc({ toc }) {
 
   useEffect(() => {
     if (!open) return undefined
-    const prev = document.body.style.overflow
+    const prevOverflow = document.body.style.overflow
+    const prevTouch = document.body.style.touchAction
     document.body.style.overflow = 'hidden'
+    document.body.style.touchAction = 'none'
+
     const onKey = e => {
       if (e.key === 'Escape') setOpen(false)
     }
+
+    // iOS: 阻止抽屉外 touchmove 带动背后页面
+    const onTouchMove = e => {
+      const panel = panelRef.current
+      if (!panel) {
+        e.preventDefault()
+        return
+      }
+      if (panel.contains(e.target)) {
+        // 面板顶/底边界继续向外滑时也拦住
+        const el = panel
+        const atTop = el.scrollTop <= 0
+        const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1
+        const touch = e.touches[0]
+        if (!touch || !onTouchMove._y) {
+          onTouchMove._y = touch?.clientY
+          return
+        }
+        const dy = touch.clientY - onTouchMove._y
+        onTouchMove._y = touch.clientY
+        if ((atTop && dy > 0) || (atBottom && dy < 0)) {
+          e.preventDefault()
+        }
+        return
+      }
+      e.preventDefault()
+    }
+    onTouchMove._y = 0
+
     window.addEventListener('keydown', onKey)
+    document.addEventListener('touchmove', onTouchMove, { passive: false })
     return () => {
-      document.body.style.overflow = prev
+      document.body.style.overflow = prevOverflow
+      document.body.style.touchAction = prevTouch
       window.removeEventListener('keydown', onKey)
+      document.removeEventListener('touchmove', onTouchMove)
     }
   }, [open])
 
@@ -33,11 +69,8 @@ export default function MobileToc({ toc }) {
     const el =
       document.getElementById(id) ||
       document.querySelector(`.notion-h[data-id="${id}"]`)
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    } else {
-      window.location.hash = id
-    }
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    else window.location.hash = id
     setOpen(false)
   }
 
@@ -65,6 +98,7 @@ export default function MobileToc({ toc }) {
           onClick={() => setOpen(false)}
         />
         <div
+          ref={panelRef}
           className='cl-toc-drawer-panel'
           role='dialog'
           aria-modal='true'
@@ -83,13 +117,20 @@ export default function MobileToc({ toc }) {
             <ul className='cl-toc-drawer-list'>
               {toc.map(item => {
                 const id = uuidToId(item.id)
+                const level = item.indentLevel || 0
+                const levelClass =
+                  level <= 0
+                    ? 'cl-toc-drawer-item--h1'
+                    : level === 1
+                      ? 'cl-toc-drawer-item--h2'
+                      : 'cl-toc-drawer-item--h3'
                 return (
                   <li key={id}>
                     <button
                       type='button'
-                      className='cl-toc-drawer-item'
+                      className={`cl-toc-drawer-item ${levelClass}`}
                       style={{
-                        paddingLeft: `${0.75 + (item.indentLevel || 0) * 0.75}rem`
+                        paddingLeft: `${0.75 + level * 0.75}rem`
                       }}
                       onClick={() => jump(id)}>
                       {item.text}

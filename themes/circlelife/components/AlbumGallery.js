@@ -347,25 +347,20 @@ export default function AlbumGallery({
               onClick={() => setExpanded(false)}>
               <i className='fas fa-times' />
             </button>
-            {n > 1 ? (
-              <>
-                <button
-                  type='button'
-                  className='cl-ag-lb-nav cl-ag-lb-nav--prev'
-                  aria-label='上一张'
-                  onClick={() => go(-1)}>
-                  ‹
-                </button>
-                <button
-                  type='button'
-                  className='cl-ag-lb-nav cl-ag-lb-nav--next'
-                  aria-label='下一张'
-                  onClick={() => go(1)}>
-                  ›
-                </button>
-              </>
-            ) : null}
-            <div className='cl-ag-lb-stage'>
+            <div
+              className='cl-ag-lb-stage'
+              onClick={e => {
+                const stage = e.currentTarget
+                const rect = stage.getBoundingClientRect()
+                const rel = (e.clientX - rect.left) / rect.width
+                if (rel < 0.33) {
+                  if (n > 1) go(-1)
+                } else if (rel > 0.67) {
+                  if (n > 1) go(1)
+                } else {
+                  setExpanded(false)
+                }
+              }}>
               <img
                 src={current.url || current.cover}
                 alt={pageTitle || ''}
