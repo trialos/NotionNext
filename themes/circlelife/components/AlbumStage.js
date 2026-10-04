@@ -213,7 +213,6 @@ export default function AlbumStage({ pages }) {
               albumName={deck.name}
               photos={deck.photos}
               onBackToShelf={backToShelf}
-              hideLeftArrow
             />
             {i < decks.length - 1 ? (
               <p className='cl-album-snap-hint'>继续下滑 · 下一辑</p>

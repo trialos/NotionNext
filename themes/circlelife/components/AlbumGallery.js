@@ -16,8 +16,7 @@ const EASE = 'cubic-bezier(0.22, 0.61, 0.36, 1)'
 export default function AlbumGallery({
   albumName,
   photos,
-  onBackToShelf,
-  hideLeftArrow = false
+  onBackToShelf
 }) {
   const n = photos?.length || 0
   const [index, setIndex] = useState(0)
@@ -150,7 +149,7 @@ export default function AlbumGallery({
   const onPointerDown = e => {
     if (expanded || busyRef.current) return
     if (e.button != null && e.button !== 0) return
-    if (e.target.closest?.('button, a, .cl-ag-arrows')) return
+    if (e.target.closest?.('button, a')) return
     dragRef.current = {
       active: true,
       locked: null,
@@ -193,7 +192,7 @@ export default function AlbumGallery({
     setStack(x, false)
   }
 
-  const onPointerUp = () => {
+  const onPointerUp = e => {
     const d = dragRef.current
     if (!d.active) {
       d.active = false
@@ -212,7 +211,20 @@ export default function AlbumGallery({
       commitFlip(-1)
     } else {
       setStack(0, true, 240)
-      if (!moved && Math.abs(x) <= TAP_MAX) setExpanded(true)
+      if (!moved && Math.abs(x) <= TAP_MAX) {
+        // 轻点：左/右 1/3 翻页，中区开灯箱
+        const stage = stageRef.current
+        const rect = stage?.getBoundingClientRect()
+        const cx = e?.clientX ?? d.startX
+        if (rect && n > 1) {
+          const rel = (cx - rect.left) / rect.width
+          if (rel < 0.33) commitFlip(-1)
+          else if (rel > 0.67) commitFlip(1)
+          else setExpanded(true)
+        } else {
+          setExpanded(true)
+        }
+      }
     }
     d.x = 0
     d.moved = false
@@ -491,37 +503,6 @@ export default function AlbumGallery({
           )}
         </div>
 
-        {n > 1 ? (
-          <div
-            className={`cl-ag-arrows${
-              hideLeftArrow ? ' cl-ag-arrows--no-left' : ''
-            }`}>
-            {!hideLeftArrow ? (
-              <button
-                type='button'
-                className='cl-ag-arrow cl-ag-arrow--prev'
-                aria-label='上一张'
-                onClick={e => {
-                  e.stopPropagation()
-                  go(-1)
-                }}>
-                ‹
-              </button>
-            ) : (
-              <span className='cl-ag-arrow-spacer' aria-hidden />
-            )}
-            <button
-              type='button'
-              className='cl-ag-arrow cl-ag-arrow--next'
-              aria-label='下一张'
-              onClick={e => {
-                e.stopPropagation()
-                go(1)
-              }}>
-              ›
-            </button>
-          </div>
-        ) : null}
       </div>
 
       <div className='cl-ag-countline' aria-live='polite'>
