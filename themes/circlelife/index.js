@@ -30,6 +30,7 @@ import BackToTop from './components/BackToTop'
 import { Footer } from './components/Footer'
 import { Header } from './components/Header'
 import LatestCard from './components/LatestCard'
+import ListScrollMemory from './components/ListScrollMemory'
 import MobileToc from './components/MobileToc'
 import { PostLock } from './components/PostLock'
 import { PostMeta } from './components/PostMeta'
@@ -137,6 +138,7 @@ const LayoutBase = props => {
       <Footer />
 
       <BackToTop label={locale?.POST?.TOP || '返回顶部'} />
+      <ListScrollMemory />
     </div>
     </AlbumUIProvider>
   )
