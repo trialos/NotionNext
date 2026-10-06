@@ -173,4 +173,45 @@ describe('getCustomMenu', () => {
 
     expect(menus[0].href).toBe('/draft')
   })
+
+  it('attaches each SubMenu to the Menu row directly above it in row order', () => {
+    const collectionData = [
+      { id: 'm-suibi', type: 'Menu', status: 'Published', title: '随笔', slug: '#', href: '#' },
+      { id: 's-a', type: 'SubMenu', status: 'Published', title: '人机协作', slug: '/category/a', href: '/category/a' },
+      { id: 's-b', type: 'SubMenu', status: 'Published', title: '关于生活', slug: '/category/b', href: '/category/b' },
+      { id: 'm-wangqi', type: 'Menu', status: 'Published', title: '往期整理', slug: '#', href: '#' },
+      { id: 's-cat', type: 'SubMenu', status: 'Published', title: '文章分类', slug: '/category', href: '/category' },
+      { id: 's-tag', type: 'SubMenu', status: 'Published', title: '文章标签', slug: '/tag', href: '/tag' }
+    ]
+
+    const menus = getCustomMenu({ collectionData, sourcePageSlugs: new Map() })
+
+    const suibi = menus.find(m => m.title === '随笔')
+    const wangqi = menus.find(m => m.title === '往期整理')
+    expect(suibi.subMenus.map(s => s.title)).toEqual(['人机协作', '关于生活'])
+    expect(wangqi.subMenus.map(s => s.title)).toEqual(['文章分类', '文章标签'])
+  })
+
+  it('falls back to 往期整理 for orphan SubMenus above every Menu row', () => {
+    const collectionData = [
+      { id: 's-orphan', type: 'SubMenu', status: 'Published', title: '孤儿', slug: '/x', href: '/x' },
+      { id: 'm-a', type: 'Menu', status: 'Published', title: '随笔', slug: '#', href: '#' }
+    ]
+
+    const menus = getCustomMenu({ collectionData, sourcePageSlugs: new Map() })
+
+    expect(menus.map(m => m.title)).toEqual(['随笔'])
+    expect(menus[0].subMenus.map(s => s.title)).toEqual(['孤儿'])
+  })
+
+  it('keeps top-level order stable per MENU_ORDER regardless of row order', () => {
+    const collectionData = [
+      { id: 'm-about', type: 'Menu', status: 'Published', title: '关于', slug: '#', href: '#' },
+      { id: 'm-suibi', type: 'Menu', status: 'Published', title: '随笔', slug: '#', href: '#' }
+    ]
+
+    const menus = getCustomMenu({ collectionData, sourcePageSlugs: new Map() })
+
+    expect(menus.map(m => m.title)).toEqual(['随笔', '关于'])
+  })
 })
