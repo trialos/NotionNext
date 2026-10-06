@@ -18,11 +18,15 @@ export default function ArticleBack({ className = '', postId = '' }) {
       stored = sessionStorage.getItem(key) || ''
     } catch (_) {}
 
+    let lastList = ''
+    try {
+      lastList = sessionStorage.getItem('cl-list-last') || ''
+    } catch (_) {}
+
     const href = resolveArticleBackHref({
-      referrer: document.referrer,
       currentPath: window.location.pathname + window.location.search,
       stored,
-      origin: window.location.origin
+      lastList
     })
 
     if (!stored && href && href !== '/') {

@@ -1,5 +1,5 @@
 /** 桌面左翼 */
-export const NAV_LEFT = ['随笔', '时间线', '影集']
+export const NAV_LEFT = ['随笔', '影集', '时间线']
 /** 桌面右翼 */
 export const NAV_RIGHT = ['往期整理', '关于']
 /** 隐藏 */
