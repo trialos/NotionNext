@@ -26,7 +26,9 @@ describe('getNotionAPI', () => {
         ofetchOptions: {
           headers: {
             'User-Agent': 'NotionNext (+https://github.com/NotionNext/NotionNext)'
-          }
+          },
+          timeout: 20000,
+          retry: 1
         }
       })
     )
