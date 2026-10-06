@@ -1,7 +1,7 @@
 /** 桌面左翼 */
-export const NAV_LEFT = ['随笔', '时间线']
+export const NAV_LEFT = ['随笔', '时间线', '影集']
 /** 桌面右翼 */
-export const NAV_RIGHT = ['影集', '往期整理', '关于']
+export const NAV_RIGHT = ['往期整理', '关于']
 /** 隐藏 */
 export const NAV_HIDE = new Set(['首页', 'Home', 'home'])
 
