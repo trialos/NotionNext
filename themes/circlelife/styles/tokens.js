@@ -1,11 +1,11 @@
 /**
- * Circle of Life — tokens：字体引入 + :root 设计变量（.dark 覆盖）+ 主题根基础
+ * Circle of Life — tokens：:root 设计变量（.dark 覆盖）+ 主题根基础
+ * 字体改由 LayoutBase 的 <Head> preconnect + stylesheet 加载（原 @import 串行阻塞渲染）
  */
 export const tokenStyle = `
-      @import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500&family=Newsreader:ital,wght@0,500;0,600;1,500&family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@500;600&display=swap');
-
       /* tokens 在 :root 一份：body 上的 portal（抽屉/子菜单/灯箱/手机目录）直接继承 */
       :root {
+        color-scheme: light;
         --cl-bg: #f5f0e4;
         --cl-surface: #fcfaf4;
         --cl-paper-2: #eae1cf;
@@ -33,6 +33,7 @@ export const tokenStyle = `
       }
 
       .dark {
+        color-scheme: dark;
         --cl-bg: #14110e;
         --cl-surface: #1a1612;
         --cl-paper-2: #1c1814;
@@ -53,10 +54,36 @@ export const tokenStyle = `
         color: var(--cl-text);
         font-family: var(--cl-font-body);
         -webkit-font-smoothing: antialiased;
+        -webkit-tap-highlight-color: transparent;
       }
 
       #theme-circlelife a {
         color: inherit;
         text-decoration: none;
+      }
+
+      /* 键盘焦点可见：主题根与 body 上的 portal（抽屉/子菜单）一并覆盖 */
+      :where(#theme-circlelife, .cl-drawer-root, .cl-toc-drawer-root, .cl-submenu)
+        :focus-visible {
+        outline: 2px solid var(--cl-accent);
+        outline-offset: 2px;
+      }
+
+      /* 全局减少动效：过渡/动画压到瞬时，平滑滚动改即时 */
+      @media (prefers-reduced-motion: reduce) {
+        html,
+        #theme-circlelife,
+        #theme-circlelife *,
+        .cl-drawer-root,
+        .cl-drawer-root *,
+        .cl-toc-drawer-root,
+        .cl-toc-drawer-root *,
+        .cl-submenu,
+        .cl-submenu * {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+        }
       }
 `

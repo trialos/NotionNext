@@ -2,6 +2,10 @@ import { useEffect, useState } from 'react'
 
 const SHOW_AFTER = 400
 
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' &&
+  Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
+
 /**
  * 全站返回顶部：内容区右槽 + 显隐动效
  */
@@ -31,7 +35,12 @@ export default function BackToTop({ label = '返回顶部' }) {
       title={label}
       aria-label={label}
       className={`cl-backtop ${visible ? 'is-visible' : ''}`}
-      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+      onClick={() =>
+        window.scrollTo({
+          top: 0,
+          behavior: prefersReducedMotion() ? 'auto' : 'smooth'
+        })
+      }>
       <span className='cl-backtop-icon' aria-hidden='true'>
         ↑
       </span>

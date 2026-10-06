@@ -18,6 +18,7 @@ import { isBrowser } from '@/lib/utils'
 import { Transition } from '@headlessui/react'
 import SmartLink from '@/components/SmartLink'
 import dynamic from 'next/dynamic'
+import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useEffect } from 'react'
 import BlogListArchive from './components/BlogListArchive'
@@ -94,6 +95,18 @@ const LayoutBase = props => {
 
   return (
     <AlbumUIProvider>
+    <Head>
+      <link rel='preconnect' href='https://fonts.googleapis.com' />
+      <link
+        rel='preconnect'
+        href='https://fonts.gstatic.com'
+        crossOrigin='anonymous'
+      />
+      <link
+        rel='stylesheet'
+        href='https://fonts.googleapis.com/css2?family=Hanken+Grotesk:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@500&family=Newsreader:ital,wght@0,500;0,600;1,500&family=Noto+Sans+SC:wght@400;500&family=Noto+Serif+SC:wght@500;600&display=swap'
+      />
+    </Head>
     <div
       id='theme-circlelife'
       className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth${isAlbumPage ? ' cl-is-album' : ''}${showSidebar ? ' cl-has-sidebar' : ''}`}>
@@ -256,6 +269,7 @@ const LayoutSlug = props => {
                 <LazyImage
                   src={post.pageCoverThumbnail || post.pageCover}
                   alt=''
+                  priority
                   className='cl-article-cover-img'
                 />
                 <div className='cl-article-cover-fade' aria-hidden='true' />
@@ -342,9 +356,9 @@ const Layout404 = props => {
   return <>
         <div className='cl-card mx-auto mt-24 max-w-md px-8 py-12 text-center'>
             <div className='text-[var(--cl-text)]'>
-                <h2 className='inline-block border-r-2 border-[var(--cl-border)] mr-2 px-3 py-2 align-top text-2xl font-semibold'><i className='mr-2 fas fa-spinner animate-spin' />404</h2>
+                <h1 className='inline-block border-r-2 border-[var(--cl-border)] mr-2 px-3 py-2 align-top text-2xl font-semibold'><i className='mr-2 fas fa-spinner animate-spin' />404</h1>
                 <div className='inline-block text-left h-32 leading-10 items-center text-[var(--cl-muted)]'>
-                    <h2 className='m-0 p-0 text-base'>页面无法加载，即将返回首页</h2>
+                    <p className='m-0 p-0 text-base'>页面无法加载，即将返回首页</p>
                 </div>
             </div>
         </div>

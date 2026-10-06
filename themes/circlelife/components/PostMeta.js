@@ -23,7 +23,7 @@ export const PostMeta = props => {
     parts.push(
       <SmartLink
         key='date'
-        href={`/archive#${formatDateFmt(post.publishDate, 'yyyy-MM')}`}
+        href={`/archive#archive-${formatDateFmt(post.publishDate, 'yyyy-MM')}`}
         className='cl-meta-date'>
         {post.publishDay}
       </SmartLink>

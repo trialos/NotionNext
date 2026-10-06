@@ -142,10 +142,12 @@ export const homeStyle = `
         font-size: 0.68rem;
         color: var(--cl-faint);
         letter-spacing: 0.08em;
+        font-variant-numeric: tabular-nums;
       }
       #theme-circlelife .cl-hero-nav {
-        width: 1.75rem;
-        height: 1.75rem;
+        position: relative;
+        width: 2.25rem;
+        height: 2.25rem;
         border-radius: 9999px;
         border: 1px solid var(--cl-border);
         background: transparent;
@@ -157,6 +159,13 @@ export const homeStyle = `
           color 0.15s var(--cl-ease),
           border-color 0.15s var(--cl-ease),
           background 0.15s var(--cl-ease);
+      }
+      /* 视觉 36px 圆钮，热区扩到 44px */
+      #theme-circlelife .cl-hero-nav::after {
+        content: '';
+        position: absolute;
+        inset: -0.25rem;
+        border-radius: 9999px;
       }
       #theme-circlelife .cl-hero-nav:hover {
         color: var(--cl-accent);
@@ -205,6 +214,7 @@ export const homeStyle = `
         margin-top: 0.55rem;
       }
       #theme-circlelife .cl-hero-dot {
+        position: relative;
         width: 6px;
         height: 6px;
         padding: 0;
@@ -216,6 +226,13 @@ export const homeStyle = `
           background 0.15s var(--cl-ease),
           border-color 0.15s var(--cl-ease),
           transform 0.15s var(--cl-ease);
+      }
+      /* 圆点视觉 6px 不变，伪元素扩出 24px 触控热区 */
+      #theme-circlelife .cl-hero-dot::after {
+        content: '';
+        position: absolute;
+        inset: -9px;
+        border-radius: 9999px;
       }
       #theme-circlelife .cl-hero-dot.is-active {
         background: var(--cl-accent);

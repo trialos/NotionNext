@@ -110,11 +110,32 @@ export const MenuItemDrop = ({
       setMenuPos({ top: rect.bottom + 4, left: rect.left })
     }
     updatePosition()
+    // 影集页滚动发生在内部容器（.cl-album-snap），window 不发 scroll，需一并监听
+    const scrollParents = []
+    let node = triggerRef.current.parentElement
+    while (node && node !== document.body) {
+      const overflowY = window.getComputedStyle(node).overflowY
+      if (overflowY === 'auto' || overflowY === 'scroll') {
+        scrollParents.push(node)
+      }
+      node = node.parentElement
+    }
     window.addEventListener('scroll', updatePosition, { passive: true })
     window.addEventListener('resize', updatePosition)
+    scrollParents.forEach(el =>
+      el.addEventListener('scroll', updatePosition, { passive: true })
+    )
+    const onKey = e => {
+      if (e.key === 'Escape') changeShow(false)
+    }
+    window.addEventListener('keydown', onKey)
     return () => {
       window.removeEventListener('scroll', updatePosition)
       window.removeEventListener('resize', updatePosition)
+      scrollParents.forEach(el =>
+        el.removeEventListener('scroll', updatePosition)
+      )
+      window.removeEventListener('keydown', onKey)
     }
   }, [show, isInline, hasSubMenu])
 
@@ -208,7 +229,7 @@ export const MenuItemDrop = ({
             }`
           : `${
               show ? 'visible opacity-100' : 'hidden pointer-events-none opacity-0'
-            } absolute z-30 transition-all duration-200 left-0 top-12 block border bg-[var(--cl-surface)] border-[var(--cl-border)]`
+            } absolute z-30 transition-opacity duration-200 left-0 top-12 block border bg-[var(--cl-surface)] border-[var(--cl-border)]`
       }
       style={
         isInline && show
