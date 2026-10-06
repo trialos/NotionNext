@@ -1,7 +1,7 @@
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import SmartLink from '@/components/SmartLink'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import CONFIG from '../config'
 import { useAlbumUI } from './albumContext'
@@ -19,6 +19,7 @@ export const Header = props => {
   const [scrolled, setScrolled] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const drawerPanelRef = useRef(null)
   const showProgress = Boolean(post) && post?.type !== 'Page'
   // 影集画廊的滚动根由 AlbumStage 经 Context 注册；null 时回退 window 滚动
   const { scrollRoot } = useAlbumUI() || {}
@@ -55,15 +56,37 @@ export const Header = props => {
 
   useEffect(() => {
     if (!drawerOpen) return undefined
-    const prev = document.body.style.overflow
+    const prevOverflow = document.body.style.overflow
+    const prevTouch = document.body.style.touchAction
     document.body.style.overflow = 'hidden'
+    document.body.style.touchAction = 'none'
     const onKey = e => {
       if (e.key === 'Escape') setDrawerOpen(false)
     }
+    // iOS：overflow:hidden 挡不住触屏惯性滚动，菜单外及面板到边一律拦截
+    let lastTouchY = 0
+    const onTouchMove = e => {
+      const panel = drawerPanelRef.current
+      if (!panel || !panel.contains(e.target)) {
+        e.preventDefault()
+        return
+      }
+      const touch = e.touches[0]
+      if (!touch) return
+      const dy = touch.clientY - lastTouchY
+      lastTouchY = touch.clientY
+      const atTop = panel.scrollTop <= 0
+      const atBottom =
+        panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 1
+      if ((atTop && dy > 0) || (atBottom && dy < 0)) e.preventDefault()
+    }
     window.addEventListener('keydown', onKey)
+    document.addEventListener('touchmove', onTouchMove, { passive: false })
     return () => {
-      document.body.style.overflow = prev
+      document.body.style.overflow = prevOverflow
+      document.body.style.touchAction = prevTouch
       window.removeEventListener('keydown', onKey)
+      document.removeEventListener('touchmove', onTouchMove)
     }
   }, [drawerOpen])
 
@@ -130,6 +153,7 @@ export const Header = props => {
           onClick={closeDrawer}
         />
         <div
+          ref={drawerPanelRef}
           className='cl-drawer-panel'
           role='dialog'
           aria-modal='true'

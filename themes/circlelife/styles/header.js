@@ -50,11 +50,11 @@ export const headerStyle = `
         min-height: 2.65rem;
       }
 
-      /* desktop three-column */
+      /* desktop three-column — 桌面导航内容约需 1000px，1024 以下切汉堡避免溢出裁切 */
       #theme-circlelife .cl-header-inner--desktop {
         display: none;
       }
-      @media (min-width: 768px) {
+      @media (min-width: 1024px) {
         #theme-circlelife .cl-header-inner--desktop {
           display: grid;
           grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
@@ -423,7 +423,7 @@ export const headerStyle = `
         justify-self: end;
         display: inline-flex;
         align-items: center;
-        gap: 0.1rem;
+        gap: 0.4rem;
       }
       /* 菜单块用 auto margin 垂直居中；内容超高时 margin 归零、从顶部正常滚动 */
       .cl-drawer-panel .cl-main-nav--drawer {
