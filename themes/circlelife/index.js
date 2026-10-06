@@ -71,8 +71,13 @@ const LayoutBase = props => {
     CONFIG
   )
   const wide = fullWidth || isAlbumPage
+  // 与 SideBar 的渲染条件对齐：无目录的页面不预留侧栏槽，避免内容被空槽挤偏
+  const hasDesktopToc = Boolean(post?.toc && post.toc.length > 2)
   const showSidebar =
-    !wide && (!sidebarOnlyPost || Boolean(post)) && !LAYOUT_VERTICAL
+    !wide &&
+    (!sidebarOnlyPost || Boolean(post)) &&
+    !LAYOUT_VERTICAL &&
+    hasDesktopToc
 
   return (
     <AlbumUIProvider>

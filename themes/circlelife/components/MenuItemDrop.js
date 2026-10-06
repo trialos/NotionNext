@@ -1,12 +1,22 @@
 import SmartLink from '@/components/SmartLink'
 import { useRouter } from 'next/router'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState
+} from 'react'
 import { createPortal } from 'react-dom'
 import { useAlbumUI } from './albumContext'
 import { isAlbumPath } from './albumRoute'
 import { ICON_FALLBACK, linkTitle } from './navConfig'
 
 const HOVER_CLOSE_MS = 120
+
+// SSR 下退回 useEffect，避免 useLayoutEffect 服务端告警
+const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
 function resolveIcon(link) {
   const raw = (link?.icon || '').trim()
@@ -63,8 +73,13 @@ export const MenuItemDrop = ({
 
   const openMenu = useCallback(() => {
     clearCloseTimer()
+    // 事件处理器先于 paint 执行：先定位再显示，首帧就不在 (0,0)
+    if (isInline && hasSubMenu && triggerRef.current) {
+      const rect = triggerRef.current.getBoundingClientRect()
+      setMenuPos({ top: rect.bottom + 4, left: rect.left })
+    }
     changeShow(true)
-  }, [clearCloseTimer])
+  }, [clearCloseTimer, isInline, hasSubMenu])
 
   const scheduleClose = useCallback(() => {
     clearCloseTimer()
@@ -73,7 +88,8 @@ export const MenuItemDrop = ({
 
   useEffect(() => () => clearCloseTimer(), [clearCloseTimer])
 
-  useEffect(() => {
+  // 键盘（Enter）开启也走这里；layout effect 保证 paint 前定位到位
+  useIsomorphicLayoutEffect(() => {
     if (!show || !isInline || !hasSubMenu || !triggerRef.current) return
     const updatePosition = () => {
       const rect = triggerRef.current.getBoundingClientRect()
@@ -171,7 +187,7 @@ export const MenuItemDrop = ({
     <ul
       className={
         isInline
-          ? `cl-submenu min-w-[11rem] py-1.5 transition-all duration-200 ${
+          ? `cl-submenu min-w-[11rem] py-1.5 transition-opacity duration-200 ${
               show ? 'visible opacity-100' : 'hidden pointer-events-none opacity-0'
             }`
           : `${
