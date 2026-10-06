@@ -4,46 +4,44 @@
 import { resolveArticleBackHref } from '@/themes/circlelife/components/articleBackHref'
 
 describe('resolveArticleBackHref', () => {
-  const origin = 'https://example.com'
-
   it('uses stored when present', () => {
     expect(
       resolveArticleBackHref({
         stored: '/archive',
-        referrer: 'https://example.com/tag/x',
-        currentPath: '/article/foo',
-        origin
+        lastList: '/tag/x',
+        currentPath: '/article/foo'
       })
     ).toBe('/archive')
   })
 
-  it('parses same-origin referrer', () => {
+  it('uses the session last list page when nothing is stored', () => {
     expect(
       resolveArticleBackHref({
-        referrer: 'https://example.com/category/life',
-        currentPath: '/article/foo',
-        origin
+        lastList: '/category/life',
+        currentPath: '/article/foo'
       })
     ).toBe('/category/life')
   })
 
-  it('rejects external referrer', () => {
+  it('ignores non-path lastList values', () => {
     expect(
       resolveArticleBackHref({
-        referrer: 'https://google.com/',
-        currentPath: '/article/foo',
-        origin
+        lastList: 'https://example.com/category/life',
+        currentPath: '/article/foo'
       })
     ).toBe('/')
   })
 
-  it('falls back when referrer is current article', () => {
+  it('falls back to home when lastList is the current article', () => {
     expect(
       resolveArticleBackHref({
-        referrer: 'https://example.com/article/foo',
-        currentPath: '/article/foo',
-        origin
+        lastList: '/article/foo',
+        currentPath: '/article/foo'
       })
     ).toBe('/')
+  })
+
+  it('falls back to home when nothing is available', () => {
+    expect(resolveArticleBackHref({ currentPath: '/article/foo' })).toBe('/')
   })
 })

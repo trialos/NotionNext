@@ -31,13 +31,15 @@ export function ArcMark({ size = 28, className = '' }) {
 
 /**
  * @param {'stack'|'row'} layout stack=中文上英文下；row=弧标·中文·英文横排
+ * @param {boolean} hideEn 只显示弧标+中文名（英文交给页脚等处）
  */
 export function BrandLockup({
   compact = false,
   collapsed = false,
   layout = 'stack',
   href = '/',
-  className = ''
+  className = '',
+  hideEn = false
 }) {
   const isRow = layout === 'row'
   const mark = isRow ? (compact ? 22 : 26) : collapsed ? 22 : compact ? 26 : 32
@@ -55,14 +57,18 @@ export function BrandLockup({
             style={{ fontFamily: 'var(--cl-font-display)' }}>
             时光的弧线
           </span>
-          <span className='cl-lockup-sep' aria-hidden='true'>
-            ·
-          </span>
-          <span
-            className='cl-lockup-en cl-lockup-en--row uppercase tracking-[0.14em] text-[var(--cl-muted)]'
-            style={{ fontFamily: 'var(--cl-font-mono)' }}>
-            Circle of Life
-          </span>
+          {!hideEn && (
+            <>
+              <span className='cl-lockup-sep' aria-hidden='true'>
+                ·
+              </span>
+              <span
+                className='cl-lockup-en cl-lockup-en--row uppercase tracking-[0.14em] text-[var(--cl-muted)]'
+                style={{ fontFamily: 'var(--cl-font-mono)' }}>
+                Circle of Life
+              </span>
+            </>
+          )}
         </span>
       ) : (
         <span className='cl-lockup-text flex min-w-0 flex-col leading-none'>
@@ -71,11 +77,13 @@ export function BrandLockup({
             style={{ fontFamily: 'var(--cl-font-display)' }}>
             时光的弧线
           </span>
-          <span
-            className='cl-lockup-en uppercase tracking-[0.16em] text-[var(--cl-muted)]'
-            style={{ fontFamily: 'var(--cl-font-mono)' }}>
-            Circle of Life
-          </span>
+          {!hideEn && (
+            <span
+              className='cl-lockup-en uppercase tracking-[0.16em] text-[var(--cl-muted)]'
+              style={{ fontFamily: 'var(--cl-font-mono)' }}>
+              Circle of Life
+            </span>
+          )}
         </span>
       )}
     </span>

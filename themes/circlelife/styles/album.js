@@ -79,7 +79,8 @@ export const albumStyle = `
       }
       #theme-circlelife .cl-album-shelf-head {
         text-align: left;
-        margin: 0 auto 1.85rem;
+        /* 与书架网格左缘对齐；此前 margin auto 居中让标题缩进网格约 10rem */
+        margin: 0 0 1.85rem;
         max-width: 36rem;
         padding: 0 0.25rem;
       }

@@ -169,9 +169,9 @@ export const Header = props => {
             <SmartLink
               href='/'
               className='cl-drawer-brand'
-              aria-label='时光的弧线 · Circle of Life'
+              aria-label='时光的弧线'
               onClick={closeDrawer}>
-              <BrandLockup compact href={null} />
+              <BrandLockup compact href={null} hideEn />
             </SmartLink>
             <div className='cl-drawer-head-actions'>
               {darkModeButton}

@@ -79,6 +79,19 @@ const LayoutBase = props => {
     !LAYOUT_VERTICAL &&
     hasDesktopToc
 
+  // 会话内记录最后一个非文章页，作为文章「返回」的兜底目标；
+  // document.referrer 指向文档最后一次完整加载的页面，SPA 内不更新，不可靠
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (post) return
+    try {
+      sessionStorage.setItem(
+        'cl-list-last',
+        window.location.pathname + window.location.search
+      )
+    } catch (_) {}
+  }, [router.asPath, post])
+
   return (
     <AlbumUIProvider>
     <div
