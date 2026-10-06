@@ -281,13 +281,16 @@ export const headerStyle = `
         padding-left: 0.4rem;
         padding-right: 0.4rem;
       }
-      #theme-circlelife .cl-nav-link--icon .cl-nav-text,
-      #theme-circlelife .cl-nav-link--icon .cl-nav-chevron {
+      #theme-circlelife .cl-nav-link--icon .cl-nav-text {
         opacity: 0;
         max-width: 0;
         margin: 0;
         overflow: hidden;
         pointer-events: none;
+      }
+      /* icon 态 chevron 彻底移出 flex 流：零宽 item 仍会产生 gap，导致间距不一致 */
+      #theme-circlelife .cl-nav-link--icon .cl-nav-chevron {
+        display: none;
       }
       #theme-circlelife .cl-nav-link--icon .cl-nav-ico {
         font-size: 0.9rem;
@@ -423,7 +426,7 @@ export const headerStyle = `
         justify-self: end;
         display: inline-flex;
         align-items: center;
-        gap: 0.4rem;
+        gap: 0.75rem;
       }
       /* 菜单块用 auto margin 垂直居中；内容超高时 margin 归零、从顶部正常滚动 */
       .cl-drawer-panel .cl-main-nav--drawer {
