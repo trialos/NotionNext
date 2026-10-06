@@ -1,5 +1,6 @@
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
+import SmartLink from '@/components/SmartLink'
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import CONFIG from '../config'
@@ -10,7 +11,7 @@ import ReadingProgress from './ReadingProgress'
 
 /**
  * 桌面：左 | 中品牌 | 右（疏朗 + 轻聚拢）
- * 手机：中品牌 + 汉堡；抽屉 portal 到 body
+ * 手机：汉堡左 | 品牌中 | 搜索右（明暗切换收进全屏菜单）；菜单 portal 到 body
  */
 export const Header = props => {
   const { post, customMenu, customNav } = props
@@ -72,39 +73,47 @@ export const Header = props => {
 
   const closeDrawer = () => setDrawerOpen(false)
 
+  const searchButton = siteConfig('CIRCLELIFE_MENU_SEARCH', null, CONFIG) ? (
+    <button
+      type='button'
+      className='cl-icon-btn'
+      onClick={openSearch}
+      aria-label='Search'
+      title='搜索'>
+      <i className='fas fa-search' />
+    </button>
+  ) : null
+
+  const darkModeButton = (
+    <button
+      type='button'
+      className='cl-icon-btn'
+      onClick={toggleDarkMode}
+      aria-label={isDarkMode ? 'Light mode' : 'Dark mode'}
+      title={isDarkMode ? '浅色' : '深色'}>
+      <span className='cl-icon-btn-glyph' aria-hidden='true'>
+        {isDarkMode ? '☀' : '☾'}
+      </span>
+    </button>
+  )
+
+  // 手机顶栏只留搜索；明暗切换收进全屏菜单
   const actions = (mobile = false) => (
     <div className={`cl-header-actions ${mobile ? 'cl-header-actions--mobile' : ''}`}>
-      {siteConfig('CIRCLELIFE_MENU_SEARCH', null, CONFIG) && (
-        <button
-          type='button'
-          className='cl-icon-btn'
-          onClick={openSearch}
-          aria-label='Search'
-          title='搜索'>
-          <i className='fas fa-search' />
-        </button>
-      )}
-      <button
-        type='button'
-        className='cl-icon-btn'
-        onClick={toggleDarkMode}
-        aria-label={isDarkMode ? 'Light mode' : 'Dark mode'}
-        title={isDarkMode ? '浅色' : '深色'}>
-        <span className='cl-icon-btn-glyph' aria-hidden='true'>
-          {isDarkMode ? '☀' : '☾'}
-        </span>
-      </button>
-      {mobile ? (
-        <button
-          type='button'
-          className='cl-icon-btn cl-hamburger'
-          aria-label={drawerOpen ? '关闭菜单' : '打开菜单'}
-          aria-expanded={drawerOpen}
-          onClick={() => setDrawerOpen(v => !v)}>
-          <i className={`fas ${drawerOpen ? 'fa-times' : 'fa-bars'}`} />
-        </button>
-      ) : null}
+      {searchButton}
+      {!mobile && darkModeButton}
     </div>
+  )
+
+  const hamburger = (
+    <button
+      type='button'
+      className='cl-icon-btn cl-hamburger'
+      aria-label={drawerOpen ? '关闭菜单' : '打开菜单'}
+      aria-expanded={drawerOpen}
+      onClick={() => setDrawerOpen(true)}>
+      <i className='fas fa-bars' />
+    </button>
   )
 
   const drawer = !mounted
@@ -126,10 +135,6 @@ export const Header = props => {
           aria-modal='true'
           aria-label='站点菜单'>
           <div className='cl-drawer-head'>
-            <div className='cl-drawer-brand'>
-              <span className='cl-drawer-eyebrow'>导航</span>
-              <span className='cl-drawer-title'>菜单</span>
-            </div>
             <button
               type='button'
               className='cl-icon-btn cl-drawer-close'
@@ -137,6 +142,17 @@ export const Header = props => {
               onClick={closeDrawer}>
               <i className='fas fa-times' />
             </button>
+            <SmartLink
+              href='/'
+              className='cl-drawer-brand'
+              aria-label='时光的弧线 · Circle of Life'
+              onClick={closeDrawer}>
+              <BrandLockup compact href={null} />
+            </SmartLink>
+            <div className='cl-drawer-head-actions'>
+              {darkModeButton}
+              {searchButton}
+            </div>
           </div>
           <MenuList
             customMenu={customMenu}
@@ -180,12 +196,14 @@ export const Header = props => {
       </div>
 
       <div className='cl-header-inner cl-header-inner--mobile'>
-        <div className='cl-header-mobile-side cl-header-mobile-side--left' aria-hidden='true' />
+        <div className='cl-header-mobile-side cl-header-mobile-side--left'>
+          {hamburger}
+        </div>
         <div className='cl-header-center'>
           <BrandLockup compact href='/' collapsed={scrolled} />
         </div>
         <div className='cl-header-mobile-side cl-header-mobile-side--right'>
-          {actions(true)}
+          {searchButton}
         </div>
       </div>
 

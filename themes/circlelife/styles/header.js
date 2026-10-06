@@ -340,7 +340,7 @@ export const headerStyle = `
       }
 
 
-      /* mobile drawer — portal on body, tokens inherit from :root */
+      /* mobile fullscreen menu — portal on body, tokens inherit from :root */
       .cl-drawer-root {
         position: fixed;
         inset: 0;
@@ -360,18 +360,16 @@ export const headerStyle = `
         position: absolute;
         inset: 0;
         border: 0;
-        background: color-mix(in srgb, var(--cl-text) 32%, transparent);
+        background: color-mix(in srgb, var(--cl-text) 18%, transparent);
         opacity: 0;
         transition: opacity 0.28s var(--cl-ease);
         cursor: pointer;
-        backdrop-filter: blur(2px);
-        -webkit-backdrop-filter: blur(2px);
       }
       .cl-drawer-root.is-open .cl-drawer-mask {
         opacity: 1;
       }
       html.dark .cl-drawer-mask {
-        background: color-mix(in srgb, #000 55%, transparent);
+        background: color-mix(in srgb, #000 45%, transparent);
       }
       @media (prefers-reduced-motion: reduce) {
         .cl-drawer-mask,
@@ -383,89 +381,86 @@ export const headerStyle = `
       }
       .cl-drawer-panel {
         position: absolute;
-        top: 0;
-        right: 0;
-        height: 100%;
-        width: min(21rem, 90vw);
-        background: var(--cl-bg);
-        border-left: 1px solid var(--cl-border);
-        padding: 1.15rem 1.15rem 2.5rem;
-        transform: translateX(104%);
-        transition: transform 0.32s cubic-bezier(0.22, 0.61, 0.36, 1);
-        overflow-y: auto;
+        inset: 0.5rem;
         display: flex;
         flex-direction: column;
-        box-shadow: -12px 0 40px color-mix(in srgb, var(--cl-text) 8%, transparent);
+        background: var(--cl-bg);
+        border-radius: 24px;
+        padding: 0.85rem 1rem 1.4rem;
+        opacity: 0;
+        transform: scale(0.965);
+        transform-origin: top center;
+        transition: opacity 0.26s var(--cl-ease), transform 0.32s var(--cl-ease);
+        overflow-y: auto;
+        box-shadow: 0 18px 60px color-mix(in srgb, var(--cl-text) 14%, transparent);
+      }
+      html.dark .cl-drawer-panel {
+        box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
       }
       .cl-drawer-root.is-open .cl-drawer-panel {
-        transform: translateX(0);
+        opacity: 1;
+        transform: scale(1);
       }
       .cl-drawer-head {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 0.75rem;
-        margin-bottom: 1.15rem;
-        padding-bottom: 0.85rem;
-        border-bottom: 1px solid var(--cl-border);
-      }
-      .cl-drawer-brand {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-        min-width: 0;
-      }
-      .cl-drawer-eyebrow {
-        font-family: var(--cl-font-mono);
-        font-size: 0.62rem;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-        color: var(--cl-faint);
-        line-height: 1;
-      }
-      .cl-drawer-title {
-        font-family: var(--cl-font-display);
-        font-size: 1.35rem;
-        font-weight: 600;
-        letter-spacing: -0.02em;
-        color: var(--cl-text);
-        line-height: 1.2;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        column-gap: 0.5rem;
+        flex: none;
       }
       .cl-drawer-close {
+        justify-self: start;
         color: var(--cl-muted) !important;
         flex: none;
+      }
+      .cl-drawer-brand {
+        justify-self: center;
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
+      }
+      .cl-drawer-head-actions {
+        justify-self: end;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.1rem;
+      }
+      /* 菜单块用 auto margin 垂直居中；内容超高时 margin 归零、从顶部正常滚动 */
+      .cl-drawer-panel .cl-main-nav--drawer {
+        margin: auto 0;
       }
       .cl-drawer-list {
         list-style: none;
         margin: 0;
         padding: 0;
+        width: 100%;
         display: flex;
         flex-direction: column;
-        gap: 0.2rem;
-        flex: 1 1 auto;
+        align-items: center;
+        gap: 0.1rem;
       }
       .cl-drawer-link {
         display: flex;
         align-items: center;
-        gap: 0.85rem;
+        justify-content: center;
+        gap: 0.5rem;
         width: 100%;
-        padding: 0.85rem 0.7rem;
+        padding: 0.8rem 0.6rem;
         border: 0;
         background: transparent;
         color: var(--cl-text);
-        font-size: 1.05rem;
-        font-weight: 500;
-        text-align: left;
-        border-radius: 10px;
+        font-family: var(--cl-font-display);
+        font-size: 1.4rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-align: center;
+        border-radius: 12px;
         cursor: pointer;
         text-decoration: none;
         transition: background 0.15s ease, color 0.15s ease;
       }
       .cl-drawer-link .cl-nav-ico {
-        width: 1.15rem;
-        text-align: center;
-        color: var(--cl-muted);
-        font-size: 0.95rem;
+        display: none;
       }
       .cl-drawer-link:hover,
       .cl-drawer-link:active {
@@ -473,7 +468,6 @@ export const headerStyle = `
         color: var(--cl-text);
       }
       .cl-drawer-chevron {
-        margin-left: auto;
         font-size: 0.7rem;
         color: var(--cl-faint);
         transition: transform 0.2s var(--cl-ease);
@@ -483,24 +477,27 @@ export const headerStyle = `
       }
       .cl-drawer-sub {
         list-style: none;
-        margin: 0 0 0.4rem 2.2rem;
+        margin: 0;
         padding: 0;
-        border-left: 1px solid var(--cl-border);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
       .cl-drawer-sublink {
         display: block;
         padding: 0.5rem 0.65rem;
         color: var(--cl-muted);
-        font-size: 0.92rem;
+        font-size: 0.98rem;
         text-decoration: none;
       }
       .cl-drawer-sublink:hover {
         color: var(--cl-accent);
       }
       .cl-drawer-foot {
-        margin: 1.5rem 0 0;
+        flex: none;
+        margin: 1.4rem 0 0;
         padding-top: 0.85rem;
-        border-top: 1px solid var(--cl-border);
+        border-top: 1px solid color-mix(in srgb, var(--cl-border) 60%, transparent);
         font-family: var(--cl-font-mono);
         font-size: 0.62rem;
         letter-spacing: 0.14em;
