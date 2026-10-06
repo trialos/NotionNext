@@ -8,7 +8,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 const Catalog = ({ toc }) => {
   const tRef = useRef(null)
   const navRef = useRef(null)
-  const tocIdsRef = useRef([])
   const [activeSection, setActiveSection] = useState(null)
   const [cursorY, setCursorY] = useState(8)
 
@@ -46,8 +45,22 @@ const Catalog = ({ toc }) => {
       }
       setActiveSection(currentSectionId)
       syncCursor(currentSectionId)
-      const index = tocIdsRef.current.indexOf(currentSectionId) || 0
-      tRef?.current?.scrollTo({ top: 28 * index, behavior: 'smooth' })
+      // 自动滚动用实测几何居中当前项，不假设固定行高
+      const list = tRef.current
+      const activeEl = navRef.current?.querySelector(
+        `[data-toc-id="${currentSectionId}"]`
+      )
+      if (list && activeEl) {
+        const top =
+          activeEl.getBoundingClientRect().top -
+          list.getBoundingClientRect().top +
+          list.scrollTop -
+          list.clientHeight / 2 +
+          activeEl.clientHeight / 2
+        const reduced =
+          window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+        list.scrollTo({ top, behavior: reduced ? 'auto' : 'smooth' })
+      }
     }, 160),
     [activeSection, syncCursor]
   )
@@ -64,8 +77,6 @@ const Catalog = ({ toc }) => {
 
   if (!toc || toc.length < 1) return null
 
-  tocIdsRef.current = []
-
   return (
     <div className='cl-toc px-1 pb-2 pt-1'>
       <div className='cl-toc-scroll' ref={tRef}>
@@ -77,7 +88,6 @@ const Catalog = ({ toc }) => {
           />
           {toc.map(tocItem => {
             const id = uuidToId(tocItem.id)
-            tocIdsRef.current.push(id)
             const active = activeSection === id
             const level = tocItem.indentLevel || 0
             const levelClass =
@@ -95,7 +105,14 @@ const Catalog = ({ toc }) => {
                     document.getElementById(id) ||
                     document.querySelector(`.notion-h[data-id="${id}"]`)
                   if (el) {
-                    el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+                    el.scrollIntoView({
+                      behavior: window.matchMedia?.(
+                        '(prefers-reduced-motion: reduce)'
+                      ).matches
+                        ? 'auto'
+                        : 'smooth',
+                      block: 'start'
+                    })
                   }
                   setActiveSection(id)
                   syncCursor(id)

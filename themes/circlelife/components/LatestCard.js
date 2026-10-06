@@ -35,6 +35,8 @@ export default function LatestCard({ post, posts }) {
   const [outgoing, setOutgoing] = useState(null) // { slide, dir: 1|-1 }
   const [swapInstant, setSwapInstant] = useState(false)
   const [paused, setPaused] = useState(false)
+  const [pageHidden, setPageHidden] = useState(false)
+  const [reducedMotion, setReducedMotion] = useState(false)
   const dragRef = useRef({ active: false, x: 0, startX: 0, moved: false })
   const stageDragRef = useRef(null)
   const busyRef = useRef(false)
@@ -46,6 +48,20 @@ export default function LatestCard({ post, posts }) {
   useEffect(() => {
     indexRef.current = index
   }, [index])
+
+  // 自动轮播的暂停条件：悬停/拖拽（paused）、页面后台、用户偏好减少动效
+  useEffect(() => {
+    const onVis = () => setPageHidden(document.hidden)
+    document.addEventListener('visibilitychange', onVis)
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const onMq = () => setReducedMotion(mq.matches)
+    onMq()
+    mq.addEventListener?.('change', onMq)
+    return () => {
+      document.removeEventListener('visibilitychange', onVis)
+      mq.removeEventListener?.('change', onMq)
+    }
+  }, [])
 
   const advance = useCallback(
     (deltaOrIndex, isAbsolute = false) => {
@@ -91,10 +107,11 @@ export default function LatestCard({ post, posts }) {
   )
 
   useEffect(() => {
-    if (count <= 1 || autoMs <= 0 || paused) return undefined
+    if (count <= 1 || autoMs <= 0 || paused || pageHidden || reducedMotion)
+      return undefined
     const t = window.setInterval(() => advance(1), autoMs)
     return () => window.clearInterval(t)
-  }, [count, autoMs, advance, paused, index])
+  }, [count, autoMs, advance, paused, pageHidden, reducedMotion, index])
 
   if (!enabled || !current?.href) return null
 
@@ -111,7 +128,14 @@ export default function LatestCard({ post, posts }) {
       <div className={`cl-deck-face ${faceClass} ${c ? 'has-cover' : ''}`}>
         {c ? (
           <div className='cl-deck-cover' aria-hidden='true'>
-            <LazyImage src={c} alt='' className='cl-deck-cover-img' />
+            <LazyImage
+              src={c}
+              alt=''
+              priority={
+                faceClass.includes('current') && slide === slides[0]
+              }
+              className='cl-deck-cover-img'
+            />
             <div className='cl-deck-cover-shade' />
           </div>
         ) : null}
@@ -202,6 +226,8 @@ export default function LatestCard({ post, posts }) {
       } ${swapInstant ? 'is-swap-instant' : ''} ${outgoing ? 'is-flipping' : ''}`}
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
       aria-roledescription='carousel'
       aria-label='精选文章'>
       <div

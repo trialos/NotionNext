@@ -63,6 +63,7 @@ export const commonStyle = `
         font-family: var(--cl-font-mono);
         font-size: 0.72rem;
         letter-spacing: 0.03em;
+        font-variant-numeric: tabular-nums;
         color: var(--cl-muted);
       }
       #theme-circlelife .cl-meta a:hover {
@@ -107,7 +108,7 @@ export const commonStyle = `
         z-index: 30;
         /* 无侧栏：内容右 gutter（max-w-3xl≈48rem） */
         right: max(1rem, calc((100vw - 48rem) / 2 + 0.5rem));
-        bottom: 1.75rem;
+        bottom: calc(1.75rem + env(safe-area-inset-bottom, 0px));
         width: 2.65rem;
         height: 2.65rem;
         border-radius: 9999px;
@@ -119,6 +120,8 @@ export const commonStyle = `
         justify-content: center;
         cursor: pointer;
         opacity: 0;
+        /* visibility 同步控制：隐藏态不可 Tab 聚焦；延迟到淡出结束再隐藏 */
+        visibility: hidden;
         pointer-events: none;
         transform: translateY(10px);
         transition:
@@ -128,7 +131,8 @@ export const commonStyle = `
           background 0.15s var(--cl-ease),
           color 0.15s var(--cl-ease),
           box-shadow 0.15s var(--cl-ease),
-          right 0.28s var(--cl-ease);
+          right 0.28s var(--cl-ease),
+          visibility 0s linear 0.28s;
         box-shadow: 0 1px 0 color-mix(in srgb, var(--cl-text) 4%, transparent);
       }
       /* 有目录侧栏：贴 TOC 左缘（max-w-5xl + w-64） */
@@ -142,13 +146,15 @@ export const commonStyle = `
       }
       @media (max-width: 767px) {
         #theme-circlelife .cl-backtop {
-          right: 1.1rem;
+          right: max(1.1rem, env(safe-area-inset-right, 0px));
         }
       }
       #theme-circlelife .cl-backtop.is-visible {
         opacity: 1;
+        visibility: visible;
         pointer-events: auto;
         transform: translateY(0);
+        transition-delay: 0s;
       }
       #theme-circlelife .cl-backtop:hover {
         color: var(--cl-accent);
@@ -235,6 +241,32 @@ export const commonStyle = `
       #theme-circlelife .cl-pager--disabled {
         visibility: hidden;
         pointer-events: none;
+      }
+      /* 加载更多（BlogListScroll）：真实按钮，键盘可达 */
+      #theme-circlelife .cl-load-more {
+        display: block;
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        font-family: var(--cl-font-body);
+        transition: color 0.15s var(--cl-ease);
+      }
+      #theme-circlelife .cl-load-more:hover:not(:disabled) {
+        color: var(--cl-accent);
+      }
+      #theme-circlelife .cl-load-more:disabled {
+        cursor: default;
+        opacity: 0.7;
+      }
+      /* type=search 的原生清除钮与自定义清除按钮重复 */
+      #theme-circlelife
+        input[type='search']::-webkit-search-cancel-button {
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      /* 归档月份锚点：跳转时给吸顶栏留出空间 */
+      #theme-circlelife .cl-archive-section {
+        scroll-margin-top: 5rem;
       }
       /* media hooks reserved */
       #theme-circlelife .cl-media-grid {

@@ -387,7 +387,10 @@ export const headerStyle = `
       }
       .cl-drawer-panel {
         position: absolute;
-        inset: 0.5rem;
+        inset: max(0.5rem, env(safe-area-inset-top, 0px))
+          max(0.5rem, env(safe-area-inset-right, 0px))
+          max(0.5rem, env(safe-area-inset-bottom, 0px))
+          max(0.5rem, env(safe-area-inset-left, 0px));
         display: flex;
         flex-direction: column;
         background: var(--cl-bg);

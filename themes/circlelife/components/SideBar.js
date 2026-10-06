@@ -12,7 +12,7 @@ export const SideBar = props => {
 
   return (
     <aside className='cl-card cl-toc-card cl-toc-card--desktop mb-6 w-full overflow-hidden pb-3'>
-      <h3 className='cl-sidebar-title'>目录</h3>
+      <h2 className='cl-sidebar-title'>目录</h2>
       <Catalog toc={post.toc} />
     </aside>
   )

@@ -57,25 +57,37 @@ export const BlogListPage = props => {
       )}
 
       <div className='mt-6 flex justify-between gap-4 text-sm'>
-        <SmartLink
-          href={{
-            pathname:
-              currentPage - 1 === 1
-                ? `${pagePrefix}/`
-                : `${pagePrefix}/page/${currentPage - 1}`,
-            query: router.query.s ? { s: router.query.s } : {}
-          }}
-          className={`cl-pager ${showPrev ? '' : 'cl-pager--disabled'}`}>
-          {locale.PAGINATION.PREV}
-        </SmartLink>
-        <SmartLink
-          href={{
-            pathname: `${pagePrefix}/page/${currentPage + 1}`,
-            query: router.query.s ? { s: router.query.s } : {}
-          }}
-          className={`cl-pager ${showNext ? '' : 'cl-pager--disabled'}`}>
-          {locale.PAGINATION.NEXT}
-        </SmartLink>
+        {showPrev ? (
+          <SmartLink
+            href={{
+              pathname:
+                currentPage - 1 === 1
+                  ? `${pagePrefix}/`
+                  : `${pagePrefix}/page/${currentPage - 1}`,
+              query: router.query.s ? { s: router.query.s } : {}
+            }}
+            className='cl-pager'>
+            {locale.PAGINATION.PREV}
+          </SmartLink>
+        ) : (
+          <span className='cl-pager cl-pager--disabled' aria-disabled='true'>
+            {locale.PAGINATION.PREV}
+          </span>
+        )}
+        {showNext ? (
+          <SmartLink
+            href={{
+              pathname: `${pagePrefix}/page/${currentPage + 1}`,
+              query: router.query.s ? { s: router.query.s } : {}
+            }}
+            className='cl-pager'>
+            {locale.PAGINATION.NEXT}
+          </SmartLink>
+        ) : (
+          <span className='cl-pager cl-pager--disabled' aria-disabled='true'>
+            {locale.PAGINATION.NEXT}
+          </span>
+        )}
       </div>
     </div>
   )

@@ -1,6 +1,7 @@
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import SmartLink from '@/components/SmartLink'
+import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import CONFIG from '../config'
@@ -16,10 +17,12 @@ import ReadingProgress from './ReadingProgress'
 export const Header = props => {
   const { post, customMenu, customNav } = props
   const { isDarkMode, toggleDarkMode } = useGlobal()
+  const router = useRouter()
   const [scrolled, setScrolled] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const drawerPanelRef = useRef(null)
+  const hamburgerRef = useRef(null)
   const showProgress = Boolean(post) && post?.type !== 'Page'
   // 影集画廊的滚动根由 AlbumStage 经 Context 注册；null 时回退 window 滚动
   const { scrollRoot } = useAlbumUI() || {}
@@ -60,8 +63,29 @@ export const Header = props => {
     const prevTouch = document.body.style.touchAction
     document.body.style.overflow = 'hidden'
     document.body.style.touchAction = 'none'
+    // 焦点管理：打开聚焦面板，Tab 循环限制在抽屉内，关闭归还汉堡按钮
+    drawerPanelRef.current?.focus({ preventScroll: true })
     const onKey = e => {
-      if (e.key === 'Escape') setDrawerOpen(false)
+      if (e.key === 'Escape') {
+        setDrawerOpen(false)
+        return
+      }
+      if (e.key !== 'Tab') return
+      const panel = drawerPanelRef.current
+      if (!panel) return
+      const focusables = panel.querySelectorAll(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+      if (!focusables.length) return
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
     }
     // iOS：overflow:hidden 挡不住触屏惯性滚动，菜单外及面板到边一律拦截
     let lastTouchY = 0
@@ -87,11 +111,14 @@ export const Header = props => {
       document.body.style.touchAction = prevTouch
       window.removeEventListener('keydown', onKey)
       document.removeEventListener('touchmove', onTouchMove)
+      hamburgerRef.current?.focus?.({ preventScroll: true })
     }
   }, [drawerOpen])
 
   const openSearch = () => {
-    window.location.href = '/search'
+    // 抽屉内搜索按钮共用：先收抽屉，再 SPA 导航，不整页重载
+    setDrawerOpen(false)
+    router.push('/search')
   }
 
   const closeDrawer = () => setDrawerOpen(false)
@@ -131,6 +158,7 @@ export const Header = props => {
   const hamburger = (
     <button
       type='button'
+      ref={hamburgerRef}
       className='cl-icon-btn cl-hamburger'
       aria-label={drawerOpen ? '关闭菜单' : '打开菜单'}
       aria-expanded={drawerOpen}
@@ -157,6 +185,7 @@ export const Header = props => {
           className='cl-drawer-panel'
           role='dialog'
           aria-modal='true'
+          tabIndex={-1}
           aria-label='站点菜单'>
           <div className='cl-drawer-head'>
             <button

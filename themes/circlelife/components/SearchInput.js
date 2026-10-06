@@ -27,9 +27,9 @@ const SearchInput = ({ currentTag, keyword, cRef }) => {
     }
   }
   const handleKeyUp = e => {
-    if (e.keyCode === 13) {
+    if (e.key === 'Enter') {
       handleSearch()
-    } else if (e.keyCode === 27) {
+    } else if (e.key === 'Escape') {
       cleanSearch()
     }
   }
@@ -61,13 +61,17 @@ const SearchInput = ({ currentTag, keyword, cRef }) => {
     <section className='cl-search-bar cl-card flex w-full max-w-2xl overflow-hidden'>
       <input
         ref={searchInputRef}
-        type='text'
+        type='search'
         placeholder={
           currentTag
             ? `${locale.SEARCH.TAGS} #${currentTag}`
             : `${locale.SEARCH.ARTICLES}`
         }
-        className='min-w-0 flex-1 border-0 bg-transparent py-3 pl-4 text-sm text-[var(--cl-text)] outline-none placeholder:text-[var(--cl-faint)]'
+        aria-label={locale.NAV.SEARCH}
+        autoComplete='off'
+        spellCheck={false}
+        enterKeyHint='search'
+        className='min-w-0 flex-1 border-0 bg-transparent py-3 pl-4 text-sm text-[var(--cl-text)] placeholder:text-[var(--cl-faint)]'
         onKeyUp={handleKeyUp}
         onCompositionStart={lockSearchInput}
         onCompositionUpdate={lockSearchInput}

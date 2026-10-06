@@ -17,14 +17,16 @@ const BlogItem = ({ post, variant = 'default' }) => {
     return (
       <article className='cl-timeline-post'>
         <div className='cl-timeline-post-row'>
-          <SmartLink href={post?.href} className='cl-post-title'>
-            {siteConfig('POST_TITLE_ICON') && (
-              <span className='mr-1 inline-flex align-middle opacity-70'>
-                <NotionIcon icon={post.pageIcon} />
-              </span>
-            )}
-            {post?.title}
-          </SmartLink>
+          <h3 className='m-0'>
+            <SmartLink href={post?.href} className='cl-post-title'>
+              {siteConfig('POST_TITLE_ICON') && (
+                <span className='mr-1 inline-flex align-middle opacity-70'>
+                  <NotionIcon icon={post.pageIcon} />
+                </span>
+              )}
+              {post?.title}
+            </SmartLink>
+          </h3>
           {post?.type !== 'Page' && post?.category && (
             <SmartLink
               href={`/category/${post.category}`}
@@ -51,14 +53,16 @@ const BlogItem = ({ post, variant = 'default' }) => {
     <article className='cl-list-post'>
       <div className={showPageCover ? 'flex gap-4' : ''}>
         <div className='min-w-0 flex-1'>
-          <SmartLink href={post?.href} className='cl-post-title'>
-            {siteConfig('POST_TITLE_ICON') && (
-              <span className='mr-1 inline-flex align-middle opacity-70'>
-                <NotionIcon icon={post.pageIcon} />
-              </span>
-            )}
-            {post?.title}
-          </SmartLink>
+          <h3 className='m-0'>
+            <SmartLink href={post?.href} className='cl-post-title'>
+              {siteConfig('POST_TITLE_ICON') && (
+                <span className='mr-1 inline-flex align-middle opacity-70'>
+                  <NotionIcon icon={post.pageIcon} />
+                </span>
+              )}
+              {post?.title}
+            </SmartLink>
+          </h3>
           <div className='cl-meta mt-1.5'>
             {post?.publishDay ? <span>{post.publishDay}</span> : null}
             {post?.category ? (

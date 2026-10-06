@@ -175,6 +175,10 @@ export const articleStyle = `
       }
 
       /* —— Article —— */
+      /* 目录/锚点跳转目标：跳转定位给吸顶栏留出空间 */
+      #theme-circlelife .notion-h {
+        scroll-margin-top: 5rem;
+      }
       #theme-circlelife .cl-article-meta {
         display: flex;
         flex-wrap: wrap;
@@ -295,8 +299,8 @@ export const articleStyle = `
         #theme-circlelife .cl-toc-fab {
           display: inline-flex;
           position: fixed;
-          right: 1rem;
-          bottom: 5.25rem;
+          right: max(1rem, env(safe-area-inset-right, 0px));
+          bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
           z-index: 35;
           align-items: center;
           justify-content: center;
@@ -346,7 +350,7 @@ export const articleStyle = `
         background: var(--cl-bg);
         border-radius: 16px 16px 0 0;
         border-top: 1px solid var(--cl-border);
-        padding: 0.85rem 1rem 1.5rem;
+        padding: 0.85rem 1rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
         transform: translateY(105%);
         transition: transform 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
         overflow: auto;

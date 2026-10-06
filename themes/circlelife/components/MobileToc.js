@@ -9,6 +9,7 @@ export default function MobileToc({ toc }) {
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const panelRef = useRef(null)
+  const fabRef = useRef(null)
 
   useEffect(() => {
     setMounted(true)
@@ -20,9 +21,30 @@ export default function MobileToc({ toc }) {
     const prevTouch = document.body.style.touchAction
     document.body.style.overflow = 'hidden'
     document.body.style.touchAction = 'none'
+    // 焦点管理：打开聚焦面板，Tab 循环限制在抽屉内，关闭归还浮钮
+    panelRef.current?.focus({ preventScroll: true })
 
     const onKey = e => {
-      if (e.key === 'Escape') setOpen(false)
+      if (e.key === 'Escape') {
+        setOpen(false)
+        return
+      }
+      if (e.key !== 'Tab') return
+      const panel = panelRef.current
+      if (!panel) return
+      const focusables = panel.querySelectorAll(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+      if (!focusables.length) return
+      const first = focusables[0]
+      const last = focusables[focusables.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
     }
 
     // iOS: 阻止抽屉外 touchmove 带动背后页面
@@ -60,16 +82,24 @@ export default function MobileToc({ toc }) {
       document.body.style.touchAction = prevTouch
       window.removeEventListener('keydown', onKey)
       document.removeEventListener('touchmove', onTouchMove)
+      fabRef.current?.focus?.({ preventScroll: true })
     }
   }, [open])
 
   if (!toc || toc.length <= 2) return null
 
+  const reducedMotion = () =>
+    window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+
   const jump = id => {
     const el =
       document.getElementById(id) ||
       document.querySelector(`.notion-h[data-id="${id}"]`)
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    if (el)
+      el.scrollIntoView({
+        behavior: reducedMotion() ? 'auto' : 'smooth',
+        block: 'start'
+      })
     else window.location.hash = id
     setOpen(false)
   }
@@ -77,6 +107,7 @@ export default function MobileToc({ toc }) {
   const btn = (
     <button
       type='button'
+      ref={fabRef}
       className='cl-toc-fab'
       aria-label='目录'
       onClick={() => setOpen(true)}>
@@ -102,6 +133,7 @@ export default function MobileToc({ toc }) {
           className='cl-toc-drawer-panel'
           role='dialog'
           aria-modal='true'
+          tabIndex={-1}
           aria-label='文章目录'>
           <div className='cl-toc-drawer-head'>
             <span className='cl-toc-drawer-title'>目录</span>

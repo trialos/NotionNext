@@ -33,13 +33,16 @@ export const PostLock = props => {
           <input
             id='password'
             type='password'
+            aria-label='密码'
+            autoComplete='current-password'
+            spellCheck={false}
             onKeyDown={e => {
               if (e.key === 'Enter') {
                 submitPassword()
               }
             }}
             ref={passwordInputRef}
-            className='min-w-0 flex-1 border-0 bg-transparent py-3 pl-4 text-sm text-[var(--cl-text)] outline-none'
+            className='min-w-0 flex-1 border-0 bg-transparent py-3 pl-4 text-sm text-[var(--cl-text)]'
           />
           <button
             type='button'
@@ -49,7 +52,7 @@ export const PostLock = props => {
             {locale.COMMON.SUBMIT}
           </button>
         </div>
-        <div id='tips' />
+        <div id='tips' aria-live='polite' />
       </div>
     </div>
   )
