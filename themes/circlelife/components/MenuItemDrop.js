@@ -32,7 +32,8 @@ export const MenuItemDrop = ({
   link,
   variant = 'default',
   collapsed = false,
-  onNavigate
+  onNavigate,
+  index = 0
 }) => {
   const router = useRouter()
   const albumUI = useAlbumUI()
@@ -43,6 +44,19 @@ export const MenuItemDrop = ({
   const hasSubMenu = link?.subMenus?.length > 0
   const isInline = variant === 'inline'
   const isDrawer = variant === 'drawer'
+  // Moment 风格：抽屉菜单项编号（01、02…）
+  const drawerIndex = String(index + 1).padStart(2, '0')
+  // 当前页高亮：比对去语言前缀、去查询参数后的路径
+  const stripPath = p =>
+    (p || '')
+      .split(/[?#]/)[0]
+      .replace(/^\/(?:zh-CN|zh-HK|zh-TW|en)(?=\/|$)/, '')
+      .replace(/\/$/, '') || '/'
+  const isCurrent =
+    isDrawer &&
+    !hasSubMenu &&
+    router?.isReady !== false &&
+    stripPath(router?.asPath) === stripPath(link?.href)
   const iconClass = resolveIcon(link)
   const label = linkTitle(link)
 
@@ -113,7 +127,8 @@ export const MenuItemDrop = ({
           <SmartLink
             href={link?.href}
             target={link?.target}
-            className='cl-drawer-link'
+            className={`cl-drawer-link ${isCurrent ? 'is-current' : ''}`}
+            data-index={drawerIndex}
             onClick={e => {
               if (handleAlbumNavClick(e)) return
               onNavigate?.(e)
@@ -125,7 +140,8 @@ export const MenuItemDrop = ({
           <div className='cl-drawer-group'>
             <button
               type='button'
-              className='cl-drawer-link cl-drawer-toggle'
+              className={`cl-drawer-link cl-drawer-toggle ${isCurrent ? 'is-current' : ''}`}
+              data-index={drawerIndex}
               aria-expanded={show}
               onClick={() => changeShow(v => !v)}>
               <i className={`${iconClass} cl-nav-ico`} aria-hidden='true' />

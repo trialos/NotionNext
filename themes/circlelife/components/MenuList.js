@@ -85,6 +85,7 @@ export const MenuList = props => {
             <MenuItemDrop
               key={link.id ?? link.title ?? index}
               link={link}
+              index={index}
               variant={isDrawer ? 'drawer' : 'inline'}
               collapsed={collapsed}
               onNavigate={onNavigate}

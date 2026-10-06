@@ -381,6 +381,9 @@ export const headerStyle = `
         .cl-toc-drawer-panel {
           transition-duration: 0.01ms !important;
         }
+        .cl-drawer-item {
+          animation: none !important;
+        }
       }
       .cl-drawer-panel {
         position: absolute;
@@ -428,6 +431,36 @@ export const headerStyle = `
         align-items: center;
         gap: 0.75rem;
       }
+      /* 抽屉 portal 在 body 上，#theme-circlelife 前缀样式不生效，需独立声明：
+         顶行图标按钮为 Moment 式浅灰圆底 */
+      .cl-drawer-root .cl-icon-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.15rem;
+        height: 2.15rem;
+        border: 0;
+        border-radius: 9999px;
+        background: color-mix(in srgb, var(--cl-text) 7%, transparent);
+        color: var(--cl-muted);
+        cursor: pointer;
+        transition:
+          background 0.15s ease,
+          color 0.15s ease;
+      }
+      .cl-drawer-root .cl-icon-btn i,
+      .cl-drawer-root .cl-icon-btn-glyph {
+        font-size: 0.85rem;
+        line-height: 1;
+      }
+      .cl-drawer-root .cl-icon-btn:hover {
+        color: var(--cl-text);
+        background: color-mix(in srgb, var(--cl-text) 12%, transparent);
+      }
+      .cl-drawer-brand .cl-lockup-cn {
+        font-size: 1rem;
+        line-height: 1.2;
+      }
       /* 菜单块用 auto margin 垂直居中；内容超高时 margin 归零、从顶部正常滚动 */
       .cl-drawer-panel .cl-main-nav--drawer {
         margin: auto 0;
@@ -439,39 +472,44 @@ export const headerStyle = `
         width: 100%;
         display: flex;
         flex-direction: column;
-        align-items: center;
-        gap: 0.1rem;
       }
+      /* Moment 风格：左对齐 + 编号列 + 大字（常态弱化色，hover/当前页提亮） */
       .cl-drawer-link {
         display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
+        align-items: baseline;
         width: 100%;
-        padding: 0.8rem 0.6rem;
+        padding: 0.85rem 0;
         border: 0;
         background: transparent;
-        color: var(--cl-text);
+        color: var(--cl-muted);
         font-family: var(--cl-font-display);
-        font-size: 1.4rem;
-        font-weight: 700;
-        letter-spacing: 0.02em;
-        text-align: center;
-        border-radius: 12px;
+        font-size: 1.7rem;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        line-height: 1.1;
+        text-align: left;
         cursor: pointer;
         text-decoration: none;
-        transition: background 0.15s ease, color 0.15s ease;
+        transition: color 0.15s ease;
+      }
+      .cl-drawer-link::before {
+        content: attr(data-index);
+        flex: none;
+        width: 2.4rem;
+        font-size: 1.9rem;
+        color: var(--cl-faint);
       }
       .cl-drawer-link .cl-nav-ico {
         display: none;
       }
       .cl-drawer-link:hover,
-      .cl-drawer-link:active {
-        background: color-mix(in srgb, var(--cl-accent-soft) 70%, transparent);
+      .cl-drawer-link.is-current {
         color: var(--cl-text);
       }
       .cl-drawer-chevron {
-        font-size: 0.7rem;
+        margin-left: auto;
+        align-self: center;
+        font-size: 0.75rem;
         color: var(--cl-faint);
         transition: transform 0.2s var(--cl-ease);
       }
@@ -480,22 +518,50 @@ export const headerStyle = `
       }
       .cl-drawer-sub {
         list-style: none;
-        margin: 0;
+        margin: 0 0 0.5rem 2.4rem;
         padding: 0;
         display: flex;
         flex-direction: column;
-        align-items: center;
       }
       .cl-drawer-sublink {
         display: block;
-        padding: 0.5rem 0.65rem;
+        padding: 0.5rem 0;
         color: var(--cl-muted);
-        font-size: 0.98rem;
+        font-family: var(--cl-font-display);
+        font-size: 1.05rem;
+        font-weight: 600;
         text-decoration: none;
+        transition: color 0.15s ease;
       }
       .cl-drawer-sublink:hover {
         color: var(--cl-accent);
       }
+      /* 打开时菜单项逐条错峰浮现 */
+      @keyframes cl-drawer-item-in {
+        from {
+          opacity: 0;
+          transform: translateY(0.9rem);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .cl-drawer-root.is-open .cl-drawer-item {
+        animation: cl-drawer-item-in 0.4s var(--cl-ease) both;
+      }
+      .cl-drawer-root.is-open .cl-drawer-item:nth-child(1) { animation-delay: 0.06s; }
+      .cl-drawer-root.is-open .cl-drawer-item:nth-child(2) { animation-delay: 0.1s; }
+      .cl-drawer-root.is-open .cl-drawer-item:nth-child(3) { animation-delay: 0.14s; }
+      .cl-drawer-root.is-open .cl-drawer-item:nth-child(4) { animation-delay: 0.18s; }
+      .cl-drawer-root.is-open .cl-drawer-item:nth-child(5) { animation-delay: 0.22s; }
+      .cl-drawer-root.is-open .cl-drawer-item:nth-child(6) { animation-delay: 0.26s; }
+      .cl-drawer-root.is-open .cl-drawer-item:nth-child(7) { animation-delay: 0.3s; }
+      .cl-drawer-root.is-open .cl-drawer-item:nth-child(8) { animation-delay: 0.34s; }
+      .cl-drawer-root.is-open .cl-drawer-item:nth-child(9) { animation-delay: 0.38s; }
+      .cl-drawer-root.is-open .cl-drawer-item:nth-child(10) { animation-delay: 0.42s; }
+      .cl-drawer-root.is-open .cl-drawer-item:nth-child(11) { animation-delay: 0.46s; }
+      .cl-drawer-root.is-open .cl-drawer-item:nth-child(12) { animation-delay: 0.5s; }
       .cl-drawer-foot {
         flex: none;
         margin: 1.4rem 0 0;
