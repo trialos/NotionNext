@@ -45,10 +45,11 @@ export function extractImagesFromBlockMap(blockMap, pageId, pageMeta = {}) {
       ''
     // needCompress=false 尽量保留清晰度
     const url = mapImgUrl(source, block, 'block', false)
-    const caption =
-      block.properties?.caption?.[0]?.[0] ||
-      block.properties?.title?.[0]?.[0] ||
-      ''
+    // 只认 Notion 里显式写的 caption；不回退到 properties.title（那是同步文件名）
+    const rawCaption = block.properties?.caption?.[0]?.[0] || ''
+    const caption = /\.(jpe?g|png|gif|webp|heic|avif)$/i.test(rawCaption)
+      ? ''
+      : rawCaption
     push(id, url, caption)
   }
 

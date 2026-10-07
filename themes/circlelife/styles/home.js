@@ -12,6 +12,8 @@ export const homeStyle = `
         background: transparent;
         box-shadow: none;
         padding: 0;
+        /* 翻页 DOM 变化不参与滚动锚定：防止卡片半露时自动翻页带动页面跳动 */
+        overflow-anchor: none;
       }
       #theme-circlelife .cl-deck-stage {
         position: relative;

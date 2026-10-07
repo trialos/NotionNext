@@ -212,7 +212,7 @@ export const MenuItemDrop = ({
           }`}
         />
       ) : null}
-      {isInline ? (
+      {isInline && !hasSubMenu ? (
         <span className='cl-nav-tip' role='tooltip'>
           {label}
         </span>

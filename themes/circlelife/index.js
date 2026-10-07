@@ -193,6 +193,27 @@ const LayoutIndex = props => {
 const LayoutPostList = props => {
   const { category, tag, keyword, latestPosts, posts } = props
   const router = useRouter()
+  // 刊头描述：在自定义菜单（含子菜单）里找与当前分类/标签同链接的行，取其 summary
+  const menuSummaryFor = path => {
+    const rows = []
+    ;(props.customMenu || []).forEach(m => {
+      if (m) rows.push(m)
+      ;(m?.subMenus || []).forEach(s => s && rows.push(s))
+    })
+    const norm = p => {
+      try {
+        return decodeURIComponent(String(p || '')).replace(/\/$/, '')
+      } catch (_) {
+        return String(p || '').replace(/\/$/, '')
+      }
+    }
+    const hit = rows.find(r => norm(r?.href) === norm(path))
+    return hit?.summary || ''
+  }
+  const categoryDesc = category
+    ? menuSummaryFor(`/category/${category}`)
+    : ''
+  const tagDesc = tag ? menuSummaryFor(`/tag/${tag}`) : ''
   const useTimeline =
     siteConfig('CIRCLELIFE_HOME_TIMELINE', true, CONFIG) &&
     !category &&
@@ -207,10 +228,18 @@ const LayoutPostList = props => {
   return (
     <>
       {category ? (
-        <PageMast eyebrow='分类' title={category} />
+        <PageMast
+          eyebrow='分类'
+          title={category}
+          description={categoryDesc || undefined}
+        />
       ) : null}
       {tag ? (
-        <PageMast eyebrow='标签' title={String(tag)} />
+        <PageMast
+          eyebrow='标签'
+          title={String(tag)}
+          description={tagDesc || undefined}
+        />
       ) : null}
 
       {useTimeline &&

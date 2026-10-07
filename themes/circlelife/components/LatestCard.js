@@ -37,6 +37,8 @@ export default function LatestCard({ post, posts }) {
   const [paused, setPaused] = useState(false)
   const [pageHidden, setPageHidden] = useState(false)
   const [reducedMotion, setReducedMotion] = useState(false)
+  const [inView, setInView] = useState(false)
+  const rootRef = useRef(null)
   const dragRef = useRef({ active: false, x: 0, startX: 0, moved: false })
   const stageDragRef = useRef(null)
   const busyRef = useRef(false)
@@ -48,6 +50,18 @@ export default function LatestCard({ post, posts }) {
   useEffect(() => {
     indexRef.current = index
   }, [index])
+
+  // 卡片不在视口内时不翻页（照抄 AlbumGallery 的 IO 门控模式）
+  useEffect(() => {
+    const root = rootRef.current
+    if (!root || typeof IntersectionObserver === 'undefined') return undefined
+    const io = new IntersectionObserver(
+      entries => setInView(entries[0]?.isIntersecting || false),
+      { threshold: 0.25 }
+    )
+    io.observe(root)
+    return () => io.disconnect()
+  }, [])
 
   // 自动轮播的暂停条件：悬停/拖拽（paused）、页面后台、用户偏好减少动效
   useEffect(() => {
@@ -107,11 +121,18 @@ export default function LatestCard({ post, posts }) {
   )
 
   useEffect(() => {
-    if (count <= 1 || autoMs <= 0 || paused || pageHidden || reducedMotion)
+    if (
+      count <= 1 ||
+      autoMs <= 0 ||
+      paused ||
+      pageHidden ||
+      reducedMotion ||
+      !inView
+    )
       return undefined
     const t = window.setInterval(() => advance(1), autoMs)
     return () => window.clearInterval(t)
-  }, [count, autoMs, advance, paused, pageHidden, reducedMotion, index])
+  }, [count, autoMs, advance, paused, pageHidden, reducedMotion, inView, index])
 
   if (!enabled || !current?.href) return null
 
@@ -221,6 +242,7 @@ export default function LatestCard({ post, posts }) {
 
   return (
     <aside
+      ref={rootRef}
       className={`cl-latest-card cl-hero cl-deck ${
         cover ? 'cl-deck--covered' : ''
       } ${swapInstant ? 'is-swap-instant' : ''} ${outgoing ? 'is-flipping' : ''}`}
