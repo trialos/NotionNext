@@ -2,6 +2,10 @@
  * Circle of Life — common：通用小组件 + 回顶 + 页脚/归档/分页 + media hooks
  */
 export const commonStyle = `
+      /* 全出血元素（如首页胶片条）的横向护栏：内容可破窄栏，但不得撑出页面 */
+      #theme-circlelife #container-wrapper {
+        overflow-x: clip;
+      }
       /* author badge */
       #theme-circlelife .cl-author-avatar {
         display: inline-flex;
@@ -247,6 +251,15 @@ export const commonStyle = `
         color: var(--cl-faint);
         opacity: 0.55;
         pointer-events: none;
+      }
+      /* 首页「全部文章」单链接复用翻页条视觉 */
+      #theme-circlelife .cl-recent-more {
+        color: var(--cl-muted);
+        text-decoration: none;
+        transition: color 0.15s var(--cl-ease);
+      }
+      #theme-circlelife .cl-recent-more:hover {
+        color: var(--cl-accent);
       }
       /* 加载更多（BlogListScroll）：真实按钮，键盘可达 */
       #theme-circlelife .cl-load-more {
