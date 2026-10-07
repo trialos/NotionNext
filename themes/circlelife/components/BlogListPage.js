@@ -16,7 +16,8 @@ export const BlogListPage = props => {
     page = 1,
     posts,
     postCount,
-    useTimeline: useTimelineProp
+    useTimeline: useTimelineProp,
+    recentMode = false
   } = props
   const { locale, NOTION_CONFIG } = useGlobal()
   const router = useRouter()
@@ -44,21 +45,34 @@ export const BlogListPage = props => {
       !router?.query?.s &&
       (router.pathname === '/' || router.pathname === '/page/[page]'))
 
+  // 首页仅预览最近 N 篇，完整列表交给归档页
+  const recentCount = siteConfig(
+    'CIRCLELIFE_HOME_RECENT_COUNT',
+    5,
+    CONFIG
+  )
+  const shownPosts =
+    recentMode && Array.isArray(posts) ? posts.slice(0, recentCount) : posts
   const pad2 = n => String(n).padStart(2, '0')
 
   return (
     <div className={`w-full ${showPageCover ? 'md:pr-2' : 'md:pr-12'} mb-12`}>
       {useTimeline ? (
-        <HomeTimeline posts={posts} />
+        <HomeTimeline posts={shownPosts} />
       ) : (
         <div id='posts-wrapper'>
-          {posts?.map(post => (
+          {shownPosts?.map(post => (
             <BlogItem key={post.id} post={post} />
           ))}
         </div>
       )}
 
-      {totalPage > 1 && (
+      {recentMode ? (
+        <SmartLink href='/archive' className='cl-pager-bar cl-recent-more'>
+          全部文章 {postCount} 篇 →
+        </SmartLink>
+      ) : (
+        totalPage > 1 && (
         <nav className='cl-pager-bar' aria-label='分页导航'>
           {showPrev ? (
             <SmartLink
@@ -98,6 +112,7 @@ export const BlogListPage = props => {
             </span>
           )}
         </nav>
+        )
       )}
     </div>
   )

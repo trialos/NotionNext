@@ -247,6 +247,108 @@ export const homeStyle = `
         }
       }
 
+      /* —— Home filmstrip（影集胶片横条）—— */
+      #theme-circlelife .cl-film {
+        margin-bottom: 1.75rem;
+      }
+      #theme-circlelife .cl-film-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin: 0 0 0.9rem;
+      }
+      #theme-circlelife .cl-film-kicker {
+        font-family: var(--cl-font-mono);
+        font-size: 0.7rem;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        color: var(--cl-faint);
+        margin: 0;
+      }
+      #theme-circlelife .cl-film-all {
+        font-family: var(--cl-font-mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
+        color: var(--cl-muted);
+        text-decoration: none;
+        transition: color 0.15s var(--cl-ease);
+      }
+      #theme-circlelife .cl-film-all:hover {
+        color: var(--cl-accent);
+      }
+      #theme-circlelife .cl-film-strip {
+        display: flex;
+        gap: 0.75rem;
+        /* 全出血：破开正文窄栏贴到屏幕两侧；首帧与正文列左缘对齐 */
+        margin-inline: calc(50% - 50vw);
+        padding-inline: max(1rem, calc((100vw - 48rem) / 2 + 1.5rem));
+        scroll-padding-inline: max(1rem, calc((100vw - 48rem) / 2 + 1.5rem));
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        overscroll-behavior-x: contain;
+        touch-action: pan-x pan-y;
+        scrollbar-width: none;
+        cursor: grab;
+      }
+      #theme-circlelife .cl-film-strip::-webkit-scrollbar {
+        display: none;
+      }
+      #theme-circlelife .cl-film-strip.is-dragging {
+        cursor: grabbing;
+        user-select: none;
+      }
+      #theme-circlelife .cl-film-frame {
+        flex: none;
+        width: clamp(16rem, 62vw, 24rem);
+        scroll-snap-align: start;
+        text-decoration: none;
+      }
+      #theme-circlelife .cl-film-img-wrap {
+        display: block;
+        aspect-ratio: 3 / 2;
+        border-radius: var(--cl-radius);
+        overflow: hidden;
+        background: var(--cl-paper-2);
+      }
+      #theme-circlelife .cl-film-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.4s var(--cl-ease);
+      }
+      #theme-circlelife .cl-film-frame:hover .cl-film-img {
+        transform: scale(1.03);
+      }
+      #theme-circlelife .cl-film-frame img {
+        -webkit-user-drag: none;
+      }
+      #theme-circlelife .cl-film-caption {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        font-family: var(--cl-font-mono);
+        font-size: 0.7rem;
+        letter-spacing: 0.06em;
+        color: var(--cl-muted);
+        transition: color 0.15s var(--cl-ease);
+      }
+      #theme-circlelife .cl-film-name {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      #theme-circlelife .cl-film-date {
+        flex: none;
+        color: var(--cl-faint);
+      }
+      #theme-circlelife .cl-film-frame:hover .cl-film-caption {
+        color: var(--cl-text);
+      }
+
       /* —— Timeline —— */
       #theme-circlelife .cl-timeline {
         padding-bottom: 1.5rem;

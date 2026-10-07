@@ -135,6 +135,21 @@ export async function getStaticProps(req) {
     props.posts = cleanPostSummaries(props.posts)
   }
   props.latestPosts = cleanPostSummaries(props.latestPosts)
+  // 首页胶片横条：最新 N 辑影集的轻量数据（type=Photo），只用现成封面缩略图，零额外 Notion 请求
+  props.photoDecks = (props.allPages || [])
+    .filter(
+      page =>
+        /^photo$/i.test(page?.type) &&
+        page?.status === 'Published' &&
+        (page?.pageCoverThumbnail || page?.pageCover)
+    )
+    .sort((a, b) => (b.publishDate || 0) - (a.publishDate || 0))
+    .map(page => ({
+      id: page.id,
+      name: page.title,
+      cover: page.pageCoverThumbnail || page.pageCover,
+      date: page.publishDay
+    }))
   delete props.allPages
 
   return {
