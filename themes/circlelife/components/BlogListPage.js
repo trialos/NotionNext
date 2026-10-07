@@ -44,6 +44,8 @@ export const BlogListPage = props => {
       !router?.query?.s &&
       (router.pathname === '/' || router.pathname === '/page/[page]'))
 
+  const pad2 = n => String(n).padStart(2, '0')
+
   return (
     <div className={`w-full ${showPageCover ? 'md:pr-2' : 'md:pr-12'} mb-12`}>
       {useTimeline ? (
@@ -56,39 +58,47 @@ export const BlogListPage = props => {
         </div>
       )}
 
-      <div className='mt-6 flex justify-between gap-4 text-sm'>
-        {showPrev ? (
-          <SmartLink
-            href={{
-              pathname:
-                currentPage - 1 === 1
-                  ? `${pagePrefix}/`
-                  : `${pagePrefix}/page/${currentPage - 1}`,
-              query: router.query.s ? { s: router.query.s } : {}
-            }}
-            className='cl-pager'>
-            {locale.PAGINATION.PREV}
-          </SmartLink>
-        ) : (
-          <span className='cl-pager cl-pager--disabled' aria-disabled='true'>
-            {locale.PAGINATION.PREV}
+      {totalPage > 1 && (
+        <nav className='cl-pager-bar' aria-label='分页导航'>
+          {showPrev ? (
+            <SmartLink
+              href={{
+                pathname:
+                  currentPage - 1 === 1
+                    ? `${pagePrefix}/`
+                    : `${pagePrefix}/page/${currentPage - 1}`,
+                query: router.query.s ? { s: router.query.s } : {}
+              }}
+              className='cl-pager-link'
+              aria-label={`上一页，第 ${currentPage - 1} 页`}>
+              ← {locale.PAGINATION.PREV}
+            </SmartLink>
+          ) : (
+            <span className='cl-pager-link is-disabled' aria-disabled='true'>
+              ← {locale.PAGINATION.PREV}
+            </span>
+          )}
+          <span className='cl-pager-pos'>
+            <span className='cl-pager-pos-cur'>{pad2(currentPage)}</span> /{' '}
+            {pad2(totalPage)}
           </span>
-        )}
-        {showNext ? (
-          <SmartLink
-            href={{
-              pathname: `${pagePrefix}/page/${currentPage + 1}`,
-              query: router.query.s ? { s: router.query.s } : {}
-            }}
-            className='cl-pager'>
-            {locale.PAGINATION.NEXT}
-          </SmartLink>
-        ) : (
-          <span className='cl-pager cl-pager--disabled' aria-disabled='true'>
-            {locale.PAGINATION.NEXT}
-          </span>
-        )}
-      </div>
+          {showNext ? (
+            <SmartLink
+              href={{
+                pathname: `${pagePrefix}/page/${currentPage + 1}`,
+                query: router.query.s ? { s: router.query.s } : {}
+              }}
+              className='cl-pager-link'
+              aria-label={`下一页，第 ${currentPage + 1} 页`}>
+              {locale.PAGINATION.NEXT} →
+            </SmartLink>
+          ) : (
+            <span className='cl-pager-link is-disabled' aria-disabled='true'>
+              {locale.PAGINATION.NEXT} →
+            </span>
+          )}
+        </nav>
+      )}
     </div>
   )
 }

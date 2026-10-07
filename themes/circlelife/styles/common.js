@@ -209,37 +209,43 @@ export const commonStyle = `
         opacity: 0.55;
       }
 
-      #theme-circlelife .cl-pager {
+      /* 档案页脚式翻页：hairline 细线 + mono 三段式（与文章页「← 返回」同语言） */
+      #theme-circlelife .cl-pager-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-top: 1.5rem;
+        padding-top: 0.9rem;
+        border-top: 1px solid var(--cl-border);
+        font-family: var(--cl-font-mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
+      }
+      #theme-circlelife .cl-pager-link {
         display: inline-flex;
         align-items: center;
-        justify-content: center;
         gap: 0.4rem;
-        min-height: 2.65rem;
-        padding: 0.55rem 1.25rem;
-        border-radius: 9999px;
-        border: 1px solid var(--cl-border-strong);
-        font-size: 0.9rem;
-        font-weight: 550;
-        letter-spacing: 0.02em;
-        color: var(--cl-text);
-        background: var(--cl-surface);
-        box-shadow: 0 1px 0 color-mix(in srgb, var(--cl-text) 5%, transparent);
-        transition:
-          border-color 0.15s var(--cl-ease),
-          color 0.15s var(--cl-ease),
-          background 0.15s var(--cl-ease),
-          transform 0.15s var(--cl-ease),
-          box-shadow 0.15s var(--cl-ease);
+        min-width: 3.6rem;
+        padding: 0.5rem 0.25rem;
+        color: var(--cl-muted);
+        text-decoration: none;
+        transition: color 0.15s var(--cl-ease);
       }
-      #theme-circlelife .cl-pager:hover:not(.cl-pager--disabled) {
-        border-color: var(--cl-accent);
+      #theme-circlelife .cl-pager-link:hover {
         color: var(--cl-accent);
-        background: var(--cl-accent-soft);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px color-mix(in srgb, var(--cl-text) 8%, transparent);
       }
-      #theme-circlelife .cl-pager--disabled {
-        visibility: hidden;
+      #theme-circlelife .cl-pager-pos {
+        flex: none;
+        color: var(--cl-faint);
+        white-space: nowrap;
+      }
+      #theme-circlelife .cl-pager-pos-cur {
+        color: var(--cl-text);
+      }
+      #theme-circlelife .cl-pager-link.is-disabled {
+        color: var(--cl-faint);
+        opacity: 0.55;
         pointer-events: none;
       }
       /* 加载更多（BlogListScroll）：真实按钮，键盘可达 */
