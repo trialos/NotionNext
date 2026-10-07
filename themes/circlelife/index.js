@@ -30,7 +30,7 @@ import ArticleBack from './components/ArticleBack'
 import BackToTop from './components/BackToTop'
 import { Footer } from './components/Footer'
 import { Header } from './components/Header'
-import HomeFilmstrip from './components/HomeFilmstrip'
+import HomeWheel from './components/HomeWheel'
 import LatestCard from './components/LatestCard'
 import ListScrollMemory from './components/ListScrollMemory'
 import MobileToc from './components/MobileToc'
@@ -218,7 +218,7 @@ const LayoutPostList = props => {
           <LatestCard posts={heroPosts} post={heroPosts[0]} />
         )}
 
-      {useTimeline && <HomeFilmstrip decks={props.photoDecks || []} />}
+      {useTimeline && <HomeWheel decks={props.photoDecks || []} />}
 
       {siteConfig('POST_LIST_STYLE') === 'page' ? (
         <BlogListPage

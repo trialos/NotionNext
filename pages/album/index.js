@@ -1,12 +1,8 @@
 import BLOG from '@/blog.config'
 import { siteConfig } from '@/lib/config'
 import { cleanPostSummaries, fetchGlobalAllData } from '@/lib/db/SiteDataApi'
-import { fetchNotionPageBlocks, formatNotionBlock } from '@/lib/db/notion/getPostBlocks'
-import { adapterNotionBlockMap } from '@/lib/utils/notion.util'
-import { idToUuid } from 'notion-utils'
-import { checkStrIsNotionId, checkStrIsUuid } from '@/lib/utils'
+import { loadPhotoImages } from '@/lib/db/notion/photoImages'
 import { DynamicLayout } from '@/themes/theme'
-import { extractImagesFromBlockMap } from '@/themes/circlelife/components/extractPhotoImages'
 
 /**
  * 影集：拉取 Photo 页正文图片
@@ -19,25 +15,6 @@ import { extractImagesFromBlockMap } from '@/themes/circlelife/components/extrac
 const AlbumIndex = props => {
   const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
   return <DynamicLayout theme={theme} layoutName='LayoutAlbum' {...props} />
-}
-
-async function loadPhotoImages(page) {
-  try {
-    let pageId = page.id
-    if (checkStrIsNotionId(pageId)) pageId = idToUuid(pageId)
-    if (!checkStrIsUuid(pageId)) return []
-
-    const raw = await fetchNotionPageBlocks(pageId, 'album')
-    if (!raw) return []
-    const blockMap = adapterNotionBlockMap(raw)
-    if (blockMap?.block) {
-      blockMap.block = formatNotionBlock(blockMap.block)
-    }
-    return extractImagesFromBlockMap(blockMap, pageId, page)
-  } catch (e) {
-    console.warn('[album] extract images failed', page?.id, e?.message)
-    return []
-  }
 }
 
 export async function getStaticProps({ locale }) {

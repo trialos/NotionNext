@@ -247,26 +247,70 @@ export const homeStyle = `
         }
       }
 
-      /* —— Home filmstrip（影集胶片横条）—— */
-      #theme-circlelife .cl-film {
+      /* —— Home wheel（影集弧形转筒）—— */
+      #theme-circlelife .cl-wheel {
         margin-bottom: 1.75rem;
       }
-      #theme-circlelife .cl-film-head {
+      #theme-circlelife .cl-wheel-head {
         display: flex;
-        align-items: baseline;
+        align-items: flex-end;
         justify-content: space-between;
         gap: 0.75rem;
-        margin: 0 0 0.9rem;
+        margin: 0 0 0.6rem;
       }
-      #theme-circlelife .cl-film-kicker {
+      #theme-circlelife .cl-wheel-mast {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+        padding-left: 0.85rem;
+        border-left: 2px solid var(--cl-accent);
+      }
+      #theme-circlelife .cl-wheel-kicker {
         font-family: var(--cl-font-mono);
-        font-size: 0.7rem;
-        font-weight: 500;
-        letter-spacing: 0.1em;
+        font-size: 0.68rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
         color: var(--cl-faint);
+        line-height: 1;
+      }
+      #theme-circlelife .cl-wheel-title {
+        font-family: var(--cl-font-display);
+        font-size: clamp(1.2rem, 2.6vw, 1.5rem);
+        font-weight: 600;
+        letter-spacing: -0.03em;
+        color: var(--cl-text);
+        line-height: 1.2;
         margin: 0;
       }
-      #theme-circlelife .cl-film-all {
+      #theme-circlelife .cl-wheel-head-actions {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+      #theme-circlelife .cl-wheel-pause {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2rem;
+        height: 2rem;
+        border: 0;
+        border-radius: 9999px;
+        background: color-mix(in srgb, var(--cl-text) 7%, transparent);
+        color: var(--cl-muted);
+        cursor: pointer;
+        transition:
+          background 0.15s var(--cl-ease),
+          color 0.15s var(--cl-ease);
+      }
+      #theme-circlelife .cl-wheel-pause:hover {
+        color: var(--cl-text);
+        background: color-mix(in srgb, var(--cl-text) 12%, transparent);
+      }
+      #theme-circlelife .cl-wheel-pause i {
+        font-size: 0.7rem;
+      }
+      #theme-circlelife .cl-wheel-all {
         font-family: var(--cl-font-mono);
         font-size: 0.72rem;
         letter-spacing: 0.06em;
@@ -274,79 +318,112 @@ export const homeStyle = `
         text-decoration: none;
         transition: color 0.15s var(--cl-ease);
       }
-      #theme-circlelife .cl-film-all:hover {
+      #theme-circlelife .cl-wheel-all:hover {
         color: var(--cl-accent);
       }
-      #theme-circlelife .cl-film-strip {
-        display: flex;
-        gap: 0.75rem;
-        /* 全出血：破开正文窄栏贴到屏幕两侧；首帧与正文列左缘对齐 */
-        margin-inline: calc(50% - 50vw);
-        padding-inline: max(1rem, calc((100vw - 48rem) / 2 + 1.5rem));
-        scroll-padding-inline: max(1rem, calc((100vw - 48rem) / 2 + 1.5rem));
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        overscroll-behavior-x: contain;
-        touch-action: pan-x pan-y;
-        scrollbar-width: none;
-        cursor: grab;
+      /* 转筒舞台：卡片位姿全由 rAF 内联 transform 驱动 */
+      #theme-circlelife .cl-wheel-viewport {
+        position: relative;
+        height: clamp(13rem, 30vw, 17rem);
+        outline: none;
+        touch-action: pan-y;
       }
-      #theme-circlelife .cl-film-strip::-webkit-scrollbar {
-        display: none;
+      #theme-circlelife .cl-wheel-viewport:focus-visible {
+        outline: 2px solid var(--cl-accent);
+        outline-offset: 4px;
+        border-radius: var(--cl-radius);
       }
-      #theme-circlelife .cl-film-strip.is-dragging {
+      #theme-circlelife .cl-wheel-stage {
+        position: absolute;
+        inset: 0;
+      }
+      #theme-circlelife .cl-wheel-card {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: clamp(11rem, 24vw, 15rem);
+        text-decoration: none;
+        will-change: transform;
+        cursor: pointer;
+      }
+      #theme-circlelife .cl-wheel-viewport.is-dragging {
         cursor: grabbing;
         user-select: none;
       }
-      #theme-circlelife .cl-film-frame {
-        flex: none;
-        width: clamp(16rem, 62vw, 24rem);
-        scroll-snap-align: start;
-        text-decoration: none;
+      #theme-circlelife .cl-wheel-viewport.is-dragging .cl-wheel-card {
+        pointer-events: none;
       }
-      #theme-circlelife .cl-film-img-wrap {
+      #theme-circlelife .cl-wheel-stack {
+        position: relative;
         display: block;
-        aspect-ratio: 3 / 2;
-        border-radius: var(--cl-radius);
-        overflow: hidden;
-        background: var(--cl-paper-2);
-      }
-      #theme-circlelife .cl-film-img {
         width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: block;
-        transition: transform 0.4s var(--cl-ease);
+        height: clamp(9.5rem, 20vw, 11.5rem);
       }
-      #theme-circlelife .cl-film-frame:hover .cl-film-img {
-        transform: scale(1.03);
+      /* 叠卡位姿/阴影照抄影集书架（原比例 contain，永不裁切） */
+      #theme-circlelife .cl-wheel-shot {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: auto;
+        height: auto;
+        max-width: 78%;
+        max-height: 92%;
+        object-fit: contain;
+        border-radius: 10px;
+        box-shadow:
+          0 0 0 1px color-mix(in srgb, var(--cl-text) 10%, transparent),
+          0 10px 28px color-mix(in srgb, var(--cl-text) 12%, transparent);
+        transform-origin: center center;
+        transition:
+          transform 0.25s var(--cl-ease),
+          opacity 0.2s ease;
       }
-      #theme-circlelife .cl-film-frame img {
+      html.dark #theme-circlelife .cl-wheel-shot {
+        box-shadow:
+          0 0 0 1px color-mix(in srgb, #fff 14%, transparent),
+          0 10px 28px rgba(0, 0, 0, 0.5);
+      }
+      #theme-circlelife .cl-wheel-shot--0 {
+        transform: translate(-50%, -50%) rotate(-2deg);
+      }
+      #theme-circlelife .cl-wheel-shot--1 {
+        transform: translate(-58%, -54%) rotate(-8deg);
+        opacity: 0.92;
+      }
+      #theme-circlelife .cl-wheel-shot--2 {
+        transform: translate(-40%, -48%) rotate(7deg);
+        opacity: 0.88;
+      }
+      #theme-circlelife .cl-wheel-card:hover .cl-wheel-shot--0 {
+        transform: translate(-50%, -52%) rotate(-1deg);
+      }
+      #theme-circlelife .cl-wheel-card:hover .cl-wheel-shot--1 {
+        transform: translate(-62%, -56%) rotate(-10deg);
+      }
+      #theme-circlelife .cl-wheel-card img {
         -webkit-user-drag: none;
       }
-      #theme-circlelife .cl-film-caption {
+      #theme-circlelife .cl-wheel-caption {
         display: flex;
-        align-items: baseline;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-        font-family: var(--cl-font-mono);
-        font-size: 0.7rem;
-        letter-spacing: 0.06em;
-        color: var(--cl-muted);
-        transition: color 0.15s var(--cl-ease);
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+        margin-top: 0.4rem;
+        text-align: center;
       }
-      #theme-circlelife .cl-film-name {
-        min-width: 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
-      #theme-circlelife .cl-film-date {
-        flex: none;
-        color: var(--cl-faint);
-      }
-      #theme-circlelife .cl-film-frame:hover .cl-film-caption {
+      #theme-circlelife .cl-wheel-name {
+        font-family: var(--cl-font-display);
+        font-size: 1.05rem;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        line-height: 1.25;
         color: var(--cl-text);
+      }
+      #theme-circlelife .cl-wheel-meta {
+        font-family: var(--cl-font-mono);
+        font-size: 0.68rem;
+        letter-spacing: 0.08em;
+        color: var(--cl-faint);
       }
 
       /* —— Timeline —— */
