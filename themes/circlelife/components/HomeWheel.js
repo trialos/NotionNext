@@ -6,12 +6,11 @@ import { useEffect, useRef, useState } from 'react'
 import CONFIG from '../config'
 
 const TWO_PI = Math.PI * 2
-const STEP = TWO_PI / 8 // 8 槽位，每槽 45°
 const VISIBLE = 1.45 // ≈83°，之外的槽位隐藏（含 tabindex 剔除）
 const AUTO_SPEED = 0.0022 // 每帧自转弧度（约 47s 一圈，展览式漂移）
 const EASE = 0.08 // 当前角向目标角缓动
 const RX = 0.42 // 水平半径（占容器宽比例）
-const LIFT = 110 // 弧线两端上抬量 px（手绘稿的微笑弧）
+const LIFT = 90 // 弧线两端上抬量 px（手绘稿的微笑弧）
 
 /**
  * 首页影集弧形转筒：书架叠卡排在下弯弧线上
@@ -27,7 +26,10 @@ export default function HomeWheel({ decks = [] }) {
     siteConfig('CIRCLELIFE_HOME_FILM_COUNT', 6, CONFIG)
   )
   const n = list.length
-  const slotCount = n < 4 ? n * 2 : 8
+  // 槽位规则：N≥5 用 N（一圈正好一整套，零同屏重复）；N≤4 用 2N
+  //（N=4 时 8 槽 45° 间距，重复副相距 180° 永不同屏，可见 5 叠）
+  const slotCount = n >= 5 ? n : n * 2
+  const STEP = TWO_PI / slotCount
 
   const router = useRouter()
   const viewportRef = useRef(null)
@@ -39,7 +41,6 @@ export default function HomeWheel({ decks = [] }) {
   const hoverRef = useRef(false)
   const frontRef = useRef(-1)
   const reduceRef = useRef(false)
-  const [focused, setFocused] = useState(0)
   const [paused, setPaused] = useState(false)
 
   const deckOf = k => list[((k % n) + n) % n]
@@ -116,11 +117,7 @@ export default function HomeWheel({ decks = [] }) {
         }
       }
       if (bestSlot >= 0) {
-        const deckIdx = ((bestSlot % n) + n) % n
-        if (frontRef.current !== deckIdx) {
-          frontRef.current = deckIdx
-          setFocused(deckIdx)
-        }
+        frontRef.current = ((bestSlot % n) + n) % n
       }
       raf = requestAnimationFrame(tick)
     }
@@ -195,7 +192,6 @@ export default function HomeWheel({ decks = [] }) {
   }
 
   if (!n) return null
-  const front = deckOf(frontRef.current)
 
   return (
     <section className='cl-wheel'>
@@ -217,7 +213,10 @@ export default function HomeWheel({ decks = [] }) {
               aria-hidden='true'
             />
           </button>
-          <SmartLink href='/album' className='cl-wheel-all' aria-label='查看全部影集'>
+          <SmartLink
+            href='/album'
+            className='cl-wheel-all'
+            aria-label='查看全部影集'>
             全部影集 →
           </SmartLink>
         </div>
@@ -262,16 +261,16 @@ export default function HomeWheel({ decks = [] }) {
                     />
                   ))}
                 </span>
+                <span className='cl-wheel-meta'>
+                  <span className='cl-wheel-name'>{deck.name}</span>
+                  <span className='cl-wheel-meta-line'>
+                    {deck.date} · {String(deck.count).padStart(2, '0')} 张
+                  </span>
+                </span>
               </SmartLink>
             )
           })}
         </div>
-      </div>
-      <div className='cl-wheel-caption' aria-hidden='true'>
-        <span className='cl-wheel-name'>{front?.name}</span>
-        <span className='cl-wheel-meta'>
-          {front?.date} · {String(front?.count).padStart(2, '0')} 张
-        </span>
       </div>
     </section>
   )
