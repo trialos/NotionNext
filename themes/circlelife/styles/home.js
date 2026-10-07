@@ -252,6 +252,8 @@ export const homeStyle = `
         margin-bottom: 1.75rem;
       }
       #theme-circlelife .cl-wheel-head {
+        position: relative;
+        z-index: 300; /* 永远压过转筒卡片（卡片 zIndex ≤200），防「全部影集」被边缘叠卡遮挡误触 */
         display: flex;
         align-items: flex-end;
         justify-content: space-between;
@@ -282,6 +284,7 @@ export const homeStyle = `
         color: var(--cl-text);
         line-height: 1.2;
         margin: 0;
+        text-wrap: balance;
       }
       #theme-circlelife .cl-wheel-head-actions {
         display: inline-flex;
@@ -292,8 +295,8 @@ export const homeStyle = `
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 2rem;
-        height: 2rem;
+        width: 2.5rem;
+        height: 2.5rem;
         border: 0;
         border-radius: 9999px;
         background: color-mix(in srgb, var(--cl-text) 7%, transparent);
@@ -312,10 +315,11 @@ export const homeStyle = `
       }
       #theme-circlelife .cl-wheel-all {
         font-family: var(--cl-font-mono);
-        font-size: 0.72rem;
+        font-size: 0.78rem;
         letter-spacing: 0.06em;
         color: var(--cl-muted);
         text-decoration: none;
+        padding: 0.5rem 0.75rem;
         transition: color 0.15s var(--cl-ease);
       }
       #theme-circlelife .cl-wheel-all:hover {
@@ -324,7 +328,7 @@ export const homeStyle = `
       /* 转筒舞台：卡片位姿全由 rAF 内联 transform 驱动 */
       #theme-circlelife .cl-wheel-viewport {
         position: relative;
-        height: clamp(13rem, 30vw, 17rem);
+        height: clamp(15rem, 32vw, 19rem);
         outline: none;
         touch-action: pan-y;
       }
@@ -403,13 +407,12 @@ export const homeStyle = `
       #theme-circlelife .cl-wheel-card img {
         -webkit-user-drag: none;
       }
-      #theme-circlelife .cl-wheel-caption {
+      #theme-circlelife .cl-wheel-meta {
         display: flex;
         flex-direction: column;
-        align-items: center;
         gap: 0.25rem;
-        margin-top: 0.4rem;
-        text-align: center;
+        padding: 0.55rem 0.15rem 0;
+        text-align: left;
       }
       #theme-circlelife .cl-wheel-name {
         font-family: var(--cl-font-display);
@@ -418,8 +421,9 @@ export const homeStyle = `
         letter-spacing: -0.02em;
         line-height: 1.25;
         color: var(--cl-text);
+        text-wrap: balance;
       }
-      #theme-circlelife .cl-wheel-meta {
+      #theme-circlelife .cl-wheel-meta-line {
         font-family: var(--cl-font-mono);
         font-size: 0.68rem;
         letter-spacing: 0.08em;
