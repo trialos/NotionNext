@@ -155,12 +155,46 @@ export default function AlbumStage({ pages }) {
       }, 80)
     }
     const t = window.setTimeout(run, 16)
+    const tLater = window.setTimeout(() => {
+      if (!cancelled) scrollToDeck(target, { smooth: false })
+    }, 320)
     return () => {
       cancelled = true
       window.clearTimeout(t)
+      window.clearTimeout(tLater)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, scrollToDeck])
+
+  // 顶栏或窗口尺寸变化后，把滚动吸回最近一辑的起点，避免张数被裁掉一截
+  useEffect(() => {
+    if (view !== 'gallery') return undefined
+    const root = scrollerRef.current
+    if (!root) return undefined
+    const align = () => {
+      const sections = [...root.querySelectorAll('.cl-album-section')]
+      if (!sections.length) return
+      let best = 0
+      let bestDist = Infinity
+      sections.forEach((s, i) => {
+        const d = Math.abs(s.offsetTop - root.scrollTop)
+        if (d < bestDist) {
+          bestDist = d
+          best = i
+        }
+      })
+      if (bestDist > 1 && bestDist < 64) {
+        root.scrollTo({ top: sections[best].offsetTop, behavior: 'auto' })
+      }
+    }
+    const ro = new ResizeObserver(align)
+    ro.observe(root)
+    const t = window.setTimeout(align, 120)
+    return () => {
+      ro.disconnect()
+      window.clearTimeout(t)
+    }
+  }, [view])
 
   // scroll spy + URL deck 同步
   useEffect(() => {
@@ -285,11 +319,6 @@ export default function AlbumStage({ pages }) {
               photos={deck.photos}
               onBackToShelf={backToShelf}
             />
-            {i < decks.length - 1 ? (
-              <p className='cl-album-snap-hint'>继续下滑 · 下一辑</p>
-            ) : (
-              <p className='cl-album-snap-hint'>左右拖动翻图 · 循环</p>
-            )}
           </section>
         ))}
       </div>

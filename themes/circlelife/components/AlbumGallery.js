@@ -139,6 +139,11 @@ export default function AlbumGallery({
     onCenterTap: () => setExpanded(true)
   })
 
+  const closeLightbox = useCallback(() => {
+    setExpanded(false)
+    window.requestAnimationFrame(() => stageRef.current?.focus())
+  }, [])
+
   // 灯箱开时键盘由 AlbumLightbox 接管，这里只管舞台态
   useEffect(() => {
     const onKey = e => {
@@ -156,16 +161,20 @@ export default function AlbumGallery({
     return () => window.removeEventListener('keydown', onKey)
   }, [expanded, go])
 
+  const onStageKeyDown = e => {
+    if (e.target !== e.currentTarget) return
+    if (e.key !== 'Enter' && e.key !== ' ') return
+    e.preventDefault()
+    setExpanded(true)
+  }
+
   if (!n) return null
 
   const prev = photos[(safe - 1 + n) % n]
   const next = photos[(safe + 1) % n]
   const prev2 = n > 2 ? photos[(safe - 2 + n) % n] : null
   const next2 = n > 2 ? photos[(safe + 2) % n] : null
-  const caption = current.caption || ''
   const pageTitle = albumName || current.title || ''
-  const showCaptionTitle =
-    current.title && current.title.trim() && current.title.trim() !== pageTitle
 
   return (
     <div className='cl-ag' ref={rootRef}>
@@ -217,9 +226,16 @@ export default function AlbumGallery({
               ← 全部影集
             </button>
           ) : null}
-          <div className='cl-ag-mast'>
-            <span className='cl-ag-mast-kicker'>影集</span>
-            <h2 className='cl-ag-mast-title'>{pageTitle || '未命名'}</h2>
+          <div className='cl-ag-mast-line'>
+            <div className='cl-ag-mast'>
+              <span className='cl-ag-mast-kicker'>影集</span>
+              <h2 className='cl-ag-mast-title'>{pageTitle || '未命名'}</h2>
+            </div>
+            {current.author?.name ? (
+              <div className='cl-ag-mast-author'>
+                <AuthorBadge author={current.author} size={20} />
+              </div>
+            ) : null}
           </div>
         </div>
       </header>
@@ -227,6 +243,9 @@ export default function AlbumGallery({
       <div
         ref={stageRef}
         className='cl-ag-stage'
+        tabIndex={0}
+        aria-label='查看大图'
+        onKeyDown={onStageKeyDown}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -268,15 +287,12 @@ export default function AlbumGallery({
           </button>
         ) : null}
 
-        <div
-          className='cl-ag-card cl-ag-card--main'
-          role='img'
-          aria-label={pageTitle || '照片'}>
+        <div className='cl-ag-card cl-ag-card--main'>
           {current.url || current.cover ? (
             <LazyImage
               key={current.id || safe}
               src={current.url || current.cover}
-              alt={pageTitle || ''}
+              alt={pageTitle || '照片'}
               className='cl-ag-img cl-ag-img--main'
               priority
             />
@@ -291,58 +307,13 @@ export default function AlbumGallery({
         {String(safe + 1).padStart(2, '0')} / {String(n).padStart(2, '0')}
       </div>
 
-      <div className='cl-ag-caption'>
-        {showCaptionTitle ? (
-          <h3 className='cl-ag-title'>{current.title}</h3>
-        ) : null}
-        {caption ? <p className='cl-ag-cap'>{caption}</p> : null}
-        {current.summary ? (
-          <p className='cl-ag-summary'>{current.summary}</p>
-        ) : null}
-        <div className='cl-ag-meta'>
-          {current.author?.name ? (
-            <AuthorBadge author={current.author} size={20} />
-          ) : null}
-          {current.date ? (
-            <span className='cl-ag-date'>{current.date}</span>
-          ) : null}
-        </div>
-      </div>
-
-      {n > 1 ? (
-        <div className='cl-ag-dots' role='tablist' aria-label='照片序号'>
-          {photos.map((p, i) => (
-            <button
-              key={p.id || i}
-              type='button'
-              role='tab'
-              aria-selected={i === safe}
-              className={`cl-ag-dot ${i === safe ? 'is-active' : ''}`}
-              onClick={() => {
-                if (busyRef.current || i === safe) return
-                const dir = i > safe ? 1 : -1
-                // 点远点：短向动画后直达
-                busyRef.current = true
-                setStack(dir > 0 ? -48 : 48, true, 180)
-                window.setTimeout(() => {
-                  setIndex(i)
-                  resetStack()
-                  busyRef.current = false
-                }, 180)
-              }}
-              aria-label={`第 ${i + 1} 张`}
-            />
-          ))}
-        </div>
-      ) : null}
-
       {expanded ? (
         <AlbumLightbox
           title={pageTitle}
           photo={current}
           index={safe}
           total={n}
-          onClose={() => setExpanded(false)}
+          onClose={closeLightbox}
           onGo={go}
         />
       ) : null}

@@ -191,7 +191,7 @@ const LayoutIndex = props => {
  * @returns
  */
 const LayoutPostList = props => {
-  const { category, tag, keyword, latestPosts, posts } = props
+  const { category, tag, keyword, latestPosts } = props
   const router = useRouter()
   // 刊头描述：在自定义菜单（含子菜单）里找与当前分类/标签同链接的行，取其 summary
   const menuSummaryFor = path => {
@@ -222,8 +222,8 @@ const LayoutPostList = props => {
     !router?.query?.s &&
     (router.pathname === '/' || router.pathname === '/page/[page]')
 
-  const heroPosts =
-    (latestPosts?.length ? latestPosts : posts)?.filter(Boolean) || []
+  // latestPosts 已按 Notion 行序截取，不再退回当前页的 posts（那会在翻页后换成另一组）。
+  const heroPosts = (Array.isArray(latestPosts) ? latestPosts : []).filter(Boolean)
 
   return (
     <>

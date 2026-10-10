@@ -11,10 +11,12 @@ function personName(p) {
 
 function rawAuthorFromPost(post) {
   if (!post) return ''
+  // 作者字段优先于 author。两者不一致时（例如 select 已改成 Andrew，
+  // author 仍是 Notion 账号名）与首页卡片保持同一来源。
   const candidates = [
+    post['作者'],
     post.author,
     post.Author,
-    post['作者'],
     post.writer,
     post.Writer
   ]
@@ -51,10 +53,7 @@ export function resolveAuthor(post) {
   if (raw) {
     const key = raw.toLowerCase()
     const hit = dir.find(
-      a =>
-        a.name?.toLowerCase() === key ||
-        a.id?.toLowerCase() === key ||
-        raw.includes(a.name)
+      a => a.name?.toLowerCase() === key || a.id?.toLowerCase() === key
     )
     if (hit) {
       return {
@@ -66,15 +65,6 @@ export function resolveAuthor(post) {
     }
     return { name: raw, avatar: '' }
   }
-  // no per-post author: do not force site AUTHOR on cards; meta can still fallback
+  // 没有文章作者时不回退成站点主人，避免首页与文章页眉不一致。
   return null
-}
-
-export function resolveAuthorOrSite(post) {
-  return (
-    resolveAuthor(post) || {
-      name: siteConfig('AUTHOR') || 'Felix',
-      avatar: ''
-    }
-  )
 }

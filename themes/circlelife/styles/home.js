@@ -17,6 +17,7 @@ export const homeStyle = `
       }
       #theme-circlelife .cl-deck-stage {
         position: relative;
+        z-index: 1;
         min-height: 11.5rem;
       }
       #theme-circlelife .cl-deck-under,
@@ -124,6 +125,8 @@ export const homeStyle = `
         text-shadow: 0 1px 0 color-mix(in srgb, var(--cl-surface) 40%, transparent);
       }
       #theme-circlelife .cl-deck-toolbar {
+        position: relative;
+        z-index: 3;
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -175,22 +178,29 @@ export const homeStyle = `
         background: var(--cl-accent-soft);
       }
       #theme-circlelife .cl-latest-title {
-        display: inline;
-        background-image: linear-gradient(var(--cl-accent), var(--cl-accent));
-        background-position: 0 100%;
-        background-repeat: no-repeat;
-        background-size: 0 1px;
+        align-self: flex-start;
+        display: -webkit-box;
+        width: fit-content;
+        max-width: 100%;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        background-image: none;
         font-family: var(--cl-font-display);
         font-size: clamp(1.3rem, 3.2vw, 1.7rem);
         font-weight: 600;
         letter-spacing: -0.02em;
         line-height: 1.3;
         color: var(--cl-text);
-        transition: background-size 0.2s var(--cl-ease), color 0.15s var(--cl-ease);
+        text-decoration: underline;
+        text-decoration-color: transparent;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 0.18em;
+        transition: color 0.15s var(--cl-ease), text-decoration-color 0.15s var(--cl-ease);
       }
       #theme-circlelife .cl-latest-title:hover {
         color: var(--cl-accent);
-        background-size: 100% 1px;
+        text-decoration-color: var(--cl-accent);
       }
       #theme-circlelife .cl-latest-summary {
         margin: 0.15rem 0 0;
@@ -210,6 +220,8 @@ export const homeStyle = `
         backdrop-filter: blur(4px);
       }
       #theme-circlelife .cl-deck-dots {
+        position: relative;
+        z-index: 3;
         display: flex;
         justify-content: center;
         gap: 0.4rem;
