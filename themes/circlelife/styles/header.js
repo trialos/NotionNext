@@ -19,15 +19,18 @@ export const headerStyle = `
         border-bottom-color: color-mix(in srgb, var(--cl-border) 55%, transparent);
         background-color: color-mix(in srgb, var(--cl-bg) 62%, transparent);
       }
-      /* 影集页：更高透，靠模糊保可读 */
+      /* 影集书架：玻璃与首页一致，留在文档流。单辑画廊另用 absolute 盖在氛围上，不用 fixed。 */
       #theme-circlelife.cl-is-album .cl-header {
-        background-color: color-mix(in srgb, var(--cl-bg) 28%, transparent);
-        backdrop-filter: blur(18px) saturate(1.18);
-        -webkit-backdrop-filter: blur(18px) saturate(1.18);
+        position: sticky;
+        top: 0;
+        z-index: 40;
+        background-color: color-mix(in srgb, var(--cl-bg) 48%, transparent);
+        backdrop-filter: blur(16px) saturate(1.12);
+        -webkit-backdrop-filter: blur(16px) saturate(1.12);
       }
       #theme-circlelife.cl-is-album .cl-header.is-scrolled {
-        background-color: color-mix(in srgb, var(--cl-bg) 42%, transparent);
-        border-bottom-color: color-mix(in srgb, var(--cl-border) 40%, transparent);
+        background-color: color-mix(in srgb, var(--cl-bg) 62%, transparent);
+        border-bottom-color: color-mix(in srgb, var(--cl-border) 55%, transparent);
       }
       #theme-circlelife .cl-header-inner {
         margin: 0 auto;
@@ -617,5 +620,113 @@ export const headerStyle = `
       .cl-submenu-ico {
         opacity: 0.7;
         font-size: 0.75rem;
+      }
+
+      #theme-circlelife .cl-search-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 80;
+      }
+      #theme-circlelife ~ .cl-search-overlay,
+      .cl-search-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 80;
+      }
+      .cl-search-overlay-mask {
+        position: absolute;
+        inset: 0;
+        border: 0;
+        background: color-mix(in srgb, var(--cl-bg) 28%, transparent);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+      }
+      .cl-search-panel {
+        position: relative;
+        z-index: 1;
+        width: min(36rem, calc(100% - 1.5rem));
+        margin: 12vh auto 0;
+        border: 1px solid var(--cl-border);
+        border-radius: 14px;
+        background: color-mix(in srgb, var(--cl-surface) 88%, transparent);
+        backdrop-filter: blur(18px) saturate(1.1);
+        -webkit-backdrop-filter: blur(18px) saturate(1.1);
+        box-shadow: 0 18px 50px color-mix(in srgb, var(--cl-text) 12%, transparent);
+        overflow: hidden;
+      }
+      .cl-search-panel-row {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        padding: 0.85rem 0.9rem;
+        border-bottom: 1px solid var(--cl-border);
+        color: var(--cl-faint);
+      }
+      .cl-search-panel-row input {
+        flex: 1;
+        min-width: 0;
+        border: 0;
+        background: transparent;
+        color: var(--cl-text);
+        font: inherit;
+        font-size: 1rem;
+      }
+      .cl-search-panel-row input:focus-visible,
+      .cl-search-close:focus-visible,
+      .cl-search-overlay-mask:focus-visible {
+        outline: 2px solid var(--cl-accent);
+        outline-offset: 2px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .cl-search-overlay,
+        .cl-search-overlay * {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+      .cl-search-close {
+        border: 0;
+        background: transparent;
+        color: var(--cl-muted);
+        font-family: var(--cl-font-mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
+        cursor: pointer;
+      }
+      .cl-search-results {
+        list-style: none;
+        margin: 0;
+        padding: 0.35rem 0 0.5rem;
+        max-height: min(52vh, 24rem);
+        overflow: auto;
+      }
+      .cl-search-results a {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        padding: 0.65rem 1rem;
+        color: var(--cl-text);
+      }
+      .cl-search-results a:hover {
+        background: color-mix(in srgb, var(--cl-accent) 8%, transparent);
+      }
+      .cl-search-kind {
+        font-family: var(--cl-font-mono);
+        font-size: 0.62rem;
+        letter-spacing: 0.08em;
+        color: var(--cl-accent);
+      }
+      .cl-search-hit {
+        font-family: var(--cl-font-display);
+        font-size: 1.05rem;
+      }
+      .cl-search-sum,
+      .cl-search-empty {
+        font-size: 0.82rem;
+        line-height: 1.45;
+        color: var(--cl-muted);
+      }
+      .cl-search-empty {
+        padding: 0.9rem 1rem 1rem;
       }
 `

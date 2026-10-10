@@ -1,13 +1,13 @@
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import SmartLink from '@/components/SmartLink'
-import { useRouter } from 'next/router'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import CONFIG from '../config'
 import { useAlbumUI } from './albumContext'
 import { BrandLockup } from './BrandLockup'
 import { MenuList } from './MenuList'
+import SearchOverlay from './SearchOverlay'
 import ReadingProgress from './ReadingProgress'
 
 /**
@@ -17,9 +17,9 @@ import ReadingProgress from './ReadingProgress'
 export const Header = props => {
   const { post, customMenu, customNav } = props
   const { isDarkMode, toggleDarkMode } = useGlobal()
-  const router = useRouter()
   const [scrolled, setScrolled] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const drawerPanelRef = useRef(null)
   const hamburgerRef = useRef(null)
@@ -116,9 +116,8 @@ export const Header = props => {
   }, [drawerOpen])
 
   const openSearch = () => {
-    // 抽屉内搜索按钮共用：先收抽屉，再 SPA 导航，不整页重载
     setDrawerOpen(false)
-    router.push('/search')
+    setSearchOpen(true)
   }
 
   const closeDrawer = () => setDrawerOpen(false)
@@ -262,6 +261,11 @@ export const Header = props => {
 
       {showProgress ? <ReadingProgress /> : null}
       {drawer}
+      <SearchOverlay
+        open={searchOpen}
+        items={props.searchIndex || []}
+        onClose={() => setSearchOpen(false)}
+      />
     </header>
   )
 }

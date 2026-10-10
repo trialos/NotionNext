@@ -1,7 +1,7 @@
 import SmartLink from '@/components/SmartLink'
 import { formatDateFmt } from '@/lib/utils/formatDate'
 import AuthorBadge from './AuthorBadge'
-import { resolveAuthorOrSite } from './authors'
+import { resolveAuthor } from './authors'
 
 /**
  * 作者（头像）· 日期 · 分类 chip
@@ -10,7 +10,7 @@ export const PostMeta = props => {
   const { post } = props
   if (!post || post.type === 'Page') return null
 
-  const author = resolveAuthorOrSite(post)
+  const author = resolveAuthor(post)
   const parts = []
 
   if (author?.name) {

@@ -49,6 +49,10 @@ export const tokenStyle = `
         --cl-accent-ink: #14110e;
       }
 
+      html:has(#theme-circlelife),
+      html:has(#theme-circlelife) body {
+        background-color: var(--cl-bg);
+      }
       #theme-circlelife {
         background-color: var(--cl-bg);
         color: var(--cl-text);
