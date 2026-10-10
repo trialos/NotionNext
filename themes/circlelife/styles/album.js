@@ -450,14 +450,29 @@ export const albumStyle = `
         margin-top: 0;
         padding-top: 0;
         box-sizing: border-box;
-        overflow-x: hidden;
-        overflow-y: auto;
+        overflow-x: clip;
+        overflow-y: scroll;
         scroll-snap-type: y mandatory;
         scroll-behavior: smooth;
         overscroll-behavior-y: contain;
         -webkit-overflow-scrolling: touch;
         width: 100%;
         background: var(--cl-bg);
+      }
+      /* iOS Safari 不把 height:0 + flex:1 当成确定滚动口，子项百分比高度失效后就不吸附。
+         顶栏是绝对定位，这里用整屏 100dvh，不要再减顶栏高度。 */
+      html.cl-album-gallery-active #theme-circlelife .cl-album-snap {
+        flex: none;
+        height: 100svh;
+        max-height: 100svh;
+        min-height: 0;
+        overflow-x: clip;
+        overflow-y: scroll;
+      }
+      @media (pointer: coarse) {
+        html.cl-album-gallery-active #theme-circlelife .cl-album-snap {
+          scroll-behavior: auto;
+        }
       }
       #theme-circlelife .cl-album-section {
         box-sizing: border-box;
@@ -946,7 +961,12 @@ export const albumStyle = `
         pointer-events: none;
       }
       html.cl-album-gallery-active #theme-circlelife .cl-album-section {
-        overflow: visible;
+        flex: none;
+        height: 100svh;
+        min-height: 100svh;
+        max-height: 100svh;
+        overflow: hidden;
+        scroll-snap-align: start;
       }
       #theme-circlelife .cl-ag-caption {
         text-align: center;

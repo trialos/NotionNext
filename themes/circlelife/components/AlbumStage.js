@@ -26,6 +26,8 @@ export default function AlbumStage({ pages }) {
   const entryIndexRef = useRef(null)
   const spyLockedRef = useRef(false)
   const urlSyncLockRef = useRef(false)
+  const deckQueryRef = useRef(router.query.deck)
+  const replaceAlbumUrlRef = useRef(null)
 
   // 滚动根同时喂给本地 spy 与 Context（Header 收起监听）
   const registerScrollRoot = albumUI?.registerScrollRoot
@@ -66,6 +68,8 @@ export default function AlbumStage({ pages }) {
     },
     [router]
   )
+  replaceAlbumUrlRef.current = replaceAlbumUrl
+  deckQueryRef.current = router.query.deck
 
   const openGallery = useCallback(
     i => {
@@ -166,35 +170,113 @@ export default function AlbumStage({ pages }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [view, scrollToDeck])
 
-  // 顶栏或窗口尺寸变化后，把滚动吸回最近一辑的起点，避免张数被裁掉一截
+  // iOS Safari 会忽略滚动子项的 dvh/百分比高度，一屏就露出两辑，吸附也不触发。
+  // 用可视高度把每一辑锁成和滚动口一样高，松手后再吸到最近一辑。
   useEffect(() => {
     if (view !== 'gallery') return undefined
     const root = scrollerRef.current
     if (!root) return undefined
-    const align = () => {
-      const sections = [...root.querySelectorAll('.cl-album-section')]
-      if (!sections.length) return
+
+    const sectionsOf = () => [...root.querySelectorAll('.cl-album-section')]
+
+    const lockHeights = () => {
+      const viewport = Math.round(
+        window.visualViewport?.height || window.innerHeight || 0
+      )
+      if (!viewport) return 0
+      let h = root.clientHeight
+      if (h < viewport * 0.7 || h > viewport * 1.05) {
+        root.style.height = viewport + 'px'
+        root.style.maxHeight = viewport + 'px'
+        root.style.flex = 'none'
+        h = root.clientHeight || viewport
+      }
+      sectionsOf().forEach(section => {
+        section.style.height = h + 'px'
+        section.style.minHeight = h + 'px'
+        section.style.maxHeight = h + 'px'
+        section.style.flex = 'none'
+      })
+      return h
+    }
+
+    const nearest = () => {
+      const sections = sectionsOf()
       let best = 0
       let bestDist = Infinity
-      sections.forEach((s, i) => {
-        const d = Math.abs(s.offsetTop - root.scrollTop)
+      sections.forEach((section, i) => {
+        const d = Math.abs(section.offsetTop - root.scrollTop)
         if (d < bestDist) {
           bestDist = d
           best = i
         }
       })
-      if (bestDist > 1 && bestDist < 64) {
-        root.scrollTo({ top: sections[best].offsetTop, behavior: 'auto' })
+      return { sections, best, bestDist }
+    }
+
+    let timer = 0
+    let touching = 0
+    const settle = () => {
+      if (touching || spyLockedRef.current) return
+      const { sections, best, bestDist } = nearest()
+      const el = sections[best]
+      if (!el || bestDist <= 2) return
+      spyLockedRef.current = true
+      root.scrollTo({ top: el.offsetTop, behavior: 'auto' })
+      setActiveIndex(best)
+      const id = el.getAttribute('data-deck-id')
+      if (id && deckQueryRef.current !== id) {
+        replaceAlbumUrlRef.current({ view: 'gallery', deckId: id })
       }
+      window.setTimeout(() => {
+        spyLockedRef.current = false
+      }, 80)
     }
-    const ro = new ResizeObserver(align)
+    const arm = ms => {
+      window.clearTimeout(timer)
+      timer = window.setTimeout(settle, ms)
+    }
+    const onScroll = () => {
+      if (!touching) arm(140)
+    }
+    const onTouchStart = () => {
+      touching += 1
+      window.clearTimeout(timer)
+    }
+    const onTouchEnd = () => {
+      touching = Math.max(0, touching - 1)
+      if (!touching) arm(180)
+    }
+
+    lockHeights()
+    const ro = new ResizeObserver(() => {
+      lockHeights()
+    })
     ro.observe(root)
-    const t = window.setTimeout(align, 120)
+    window.visualViewport?.addEventListener('resize', lockHeights)
+    root.addEventListener('scroll', onScroll, { passive: true })
+    root.addEventListener('touchstart', onTouchStart, { passive: true })
+    root.addEventListener('touchend', onTouchEnd, { passive: true })
+    root.addEventListener('touchcancel', onTouchEnd, { passive: true })
     return () => {
+      window.clearTimeout(timer)
       ro.disconnect()
-      window.clearTimeout(t)
+      window.visualViewport?.removeEventListener('resize', lockHeights)
+      root.removeEventListener('scroll', onScroll)
+      root.removeEventListener('touchstart', onTouchStart)
+      root.removeEventListener('touchend', onTouchEnd)
+      root.removeEventListener('touchcancel', onTouchEnd)
+      root.style.height = ''
+      root.style.maxHeight = ''
+      root.style.flex = ''
+      sectionsOf().forEach(section => {
+        section.style.height = ''
+        section.style.minHeight = ''
+        section.style.maxHeight = ''
+        section.style.flex = ''
+      })
     }
-  }, [view])
+  }, [view, decks.length])
 
   // scroll spy + URL deck 同步
   useEffect(() => {
