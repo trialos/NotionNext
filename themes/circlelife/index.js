@@ -25,6 +25,7 @@ import BlogListArchive from './components/BlogListArchive'
 import { BlogListPage } from './components/BlogListPage'
 import { BlogListScroll } from './components/BlogListScroll'
 import AlbumStage from './components/AlbumStage'
+import LayoutAbout from './components/LayoutAbout'
 import { AlbumUIProvider } from './components/albumContext'
 import ArticleBack from './components/ArticleBack'
 import BackToTop from './components/BackToTop'
@@ -62,6 +63,11 @@ const LayoutBase = props => {
     (typeof router?.asPath === 'string' &&
       router.asPath.split('?')[0].replace(/\/$/, '') === '/album')
 
+  const isAboutPage =
+    router?.pathname === '/about' ||
+    (typeof router?.asPath === 'string' &&
+      router.asPath.split('?')[0].replace(/\/$/, '') === '/about')
+
   const LAYOUT_VERTICAL =
     post && siteConfig('CIRCLELIFE_ARTICLE_LAYOUT_VERTICAL', false, CONFIG)
 
@@ -72,7 +78,7 @@ const LayoutBase = props => {
     true,
     CONFIG
   )
-  const wide = fullWidth || isAlbumPage
+  const wide = fullWidth || isAlbumPage || isAboutPage
   // 与 SideBar 的渲染条件对齐：无目录的页面不预留侧栏槽，避免内容被空槽挤偏
   const hasDesktopToc = Boolean(post?.toc && post.toc.length > 2)
   const showSidebar =
@@ -110,7 +116,7 @@ const LayoutBase = props => {
     </Head>
     <div
       id='theme-circlelife'
-      className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth${isAlbumPage ? ' cl-is-album' : ''}${showSidebar ? ' cl-has-sidebar' : ''}`}>
+      className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth${isAlbumPage ? ' cl-is-album' : ''}${isAboutPage ? ' cl-is-about' : ''}${showSidebar ? ' cl-has-sidebar' : ''}`}>
       <Style />
 
       <Header {...props} />
@@ -120,7 +126,7 @@ const LayoutBase = props => {
         <div
           id='container-wrapper'
           className={`relative mx-auto flex justify-center ${
-            isAlbumPage
+            isAlbumPage || isAboutPage
               ? 'max-w-none w-full flex-col items-stretch px-0 py-0'
               : `px-4 py-8 md:px-6 ${LAYOUT_SIDEBAR_REVERSE ? 'md:flex-row-reverse' : ''} ${
                   LAYOUT_VERTICAL
@@ -167,7 +173,7 @@ const LayoutBase = props => {
         </div>
       </div>
 
-      <Footer />
+      {!isAboutPage && <Footer />}
 
       <BackToTop label={locale?.POST?.TOP || '返回顶部'} />
       <ListScrollMemory />
@@ -532,6 +538,7 @@ export {
   LayoutBase,
   LayoutCategoryIndex,
   LayoutAlbum,
+  LayoutAbout,
   LayoutIndex,
   LayoutPostList,
   LayoutSearch,

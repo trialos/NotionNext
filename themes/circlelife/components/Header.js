@@ -33,6 +33,9 @@ export const Header = props => {
 
   useEffect(() => {
     const readY = () => {
+      if (typeof window !== 'undefined' && window.__CL_ABOUT_SCROLL_Y__ != null) {
+        return window.__CL_ABOUT_SCROLL_Y__
+      }
       if (scrollRoot) return scrollRoot.scrollTop || 0
       return window.scrollY || document.documentElement.scrollTop || 0
     }
@@ -46,11 +49,13 @@ export const Header = props => {
     }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('cl-virtual-scroll', onScroll, { passive: true })
     if (scrollRoot) {
       scrollRoot.addEventListener('scroll', onScroll, { passive: true })
     }
     return () => {
       window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('cl-virtual-scroll', onScroll)
       if (scrollRoot) {
         scrollRoot.removeEventListener('scroll', onScroll)
       }

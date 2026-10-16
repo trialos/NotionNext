@@ -34,6 +34,16 @@ export function extractImagesFromBlockMap(blockMap, pageId, pageMeta = {}) {
     ? pageBlock.content
     : Object.keys(blocks)
 
+  const parseCaption = block => {
+    if (!block?.properties?.caption) return ''
+    const segs = block.properties.caption
+    const text = Array.isArray(segs)
+      ? segs.map(part => (Array.isArray(part) ? part[0] : (part || ''))).join('')
+      : String(segs || '')
+    // 排除自动上传时带入的文件名
+    return /\.(jpe?g|png|gif|webp|heic|avif)$/i.test(text.trim()) ? '' : text.trim()
+  }
+
   for (const id of contentIds) {
     const block = blocks[id]?.value
     if (!block || block.type !== 'image') continue
@@ -45,11 +55,7 @@ export function extractImagesFromBlockMap(blockMap, pageId, pageMeta = {}) {
       ''
     // needCompress=false 尽量保留清晰度
     const url = mapImgUrl(source, block, 'block', false)
-    // 只认 Notion 里显式写的 caption；不回退到 properties.title（那是同步文件名）
-    const rawCaption = block.properties?.caption?.[0]?.[0] || ''
-    const caption = /\.(jpe?g|png|gif|webp|heic|avif)$/i.test(rawCaption)
-      ? ''
-      : rawCaption
+    const caption = parseCaption(block)
     push(id, url, caption)
   }
 
@@ -63,7 +69,7 @@ export function extractImagesFromBlockMap(blockMap, pageId, pageMeta = {}) {
         block.format?.display_source ||
         ''
       const url = mapImgUrl(source, block, 'block', false)
-      const caption = block.properties?.caption?.[0]?.[0] || ''
+      const caption = parseCaption(block)
       push(id, url, caption)
     }
   }

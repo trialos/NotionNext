@@ -7,6 +7,8 @@ module.exports = {
   LAYOUT_MAPPINGS: {
     '-1': 'LayoutBase',
     '/': 'LayoutIndex',
+    '/about': 'LayoutAbout',
+    '/album': 'LayoutAlbum',
     '/archive': 'LayoutArchive',
     '/page/[page]': 'LayoutPostList',
     '/category/[category]': 'LayoutPostList',
