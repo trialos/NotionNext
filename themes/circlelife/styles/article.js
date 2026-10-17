@@ -224,6 +224,7 @@ export const articleStyle = `
         font-size: 1.02rem;
         line-height: 1.85;
         color: var(--cl-text);
+        contain: layout;
       }
       #theme-circlelife #article-wrapper.cl-prose-wrap .notion {
         color: var(--cl-text);
@@ -273,9 +274,6 @@ export const articleStyle = `
         border: 1px solid var(--cl-border);
         background: color-mix(in srgb, var(--cl-paper-2) 45%, var(--cl-surface));
         border-radius: var(--cl-radius-sm);
-      }
-      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-asset-wrapper-image {
-        contain: layout paint;
       }
       /* article back */
       #theme-circlelife .cl-article-back {

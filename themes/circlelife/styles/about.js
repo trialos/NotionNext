@@ -119,12 +119,12 @@ export const aboutStyle = `
     }
   }
 
-  /* 瀑布流单列（严格层隔离，切断各列重排与样式重算传染） */
+  /* 瀑布流单列（切断各列重排传染，避免 paint 隔离造成层剪裁与额外图层开销） */
   .cl-about-column {
     position: relative;
     height: 100%;
     overflow: visible;
-    contain: layout paint style;
+    contain: layout;
   }
 
   /* 列流动轨道（GPU 加速与独立复合层） */
@@ -156,15 +156,11 @@ export const aboutStyle = `
     }
   }
 
-  /* 直角单项卡片：启用独立渲染隔离与 GPU 硬件加速，彻底杜绝离屏高度收缩导致的跳动 */
+  /* 直角单项卡片：精简图层，由父级列轨道统一步伐硬件加速，杜绝过度隔离导致的 Layerize 瓶颈 */
   .cl-about-item {
     position: relative;
     width: 100%;
-    contain: layout paint;
     break-inside: avoid;
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
     white-space: normal;
     background: transparent !important;
     cursor: grab;
@@ -193,10 +189,6 @@ export const aboutStyle = `
 
   .cl-about-item .item-wrapper {
     background: transparent !important;
-    contain: layout paint;
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
   }
 
   /* 图片容器：固定比例视窗，优雅纸质骨架底色，未加载前占据确定空间（零 CLS） */
@@ -208,9 +200,6 @@ export const aboutStyle = `
     border: none !important;
     box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.12);
     transition: box-shadow 0.35s ease;
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
   }
 
   .cl-about-item.is-hovered .item-image {

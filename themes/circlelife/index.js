@@ -109,10 +109,24 @@ const LayoutBase = props => {
         href='https://fonts.gstatic.com'
         crossOrigin='anonymous'
       />
+      {/* 字体非阻塞异步加载：优先级降为 Low，避免 VeryHigh 阻塞关键渲染与抢占 LCP 图片网络带宽 */}
+      <link
+        rel='preload'
+        as='style'
+        href='https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600&family=JetBrains+Mono:wght@500&family=Newsreader:wght@500&family=Noto+Serif+SC:wght@500&display=swap'
+      />
       <link
         rel='stylesheet'
         href='https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600&family=JetBrains+Mono:wght@500&family=Newsreader:wght@500&family=Noto+Serif+SC:wght@500&display=swap'
+        media='print'
+        onLoad="this.media='all'"
       />
+      <noscript>
+        <link
+          rel='stylesheet'
+          href='https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600&family=JetBrains+Mono:wght@500&family=Newsreader:wght@500&family=Noto+Serif+SC:wght@500&display=swap'
+        />
+      </noscript>
     </Head>
     <div
       id='theme-circlelife'
