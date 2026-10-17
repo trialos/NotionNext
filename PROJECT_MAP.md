@@ -12,13 +12,13 @@
    * **博主在当前会话中的直接需求与裁决拥有最高优先级**。博主可随时决定尝试新版式、重构代码或调整业务。
 1. **第一级（真实代码实现与本地现场底座）**：
    * `package.json`、`yarn.lock`、代码实际实现是依赖与技术栈版本（Next.js 15.x / Tailwind 3.4.x）的客观事实来源。
-   * 本地独有交接文档 `docs/circlelife-handover.md`（受 `.git/info/exclude` 保护）记录的生产域名（withcol.com）、分支规范（custom_theme）、作者人设与 Vercel/Notion 私密 ID 具备最高现场权威。
+   * 私有凭据与交接文档已收拢至同级私有库 `../withcol-private/docs/secrets/handover.local.md`，记录的生产域名（withcol.com）、分支规范（custom_theme）、作者人设与 Vercel/Notion 私密 ID 具备最高现场权威。
    * *注：`OPTIMIZATION_SUMMARY.md`、`PROJECT_COMPLETION_REPORT.md` 属历史归档快照，记载的 Next 14 已失效，不作为当前依据。*
 2. **第二级（核心维护契约与技术底线）**：
    * 工程规范遵循 `docs/developer/MAINTENANCE_PHILOSOPHY.zh-CN.md`。
    * Notion 内容读写遵循 `tools/notionnext-content-mcp/server.js` 与 `docs/developer/NOTIONNEXT_CONTENT_MCP.md` 中的“零 ext 写入契约”。
 3. **第三级（活态设计规范与专项 RFC）**：
-   * 主站视觉以 **`docs/design/circlelife/DESIGN.md`**（当前成熟基准）为参考。
+   * 主站视觉以私有库 **`withcol-private/docs/design-system/circlelife-DESIGN.md`**（当前成熟基准，本地由 AI 自动探测加载）为参考。
    * 特定主题遵循对应规范（如 `docs/design/xuhome/DESIGN.md`）。
    * 组件级交互遵循已实现的 `docs/developer/rfc/*`。
 4. **第四级（维护手册与用户手册）**：
@@ -32,7 +32,7 @@
 
 | 模块 / 主题 | 权威设计规范位置 | 核心范围与职责 | 适用任务类型 |
 | :--- | :--- | :--- | :--- |
-| **主站 Circle of Life 主题** | 1. **`docs/design/circlelife/DESIGN.md`**<br>2. `docs/developer/themes/CIRCLELIFE.md`<br>3. `themes/circlelife/styles/` | 当前成熟基准：纸感杂志风格、纸色 `#F5F0E4`、朱砂红 `#B24A33`、Newsreader / 思源宋体、1024px 导航、关于我 3D 摄影瀑布展墙与动态显存回收。支持随博主意图演进。 | 主站日常样式优化、影集画廊交互打磨、转筒与抽牌调整、关于我展墙与序言幕布维护 |
+| **主站 Circle of Life 主题** | 1. **`withcol-private/docs/design-system/circlelife-DESIGN.md`**（本地自动探测）<br>2. `withcol-private/docs/architecture/circlelife-THEME-ARCH.md`<br>3. `themes/circlelife/styles/` | 当前成熟基准：纸感杂志风格、纸色 `#F5F0E4`、朱砂红 `#B24A33`、Newsreader / 思源宋体、1024px 导航、关于我 3D 摄影瀑布展墙与动态显存回收。支持随博主意图演进。 | 主站日常样式优化、影集画廊交互打磨、转筒与抽牌调整、关于我展墙与序言幕布维护 |
 | **XuHome 主题** | `docs/design/xuhome/DESIGN.md` | Neo-brutalist 风格规范、全套 Token（色彩、间距、圆角）、深浅模式对比度、200ms ease-out 控制台抽屉动画 | `xuhome` 主题样式重构、布局调整、组件新增 |
 | **全局色彩系统演进** | `docs/developer/THEME_COLOR_TOKEN_ROADMAP.zh-CN.md` | 主题色变量命名规范（`<THEME>_COLOR_*` 与 `--<theme>-color-*`）、语义色迁移标准与非目标 | 主题色彩配置扩展、调色板变量化改造 |
 | **主题控制台** | `docs/developer/THEME_CONSOLE_DESIGN.zh-CN.md` | 控制台交互约定、4 个浮动入口、深浅配色分组标准、最小配色暴露清单 | 主题控制台功能扩展、交互适配、移动端响应式 |
@@ -52,14 +52,14 @@ flowchart TD
     Type -->|Notion / 内容生成| RouteMCP[内容与 MCP 任务]
     Type -->|双语翻译运维| RouteTrans[翻译工具链任务]
 
-    RouteMain --> ReadMain["1. AGENTS.md<br>2. docs/design/circlelife/DESIGN.md<br>3. docs/developer/themes/CIRCLELIFE.md<br>4. themes/circlelife/"]
+    RouteMain --> ReadMain["1. AGENTS.md<br>2. withcol-private/docs/design-system/circlelife-DESIGN.md<br>3. withcol-private/docs/architecture/circlelife-THEME-ARCH.md<br>4. themes/circlelife/"]
     RouteCore --> ReadCore["1. AGENTS.md<br>2. docs/developer/MAINTENANCE_PHILOSOPHY.zh-CN.md<br>3. 关联代码与测试用例"]
     RouteMCP --> ReadMCP["1. AGENTS.md<br>2. docs/developer/NOTIONNEXT_CONTENT_MCP.md<br>3. tools/notionnext-content-mcp/server.js"]
     RouteTrans --> ReadTrans["1. AGENTS.md<br>2. scripts/translate/README.md<br>3. scripts/translate/glossary.json"]
 ```
 
 ### 1. 主站 circlelife UI 与业务功能改造
-* **按需查阅**：`AGENTS.md`、`docs/design/circlelife/DESIGN.md`、`docs/developer/themes/CIRCLELIFE.md`。
+* **按需查阅**：`AGENTS.md`、`withcol-private/docs/design-system/circlelife-DESIGN.md`（本地环境由 AI 自动探测加载）、`themes/circlelife/`。
 * **交付要求**：尊重纸感基调，敏捷配合博主意图；本地通过 `npm run build && npm run start` 快速预览；博主批准后推送到 `custom_theme`。
 
 ### 2. 通用底层工程、数据流与 Bug 修复
@@ -79,8 +79,8 @@ flowchart TD
 ## 四、 核心代码目录速查
 
 * `themes/circlelife/`：主站当前运行的核心主题实现目录
-* `docs/design/`：官方设计规范中心（`circlelife/DESIGN.md` 为主站活态基准，`xuhome/` 为备用主题规范）
-* `docs/developer/themes/`：各主题架构与实现手册（包含 `CIRCLELIFE.md`, `CLAUDE.md`, `HEO.md` 等）
+* `docs/design/`：官方设计规范中心（`xuhome/` 为备用主题规范；主站专属纸感设计体系已迁移至私有库 `withcol-private/docs/design-system/`）
+* `docs/developer/themes/`：开源主题架构与实现手册（包含 `CLAUDE.md`, `HEO.md` 等；Circlelife 核心架构推演已迁移至私有库 `withcol-private/docs/architecture/`）
 * `pages/`：Next.js 路由入口、SSG/ISR 页面生命周期
 * `components/`：跨主题通用公共组件（`NotionPage`, `NotionTabs`, `PrismMac` 等）
 * `lib/db/SiteDataApi.js`：全站 Notion 数据清洗与拉取总入口

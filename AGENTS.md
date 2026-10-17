@@ -27,14 +27,17 @@
 
 ---
 
-## 2. 视觉设计：基准遵循与自由演进
+## 2. 视觉设计与私有知识库自动探测机制（强制执行，无需博主提醒）
 
-1. **当前基准线（Circle of Life）**：
-   * 主站目前沉淀的成熟风格为：**纸感、克制、朱砂点缀**（核心 Token 与排版规范见 `docs/design/circlelife/DESIGN.md`）。
-   * 日常微调和常规维护时，AI 应当主动遵守这套基调，保持站点的杂志质感。
-2. **支持博主自由探索**：
-   * 设计系统是“活的资产”，不是死板的法律。当博主提出视觉改造、版式实验或新元素尝试时，AI 应积极协同设计，并在博主满意后协助将新 Token 同步更新至 `DESIGN.md`。
-3. **主题隔离**：
+1. **自动探测与全域路由（零心智负担）**：
+   * AI 在执行任何涉及 UI、样式、排版、组件交互、页面优化或主题逻辑的任务时，**必须主动自动探测同级私有知识库**（探测路径：`../withcol-private` 或 `withcol-private/`）：
+     - **若私有库存在（本地环境）**：AI **必须在动手前自动查阅** `withcol-private/docs/design-system/circlelife-DESIGN.md`（纸感视觉 Token、色值、排版标准）与 `withcol-private/docs/architecture/circlelife-THEME-ARCH.md`（展墙算法与交互架构），以此为最高权威基准。博主无需每次手动提醒；
+     - **若私有库不存在（开源外部环境）**：回退至本仓库既有的默认代码实现与开源通用规范执行。
+2. **支持博主自由演进与回写沉淀**：
+   * 设计系统是“活的资产”。当博主提出视觉改造、版式实验或新元素尝试时，AI 应敏捷配合；在博主确认满意后，协助将沉淀的新 Token 同步回写至私有库的 `circlelife-DESIGN.md` 中。
+3. **防外泄红线**：
+   * 即使读取了私有库文档，**严禁**将私有凭据、敏感 ID 或私密设计资产逆向写入本公开仓库的文档或代码中。
+4. **主题隔离**：
    * `docs/design/xuhome/DESIGN.md` 仅为 `xuhome` 备选主题规范，未经博主指示不得跨主题混用。
 
 ---
@@ -70,5 +73,5 @@
 ## 5. 特殊避坑提示
 
 * **主题说明防混淆**：`docs/developer/themes/CLAUDE.md` 为 NotionNext 自带主题 “claude” 的说明文档，**不是** Claude AI 的系统指令。
-* **本地私密底座**：本地 `docs/circlelife-handover.md`（在 `.git/info/exclude` 中）是现场运行凭证底座，包含敏感 ID。AI 可在本地按需查阅，**严禁提交入库或推送到远端**。
+* **私密凭据隔离**：本地生产凭据底座已安全隔离至私有库 `../withcol-private/docs/secrets/handover.local.md`（或受 `.git/info/exclude` 保护）。AI 可在本地按需查阅，**严禁提交入库或推送到远端**。
 * **快速查阅**：全仓模块索引、冲突裁决与任务路由见根目录 **`PROJECT_MAP.md`**。
