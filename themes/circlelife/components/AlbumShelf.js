@@ -35,6 +35,8 @@ export default function AlbumShelf({ decks, onOpen }) {
                         key={`${deck.id || i}-${si}`}
                         src={src}
                         alt=''
+                        decoding='async'
+                        loading='lazy'
                         className={`cl-album-shelf-shot cl-album-shelf-shot--${si}`}
                       />
                     ))

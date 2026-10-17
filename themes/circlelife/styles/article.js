@@ -274,6 +274,9 @@ export const articleStyle = `
         background: color-mix(in srgb, var(--cl-paper-2) 45%, var(--cl-surface));
         border-radius: var(--cl-radius-sm);
       }
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-asset-wrapper-image {
+        contain: layout paint;
+      }
       /* article back */
       #theme-circlelife .cl-article-back {
         border: 0;

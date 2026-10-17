@@ -99,6 +99,7 @@ export default function AlbumLightbox({
             alt={label}
             className='cl-ag-lb-img'
             draggable={false}
+            decoding='async'
           />
           <div className='cl-ag-lb-zones'>
             <button

@@ -184,6 +184,7 @@ export default function AlbumGallery({
           <img
             src={glowA}
             alt=''
+            decoding='async'
             className={
               'cl-ag-ambient-img ' +
               (frontSlot === 'a'
@@ -201,6 +202,7 @@ export default function AlbumGallery({
           <img
             src={glowB}
             alt=''
+            decoding='async'
             className={
               'cl-ag-ambient-img ' +
               (frontSlot === 'b'
