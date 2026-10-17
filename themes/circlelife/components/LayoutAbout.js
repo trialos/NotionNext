@@ -21,24 +21,6 @@ export default function LayoutAbout(props) {
         <meta name='description' content={description} />
         <meta property='og:title' content={pageTitle} />
         <meta property='og:description' content={description} />
-
-        {/* 静默预加载首屏核心 LCP 图片（消灭 2.5s 资源延迟） */}
-        {firstCard?.src && (
-          <link
-            rel='preload'
-            as='image'
-            href={firstCard.src}
-            fetchpriority='high'
-          />
-        )}
-        {secondCard?.src && (
-          <link
-            rel='preload'
-            as='image'
-            href={secondCard.src}
-            fetchpriority='high'
-          />
-        )}
       </Head>
       <main className='relative w-full h-[100dvh] overflow-hidden'>
         {/* 沉浸式 3D 瀑布展墙与 Hero 序言封面 */}

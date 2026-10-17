@@ -24,8 +24,8 @@ export const tokenStyle = `
         --cl-shadow-sm: none;
         --cl-shadow-md: none;
         --cl-font-display: 'Newsreader', 'Noto Serif SC', 'Songti SC', serif;
-        --cl-font-body: 'Hanken Grotesk', 'Noto Sans SC', system-ui, sans-serif;
-        --cl-font-mono: 'JetBrains Mono', 'Noto Sans SC', ui-monospace, monospace;
+        --cl-font-body: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
+        --cl-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         --cl-media-radius: 10px;
         --cl-media-ratio: 4 / 3;
         --cl-ease: cubic-bezier(0.22, 0.61, 0.36, 1);

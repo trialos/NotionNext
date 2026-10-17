@@ -26,9 +26,10 @@ const AboutIndex = props => {
   return (
     <>
       <Head>
-        {/* 静默预加载首屏核心 LCP 图片（消灭 2.5s 资源延迟） */}
+        {/* 静默预加载首屏核心 LCP 图片（置顶最前列，消灭资源发现延迟） */}
         {firstCard?.src && (
           <link
+            key='preload-lcp-0'
             rel='preload'
             as='image'
             href={firstCard.src}
@@ -37,6 +38,7 @@ const AboutIndex = props => {
         )}
         {secondCard?.src && (
           <link
+            key='preload-lcp-1'
             rel='preload'
             as='image'
             href={secondCard.src}
@@ -44,6 +46,19 @@ const AboutIndex = props => {
           />
         )}
       </Head>
+      {/* SSR 预备 LCP 节点：让浏览器在解析 HTML 第一瞬间完成 DOM 绑定，彻底归零 166ms 发现延迟 */}
+      {firstCard?.src && (
+        <div className='sr-only pointer-events-none absolute h-0 w-0 overflow-hidden' aria-hidden='true'>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={firstCard.src}
+            alt=''
+            fetchPriority='high'
+            decoding='async'
+            style={{ width: 1, height: 1 }}
+          />
+        </div>
+      )}
       <DynamicLayout theme={theme} layoutName='LayoutAbout' {...props} />
     </>
   )
@@ -171,7 +186,7 @@ export async function getStaticProps({ locale }) {
                 title: img.caption ? img.caption.split(/\r?\n/)[0] : `${singleAboutPage.title} #${idx + 1}`,
                 caption: cText,
                 lines: imgLines,
-                src: img.url,
+                src: compressImage(img.url, 1200),
                 aspectRatio: finalRatio,
                 date: singleAboutPage.date?.start_date || singleAboutPage.publishDay || '',
                 author: singleAboutPage.author || '',
