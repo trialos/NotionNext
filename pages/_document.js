@@ -50,6 +50,14 @@ class MyDocument extends Document {
           <link rel='preconnect' href='https://images.unsplash.com' />
           <link rel='dns-prefetch' href='//images.unsplash.com' />
 
+          {/* Notion 核心图床与代理域名预连接（消灭 302 重定向握手延迟） */}
+          <link rel='preconnect' href='https://www.notion.so' crossOrigin='anonymous' />
+          <link rel='dns-prefetch' href='//www.notion.so' />
+          <link rel='preconnect' href='https://img.notionusercontent.com' crossOrigin='anonymous' />
+          <link rel='dns-prefetch' href='//img.notionusercontent.com' />
+          <link rel='preconnect' href='https://file.notion.so' crossOrigin='anonymous' />
+          <link rel='dns-prefetch' href='//file.notion.so' />
+
           {/* 预加载字体 */}
           {BLOG.FONT_AWESOME && (
             <>

@@ -6,6 +6,8 @@ import { adapterNotionBlockMap } from '@/lib/utils/notion.util'
 import { checkStrIsNotionId, checkStrIsUuid } from '@/lib/utils'
 import { idToUuid } from 'notion-utils'
 import { extractImagesFromBlockMap } from '@/themes/circlelife/components/extractPhotoImages'
+import { compressImage } from '@/lib/db/notion/mapImage'
+import Head from 'next/head'
 import { DynamicLayout } from '@/themes/theme'
 
 /**
@@ -19,7 +21,32 @@ import { DynamicLayout } from '@/themes/theme'
  */
 const AboutIndex = props => {
   const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
-  return <DynamicLayout theme={theme} layoutName='LayoutAbout' {...props} />
+  const firstCard = props.aboutCards?.[0]
+  const secondCard = props.aboutCards?.[1]
+  return (
+    <>
+      <Head>
+        {/* 静默预加载首屏核心 LCP 图片（消灭 2.5s 资源延迟） */}
+        {firstCard?.src && (
+          <link
+            rel='preload'
+            as='image'
+            href={firstCard.src}
+            fetchpriority='high'
+          />
+        )}
+        {secondCard?.src && (
+          <link
+            rel='preload'
+            as='image'
+            href={secondCard.src}
+            fetchpriority='high'
+          />
+        )}
+      </Head>
+      <DynamicLayout theme={theme} layoutName='LayoutAbout' {...props} />
+    </>
+  )
 }
 
 export async function getStaticProps({ locale }) {
@@ -81,19 +108,24 @@ export async function getStaticProps({ locale }) {
               .filter(Boolean)
           : [post.title || '关于', post.category || 'Circle of Life', 'Self-Portrait', post.publishDay || '']
 
-            const cover = post.pageCoverThumbnail || post.pageCover || extractedImages[0]?.url || ''
+            const rawCover = post.pageCoverThumbnail || post.pageCover || extractedImages[0]?.url || ''
+            const cover = compressImage(rawCover, 1200)
 
-            cards.push({
-              id: post.id,
-              title: post.title || '关于',
-              caption: captionText,
-              lines,
-              src: cover,
-              date: post.date?.start_date || post.publishDay || '',
-              author: post.author || '',
-              category: post.category || '关于',
-              slug: post.slug || ''
-            })
+        const defaultRatios = [1.5, 1.25, 0.8, 1.333, 1.0, 1.4]
+        const firstImgRatio = extractedImages[0]?.aspectRatio || defaultRatios[cards.length % defaultRatios.length]
+
+        cards.push({
+          id: post.id,
+          title: post.title || '关于',
+          caption: captionText,
+          lines,
+          src: cover,
+          aspectRatio: firstImgRatio,
+          date: post.date?.start_date || post.publishDay || '',
+          author: post.author || '',
+          category: post.category || '关于',
+          slug: post.slug || ''
+        })
       }
     } catch (err) {
       console.warn('[about] fetch post blocks error', post.id, err)
@@ -131,12 +163,16 @@ export async function getStaticProps({ locale }) {
                     singleAboutPage.publishDay || '2024'
                   ]
 
+              const defaultRatios = [1.5, 1.25, 0.8, 1.333, 1.0, 1.4]
+              const finalRatio = img.aspectRatio || defaultRatios[cards.length % defaultRatios.length]
+
               cards.push({
                 id: `${singleAboutPage.id}-img-${idx}`,
                 title: img.caption ? img.caption.split(/\r?\n/)[0] : `${singleAboutPage.title} #${idx + 1}`,
                 caption: cText,
                 lines: imgLines,
                 src: img.url,
+                aspectRatio: finalRatio,
                 date: singleAboutPage.date?.start_date || singleAboutPage.publishDay || '',
                 author: singleAboutPage.author || '',
                 category: '关于',
@@ -176,12 +212,16 @@ export async function getStaticProps({ locale }) {
             post.publishDay || '2024'
           ]
 
+      const defaultRatios = [1.5, 1.25, 0.8, 1.333, 1.0, 1.4]
+      const finalRatio = defaultRatios[cards.length % defaultRatios.length]
+
       cards.push({
         id: post.id,
         title: post.title || '时光的弧线',
         caption: captionText,
         lines,
-        src: post.pageCoverThumbnail || post.pageCover,
+        src: compressImage(post.pageCoverThumbnail || post.pageCover, 1200),
+        aspectRatio: finalRatio,
         date: post.date?.start_date || post.publishDay || '',
         author: post.author || 'Felix',
         category: post.category || '关于',

@@ -143,4 +143,39 @@ describe('mapImgUrl 外链图片', () => {
       expect(source).not.toContain('width=800')
     })
   })
+
+  describe('Notion 官方代理与 attachment 图床压缩（修复 iOS 776MB 内存溢出）', () => {
+    it('attachment: 新版直链通过 mapImgUrl 转换后注入 width 和 cache=v2', () => {
+      const block = {
+        type: 'image',
+        id: 'attach-block-1',
+        format: { block_width: 1200 }
+      }
+      const ret = mapImgUrl(
+        'attachment:attach-block-1:photo.jpg',
+        block,
+        'block',
+        true
+      )
+
+      expect(ret).toContain(`${BLOG.NOTION_HOST}/image/`)
+      expect(ret).toContain('width=1200')
+      expect(ret).toContain('cache=v2')
+    })
+
+    it('https://file.notion.so/f/f/... 签名链接还原为 attachment 后同样注入压缩参数', () => {
+      const block = {
+        type: 'image',
+        id: 'file-notion-block-2',
+        format: { block_width: 800 }
+      }
+      const signedUrl =
+        'https://file.notion.so/f/f/user-id/file-id/photo.png?table=block&id=file-notion-block-2'
+      const ret = mapImgUrl(signedUrl, block, 'block', true)
+
+      expect(ret).toContain(`${BLOG.NOTION_HOST}/image/`)
+      expect(ret).toContain('width=800')
+      expect(ret).toContain('cache=v2')
+    })
+  })
 })

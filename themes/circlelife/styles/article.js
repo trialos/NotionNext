@@ -233,6 +233,12 @@ export const articleStyle = `
       #theme-circlelife #article-wrapper.cl-prose-wrap .notion-page-content-inner {
         padding: 0 !important;
       }
+      /* 渲染路径优化：对深层长文 Notion Block 启用 content-visibility 跳过离屏布局排版，加速首次 Layout 与 Commit */
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-page-content-inner > *:nth-child(n + 15),
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-page-content > *:nth-child(n + 15) {
+        content-visibility: auto;
+        contain-intrinsic-size: auto 60px;
+      }
       #theme-circlelife #article-wrapper.cl-prose-wrap h1,
       #theme-circlelife #article-wrapper.cl-prose-wrap h2,
       #theme-circlelife #article-wrapper.cl-prose-wrap h3,

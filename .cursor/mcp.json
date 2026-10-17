@@ -3,6 +3,10 @@
     "notionnext-content": {
       "command": "node",
       "args": ["tools/notionnext-content-mcp/server.js"]
+    },
+    "safari": {
+      "command": "/usr/bin/safaridriver",
+      "args": ["--mcp"]
     }
   }
 }
