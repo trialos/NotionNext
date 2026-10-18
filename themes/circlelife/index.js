@@ -20,11 +20,12 @@ import SmartLink from '@/components/SmartLink'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import BlogListArchive from './components/BlogListArchive'
 import { BlogListPage } from './components/BlogListPage'
 import { BlogListScroll } from './components/BlogListScroll'
 import AlbumStage from './components/AlbumStage'
+import { buildAlbumDecks } from './components/albumUtils'
 import LayoutAbout from './components/LayoutAbout'
 import { AlbumUIProvider } from './components/albumContext'
 import ArticleBack from './components/ArticleBack'
@@ -158,19 +159,26 @@ const LayoutBase = props => {
                   ? 'w-full max-w-5xl'
                   : 'w-full max-w-3xl'
             }`}>
-            <Transition
-              show={!onLoading}
-              appear={true}
-              enter='transition ease-in-out duration-700 transform order-first'
-              enterFrom='opacity-0 translate-y-16'
-              enterTo='opacity-100'
-              leave='transition ease-in-out duration-300 transform'
-              leaveFrom='opacity-100 translate-y-0'
-              leaveTo='opacity-0 -translate-y-16'
-              unmount={false}>
-              {props.slotTop}
-              {children}
-            </Transition>
+            {isAlbumPage ? (
+              <div className='w-full'>
+                {props.slotTop}
+                {children}
+              </div>
+            ) : (
+              <Transition
+                show={!onLoading}
+                appear={true}
+                enter='transition ease-in-out duration-700 transform order-first'
+                enterFrom='opacity-0 translate-y-16'
+                enterTo='opacity-100'
+                leave='transition ease-in-out duration-300 transform'
+                leaveFrom='opacity-100 translate-y-0'
+                leaveTo='opacity-0 -translate-y-16'
+                unmount={false}>
+                {props.slotTop}
+                {children}
+              </Transition>
+            )}
           </div>
 
           {showSidebar && (
@@ -388,10 +396,32 @@ const LayoutSlug = props => {
  * 影集：卡片舞台
  */
 const LayoutAlbum = props => {
+  const decks = useMemo(
+    () => buildAlbumDecks(props.photos || []),
+    [props.photos]
+  )
+  const firstDeck = decks[0]
+  const lcpCover =
+    firstDeck?.photos?.[0]?.cover ||
+    firstDeck?.photos?.[0]?.url ||
+    ''
+
   return (
-    <div className='cl-album-page w-full'>
-      <AlbumStage pages={props.photos || []} />
-    </div>
+    <>
+      {lcpCover && (
+        <Head>
+          <link
+            rel='preload'
+            as='image'
+            href={lcpCover}
+            fetchPriority='high'
+          />
+        </Head>
+      )}
+      <div className='cl-album-page w-full'>
+        <AlbumStage pages={props.photos || []} />
+      </div>
+    </>
   )
 }
 

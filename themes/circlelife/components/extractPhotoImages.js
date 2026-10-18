@@ -21,7 +21,17 @@ export function extractImagesFromBlockMap(blockMap, pageId, pageMeta = {}) {
   }
 
   const push = (id, url, caption = '', aspectRatio = null) => {
-    if (!url || seen.has(url)) return
+    if (!url) return
+    const existing = images.find(img => img.url === url)
+    if (existing) {
+      if (!existing.caption && caption) {
+        existing.caption = caption
+      }
+      if (!existing.aspectRatio && aspectRatio) {
+        existing.aspectRatio = aspectRatio
+      }
+      return
+    }
     seen.add(url)
     images.push({ id: id || url, url, caption: caption || '', aspectRatio })
   }
@@ -43,13 +53,35 @@ export function extractImagesFromBlockMap(blockMap, pageId, pageMeta = {}) {
     : Object.keys(blocks)
 
   const parseCaption = block => {
-    if (!block?.properties?.caption) return ''
-    const segs = block.properties.caption
-    const text = Array.isArray(segs)
-      ? segs.map(part => (Array.isArray(part) ? part[0] : (part || ''))).join('')
-      : String(segs || '')
-    // 排除自动上传时带入的文件名
-    return /\.(jpe?g|png|gif|webp|heic|avif)$/i.test(text.trim()) ? '' : text.trim()
+    if (!block) return ''
+    // 1. properties.caption (Notion 原生图片注释)
+    const segs = block.properties?.caption
+    if (segs) {
+      const text = Array.isArray(segs)
+        ? segs.map(part => (Array.isArray(part) ? part[0] : (part || ''))).join('')
+        : String(segs || '')
+      if (text.trim() && !/\.(jpe?g|png|gif|webp|heic|avif)$/i.test(text.trim())) {
+        return text.trim()
+      }
+    }
+    // 2. format.caption
+    if (block.format?.caption && typeof block.format.caption === 'string') {
+      const text = block.format.caption.trim()
+      if (text && !/\.(jpe?g|png|gif|webp|heic|avif)$/i.test(text)) {
+        return text
+      }
+    }
+    // 3. properties.title (如果用户输入了非图片文件名的文字说明)
+    const titleSegs = block.properties?.title
+    if (titleSegs) {
+      const text = Array.isArray(titleSegs)
+        ? titleSegs.map(part => (Array.isArray(part) ? part[0] : (part || ''))).join('')
+        : String(titleSegs || '')
+      if (text.trim() && !/\.(jpe?g|png|gif|webp|heic|avif)$/i.test(text.trim())) {
+        return text.trim()
+      }
+    }
+    return ''
   }
 
   for (const id of contentIds) {

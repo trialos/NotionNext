@@ -65,17 +65,27 @@ export const MenuItemDrop = ({
       if (!isAlbumPath(link?.href)) return false
       const path = (router?.asPath || '').split('?')[0].replace(/\/$/, '')
       const onAlbum = path === '/album'
-      if (!onAlbum) return false
-      // 已在影集页：画廊→书架；书架保持。Context 未就绪则退回普通导航
-      const goShelf = albumUI?.goShelf
-      if (!goShelf) return false
-      e.preventDefault()
-      e.stopPropagation?.()
-      goShelf()
-      onNavigate?.()
-      return true
+      if (onAlbum) {
+        // 已在影集页：画廊→书架；书架保持
+        const goShelf = albumUI?.goShelf
+        if (goShelf) {
+          e.preventDefault()
+          e.stopPropagation?.()
+          goShelf()
+          onNavigate?.()
+          return true
+        }
+      } else {
+        // 未在影集页：强制以纯净路径 '/album' 进站，彻底切断任何遗留的 query 参数
+        e.preventDefault()
+        e.stopPropagation?.()
+        onNavigate?.()
+        router.push('/album')
+        return true
+      }
+      return false
     },
-    [link?.href, router?.asPath, onNavigate, albumUI]
+    [link?.href, router, onNavigate, albumUI]
   )
 
   const clearCloseTimer = useCallback(() => {

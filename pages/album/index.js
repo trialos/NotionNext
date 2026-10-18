@@ -17,7 +17,28 @@ const AlbumIndex = props => {
   return <DynamicLayout theme={theme} layoutName='LayoutAlbum' {...props} />
 }
 
+// 服务端相册数据内存缓存（避免开发调试与短期重复请求重算几十个 Block Map）
+let albumCache = {
+  data: null,
+  timestamp: 0
+}
+const ALBUM_CACHE_TTL = 120 * 1000 // 120 秒缓存
+
 export async function getStaticProps({ locale }) {
+  const now = Date.now()
+  if (albumCache.data && now - albumCache.timestamp < ALBUM_CACHE_TTL) {
+    return {
+      props: { ...albumCache.data },
+      revalidate: process.env.EXPORT
+        ? undefined
+        : siteConfig(
+            'NEXT_REVALIDATE_SECOND',
+            BLOG.NEXT_REVALIDATE_SECOND,
+            albumCache.data?.NOTION_CONFIG
+          )
+    }
+  }
+
   const props = await fetchGlobalAllData({ from: 'album-index', locale })
   const all = props.allPages || []
   const photoPages = cleanPostSummaries(
@@ -57,6 +78,12 @@ export async function getStaticProps({ locale }) {
 
   props.photos = enriched
   delete props.allPages
+
+  albumCache = {
+    data: { ...props },
+    timestamp: now
+  }
+
   return {
     props,
     revalidate: process.env.EXPORT

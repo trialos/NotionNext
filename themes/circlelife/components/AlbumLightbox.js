@@ -97,6 +97,8 @@ export default function AlbumLightbox({
           <img
             src={photo.url || photo.cover}
             alt={label}
+            width='1600'
+            height='1200'
             className='cl-ag-lb-img'
             draggable={false}
             decoding='async'

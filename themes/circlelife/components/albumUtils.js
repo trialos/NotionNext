@@ -77,6 +77,7 @@ export function expandPhotoPage(p) {
         url: img.url,
         cover: img.url,
         caption,
+        aspectRatio: img.aspectRatio || null,
         indexInPage: i,
         totalInPage: imgs.length
       }
@@ -91,7 +92,7 @@ export function expandPhotoPage(p) {
       id: p.id,
       url: cover,
       cover,
-      caption: '',
+      caption: uniqueCaption(p.caption || '', pageTitle, pageSummary) || '',
       indexInPage: 0,
       totalInPage: 1
     }

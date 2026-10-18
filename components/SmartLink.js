@@ -54,8 +54,12 @@ const SmartLink = ({ href, children, ...rest }) => {
     const queryString = window.location.search?.slice(1) || ''
     const params = new URLSearchParams(queryString)
     const preserved = {}
+    // 排除页面与路由私有状态（如影集画廊参数 view/deck、分页参数 page、搜索关键词 keyword 等），仅允许全局状态（如主题预览 theme）跨页面透传
+    const EXCLUDED_KEYS = new Set(['view', 'deck', 'photo', 'page', 'keyword', 'slot'])
     for (const [key, value] of params.entries()) {
-      if (value !== '') preserved[key] = value
+      if (value !== '' && !EXCLUDED_KEYS.has(key)) {
+        preserved[key] = value
+      }
     }
     return preserved
   }

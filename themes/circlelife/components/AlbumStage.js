@@ -3,9 +3,10 @@ import { useRouter } from 'next/router'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import CONFIG from '../config'
 import { useAlbumUI } from './albumContext'
-import AlbumGallery from './AlbumGallery'
-import AlbumRail from './AlbumRail'
-import AlbumShelf from './AlbumShelf'
+import AlbumDeckNav from './AlbumDeckNav'
+import AlbumInfiniteWall from './AlbumInfiniteWall'
+import AlbumLightbox from './AlbumLightbox'
+import AlbumShelfStack from './AlbumShelfStack'
 import {
   buildAlbumHref,
   findDeckIndexById,
@@ -14,327 +15,130 @@ import {
 import { buildAlbumDecks } from './albumUtils'
 
 /**
- * 影集：默认书架 · 点开长画廊（可邻辑）· URL ?view=&deck=
+ * 影集舞台 (AlbumStage)
+ * 两态极简架构：
+ * 1. 书架态 (Shelf)：全部影集封面总览与统计
+ * 2. 画廊态 (Gallery)：顶栏横向快切轨道 + 专辑专属无限瀑布流 + 全屏灯箱
  */
 export default function AlbumStage({ pages }) {
   const router = useRouter()
   const albumUI = useAlbumUI()
   const decks = useMemo(() => buildAlbumDecks(pages), [pages])
-  const scrollerRef = useRef(null)
+
   const [view, setView] = useState('shelf')
   const [activeIndex, setActiveIndex] = useState(0)
-  const entryIndexRef = useRef(null)
-  const spyLockedRef = useRef(false)
+  const [lightboxPhotoIndex, setLightboxPhotoIndex] = useState(null)
+  const [isGalleryScrolled, setIsGalleryScrolled] = useState(false)
+
   const urlSyncLockRef = useRef(false)
-  const deckQueryRef = useRef(router.query.deck)
-  const replaceAlbumUrlRef = useRef(null)
-
-  // 滚动根同时喂给本地 spy 与 Context（Header 收起监听）
-  const registerScrollRoot = albumUI?.registerScrollRoot
-  const snapRef = useCallback(
-    el => {
-      scrollerRef.current = el
-      if (registerScrollRoot) registerScrollRoot(el)
-    },
-    [registerScrollRoot]
-  )
-
-  const scrollToDeck = useCallback((i, { smooth = true } = {}) => {
-    const root = scrollerRef.current
-    if (!root) return false
-    const sections = root.querySelectorAll('.cl-album-section')
-    const el = sections[i]
-    if (!el) return false
-    root.scrollTo({
-      top: el.offsetTop,
-      behavior: smooth ? 'smooth' : 'auto'
-    })
-    setActiveIndex(i)
-    return true
-  }, [])
 
   const replaceAlbumUrl = useCallback(
     ({ view: v, deckId }) => {
       if (!router?.replace) return
       urlSyncLockRef.current = true
       const href = buildAlbumHref({ view: v, deckId })
-      router.replace(href, undefined, { shallow: true, scroll: false }).finally(
-        () => {
+      router
+        .replace(href, undefined, { shallow: true, scroll: false })
+        .finally(() => {
           window.setTimeout(() => {
             urlSyncLockRef.current = false
-          }, 50)
-        }
-      )
+          }, 60)
+        })
     },
     [router]
   )
-  replaceAlbumUrlRef.current = replaceAlbumUrl
-  deckQueryRef.current = router.query.deck
 
+  // 打开某个影集进入画廊态
   const openGallery = useCallback(
     i => {
       const deck = decks[i]
       if (!deck) return
-      entryIndexRef.current = i
-      spyLockedRef.current = true
       setActiveIndex(i)
       setView('gallery')
+      setLightboxPhotoIndex(null)
       replaceAlbumUrl({ view: 'gallery', deckId: deck.id })
     },
     [decks, replaceAlbumUrl]
   )
 
+  // 返回书架总览
   const backToShelf = useCallback(() => {
     setView('shelf')
-    entryIndexRef.current = null
-    spyLockedRef.current = false
     setActiveIndex(0)
+    setLightboxPhotoIndex(null)
     replaceAlbumUrl({ view: 'shelf' })
   }, [replaceAlbumUrl])
 
-  // URL → 状态（权威）
+  // 画廊快切轨道切换画辑
+  const selectDeck = useCallback(
+    i => {
+      const deck = decks[i]
+      if (!deck) return
+      setActiveIndex(i)
+      setLightboxPhotoIndex(null)
+      replaceAlbumUrl({ view: 'gallery', deckId: deck.id })
+    },
+    [decks, replaceAlbumUrl]
+  )
+
+  // URL 驱动权威状态同步
   useEffect(() => {
     if (!router.isReady) return
     if (urlSyncLockRef.current) return
-    const { view: qView, deck } = parseAlbumQuery(router.query)
-    if (qView === 'gallery') {
-      const i = findDeckIndexById(decks, deck)
+
+    const { view: qView, deck: qDeck } = parseAlbumQuery(router.query)
+
+    if (qView === 'gallery' || qDeck) {
+      const i = findDeckIndexById(decks, qDeck)
       if (i < 0) {
         setView('shelf')
         setActiveIndex(0)
-        if (deck || router.query.view === 'gallery') {
+        if (qDeck || router.query.view === 'gallery') {
           replaceAlbumUrl({ view: 'shelf' })
         }
         return
       }
       if (view !== 'gallery' || activeIndex !== i) {
-        entryIndexRef.current = i
-        spyLockedRef.current = true
         setActiveIndex(i)
         setView('gallery')
       }
     } else if (view !== 'shelf') {
       setView('shelf')
-      entryIndexRef.current = null
-      spyLockedRef.current = false
+      setActiveIndex(0)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.isReady, router.query.view, router.query.deck, decks, replaceAlbumUrl])
+  }, [router.isReady, router.query, decks, view, activeIndex, replaceAlbumUrl])
 
-  // 画廊态：藏页脚 + 通知顶栏
+  // 画廊态控制页面全局类（隐藏默认页脚，适配全屏视差画廊）
   useEffect(() => {
     if (typeof document === 'undefined') return undefined
     const root = document.documentElement
-    if (view === 'gallery') root.classList.add('cl-album-gallery-active')
-    else root.classList.remove('cl-album-gallery-active')
+    if (view === 'gallery') {
+      root.classList.add('cl-album-gallery-active')
+    } else {
+      root.classList.remove('cl-album-gallery-active')
+    }
     return () => root.classList.remove('cl-album-gallery-active')
   }, [view])
 
-  // 点导航「影集」回书架：经 Context 注册，替代 cl-album-go-shelf 事件
+  // 导航栏点击「影集」回归书架
   useEffect(() => {
     if (!albumUI?.registerGoShelf) return undefined
     albumUI.registerGoShelf(backToShelf)
     return () => albumUI.registerGoShelf(null)
   }, [albumUI, backToShelf])
 
-  // 进入画廊定位
-  useEffect(() => {
-    if (view !== 'gallery') return undefined
-    const target =
-      entryIndexRef.current != null ? entryIndexRef.current : activeIndex
+  // 灯箱回调挂载（保证在所有条件返回前无条件声明）
+  const handlePhotoClick = useCallback(idx => {
+    setLightboxPhotoIndex(idx)
+  }, [])
 
-    let cancelled = false
-    const run = () => {
-      if (cancelled) return
-      const ok = scrollToDeck(target, { smooth: false })
-      if (!ok) {
-        window.requestAnimationFrame(run)
-        return
-      }
-      window.setTimeout(() => {
-        if (cancelled) return
-        scrollToDeck(target, { smooth: false })
-        entryIndexRef.current = null
-        spyLockedRef.current = false
-      }, 80)
-    }
-    const t = window.setTimeout(run, 16)
-    const tLater = window.setTimeout(() => {
-      if (!cancelled) scrollToDeck(target, { smooth: false })
-    }, 320)
-    return () => {
-      cancelled = true
-      window.clearTimeout(t)
-      window.clearTimeout(tLater)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [view, scrollToDeck])
+  const handleCloseLightbox = useCallback(() => {
+    setLightboxPhotoIndex(null)
+  }, [])
 
-  // iOS Safari 会忽略滚动子项的 dvh/百分比高度，一屏就露出两辑，吸附也不触发。
-  // 用可视高度把每一辑锁成和滚动口一样高，松手后再吸到最近一辑。
-  useEffect(() => {
-    if (view !== 'gallery') return undefined
-    const root = scrollerRef.current
-    if (!root) return undefined
-
-    const sectionsOf = () => [...root.querySelectorAll('.cl-album-section')]
-
-    const lockHeights = () => {
-      const viewport = Math.round(
-        window.visualViewport?.height || window.innerHeight || 0
-      )
-      if (!viewport) return 0
-      let h = root.clientHeight
-      if (h < viewport * 0.7 || h > viewport * 1.05) {
-        root.style.height = viewport + 'px'
-        root.style.maxHeight = viewport + 'px'
-        root.style.flex = 'none'
-        h = root.clientHeight || viewport
-      }
-      sectionsOf().forEach(section => {
-        section.style.height = h + 'px'
-        section.style.minHeight = h + 'px'
-        section.style.maxHeight = h + 'px'
-        section.style.flex = 'none'
-      })
-      return h
-    }
-
-    const nearest = () => {
-      const sections = sectionsOf()
-      let best = 0
-      let bestDist = Infinity
-      sections.forEach((section, i) => {
-        const d = Math.abs(section.offsetTop - root.scrollTop)
-        if (d < bestDist) {
-          bestDist = d
-          best = i
-        }
-      })
-      return { sections, best, bestDist }
-    }
-
-    let timer = 0
-    let touching = 0
-    const settle = () => {
-      if (touching || spyLockedRef.current) return
-      const { sections, best, bestDist } = nearest()
-      const el = sections[best]
-      if (!el || bestDist <= 2) return
-      spyLockedRef.current = true
-      root.scrollTo({ top: el.offsetTop, behavior: 'auto' })
-      setActiveIndex(best)
-      const id = el.getAttribute('data-deck-id')
-      if (id && deckQueryRef.current !== id) {
-        replaceAlbumUrlRef.current({ view: 'gallery', deckId: id })
-      }
-      window.setTimeout(() => {
-        spyLockedRef.current = false
-      }, 80)
-    }
-    const arm = ms => {
-      window.clearTimeout(timer)
-      timer = window.setTimeout(settle, ms)
-    }
-    const onScroll = () => {
-      if (!touching) arm(140)
-    }
-    const onTouchStart = () => {
-      touching += 1
-      window.clearTimeout(timer)
-    }
-    const onTouchEnd = () => {
-      touching = Math.max(0, touching - 1)
-      if (!touching) arm(180)
-    }
-
-    lockHeights()
-    const ro = new ResizeObserver(() => {
-      lockHeights()
-    })
-    ro.observe(root)
-    window.visualViewport?.addEventListener('resize', lockHeights)
-    root.addEventListener('scroll', onScroll, { passive: true })
-    root.addEventListener('touchstart', onTouchStart, { passive: true })
-    root.addEventListener('touchend', onTouchEnd, { passive: true })
-    root.addEventListener('touchcancel', onTouchEnd, { passive: true })
-    return () => {
-      window.clearTimeout(timer)
-      ro.disconnect()
-      window.visualViewport?.removeEventListener('resize', lockHeights)
-      root.removeEventListener('scroll', onScroll)
-      root.removeEventListener('touchstart', onTouchStart)
-      root.removeEventListener('touchend', onTouchEnd)
-      root.removeEventListener('touchcancel', onTouchEnd)
-      root.style.height = ''
-      root.style.maxHeight = ''
-      root.style.flex = ''
-      sectionsOf().forEach(section => {
-        section.style.height = ''
-        section.style.minHeight = ''
-        section.style.maxHeight = ''
-        section.style.flex = ''
-      })
-    }
-  }, [view, decks.length])
-
-  // scroll spy + URL deck 同步
-  useEffect(() => {
-    if (view !== 'gallery') return undefined
-    const root = scrollerRef.current
-    if (!root || !decks.length) return undefined
-    const onScroll = () => {
-      if (spyLockedRef.current) return
-      const sections = [...root.querySelectorAll('.cl-album-section')]
-      if (!sections.length) return
-      const mid = root.scrollTop + root.clientHeight * 0.35
-      let best = 0
-      let bestDist = Infinity
-      sections.forEach((s, i) => {
-        const c = s.offsetTop + s.offsetHeight * 0.25
-        const d = Math.abs(c - mid)
-        if (d < bestDist) {
-          bestDist = d
-          best = i
-        }
-      })
-      setActiveIndex(prev => {
-        if (prev === best) return prev
-        const id = decks[best]?.id
-        if (id && router.query.deck !== String(id)) {
-          replaceAlbumUrl({ view: 'gallery', deckId: id })
-        }
-        return best
-      })
-    }
-    root.addEventListener('scroll', onScroll, { passive: true })
-    return () => root.removeEventListener('scroll', onScroll)
-  }, [decks, view, replaceAlbumUrl, router.query.deck])
-
-  useEffect(() => {
-    if (view !== 'gallery') return undefined
-    if (decks.length <= 1) return undefined
-    const onKey = e => {
-      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return
-      if (document.querySelector('.cl-ag-lb')) return
-      e.preventDefault()
-      const next =
-        e.key === 'ArrowDown'
-          ? Math.min(decks.length - 1, activeIndex + 1)
-          : Math.max(0, activeIndex - 1)
-      const id = decks[next]?.id
-      entryIndexRef.current = next
-      spyLockedRef.current = true
-      setActiveIndex(next)
-      scrollToDeck(next, { smooth: true })
-      if (id) replaceAlbumUrl({ view: 'gallery', deckId: id })
-      window.setTimeout(() => {
-        spyLockedRef.current = false
-      }, 400)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [decks, activeIndex, scrollToDeck, view, replaceAlbumUrl])
+  const handleGoLightbox = useCallback((delta, total) => {
+    setLightboxPhotoIndex(prev => (prev + delta + total) % total)
+  }, [])
 
   const emptyHint = siteConfig(
     'CIRCLELIFE_ALBUM_EMPTY_HINT',
@@ -365,45 +169,51 @@ export default function AlbumStage({ pages }) {
   if (view === 'shelf') {
     return (
       <div className='cl-album-shell is-shelf'>
-        <AlbumShelf decks={decks} onOpen={openGallery} />
+        <AlbumShelfStack decks={decks} onOpen={openGallery} />
       </div>
     )
   }
 
+  const currentDeck = decks[activeIndex] || decks[0]
+  const currentPhotos = currentDeck?.photos || []
+  const activePhoto =
+    lightboxPhotoIndex !== null ? currentPhotos[lightboxPhotoIndex] : null
+
   return (
     <div className='cl-album-shell is-gallery'>
-      <AlbumRail
-        decks={decks}
-        activeIndex={activeIndex}
-        onSelect={i => {
-          const id = decks[i]?.id
-          entryIndexRef.current = i
-          spyLockedRef.current = true
-          setActiveIndex(i)
-          scrollToDeck(i, { smooth: true })
-          if (id) replaceAlbumUrl({ view: 'gallery', deckId: id })
-          window.setTimeout(() => {
-            spyLockedRef.current = false
-          }, 400)
-        }}
+      {/* 核心摄影瀑布流展墙 */}
+      <AlbumInfiniteWall
+        key={currentDeck.id || activeIndex}
+        photos={currentPhotos}
+        albumName={currentDeck.name}
+        albumSummary={currentPhotos[0]?.summary || ''}
+        albumDate={currentPhotos[0]?.date || ''}
+        onBackToShelf={backToShelf}
+        onPhotoClick={handlePhotoClick}
+        isPaused={lightboxPhotoIndex !== null}
+        onScrollChange={setIsGalleryScrolled}
       />
-      <div className='cl-album-snap' ref={snapRef}>
-        {decks.map((deck, i) => (
-          <section
-            key={deck.id || deck.name}
-            className='cl-album-section'
-            data-album={deck.name}
-            data-deck-id={deck.id}
-            data-index={i}
-            aria-label={`影集 ${deck.name}`}>
-            <AlbumGallery
-              albumName={deck.name}
-              photos={deck.photos}
-              onBackToShelf={backToShelf}
-            />
-          </section>
-        ))}
-      </div>
+
+      {/* 右下角灵动影集快速切辑器 */}
+      <AlbumDeckNav
+        decks={decks}
+        activeDeckIndex={activeIndex}
+        onBack={backToShelf}
+        onSelect={selectDeck}
+        isScrolled={isGalleryScrolled}
+      />
+
+      {/* 全屏灯箱 */}
+      {activePhoto && lightboxPhotoIndex !== null && (
+        <AlbumLightbox
+          title={activePhoto.title || currentDeck.name}
+          photo={activePhoto}
+          index={lightboxPhotoIndex}
+          total={currentPhotos.length}
+          onClose={handleCloseLightbox}
+          onGo={delta => handleGoLightbox(delta, currentPhotos.length)}
+        />
+      )}
     </div>
   )
 }

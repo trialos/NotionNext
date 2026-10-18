@@ -109,6 +109,18 @@ describe('SEO structured data', () => {
       url: 'https://example.com'
     })
   })
+
+  it('generates correct SEO title and meta for /album route', () => {
+    const { getSEOMeta } = require('@/components/SEO')
+    const meta = getSEOMeta(
+      { siteInfo: { title: 'Example Blog', description: 'Photo collection', pageCover: '/cover.jpg' } },
+      { route: '/album', asPath: '/album' },
+      'circlelife'
+    )
+    expect(meta.title).toBe('影集 | Example Blog')
+    expect(meta.slug).toBe('album')
+    expect(meta.type).toBe('website')
+  })
 })
 
 describe('SEO font resource hints', () => {

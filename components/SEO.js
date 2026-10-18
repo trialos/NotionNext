@@ -378,7 +378,7 @@ const getIsoTime = value => {
  * @param {*} props
  * @param {*} router
  */
-const getSEOMeta = (props, router, locale) => {
+export const getSEOMeta = (props, router, locale) => {
   const { post, siteInfo, tag, category, page } = props
   const keyword = router?.query?.s
 
@@ -469,6 +469,14 @@ const getSEOMeta = (props, router, locale) => {
         description: `${siteInfo?.description}`,
         image: `${siteInfo?.pageCover}`,
         slug: 'category',
+        type: 'website'
+      }
+    case '/album':
+      return {
+        title: `${locale?.NAV?.ALBUM || '影集'} | ${siteInfo?.title}`,
+        description: `${siteInfo?.description}`,
+        image: `${siteInfo?.pageCover}`,
+        slug: 'album',
         type: 'website'
       }
     default:
