@@ -6,6 +6,7 @@ import {
   fetchGlobalAllData,
   getPostBlocks
 } from '@/lib/db/SiteDataApi'
+import { loadPhotoImages } from '@/lib/db/notion/photoImages'
 import { formatNotionBlock } from '@/lib/db/notion/getPostBlocks'
 import { generateRobotsTxt } from '@/lib/utils/robots.txt'
 import { generateRss, shouldGenerateRssForLocale } from '@/lib/utils/rss'
@@ -130,6 +131,51 @@ export async function getStaticProps(req) {
     props.posts = cleanPostSummaries(props.posts)
   }
   props.latestPosts = cleanPostSummaries(props.latestPosts)
+  // 首页影集转筒：最新 N 辑（type=Photo）拉正文图，与影集页共用管线；
+  // 不依赖 Notion 页面封面，发新一辑自动出现
+  const filmCount =
+    Number(siteConfig('CIRCLELIFE_HOME_FILM_COUNT', 6, props?.NOTION_CONFIG)) ||
+    6
+  const filmBatch = Math.max(
+    1,
+    Math.min(
+      8,
+      Number(
+        siteConfig('CIRCLELIFE_ALBUM_FETCH_BATCH', 4, props?.NOTION_CONFIG)
+      ) || 4
+    )
+  )
+  const photoPages = cleanPostSummaries(
+    (props.allPages || [])
+      .filter(
+        p =>
+          p &&
+          (p.type === 'Photo' || p.type === 'photo') &&
+          p.status === 'Published'
+      )
+      .sort((a, b) => (b.publishDate || 0) - (a.publishDate || 0))
+      .slice(0, filmCount)
+  )
+  const photoDecks = []
+  for (let i = 0; i < photoPages.length; i += filmBatch) {
+    const slice = photoPages.slice(i, i + filmBatch)
+    const parts = await Promise.all(
+      slice.map(async p => {
+        const images = (await loadPhotoImages(p))
+          .map(im => im?.url)
+          .filter(Boolean)
+        return {
+          id: p.id,
+          name: p.title,
+          date: p.publishDay,
+          count: images.length,
+          images
+        }
+      })
+    )
+    photoDecks.push(...parts.filter(d => d.images.length > 0))
+  }
+  props.photoDecks = photoDecks
   delete props.allPages
 
   return {
