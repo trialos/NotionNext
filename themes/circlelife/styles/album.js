@@ -925,16 +925,30 @@ export const albumStyle = `
 
   @media (max-width: 767px) {
     .cl-album-stack-grid-view {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 16px 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px 10px;
       padding-bottom: 70px;
+    }
+
+    .cl-album-stack-grid-info {
+      padding: 6px 0 0;
+      gap: 2px;
+    }
+
+    .cl-album-stack-grid-title {
+      font-size: 0.88rem;
+      line-height: 1.3;
+    }
+
+    .cl-album-stack-grid-count {
+      font-size: 10px;
     }
   }
 
-  @media (max-width: 479px) {
+  @media (min-width: 540px) and (max-width: 767px) {
     .cl-album-stack-grid-view {
-      grid-template-columns: 1fr;
-      gap: 20px;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px 12px;
     }
   }
 
@@ -945,6 +959,8 @@ export const albumStyle = `
     cursor: pointer;
     background: transparent !important;
     border: none !important;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
     transition: transform 0.25s ease, opacity 0.25s ease;
   }
 
@@ -988,7 +1004,7 @@ export const albumStyle = `
   }
 
   .cl-album-stack-grid-info {
-    padding: 10px 0 0;
+    padding: 8px 0 0;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -1004,6 +1020,12 @@ export const albumStyle = `
     line-height: 1.35;
     color: var(--cl-text);
     text-align: left;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
   }
 
   .cl-album-stack-grid-count {
