@@ -83,6 +83,16 @@ export const albumStyle = `
     overflow: hidden;
   }
 
+  html.cl-album-gallery-active #theme-circlelife .cl-album-stage {
+    position: relative;
+    flex: 1 1 auto;
+    height: 100% !important;
+    min-height: 0;
+    max-height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+
   /* —— 影集空状态 —— */
   #theme-circlelife .cl-album-empty {
     text-align: center;
@@ -1440,15 +1450,9 @@ export const albumStyle = `
     box-sizing: border-box;
   }
 
-  /* 彻底消除首排图片顶部荒漠空白：将瀑布展墙绝对定位起点紧凑贴合顶栏与顶部居中胶囊 */
+  /* 彻底消除首排图片顶部荒漠空白：将瀑布展墙绝对定位起点紧凑贴合顶栏与顶部居中胶囊，保持 14px 垂直对称间距 */
   .cl-album-masonry-wall {
     top: 56px !important;
-  }
-
-  @media (max-width: 767px) {
-    .cl-album-masonry-wall {
-      top: 50px !important;
-    }
   }
 
   /* 影集展墙完结区域：独立界限，严格隔离在所有照片下方 */
@@ -1538,18 +1542,22 @@ export const albumStyle = `
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   }
 
-  /* 顶部居中当前影集胶囊按钮（初始常驻可见且可点击，点击灵动展开/收起影集简介） */
+  /* 顶部居中当前影集胶囊按钮（绝对锚定在画廊舞台内部，严格以顶栏底边为原点，保持 14px-28px-14px 垂直对称） */
   .cl-album-prologue-top-btn,
   .cl-album-prologue-center-btn {
-    position: fixed;
-    top: 68px;
+    position: absolute;
+    top: 14px;
     left: 50%;
     transform: translateX(-50%) translateY(0);
-    z-index: 44;
+    z-index: 35;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 5px 16px;
+    height: 28px;
+    min-height: 28px;
+    line-height: 26px;
+    padding: 0 14px;
+    box-sizing: border-box;
     border-radius: 9999px;
     background: color-mix(in srgb, var(--cl-bg) 55%, transparent);
     backdrop-filter: blur(16px) saturate(1.12);
@@ -1567,7 +1575,6 @@ export const albumStyle = `
     opacity: 1;
     pointer-events: auto;
     transition:
-      top 0.28s var(--cl-ease, cubic-bezier(0.16, 1, 0.3, 1)),
       transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
       border-color 0.2s ease,
       background-color 0.2s ease,
@@ -1581,10 +1588,9 @@ export const albumStyle = `
     outline-offset: 2px;
   }
 
-  /* 顶栏收缩时，Hero 按钮平滑上移联动 */
+  /* 顶栏收缩时，Hero 按钮阴影联动强化（随舞台自然上浮，无需硬编码 top） */
   .cl-album-prologue-top-btn.is-scrolled,
   .cl-album-prologue-center-btn.is-scrolled {
-    top: 54px;
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
   }
 
@@ -1622,15 +1628,14 @@ export const albumStyle = `
   @media (max-width: 767px) {
     .cl-album-prologue-top-btn,
     .cl-album-prologue-center-btn {
-      top: 60px;
-      max-width: 55vw;
-      padding: 4px 12px;
+      top: 14px;
+      max-width: 60vw;
+      height: 28px;
+      min-height: 28px;
+      line-height: 26px;
+      padding: 0 12px;
       font-size: 11px;
-    }
-
-    .cl-album-prologue-top-btn.is-scrolled,
-    .cl-album-prologue-center-btn.is-scrolled {
-      top: 46px;
+      box-sizing: border-box;
     }
 
     .cl-album-prologue-top-btn .cl-album-prologue-title,
