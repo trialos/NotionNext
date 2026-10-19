@@ -103,6 +103,7 @@ export default function AlbumDeckNav({
                 setIsOpen(false)
                 onBack?.()
               }}
+              aria-label='返回影集展架总览'
               className='cl-album-deck-popover-back'>
               <span>返回展架</span>
             </button>
@@ -124,7 +125,8 @@ export default function AlbumDeckNav({
                     onSelect?.(i)
                   }}
                   className={`cl-album-deck-popover-item ${isActive ? 'is-active' : ''}`}
-                  role='menuitem'>
+                  role='menuitem'
+                  aria-current={isActive ? 'page' : undefined}>
                   <div className='cl-album-deck-popover-thumb'>
                     {thumbSrc ? (
                       // eslint-disable-next-line @next/next/no-img-element

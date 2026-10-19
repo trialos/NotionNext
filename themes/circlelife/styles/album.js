@@ -269,9 +269,12 @@ export const albumStyle = `
   button.cl-shelf-wheel-cover:focus-visible,
   button.cl-shelf-wheel-aside-card:focus-visible,
   button.cl-album-stack-grid-card:focus-visible,
-  button.cl-shelf-mobile-hud-inner:focus-visible {
-    outline: 2px solid var(--cl-vermilion, #b93a2b);
-    outline-offset: 4px;
+  button.cl-shelf-mobile-hud-inner:focus-visible,
+  .cl-album-item:focus-visible,
+  .cl-about-hero-hint-text:focus-visible,
+  .cl-album-deck-popover-back:focus-visible {
+    outline: 2px solid var(--cl-vermilion, #b93a2b) !important;
+    outline-offset: 4px !important;
     border-radius: 4px;
   }
 
@@ -713,6 +716,7 @@ export const albumStyle = `
       font-weight: 500;
       color: var(--cl-muted, #716b64);
       letter-spacing: 0.06em;
+      font-variant-numeric: tabular-nums;
       flex-shrink: 0;
     }
 
@@ -738,6 +742,7 @@ export const albumStyle = `
       font-family: var(--cl-font-mono, 'JetBrains Mono', monospace);
       font-size: 11px;
       font-weight: 600;
+      font-variant-numeric: tabular-nums;
       flex-shrink: 0;
     }
 
@@ -809,7 +814,6 @@ export const albumStyle = `
       display: flex;
       justify-content: center;
       border: none !important;
-      outline: none !important;
       box-shadow: none !important;
       contain: layout;
       background: transparent !important;
@@ -867,7 +871,6 @@ export const albumStyle = `
         transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       pointer-events: none;
       border: none !important;
-      outline: none !important;
       box-shadow: none !important;
     }
 
@@ -1032,13 +1035,14 @@ export const albumStyle = `
     font-family: var(--cl-font-mono, monospace);
     font-size: 11px;
     letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
     color: var(--cl-muted);
   }
 
   /* —— 底部浮动视图切换胶囊 [ 堆叠 | 网格 ] —— */
   .cl-album-mode-capsule-wrap {
     position: fixed;
-    bottom: 28px;
+    bottom: max(28px, calc(env(safe-area-inset-bottom, 0px) + 16px));
     left: 50%;
     transform: translateX(-50%) translateY(0);
     z-index: 50;
@@ -1051,7 +1055,7 @@ export const albumStyle = `
   /* 触底遇 Footer 时自动避让隐退，彻底杜绝遮挡底部文字 */
   .cl-album-mode-capsule-wrap.is-hidden-footer {
     opacity: 0;
-    transform: translateX(-50%) translateY(24px);
+    transform: translateX(-50%) translateY(calc(24px + env(safe-area-inset-bottom, 0px)));
     pointer-events: none !important;
   }
 
@@ -1177,6 +1181,12 @@ export const albumStyle = `
       box-shadow 0.25s ease,
       border-color 0.2s ease,
       padding 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .cl-album-deck-nav-btn::before {
+    content: '';
+    position: absolute;
+    inset: -6px;
   }
 
   .cl-album-deck-nav-btn:focus-visible {
@@ -1589,6 +1599,13 @@ export const albumStyle = `
       box-shadow 0.2s ease;
   }
 
+  .cl-album-prologue-top-btn::before,
+  .cl-album-prologue-center-btn::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+  }
+
   .cl-album-prologue-top-btn:focus-visible,
   .cl-album-prologue-center-btn:focus-visible {
     outline: 2px solid var(--cl-vermilion, #b93a2b);
@@ -1670,6 +1687,7 @@ export const albumStyle = `
     font-family: var(--cl-font-mono, 'JetBrains Mono', monospace);
     font-size: 12px;
     letter-spacing: 0.12em;
+    font-variant-numeric: tabular-nums;
     color: var(--cl-muted, #716b64);
   }
 

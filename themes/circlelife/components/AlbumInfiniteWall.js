@@ -76,6 +76,7 @@ export default function AlbumInfiniteWall({
     backdropRef.current?.classList.remove('is-closed')
     backdropRef.current?.setAttribute('aria-hidden', 'false')
     prologueBtnRef.current?.classList.add('is-active')
+    prologueBtnRef.current?.setAttribute('aria-expanded', 'true')
 
     // 指针拖拽与滑动状态
     let isDragging = false
@@ -164,8 +165,21 @@ export default function AlbumInfiniteWall({
     // 构建单张照片卡片 DOM
     const createCardElement = (photo, photoIndex, isCritical) => {
       const el = document.createElement('div')
-      el.className = 'cl-about-item item cl-album-item'
+      el.className = 'cl-about-item item cl-album-item cl-clickable-target'
       el.dataset.photoIndex = String(photoIndex)
+      el.setAttribute('role', 'button')
+      el.setAttribute('tabindex', '0')
+      const photoLabel =
+        photo.title || photo.caption || `${albumName || '影集'}照片 ${photoIndex + 1}`
+      el.setAttribute('aria-label', `查看照片：${photoLabel}`)
+      el.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          if (!isHeroOpen && onPhotoClickRef.current) {
+            onPhotoClickRef.current(photoIndex)
+          }
+        }
+      })
 
       const wrapper = document.createElement('div')
       wrapper.className = 'item-wrapper'
@@ -374,6 +388,7 @@ export default function AlbumInfiniteWall({
       backdropRef.current?.classList.add('is-closed')
       backdropRef.current?.setAttribute('aria-hidden', 'true')
       prologueBtnRef.current?.classList.remove('is-active')
+      prologueBtnRef.current?.setAttribute('aria-expanded', 'false')
     }
 
     // 唤出序言幕布（原位缓缓降落，保留当前滚动位移，恢复呼吸流动）
@@ -387,6 +402,7 @@ export default function AlbumInfiniteWall({
       backdropRef.current?.classList.remove('is-closed')
       backdropRef.current?.setAttribute('aria-hidden', 'false')
       prologueBtnRef.current?.classList.add('is-active')
+      prologueBtnRef.current?.setAttribute('aria-expanded', 'true')
     }
 
     const toggleHero = () => {
@@ -597,12 +613,20 @@ export default function AlbumInfiniteWall({
     calculateLayout()
     rafId = requestAnimationFrame(render)
 
+    const onKeyDown = e => {
+      if (e.key === 'Escape' && isHeroOpen) {
+        e.preventDefault()
+        closeHero()
+      }
+    }
+
     stage.addEventListener('pointerdown', onPointerDown)
     window.addEventListener('pointermove', onPointerMove)
     window.addEventListener('pointerup', onPointerUp)
     window.addEventListener('pointercancel', onPointerUp)
     window.addEventListener('wheel', onWheel, { passive: false })
     window.addEventListener('resize', onResize)
+    window.addEventListener('keydown', onKeyDown)
 
     return () => {
       isDestroyed = true
@@ -618,6 +642,7 @@ export default function AlbumInfiniteWall({
       window.removeEventListener('pointercancel', onPointerUp)
       window.removeEventListener('wheel', onWheel)
       window.removeEventListener('resize', onResize)
+      window.removeEventListener('keydown', onKeyDown)
       closeHeroRef.current = null
       openHeroRef.current = null
       toggleHeroRef.current = null
@@ -652,9 +677,12 @@ export default function AlbumInfiniteWall({
       />
 
       {/* Hero 序言毛玻璃与暗膜滤镜过渡层 */}
-      <div
+      <button
         ref={backdropRef}
+        type='button'
+        tabIndex={-1}
         onClick={handleCloseHero}
+        aria-label='收起影集简介'
         className='cl-about-hero-backdrop cl-album-hero-backdrop'
         style={{
           backdropFilter: 'blur(16px)',
@@ -665,10 +693,11 @@ export default function AlbumInfiniteWall({
       {/* Hero 序言杂志排版覆盖层 */}
       <div
         ref={heroOverlayRef}
+        id='cl-about-hero-overlay'
         className='cl-about-hero-overlay cl-album-hero-overlay'>
         <div className='cl-about-hero-inner'>
           <div className='cl-about-hero-badge'>
-            <span className='cl-about-hero-badge-dot' />
+            <span className='cl-about-hero-badge-dot' aria-hidden='true' />
             <span>影集 · {albumName || '画廊'}</span>
           </div>
 
@@ -706,6 +735,8 @@ export default function AlbumInfiniteWall({
         type='button'
         onClick={handleToggleHero}
         className='cl-album-prologue-top-btn'
+        aria-expanded='true'
+        aria-controls='cl-about-hero-overlay'
         aria-label={`展开或收起《${albumName || '影集'}》简介`}
         title={`展开或收起《${albumName || '影集'}》简介`}>
         <span className='cl-album-prologue-dot' aria-hidden='true' />

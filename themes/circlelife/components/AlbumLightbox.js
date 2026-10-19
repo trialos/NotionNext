@@ -16,11 +16,21 @@ export default function AlbumLightbox({
   const titleId = useId()
   const dialogRef = useRef(null)
   const closeRef = useRef(null)
+  const previousFocusRef = useRef(null)
   const [portalReady, setPortalReady] = useState(false)
   const caption = (photo?.caption || title || '').trim()
 
   useEffect(() => {
+    previousFocusRef.current = document.activeElement
     setPortalReady(true)
+    return () => {
+      if (
+        previousFocusRef.current &&
+        typeof previousFocusRef.current.focus === 'function'
+      ) {
+        previousFocusRef.current.focus()
+      }
+    }
   }, [])
 
   useEffect(() => {

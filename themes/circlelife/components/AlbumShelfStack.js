@@ -138,6 +138,8 @@ export default function AlbumShelfStack({ decks = [], onOpen }) {
                 <button
                   key={cat.id}
                   type='button'
+                  aria-pressed={isSelected}
+                  aria-label={`分类：${cat.name}，共 ${cat.count} 部影集`}
                   className={`cl-album-stack-tag ${isSelected ? 'is-active' : ''}`}
                   onClick={() => {
                     setSelectedTag(cat.id)
