@@ -909,21 +909,37 @@ export const albumStyle = `
     }
   }
 
-  /* —— GRID 网格大画幅画册模式（2~3 列大气排版，3:2 胶片比例，彻底告别微缩图） —— */
+  /* —— GRID 网格画册模式（至多 4 列紧凑节奏排版，紧凑标题与张数聚合） —— */
   .cl-album-stack-grid-view {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-    gap: 32px 28px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px 20px;
     width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
     padding-bottom: 90px;
     box-sizing: border-box;
   }
 
+  @media (max-width: 1099px) {
+    .cl-album-stack-grid-view {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px 16px;
+    }
+  }
+
   @media (max-width: 767px) {
     .cl-album-stack-grid-view {
-      grid-template-columns: 1fr;
-      gap: 24px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px 12px;
       padding-bottom: 70px;
+    }
+  }
+
+  @media (max-width: 479px) {
+    .cl-album-stack-grid-view {
+      grid-template-columns: 1fr;
+      gap: 20px;
     }
   }
 
@@ -943,7 +959,7 @@ export const albumStyle = `
 
   .cl-album-stack-grid-img-wrap {
     width: 100%;
-    aspect-ratio: 3 / 2;
+    aspect-ratio: 4 / 3;
     position: relative;
     overflow: hidden;
     border: none !important;
@@ -976,22 +992,26 @@ export const albumStyle = `
   .cl-album-stack-grid-info {
     padding: 8px 2px 0;
     display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 8px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    width: 100%;
   }
 
   .cl-album-stack-grid-title {
     margin: 0;
     font-family: var(--cl-font-display, sans-serif);
-    font-size: 1.05rem;
+    font-size: 0.95rem;
     font-weight: 600;
+    line-height: 1.35;
     color: var(--cl-text);
+    text-align: left;
   }
 
   .cl-album-stack-grid-count {
     font-family: var(--cl-font-mono, monospace);
     font-size: 11px;
+    letter-spacing: 0.04em;
     color: var(--cl-muted);
   }
 
