@@ -59,21 +59,15 @@ export const albumStyle = `
     border-bottom: 1px solid color-mix(in srgb, var(--cl-border) 45%, transparent);
   }
 
-  html.cl-album-gallery-active #theme-circlelife > #container-inner {
-    flex: 1 1 auto;
-    height: 100%;
-    min-height: 0;
-    max-height: 100%;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
+  html.cl-album-gallery-active #theme-circlelife > #container-inner,
   html.cl-album-gallery-active #theme-circlelife #container-wrapper,
   html.cl-album-gallery-active #theme-circlelife #container-wrapper > div,
-  html.cl-album-gallery-active #theme-circlelife .cl-album-shell.is-gallery {
+  html.cl-album-gallery-active #theme-circlelife #container-wrapper > div > div,
+  html.cl-album-gallery-active #theme-circlelife .cl-album-page,
+  html.cl-album-gallery-active #theme-circlelife .cl-album-shell.is-gallery,
+  html.cl-album-gallery-active #theme-circlelife .cl-album-stage {
     flex: 1 1 auto;
-    height: 100%;
+    height: 100% !important;
     min-height: 0;
     max-height: 100%;
     width: 100%;
@@ -83,15 +77,6 @@ export const albumStyle = `
     overflow: hidden;
   }
 
-  html.cl-album-gallery-active #theme-circlelife .cl-album-stage {
-    position: relative;
-    flex: 1 1 auto;
-    height: 100% !important;
-    min-height: 0;
-    max-height: 100%;
-    width: 100%;
-    overflow: hidden;
-  }
 
   /* —— 影集空状态 —— */
   #theme-circlelife .cl-album-empty {
