@@ -17,7 +17,7 @@ export default function AlbumLightbox({
   const dialogRef = useRef(null)
   const closeRef = useRef(null)
   const [portalReady, setPortalReady] = useState(false)
-  const label = title || '照片'
+  const caption = (photo?.caption || title || '').trim()
 
   useEffect(() => {
     setPortalReady(true)
@@ -75,7 +75,8 @@ export default function AlbumLightbox({
       className='cl-ag-lb'
       role='dialog'
       aria-modal='true'
-      aria-labelledby={titleId}>
+      aria-labelledby={caption ? titleId : undefined}
+      aria-label={caption ? undefined : `照片 ${index + 1} / ${total}`}>
       <button
         type='button'
         className='cl-ag-lb-mask'
@@ -96,7 +97,7 @@ export default function AlbumLightbox({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={photo.url || photo.cover}
-            alt={label}
+            alt={caption || `照片 ${index + 1} / ${total}`}
             width='1600'
             height='1200'
             className='cl-ag-lb-img'
@@ -127,9 +128,11 @@ export default function AlbumLightbox({
           </div>
         </div>
         <div className='cl-ag-lb-meta'>
-          <p id={titleId} className='cl-ag-lb-title'>
-            {label}
-          </p>
+          {caption ? (
+            <p id={titleId} className='cl-ag-lb-title'>
+              {caption}
+            </p>
+          ) : null}
           <p className='cl-ag-lb-count'>
             {String(index + 1).padStart(2, '0')} / {String(total).padStart(2, '0')}
           </p>

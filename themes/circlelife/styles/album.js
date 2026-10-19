@@ -1796,6 +1796,7 @@ export const albumStyle = `
     font-size: 1.1rem;
     font-weight: 600;
     letter-spacing: -0.01em;
+    white-space: pre-line;
   }
 
   .cl-ag-lb-count {

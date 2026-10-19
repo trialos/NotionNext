@@ -206,7 +206,7 @@ export default function AlbumStage({ pages }) {
       {/* 全屏灯箱 */}
       {activePhoto && lightboxPhotoIndex !== null && (
         <AlbumLightbox
-          title={activePhoto.title || currentDeck.name}
+          title={activePhoto.caption || ''}
           photo={activePhoto}
           index={lightboxPhotoIndex}
           total={currentPhotos.length}
