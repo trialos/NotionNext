@@ -3,7 +3,7 @@ import { useGlobal } from '@/lib/global'
 import { useMemo } from 'react'
 import CONFIG from '../config'
 import { MenuItemDrop } from './MenuItemDrop'
-import { normalizeNavLinks } from './navConfig'
+import { normalizeNavLinks, linkTitle } from './navConfig'
 
 export const MenuList = props => {
   const {
@@ -55,7 +55,24 @@ export const MenuList = props => {
   let showLinks = all
   if (wing === 'left') showLinks = left
   if (wing === 'right') showLinks = right
-  if (wing === 'drawer') showLinks = all
+  if (wing === 'drawer') {
+    const hasHome = all.some(l => linkTitle(l) === '首页' || linkTitle(l) === 'Home')
+    if (!hasHome) {
+      showLinks = [
+        {
+          id: 'cl-home',
+          title: locale?.NAV?.INDEX || '首页',
+          name: locale?.NAV?.INDEX || '首页',
+          href: '/',
+          icon: 'fas fa-home',
+          show: true
+        },
+        ...all
+      ]
+    } else {
+      showLinks = all
+    }
+  }
 
   if (!showLinks?.length) return null
 

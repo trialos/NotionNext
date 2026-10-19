@@ -46,10 +46,25 @@ export function extractImagesFromBlockMap(blockMap, pageId, pageMeta = {}) {
     push(`cover-${pageId}`, cover, '', null)
   }
 
-  // 2) walk page content order
-  const pageBlock = blocks[pageId]?.value
+  const getBlockVal = b => b?.value?.value || b?.value || b
+
+  // 2) walk page content order (with recursive traversal for column_list, column, toggle, etc.)
+  const pageBlock = getBlockVal(blocks[pageId])
+  const collectBlockIds = ids => {
+    const result = []
+    if (!Array.isArray(ids)) return result
+    for (const cid of ids) {
+      result.push(cid)
+      const b = getBlockVal(blocks[cid])
+      if (b && Array.isArray(b.content) && b.content.length > 0) {
+        result.push(...collectBlockIds(b.content))
+      }
+    }
+    return result
+  }
+
   const contentIds = Array.isArray(pageBlock?.content)
-    ? pageBlock.content
+    ? collectBlockIds(pageBlock.content)
     : Object.keys(blocks)
 
   const parseCaption = block => {
@@ -85,7 +100,7 @@ export function extractImagesFromBlockMap(blockMap, pageId, pageMeta = {}) {
   }
 
   for (const id of contentIds) {
-    const block = blocks[id]?.value
+    const block = getBlockVal(blocks[id])
     if (!block || block.type !== 'image') continue
 
     const source =
@@ -107,7 +122,7 @@ export function extractImagesFromBlockMap(blockMap, pageId, pageMeta = {}) {
   // 3) fallback scan all blocks if content empty
   if (images.length <= (cover ? 1 : 0)) {
     for (const id of Object.keys(blocks)) {
-      const block = blocks[id]?.value
+      const block = getBlockVal(blocks[id])
       if (!block || block.type !== 'image') continue
       const source =
         block.properties?.source?.[0]?.[0] ||

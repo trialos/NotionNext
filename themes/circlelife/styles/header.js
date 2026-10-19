@@ -1,342 +1,555 @@
 /**
- * Circle of Life — header：中轴导航 + 阅读进度 + 汉堡抽屉 portal + 桌面子菜单 portal
+ * Circle of Life — 居中悬浮胶囊导航栏 + 全屏杂志折叠大菜单（含完整子菜单） + 阅读进度 + 搜索弹窗
  */
 export const headerStyle = `
-      /* —— Header：中轴桌面 + 手机汉堡 —— */
-      #theme-circlelife .cl-header {
-        position: sticky;
-        top: 0;
-        background-color: color-mix(in srgb, var(--cl-bg) 48%, transparent);
-        backdrop-filter: blur(16px) saturate(1.12);
-        -webkit-backdrop-filter: blur(16px) saturate(1.12);
-        border-bottom: 1px solid transparent;
-        transition:
-          border-color var(--cl-dur) var(--cl-ease),
-          background-color var(--cl-dur) var(--cl-ease),
-          backdrop-filter var(--cl-dur) var(--cl-ease);
-      }
-      #theme-circlelife .cl-header.is-scrolled {
-        border-bottom-color: color-mix(in srgb, var(--cl-border) 55%, transparent);
-        background-color: color-mix(in srgb, var(--cl-bg) 62%, transparent);
-      }
-      /* 影集书架：玻璃与首页一致，留在文档流。单辑画廊另用 absolute 盖在氛围上，不用 fixed。 */
-      #theme-circlelife.cl-is-album .cl-header {
-        position: sticky;
-        top: 0;
-        z-index: 40;
-        background-color: color-mix(in srgb, var(--cl-bg) 48%, transparent);
-        backdrop-filter: blur(16px) saturate(1.12);
-        -webkit-backdrop-filter: blur(16px) saturate(1.12);
-      }
-      #theme-circlelife.cl-is-album .cl-header.is-scrolled {
-        background-color: color-mix(in srgb, var(--cl-bg) 62%, transparent);
-        border-bottom-color: color-mix(in srgb, var(--cl-border) 55%, transparent);
-      }
-      #theme-circlelife .cl-header-inner {
-        margin: 0 auto;
-        width: 100%;
-        max-width: min(72rem, 100%);
+      /* ==========================================================================
+         1. 悬浮胶囊导航体系 (Centered Floating Pill Navbar)
+         彻底脱离普通文档流，严格水平居中，不随滚动发生高宽形变，零回流零抖动
+         ========================================================================== */
+      .cl-floating-header {
+        position: fixed;
+        top: max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.65rem));
+        left: 0;
+        right: 0;
+        z-index: 60;
         display: flex;
+        justify-content: center;
         align-items: center;
-        padding: 0.8rem clamp(1.25rem, 3vw, 2.25rem);
-        min-height: 3.5rem;
-        gap: 1rem;
-        box-sizing: border-box;
-        transition:
-          padding 0.28s var(--cl-ease),
-          min-height 0.28s var(--cl-ease),
-          gap 0.28s var(--cl-ease);
-      }
-      #theme-circlelife .cl-header.is-scrolled .cl-header-inner {
-        padding-top: 0.4rem;
-        padding-bottom: 0.4rem;
-        min-height: 2.65rem;
+        pointer-events: none;
       }
 
-      /* desktop three-column — 桌面导航内容约需 1000px，1024 以下切汉堡避免溢出裁切 */
-      #theme-circlelife .cl-header-inner--desktop {
-        display: none;
+      /* 非全屏沉浸页（文章详情、归档列表等）提供顶部避让空间，防止被悬浮胶囊遮挡 */
+      #theme-circlelife:not(.cl-is-home):not(.cl-is-album):not(.cl-is-about) #container-inner {
+        padding-top: max(4.5rem, calc(env(safe-area-inset-top, 0px) + 4rem));
       }
-      @media (min-width: 1024px) {
-        #theme-circlelife .cl-header-inner--desktop {
-          display: grid;
-          grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+
+      /* 悬浮胶囊母体 (Pill Capsule) — 水平绝对居中 */
+      .cl-floating-pill {
+        pointer-events: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: clamp(0.75rem, 1.8vw, 1.25rem);
+        padding: 0.38rem 1.25rem;
+        border-radius: 9999px;
+        background: rgba(30, 30, 30, 0.88);
+        backdrop-filter: blur(24px) saturate(1.2);
+        -webkit-backdrop-filter: blur(24px) saturate(1.2);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 10px 32px rgba(0, 0, 0, 0.32);
+        white-space: nowrap;
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      :root:not(.dark) .cl-floating-pill {
+        background: rgba(250, 246, 238, 0.92);
+        border-color: rgba(32, 25, 15, 0.12);
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
+      }
+
+      /* 手机端拉长横幅 (对标设计截图) */
+      @media (max-width: 767px) {
+        .cl-floating-pill {
+          width: min(calc(100vw - 2.25rem), 400px);
+          display: flex;
+          justify-content: space-between;
           align-items: center;
-          column-gap: clamp(1.25rem, 2.5vw, 2rem);
+          padding: 0.35rem 0.5rem 0.35rem 0.95rem;
+          gap: 0;
         }
-        #theme-circlelife .cl-header-inner--mobile {
+      }
+
+      /* Logo 链接 */
+      .cl-floating-pill-logo-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        text-decoration: none;
+        transition: transform 0.2s ease, opacity 0.2s ease;
+      }
+      .cl-floating-pill-logo-link:hover {
+        opacity: 0.85;
+        transform: scale(1.06);
+      }
+
+      /* 手机端正中品牌标识: 严格对标 circlelife-DESIGN.md 与 BrandLockup 规范 */
+      .cl-floating-pill-brand-text {
+        font-family: var(--cl-font-display, 'Noto Serif SC', 'Songti SC', serif);
+        font-size: 0.96rem;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        color: #e5e2dc;
+        user-select: none;
+      }
+      :root:not(.dark) .cl-floating-pill-brand-text {
+        color: #20190f;
+      }
+      @media (min-width: 768px) {
+        .cl-floating-pill-brand-text {
           display: none !important;
         }
       }
-      #theme-circlelife .cl-header-inner--mobile {
-        display: grid;
-        grid-template-columns: minmax(4.5rem, 1fr) auto minmax(4.5rem, 1fr);
+
+      /* PC 桌面端 4 个主导航项：首页、随笔、相册、关于 */
+      .cl-floating-pill-nav {
+        display: none;
         align-items: center;
-        column-gap: 0.35rem;
+        gap: clamp(0.85rem, 1.8vw, 1.45rem);
+        padding-left: 0.35rem;
+        padding-right: 0.35rem;
       }
-      #theme-circlelife .cl-header-mobile-side {
-        display: flex;
-        align-items: center;
-        min-width: 0;
-      }
-      #theme-circlelife .cl-header-mobile-side--left {
-        justify-content: flex-start;
-      }
-      #theme-circlelife .cl-header-mobile-side--right {
-        justify-content: flex-end;
-      }
-      #theme-circlelife .cl-header-actions--mobile {
-        gap: 0.1rem;
-      }
-      /* 手机展开：logo 双行；上滑收起：单行英文（BrandLockup collapsed） */
-      #theme-circlelife .cl-header-inner--mobile .cl-header-center {
-        justify-self: center;
+      @media (min-width: 768px) {
+        .cl-floating-pill-nav {
+          display: inline-flex;
+        }
       }
 
-      #theme-circlelife .cl-header-center {
-        display: flex;
-        justify-content: center;
-        justify-self: center;
-        z-index: 2;
+      .cl-floating-pill-link {
+        color: #cfcac2;
+        font-family: var(--cl-font-display, inherit);
+        font-size: 0.92rem;
+        font-weight: 500;
+        text-decoration: none;
+        letter-spacing: 0.02em;
+        white-space: nowrap;
+        transition: color 0.15s ease;
       }
-      #theme-circlelife .cl-header-wing {
-        display: flex;
-        align-items: center;
-        gap: 0.55rem;
-        min-width: 0;
-        transition: gap 0.32s var(--cl-ease);
+      :root:not(.dark) .cl-floating-pill-link {
+        color: #55524c;
       }
-      #theme-circlelife .cl-header-wing--left {
-        justify-content: flex-end;
-        justify-self: stretch;
-        padding-right: 0.25rem;
+      .cl-floating-pill-link:hover {
+        color: #ffffff;
       }
-      #theme-circlelife .cl-header-wing--right {
-        justify-content: flex-start;
-        justify-self: stretch;
-        gap: 0.85rem;
-        padding-left: 0.25rem;
-      }
-      /* 收起：略紧凑，不硬拽贴 logo */
-      #theme-circlelife .cl-header.is-scrolled .cl-header-wing--left.is-gathered {
-        gap: 0.35rem;
-      }
-      #theme-circlelife .cl-header.is-scrolled .cl-header-wing--right.is-gathered {
-        gap: 0.65rem;
-      }
-      #theme-circlelife .cl-header-wing--right .cl-main-nav {
-        margin-right: 0.15rem;
+      :root:not(.dark) .cl-floating-pill-link:hover {
+        color: #1a1917;
       }
 
-      #theme-circlelife .cl-header-actions {
-        display: inline-flex;
-        flex-shrink: 0;
-        align-items: center;
-        justify-content: center;
-        gap: 0.2rem;
-        height: 2.25rem;
-      }
-      #theme-circlelife .cl-icon-btn {
+      /* 移动端内置右端纯图标暖金胶囊按钮 */
+      .cl-pill-menu-btn--mobile {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: 2.15rem;
-        height: 2.15rem;
+        width: 2.35rem;
+        height: 2.35rem;
         padding: 0;
         border-radius: 9999px;
-        border: 1px solid transparent;
-        background: transparent;
-        color: var(--cl-muted);
-        line-height: 1;
+        border: 0;
+        background: #c4a47c;
+        color: #ffffff;
+        font-size: 0.88rem;
         cursor: pointer;
-        transition:
-          color 0.15s var(--cl-ease),
-          border-color 0.15s var(--cl-ease),
-          background 0.15s var(--cl-ease),
-          transform 0.15s var(--cl-ease);
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), filter 0.18s ease;
+        box-shadow: 0 2px 10px rgba(196, 164, 124, 0.35);
       }
-      #theme-circlelife .cl-icon-btn i,
-      #theme-circlelife .cl-icon-btn-glyph {
-        font-size: 0.92rem;
-        line-height: 1;
+      .cl-pill-menu-btn--mobile:active {
+        transform: scale(0.94);
+      }
+      @media (min-width: 768px) {
+        .cl-pill-menu-btn--mobile {
+          display: none !important;
+        }
+      }
+
+      /* PC 桌面端独立悬浮右上角暖金纯图标胶囊按钮 */
+      .cl-floating-desktop-menu-btn {
+        position: fixed;
+        top: max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.65rem));
+        right: max(1.5rem, calc(env(safe-area-inset-right, 0px) + 1.25rem));
+        z-index: 60;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-      }
-      #theme-circlelife .cl-icon-btn:hover {
-        color: var(--cl-accent);
-        border-color: var(--cl-border);
-        background: var(--cl-accent-soft);
-      }
-      #theme-circlelife .cl-header.is-scrolled .cl-icon-btn,
-      #theme-circlelife .cl-header.is-scrolled .cl-header-actions {
-        height: 2rem;
-      }
-      #theme-circlelife .cl-header.is-scrolled .cl-icon-btn {
-        width: 2rem;
-        height: 2rem;
-      }
-
-      /* lockup — no clip on Chinese */
-      #theme-circlelife .cl-brand:hover {
-        opacity: 0.86;
-      }
-      #theme-circlelife .cl-lockup-cn {
-        font-family: var(--cl-font-display);
-        font-size: 1.02rem;
-        line-height: 1.35;
-        padding-top: 0.08em;
-        padding-bottom: 0.06em;
-        opacity: 1;
-        /* never overflow:hidden — was clipping 时光的弧线 */
-      }
-      #theme-circlelife .cl-lockup-en {
-        font-family: var(--cl-font-mono);
-        font-size: 0.62rem;
-        letter-spacing: 0.16em;
-        margin-top: 0.22rem;
-        line-height: 1.2;
-        transition: margin 0.22s var(--cl-ease), opacity 0.2s var(--cl-ease), font-size 0.22s var(--cl-ease);
-      }
-      #theme-circlelife .cl-lockup--collapsed .cl-lockup-cn {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
+        padding: 0.44rem 1.05rem;
+        border-radius: 9999px;
         border: 0;
-      }
-      #theme-circlelife .cl-lockup--collapsed .cl-lockup-en {
-        margin-top: 0;
-        font-size: 0.58rem;
-      }
-      #theme-circlelife .cl-lockup--collapsed .cl-lockup-text {
-        position: relative;
-      }
-            #theme-circlelife .cl-lockup--row {
-        align-items: center;
-      }
-      #theme-circlelife .cl-lockup--row .cl-lockup-mark {
-        display: block;
-      }
-      #theme-circlelife .cl-lockup-row-text {
-        align-items: center;
-        line-height: 1;
-      }
-      #theme-circlelife .cl-lockup--row .cl-lockup-cn--row {
+        background: #c4a47c;
+        color: #ffffff;
         font-size: 0.95rem;
         line-height: 1;
-        padding: 0;
-        display: inline-flex;
-        align-items: center;
+        cursor: pointer;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        box-shadow: 0 4px 18px rgba(196, 164, 124, 0.4);
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.18s ease, box-shadow 0.2s ease;
       }
-      #theme-circlelife .cl-lockup--row .cl-lockup-en--row {
-        margin-top: 0;
-        font-size: 0.58rem;
-        line-height: 1;
-        letter-spacing: 0.14em;
-        display: inline-flex;
-        align-items: center;
-        transform: translateY(0.5px);
+      .cl-floating-desktop-menu-btn:hover {
+        transform: scale(1.06);
+        filter: brightness(1.08);
+        box-shadow: 0 6px 22px rgba(196, 164, 124, 0.55);
       }
-      #theme-circlelife .cl-lockup-sep {
-        color: var(--cl-accent);
-        font-size: 0.85rem;
-        line-height: 1;
-        opacity: 0.95;
-        transform: translateY(-0.5px);
+      .cl-floating-desktop-menu-btn:active {
+        transform: scale(0.96);
+      }
+      @media (max-width: 767px) {
+        .cl-floating-desktop-menu-btn {
+          display: none !important;
+        }
       }
 
-      #theme-circlelife .cl-nav-link {
-        position: relative;
-        color: var(--cl-muted);
-        font-size: 0.875rem;
-        font-weight: 500;
-        white-space: nowrap;
-        transition:
-          color 0.15s var(--cl-ease),
-          background 0.15s var(--cl-ease),
-          padding 0.2s var(--cl-ease);
+      /* 键盘高对比度 Focus 焦点环 (Vercel Guidelines) */
+      .cl-floating-pill-link:focus-visible,
+      .cl-pill-menu-btn--mobile:focus-visible,
+      .cl-floating-desktop-menu-btn:focus-visible,
+      .cl-drawer-link:focus-visible,
+      .cl-drawer-sublink:focus-visible,
+      .cl-fullscreen-top-btn:focus-visible,
+      .cl-fullscreen-close:focus-visible {
+        outline: 2px solid var(--cl-accent, #c4a47c) !important;
+        outline-offset: 3px !important;
       }
-      #theme-circlelife .cl-nav-link:hover {
-        color: var(--cl-text);
-        background: color-mix(in srgb, var(--cl-accent-soft) 55%, transparent);
-      }
-      #theme-circlelife .cl-nav-ico {
-        font-size: 0.78rem;
-        opacity: 0.85;
-        width: 0.95em;
-        text-align: center;
-      }
-      #theme-circlelife .cl-nav-text {
-        display: inline-block;
-        max-width: 6.5rem;
-        opacity: 1;
-        transition: opacity 0.18s var(--cl-ease), max-width 0.28s var(--cl-ease);
-      }
-      #theme-circlelife .cl-nav-link--icon {
-        min-width: 1.85rem;
-        min-height: 1.85rem;
+
+      /* ==========================================================================
+         2. 约 95% 覆盖率悬浮圆角大画卷框体 (95% Floating Framed Drawer)
+         ========================================================================== */
+      .cl-fullscreen-root {
+        position: fixed;
+        inset: 0;
+        z-index: 200;
+        display: flex;
+        align-items: center;
         justify-content: center;
-        padding-left: 0.4rem;
-        padding-right: 0.4rem;
-      }
-      #theme-circlelife .cl-nav-link--icon .cl-nav-text {
-        opacity: 0;
-        max-width: 0;
-        margin: 0;
-        overflow: hidden;
         pointer-events: none;
+        visibility: hidden;
+        padding: clamp(0.75rem, 2.5vw, 1.75rem);
+        transition: visibility 0s linear 0.32s;
       }
-      /* icon 态 chevron 彻底移出 flex 流：零宽 item 仍会产生 gap，导致间距不一致 */
-      #theme-circlelife .cl-nav-link--icon .cl-nav-chevron {
-        display: none;
-      }
-      #theme-circlelife .cl-nav-link--icon .cl-nav-ico {
-        font-size: 0.9rem;
-        opacity: 1;
-      }
-      #theme-circlelife .cl-nav-tip {
-        position: absolute;
-        left: 50%;
-        top: calc(100% + 6px);
-        transform: translateX(-50%) translateY(-2px);
-        padding: 0.22rem 0.48rem;
-        border-radius: var(--cl-radius-sm);
-        border: 1px solid var(--cl-border);
-        background: var(--cl-surface);
-        color: var(--cl-text);
-        font-size: 0.68rem;
-        white-space: nowrap;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.15s var(--cl-ease), transform 0.15s var(--cl-ease);
-        z-index: 60;
-      }
-      #theme-circlelife .cl-nav-link--icon:hover .cl-nav-tip,
-      #theme-circlelife .cl-nav-link--icon:focus-within .cl-nav-tip {
-        opacity: 1;
-        transform: translateX(-50%) translateY(0);
-      }
-      #theme-circlelife .cl-nav-link--text .cl-nav-tip {
-        display: none;
+      .cl-fullscreen-root.is-open {
+        pointer-events: auto;
+        visibility: visible;
+        transition-delay: 0s;
       }
 
-      /* reading progress */
-      #theme-circlelife .cl-read-progress {
+      /* 背景全屏毛玻璃暗膜蒙层 */
+      .cl-fullscreen-mask {
         position: absolute;
+        inset: 0;
+        border: 0;
+        background: rgba(0, 0, 0, 0.64);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        opacity: 0;
+        transition: opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+        cursor: pointer;
+      }
+      .cl-fullscreen-root.is-open .cl-fullscreen-mask {
+        opacity: 1;
+      }
+
+      /* 约 95% 悬浮圆角大画卷框体（比全屏小一圈，零溢出免滚动） */
+      .cl-fullscreen-panel {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: calc(100vw - clamp(1.5rem, 5vw, 3.5rem));
+        height: 100%;
+        max-height: calc(100dvh - clamp(1.5rem, 5vh, 3.5rem));
+        border-radius: clamp(18px, 2vw, 26px);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background: rgba(22, 20, 19, 0.95);
+        backdrop-filter: blur(32px) saturate(1.2);
+        -webkit-backdrop-filter: blur(32px) saturate(1.2);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+        color: #f2efe9;
+        overscroll-behavior: contain;
+        padding: clamp(1.25rem, 3vw, 2.5rem) clamp(1.5rem, 4vw, 3.5rem);
+        opacity: 0;
+        transform: scale(0.96) translateY(8px);
+        transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        overflow-y: auto;
+        scrollbar-width: none;
+      }
+      .cl-fullscreen-panel::-webkit-scrollbar {
+        display: none;
+      }
+      :root:not(.dark) .cl-fullscreen-panel {
+        background: rgba(248, 245, 238, 0.96);
+        border-color: rgba(32, 25, 15, 0.1);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.14);
+        color: #1f1d1a;
+      }
+      .cl-fullscreen-root.is-open .cl-fullscreen-panel {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+
+
+
+      /* 顶栏操作 */
+      .cl-fullscreen-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        flex: none;
+      }
+      .cl-fullscreen-topbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      .cl-fullscreen-top-btn,
+      .cl-fullscreen-close {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.65rem;
+        height: 2.65rem;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: rgba(255, 255, 255, 0.06);
+        color: #cfcac2;
+        font-size: 1.05rem;
+        cursor: pointer;
+        touch-action: manipulation;
+        transition: background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+      }
+      :root:not(.dark) .cl-fullscreen-top-btn,
+      :root:not(.dark) .cl-fullscreen-close {
+        border-color: rgba(0, 0, 0, 0.1);
+        background: rgba(0, 0, 0, 0.05);
+        color: #333;
+      }
+      .cl-fullscreen-top-btn:hover,
+      .cl-fullscreen-close:hover {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.15);
+        transform: scale(1.05);
+      }
+      :root:not(.dark) .cl-fullscreen-top-btn:hover,
+      :root:not(.dark) .cl-fullscreen-close:hover {
+        color: #000;
+        background: rgba(0, 0, 0, 0.12);
+      }
+
+      /* ==========================================================================
+         3. 杂志主导航与二级子菜单 (数字列严格左对齐排布)
+         ========================================================================== */
+      .cl-fullscreen-nav-body {
+        margin: 0;
+        padding: clamp(1rem, 3.5vh, 2.5rem) 0 1.5rem 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: stretch;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        scrollbar-width: none;
+      }
+      .cl-fullscreen-nav-body::-webkit-scrollbar {
+        display: none;
+      }
+      .cl-drawer-list {
+        list-style: none;
+        margin: 0;
+        padding: 0 clamp(0.5rem, 2vw, 2rem);
+        width: 100%;
+        max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: clamp(1rem, 2.5vh, 2.2rem);
+      }
+      .cl-drawer-item {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .cl-drawer-group {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+      }
+      .cl-drawer-link {
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-start;
+        width: 100%;
+        padding: 0.15rem 0;
+        border: 0;
+        background: transparent;
+        color: #8c8983;
+        text-decoration: none;
+        text-align: left;
+        cursor: pointer;
+        transition: color 0.18s ease, transform 0.18s ease;
+      }
+      :root:not(.dark) .cl-drawer-link {
+        color: #8c8983;
+      }
+      .cl-drawer-link:hover,
+      .cl-drawer-link.is-current {
+        color: #ffffff;
+        transform: translateX(6px);
+      }
+      :root:not(.dark) .cl-drawer-link:hover,
+      :root:not(.dark) .cl-drawer-link.is-current {
+        color: #1a1917;
+      }
+
+      /* 左上角小数字角标 (Top-Left Floating Index) */
+      .cl-drawer-num {
+        font-family: var(--cl-font-mono, monospace);
+        font-size: clamp(0.72rem, 1.1vw, 0.92rem);
+        font-weight: 500;
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: "tnum";
+        opacity: 0.45;
+        letter-spacing: 0.04em;
+        line-height: 1;
+        margin-top: 0.22em; /* 贴齐大文字顶部 cap-height */
+        margin-right: clamp(0.5rem, 1.2vw, 0.85rem);
+        flex: none;
+      }
+
+      /* 全域大标题：大号艺术字体扩充版面 */
+      .cl-drawer-title {
+        font-family: var(--cl-font-display, inherit);
+        font-size: clamp(2.2rem, 5.2vw, 4rem);
+        font-weight: 700;
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+        flex: 1;
+        text-align: left;
+      }
+
+      /* 右侧极简折叠展开符号：+ / × */
+      .cl-drawer-toggle-ico {
+        margin-left: auto;
+        font-family: var(--cl-font-mono, system-ui, sans-serif);
+        font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+        font-weight: 300;
+        line-height: 1;
+        opacity: 0.55;
+        align-self: center;
+        padding-left: 1rem;
+        transition: transform 0.25s var(--cl-ease), opacity 0.2s ease;
+      }
+      .cl-drawer-link:hover .cl-drawer-toggle-ico {
+        opacity: 1;
+      }
+
+      /* 二级子菜单列表 (纯净极简垂直排列) */
+      .cl-drawer-sub {
+        list-style: none;
+        margin: clamp(0.6rem, 1.5vh, 1.1rem) 0 0 calc(2ch + clamp(0.5rem, 1.2vw, 0.85rem));
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: clamp(0.5rem, 1.2vh, 0.85rem);
+      }
+      .cl-drawer-sublink {
+        display: inline-block;
+        color: #a09d96;
+        font-family: var(--cl-font-display, inherit);
+        font-size: clamp(1.15rem, 2.2vw, 1.6rem);
+        font-weight: 600;
+        line-height: 1.25;
+        text-decoration: none;
+        text-align: left;
+        transition: color 0.15s ease, transform 0.15s ease;
+      }
+      :root:not(.dark) .cl-drawer-sublink {
+        color: #6d6961;
+      }
+      .cl-drawer-sublink:hover {
+        color: var(--cl-accent, #c4a47c);
+        transform: translateX(4px);
+      }
+
+      /* 逐条交错浮现动画 */
+      @keyframes cl-fullscreen-slide-in {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .cl-fullscreen-root.is-open .cl-drawer-item {
+        animation: cl-fullscreen-slide-in 0.42s cubic-bezier(0.16, 1, 0.3, 1) both;
+      }
+      .cl-fullscreen-root.is-open .cl-drawer-item:nth-child(1) { animation-delay: 0.05s; }
+      .cl-fullscreen-root.is-open .cl-drawer-item:nth-child(2) { animation-delay: 0.09s; }
+      .cl-fullscreen-root.is-open .cl-drawer-item:nth-child(3) { animation-delay: 0.13s; }
+      .cl-fullscreen-root.is-open .cl-drawer-item:nth-child(4) { animation-delay: 0.17s; }
+      .cl-fullscreen-root.is-open .cl-drawer-item:nth-child(5) { animation-delay: 0.21s; }
+      .cl-fullscreen-root.is-open .cl-drawer-item:nth-child(6) { animation-delay: 0.25s; }
+      .cl-fullscreen-root.is-open .cl-drawer-item:nth-child(7) { animation-delay: 0.29s; }
+
+      /* 移动端抽屉菜单自适应：顶部上靠对齐与视口高度/宽度弹性缩放 */
+      @media (max-width: 767px) {
+        .cl-fullscreen-root {
+          padding: 0.65rem;
+        }
+        .cl-fullscreen-panel {
+          max-width: calc(100vw - 1.3rem);
+          max-height: calc(100dvh - 1.3rem);
+          border-radius: 18px;
+          padding: 1.25rem 1.25rem;
+        }
+        .cl-fullscreen-nav-body {
+          margin: 0;
+          padding-top: clamp(0.75rem, 2.5vh, 1.5rem);
+          padding-bottom: 1rem;
+          align-items: stretch;
+          justify-content: flex-start;
+        }
+        .cl-drawer-list {
+          width: 100%;
+          padding: 0;
+          gap: clamp(0.75rem, 2.2vh, 1.35rem);
+        }
+        .cl-drawer-title {
+          font-size: clamp(1.75rem, 6.8vw, 2.4rem) !important;
+          line-height: 1.12;
+        }
+        .cl-drawer-num {
+          font-size: clamp(0.75rem, 3.2vw, 0.9rem);
+          margin-right: 0.65rem;
+          margin-top: 0.18em;
+        }
+        .cl-drawer-toggle-ico {
+          font-size: 1.5rem;
+        }
+        .cl-drawer-sub {
+          margin-top: 0.5rem;
+          margin-left: calc(2ch + 0.65rem);
+          gap: 0.5rem;
+        }
+        .cl-drawer-sublink {
+          font-size: clamp(1rem, 4vw, 1.25rem);
+        }
+      }
+
+      /* ==========================================================================
+         4. 阅读进度条 (Reading Progress Bar)
+         ========================================================================== */
+      .cl-read-progress {
+        position: fixed;
+        top: 0;
         left: 0;
         right: 0;
-        bottom: 0;
         height: 2px;
+        z-index: 70;
         pointer-events: none;
         background: color-mix(in srgb, var(--cl-border) 70%, transparent);
         overflow: hidden;
       }
-      #theme-circlelife .cl-read-progress-bar {
+      .cl-read-progress-bar {
         height: 100%;
         width: 100%;
         transform-origin: left center;
@@ -345,293 +558,13 @@ export const headerStyle = `
         will-change: transform;
       }
 
-
-      /* mobile fullscreen menu — portal on body, tokens inherit from :root */
-      .cl-drawer-root {
-        position: fixed;
-        inset: 0;
-        z-index: 200;
-        pointer-events: none;
-        visibility: hidden;
-        transition: visibility 0s linear 0.32s;
-        font-family: 'Hanken Grotesk', 'Noto Sans SC', system-ui, sans-serif;
-        color: var(--cl-text);
-      }
-      .cl-drawer-root.is-open {
-        pointer-events: auto;
-        visibility: visible;
-        transition-delay: 0s;
-      }
-      .cl-drawer-mask {
-        position: absolute;
-        inset: 0;
-        border: 0;
-        background: color-mix(in srgb, var(--cl-text) 18%, transparent);
-        opacity: 0;
-        transition: opacity 0.28s var(--cl-ease);
-        cursor: pointer;
-      }
-      .cl-drawer-root.is-open .cl-drawer-mask {
-        opacity: 1;
-      }
-      html.dark .cl-drawer-mask {
-        background: color-mix(in srgb, #000 45%, transparent);
-      }
-      @media (prefers-reduced-motion: reduce) {
-        .cl-drawer-mask,
-        .cl-drawer-panel,
-        .cl-toc-drawer-mask,
-        .cl-toc-drawer-panel {
-          transition-duration: 0.01ms !important;
-        }
-        .cl-drawer-item {
-          animation: none !important;
-        }
-      }
-      .cl-drawer-panel {
-        position: absolute;
-        inset: max(0.5rem, env(safe-area-inset-top, 0px))
-          max(0.5rem, env(safe-area-inset-right, 0px))
-          max(0.5rem, env(safe-area-inset-bottom, 0px))
-          max(0.5rem, env(safe-area-inset-left, 0px));
-        display: flex;
-        flex-direction: column;
-        background: var(--cl-bg);
-        border-radius: 24px;
-        padding: 0.85rem 1rem 1.4rem;
-        opacity: 0;
-        transform: scale(0.965);
-        transform-origin: top center;
-        transition: opacity 0.26s var(--cl-ease), transform 0.32s var(--cl-ease);
-        overflow-y: auto;
-        box-shadow: 0 18px 60px color-mix(in srgb, var(--cl-text) 14%, transparent);
-      }
-      html.dark .cl-drawer-panel {
-        box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
-      }
-      .cl-drawer-root.is-open .cl-drawer-panel {
-        opacity: 1;
-        transform: scale(1);
-      }
-      .cl-drawer-head {
-        display: grid;
-        grid-template-columns: 1fr auto 1fr;
-        align-items: center;
-        column-gap: 0.5rem;
-        flex: none;
-      }
-      .cl-drawer-close {
-        justify-self: start;
-        color: var(--cl-muted) !important;
-        flex: none;
-      }
-      .cl-drawer-brand {
-        justify-self: center;
-        display: inline-flex;
-        align-items: center;
-        text-decoration: none;
-      }
-      .cl-drawer-head-actions {
-        justify-self: end;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.75rem;
-      }
-      /* 抽屉 portal 在 body 上，#theme-circlelife 前缀样式不生效，需独立声明：
-         顶行图标按钮为 Moment 式浅灰圆底 */
-      .cl-drawer-root .cl-icon-btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 2.15rem;
-        height: 2.15rem;
-        border: 0;
-        border-radius: 9999px;
-        background: color-mix(in srgb, var(--cl-text) 7%, transparent);
-        color: var(--cl-muted);
-        cursor: pointer;
-        transition:
-          background 0.15s ease,
-          color 0.15s ease;
-      }
-      .cl-drawer-root .cl-icon-btn i,
-      .cl-drawer-root .cl-icon-btn-glyph {
-        font-size: 0.85rem;
-        line-height: 1;
-      }
-      .cl-drawer-root .cl-icon-btn:hover {
-        color: var(--cl-text);
-        background: color-mix(in srgb, var(--cl-text) 12%, transparent);
-      }
-      .cl-drawer-brand .cl-lockup-cn {
-        font-size: 1rem;
-        line-height: 1.2;
-      }
-      /* 菜单块用 auto margin 垂直居中；内容超高时 margin 归零、从顶部正常滚动 */
-      .cl-drawer-panel .cl-main-nav--drawer {
-        margin: auto 0;
-      }
-      .cl-drawer-list {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-      }
-      /* Moment 风格：左对齐 + 编号列 + 大字（常态弱化色，hover/当前页提亮） */
-      .cl-drawer-link {
-        display: flex;
-        align-items: baseline;
-        width: 100%;
-        padding: 0.85rem 0;
-        border: 0;
-        background: transparent;
-        color: var(--cl-muted);
-        font-family: var(--cl-font-display);
-        font-size: 1.7rem;
-        font-weight: 600;
-        letter-spacing: 0.01em;
-        line-height: 1.1;
-        text-align: left;
-        cursor: pointer;
-        text-decoration: none;
-        transition: color 0.15s ease;
-      }
-      .cl-drawer-link::before {
-        content: attr(data-index);
-        flex: none;
-        width: 2.4rem;
-        font-size: 1.9rem;
-        color: var(--cl-faint);
-      }
-      .cl-drawer-link .cl-nav-ico {
-        display: none;
-      }
-      .cl-drawer-link:hover,
-      .cl-drawer-link.is-current {
-        color: var(--cl-text);
-      }
-      .cl-drawer-chevron {
-        margin-left: auto;
-        align-self: center;
-        font-size: 0.75rem;
-        color: var(--cl-faint);
-        transition: transform 0.2s var(--cl-ease);
-      }
-      .cl-drawer-chevron.is-open {
-        transform: rotate(180deg);
-      }
-      .cl-drawer-sub {
-        list-style: none;
-        margin: 0 0 0.5rem 2.4rem;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-      }
-      .cl-drawer-sublink {
-        display: block;
-        padding: 0.5rem 0;
-        color: var(--cl-muted);
-        font-family: var(--cl-font-display);
-        font-size: 1.05rem;
-        font-weight: 600;
-        text-decoration: none;
-        transition: color 0.15s ease;
-      }
-      .cl-drawer-sublink:hover {
-        color: var(--cl-accent);
-      }
-      /* 打开时菜单项逐条错峰浮现 */
-      @keyframes cl-drawer-item-in {
-        from {
-          opacity: 0;
-          transform: translateY(0.9rem);
-        }
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-      .cl-drawer-root.is-open .cl-drawer-item {
-        animation: cl-drawer-item-in 0.4s var(--cl-ease) both;
-      }
-      .cl-drawer-root.is-open .cl-drawer-item:nth-child(1) { animation-delay: 0.06s; }
-      .cl-drawer-root.is-open .cl-drawer-item:nth-child(2) { animation-delay: 0.1s; }
-      .cl-drawer-root.is-open .cl-drawer-item:nth-child(3) { animation-delay: 0.14s; }
-      .cl-drawer-root.is-open .cl-drawer-item:nth-child(4) { animation-delay: 0.18s; }
-      .cl-drawer-root.is-open .cl-drawer-item:nth-child(5) { animation-delay: 0.22s; }
-      .cl-drawer-root.is-open .cl-drawer-item:nth-child(6) { animation-delay: 0.26s; }
-      .cl-drawer-root.is-open .cl-drawer-item:nth-child(7) { animation-delay: 0.3s; }
-      .cl-drawer-root.is-open .cl-drawer-item:nth-child(8) { animation-delay: 0.34s; }
-      .cl-drawer-root.is-open .cl-drawer-item:nth-child(9) { animation-delay: 0.38s; }
-      .cl-drawer-root.is-open .cl-drawer-item:nth-child(10) { animation-delay: 0.42s; }
-      .cl-drawer-root.is-open .cl-drawer-item:nth-child(11) { animation-delay: 0.46s; }
-      .cl-drawer-root.is-open .cl-drawer-item:nth-child(12) { animation-delay: 0.5s; }
-      .cl-drawer-foot {
-        flex: none;
-        margin: 1.4rem 0 0;
-        padding-top: 0.85rem;
-        border-top: 1px solid color-mix(in srgb, var(--cl-border) 60%, transparent);
-        font-family: var(--cl-font-mono);
-        font-size: 0.62rem;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        color: var(--cl-faint);
-        text-align: center;
-      }
-      /* desktop dropdown submenu (portal on body) */
-      .cl-submenu {
-        list-style: none;
-        margin: 0;
-        padding: 0.4rem 0;
-        min-width: 11rem;
-        border-radius: var(--cl-radius);
-        border: 1px solid var(--cl-border);
-        background: var(--cl-surface) !important;
-        color: var(--cl-text);
-        box-shadow: 0 8px 24px color-mix(in srgb, var(--cl-text) 8%, transparent);
-        z-index: 120;
-      }
-      .dark .cl-submenu {
-        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
-      }
-      .cl-submenu-item {
-        margin: 0;
-        padding: 0;
-        list-style: none;
-      }
-      .cl-submenu-link {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.55rem 1rem;
-        color: inherit;
-        font-size: 0.86rem;
-        font-weight: 400;
-        letter-spacing: 0.02em;
-        text-decoration: none;
-        transition: background 0.15s ease, color 0.15s ease;
-      }
-      .cl-submenu-link:hover {
-        background: var(--cl-accent-soft);
-        color: var(--cl-accent);
-      }
-      .cl-submenu-ico {
-        opacity: 0.7;
-        font-size: 0.75rem;
-      }
-
-      #theme-circlelife .cl-search-overlay {
-        position: fixed;
-        inset: 0;
-        z-index: 80;
-      }
-      #theme-circlelife ~ .cl-search-overlay,
+      /* ==========================================================================
+         5. 全局搜索浮层 (Search Overlay)
+         ========================================================================== */
       .cl-search-overlay {
         position: fixed;
         inset: 0;
-        z-index: 80;
+        z-index: 250;
       }
       .cl-search-overlay-mask {
         position: absolute;
@@ -677,13 +610,6 @@ export const headerStyle = `
         outline: 2px solid var(--cl-accent);
         outline-offset: 2px;
       }
-      @media (prefers-reduced-motion: reduce) {
-        .cl-search-overlay,
-        .cl-search-overlay * {
-          animation-duration: 0.01ms !important;
-          transition-duration: 0.01ms !important;
-        }
-      }
       .cl-search-close {
         border: 0;
         background: transparent;
@@ -728,5 +654,23 @@ export const headerStyle = `
       }
       .cl-search-empty {
         padding: 0.9rem 1rem 1rem;
+      }
+
+      /* ==========================================================================
+         6. 系统 Reduced Motion 响应
+         ========================================================================== */
+      @media (prefers-reduced-motion: reduce) {
+        .cl-floating-pill,
+        .cl-pill-menu-btn,
+        .cl-fullscreen-panel,
+        .cl-fullscreen-mask,
+        .cl-drawer-item,
+        .cl-drawer-link,
+        .cl-drawer-sublink,
+        .cl-search-overlay,
+        .cl-search-overlay * {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+        }
       }
 `

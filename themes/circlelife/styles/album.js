@@ -113,20 +113,20 @@ export const albumStyle = `
   .cl-album-stack-root {
     max-width: 1720px;
     margin: 0 auto;
-    padding: 2.5rem 2rem 7rem;
+    padding: max(5.5rem, calc(env(safe-area-inset-top, 0px) + 4.8rem)) 2rem 7rem;
     box-sizing: border-box;
     position: relative;
   }
 
   @media (max-width: 1023px) {
     .cl-album-stack-root {
-      padding: 2rem 1.5rem 6rem;
+      padding: max(5.2rem, calc(env(safe-area-inset-top, 0px) + 4.5rem)) 1.5rem 6rem;
     }
   }
 
   @media (max-width: 767px) {
     .cl-album-stack-root {
-      padding: 1.5rem 1rem 5rem;
+      padding: max(5.2rem, calc(env(safe-area-inset-top, 0px) + 4.5rem)) 1rem 5rem;
     }
   }
 

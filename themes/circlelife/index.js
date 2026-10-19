@@ -32,7 +32,7 @@ import ArticleBack from './components/ArticleBack'
 import BackToTop from './components/BackToTop'
 import { Footer } from './components/Footer'
 import { Header } from './components/Header'
-import HomeWheel from './components/HomeWheel'
+import HomeTiltWall from './components/HomeTiltWall'
 import LatestCard from './components/LatestCard'
 import ListScrollMemory from './components/ListScrollMemory'
 import MobileToc from './components/MobileToc'
@@ -69,6 +69,12 @@ const LayoutBase = props => {
     (typeof router?.asPath === 'string' &&
       router.asPath.split('?')[0].replace(/\/$/, '') === '/about')
 
+  const isHomePage =
+    (router?.pathname === '/' ||
+      (typeof router?.asPath === 'string' &&
+        router.asPath.split('?')[0].replace(/\/$/, '') === '')) &&
+    !router?.query?.s
+
   const LAYOUT_VERTICAL =
     post && siteConfig('CIRCLELIFE_ARTICLE_LAYOUT_VERTICAL', false, CONFIG)
 
@@ -79,7 +85,7 @@ const LayoutBase = props => {
     true,
     CONFIG
   )
-  const wide = fullWidth || isAlbumPage || isAboutPage
+  const wide = fullWidth || isAlbumPage || isAboutPage || isHomePage
   // 与 SideBar 的渲染条件对齐：无目录的页面不预留侧栏槽，避免内容被空槽挤偏
   const hasDesktopToc = Boolean(post?.toc && post.toc.length > 2)
   const showSidebar =
@@ -110,28 +116,14 @@ const LayoutBase = props => {
         href='https://fonts.gstatic.com'
         crossOrigin='anonymous'
       />
-      {/* 字体非阻塞异步加载：优先级降为 Low，避免 VeryHigh 阻塞关键渲染与抢占 LCP 图片网络带宽 */}
-      <link
-        rel='preload'
-        as='style'
-        href='https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600&family=JetBrains+Mono:wght@500&family=Newsreader:wght@500&family=Noto+Serif+SC:wght@500&display=swap'
-      />
       <link
         rel='stylesheet'
-        href='https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600&family=JetBrains+Mono:wght@500&family=Newsreader:wght@500&family=Noto+Serif+SC:wght@500&display=swap'
-        media='print'
-        onLoad="this.media='all'"
+        href='https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600&family=JetBrains+Mono:wght@500&family=Newsreader:wght@500&family=Noto+Serif+SC:wght@500;700&display=swap'
       />
-      <noscript>
-        <link
-          rel='stylesheet'
-          href='https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600&family=JetBrains+Mono:wght@500&family=Newsreader:wght@500&family=Noto+Serif+SC:wght@500&display=swap'
-        />
-      </noscript>
     </Head>
     <div
       id='theme-circlelife'
-      className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth${isAlbumPage ? ' cl-is-album' : ''}${isAboutPage ? ' cl-is-about' : ''}${showSidebar ? ' cl-has-sidebar' : ''}`}>
+      className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth${isAlbumPage ? ' cl-is-album' : ''}${isAboutPage ? ' cl-is-about' : ''}${isHomePage ? ' cl-is-home' : ''}${showSidebar ? ' cl-has-sidebar' : ''}`}>
       <Style />
 
       <Header {...props} />
@@ -141,7 +133,7 @@ const LayoutBase = props => {
         <div
           id='container-wrapper'
           className={`relative mx-auto flex justify-center ${
-            isAlbumPage || isAboutPage
+            isAlbumPage || isAboutPage || isHomePage
               ? 'max-w-none w-full flex-col items-stretch px-0 py-0'
               : `px-4 py-8 md:px-6 ${LAYOUT_SIDEBAR_REVERSE ? 'md:flex-row-reverse' : ''} ${
                   LAYOUT_VERTICAL
@@ -159,7 +151,7 @@ const LayoutBase = props => {
                   ? 'w-full max-w-5xl'
                   : 'w-full max-w-3xl'
             }`}>
-            {isAlbumPage ? (
+            {isAlbumPage || isHomePage ? (
               <div className='w-full'>
                 {props.slotTop}
                 {children}
@@ -270,22 +262,26 @@ const LayoutPostList = props => {
         />
       ) : null}
 
-      {useTimeline &&
-        siteConfig('CIRCLELIFE_HOME_LATEST_CARD', true, CONFIG) && (
-          <LatestCard posts={heroPosts} post={heroPosts[0]} />
-        )}
-
-      {useTimeline && <HomeWheel decks={props.photoDecks || []} />}
-
-      {siteConfig('POST_LIST_STYLE') === 'page' ? (
-        <BlogListPage
-          {...props}
-          useTimeline={useTimeline}
-          recentMode={router.pathname === '/'}
-        />
-      ) : (
-        <BlogListScroll {...props} useTimeline={useTimeline} />
+      {useTimeline && (
+        <HomeTiltWall homeCoverImages={props.homeCoverImages || []} />
       )}
+
+      <div className={useTimeline ? 'cl-home-content-container max-w-4xl mx-auto w-full px-4 md:px-6 py-12' : ''}>
+        {useTimeline &&
+          siteConfig('CIRCLELIFE_HOME_LATEST_CARD', true, CONFIG) && (
+            <LatestCard posts={heroPosts} post={heroPosts[0]} />
+          )}
+
+        {siteConfig('POST_LIST_STYLE') === 'page' ? (
+          <BlogListPage
+            {...props}
+            useTimeline={useTimeline}
+            recentMode={router.pathname === '/'}
+          />
+        ) : (
+          <BlogListScroll {...props} useTimeline={useTimeline} />
+        )}
+      </div>
     </>
   )
 }

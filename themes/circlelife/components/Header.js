@@ -4,72 +4,42 @@ import SmartLink from '@/components/SmartLink'
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import CONFIG from '../config'
-import { useAlbumUI } from './albumContext'
-import { BrandLockup } from './BrandLockup'
+import { ArcMark, BrandLockup } from './BrandLockup'
 import { MenuList } from './MenuList'
 import SearchOverlay from './SearchOverlay'
 import ReadingProgress from './ReadingProgress'
 
 /**
- * 桌面：左 | 中品牌 | 右（疏朗 + 轻聚拢）
- * 手机：汉堡左 | 品牌中 | 搜索右（明暗切换收进全屏菜单）；菜单 portal 到 body
+ * 悬浮胶囊导航栏 + 全屏杂志折叠大菜单 (Floating Pill Navbar + Fullscreen Magazine Drawer)
+ * 1. 彻底固定悬浮 (position: fixed) 且严格水平居中 (left: 50%, -50%)，不随滚动发生高宽形变
+ * 2. 胶囊结构：左侧 Logo + 中间 4 个主导航项（首页、随笔、相册、关于） + 右侧驼色“≡ 菜单”按钮
+ * 3. 手机端一体化胶囊：左侧 Logo，右侧驼色“≡ 菜单”按钮，完美自适应
+ * 4. 全屏覆盖折叠大菜单：完整接入 MenuList，100% 恢复 Notion 配置的所有二级子菜单与手风琴展开体验
  */
 export const Header = props => {
-  const { post, customMenu, customNav } = props
+  const { post } = props
   const { isDarkMode, toggleDarkMode } = useGlobal()
-  const [scrolled, setScrolled] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const drawerPanelRef = useRef(null)
   const hamburgerRef = useRef(null)
   const showProgress = Boolean(post) && post?.type !== 'Page'
-  // 影集画廊的滚动根由 AlbumStage 经 Context 注册；null 时回退 window 滚动
-  const { scrollRoot } = useAlbumUI() || {}
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  useEffect(() => {
-    const readY = () => {
-      if (typeof window !== 'undefined' && window.__CL_ABOUT_SCROLL_Y__ != null) {
-        return window.__CL_ABOUT_SCROLL_Y__
-      }
-      if (scrollRoot) return scrollRoot.scrollTop || 0
-      return window.scrollY || document.documentElement.scrollTop || 0
-    }
-    const onScroll = () => {
-      const y = readY()
-      setScrolled(prev => {
-        if (!prev && y > 28) return true
-        if (prev && y < 10) return false
-        return prev
-      })
-    }
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    window.addEventListener('cl-virtual-scroll', onScroll, { passive: true })
-    if (scrollRoot) {
-      scrollRoot.addEventListener('scroll', onScroll, { passive: true })
-    }
-    return () => {
-      window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('cl-virtual-scroll', onScroll)
-      if (scrollRoot) {
-        scrollRoot.removeEventListener('scroll', onScroll)
-      }
-    }
-  }, [scrollRoot])
-
+  // Focus trap 与 ESC 键退出处理
   useEffect(() => {
     if (!drawerOpen) return undefined
     const prevOverflow = document.body.style.overflow
     const prevTouch = document.body.style.touchAction
     document.body.style.overflow = 'hidden'
     document.body.style.touchAction = 'none'
-    // 焦点管理：打开聚焦面板，Tab 循环限制在抽屉内，关闭归还汉堡按钮
+
     drawerPanelRef.current?.focus({ preventScroll: true })
+
     const onKey = e => {
       if (e.key === 'Escape') {
         setDrawerOpen(false)
@@ -92,30 +62,12 @@ export const Header = props => {
         first.focus()
       }
     }
-    // iOS：overflow:hidden 挡不住触屏惯性滚动，菜单外及面板到边一律拦截
-    let lastTouchY = 0
-    const onTouchMove = e => {
-      const panel = drawerPanelRef.current
-      if (!panel || !panel.contains(e.target)) {
-        e.preventDefault()
-        return
-      }
-      const touch = e.touches[0]
-      if (!touch) return
-      const dy = touch.clientY - lastTouchY
-      lastTouchY = touch.clientY
-      const atTop = panel.scrollTop <= 0
-      const atBottom =
-        panel.scrollTop + panel.clientHeight >= panel.scrollHeight - 1
-      if ((atTop && dy > 0) || (atBottom && dy < 0)) e.preventDefault()
-    }
+
     window.addEventListener('keydown', onKey)
-    document.addEventListener('touchmove', onTouchMove, { passive: false })
     return () => {
       document.body.style.overflow = prevOverflow
       document.body.style.touchAction = prevTouch
       window.removeEventListener('keydown', onKey)
-      document.removeEventListener('touchmove', onTouchMove)
       hamburgerRef.current?.focus?.({ preventScroll: true })
     }
   }, [drawerOpen])
@@ -130,147 +82,153 @@ export const Header = props => {
   const searchButton = siteConfig('CIRCLELIFE_MENU_SEARCH', null, CONFIG) ? (
     <button
       type='button'
-      className='cl-icon-btn'
+      className='cl-icon-btn cl-fullscreen-top-btn'
       onClick={openSearch}
-      aria-label='Search'
+      aria-label='搜索'
       title='搜索'>
-      <i className='fas fa-search' />
+      <i className='fas fa-search' aria-hidden='true' />
     </button>
   ) : null
 
   const darkModeButton = (
     <button
       type='button'
-      className='cl-icon-btn'
+      className='cl-icon-btn cl-fullscreen-top-btn'
       onClick={toggleDarkMode}
-      aria-label={isDarkMode ? 'Light mode' : 'Dark mode'}
+      aria-label={isDarkMode ? '切换至浅色模式' : '切换至深色模式'}
       title={isDarkMode ? '浅色' : '深色'}>
-      <span className='cl-icon-btn-glyph' aria-hidden='true'>
-        {isDarkMode ? '☀' : '☾'}
-      </span>
+      <i
+        className={`${isDarkMode ? 'fas fa-sun' : 'fas fa-moon'} cl-theme-switch-ico`}
+        aria-hidden='true'
+      />
     </button>
   )
 
-  // 手机顶栏只留搜索；明暗切换收进全屏菜单
-  const actions = (mobile = false) => (
-    <div className={`cl-header-actions ${mobile ? 'cl-header-actions--mobile' : ''}`}>
-      {searchButton}
-      {!mobile && darkModeButton}
-    </div>
-  )
-
-  const hamburger = (
-    <button
-      type='button'
-      ref={hamburgerRef}
-      className='cl-icon-btn cl-hamburger'
-      aria-label={drawerOpen ? '关闭菜单' : '打开菜单'}
-      aria-expanded={drawerOpen}
-      onClick={() => setDrawerOpen(true)}>
-      <i className='fas fa-bars' />
-    </button>
-  )
-
+  // 全屏覆盖式折叠大菜单 (Portal 到 document.body)
   const drawer = !mounted
     ? null
     : createPortal(
       <div
-        className={`cl-drawer-root ${drawerOpen ? 'is-open' : ''}`}
+        className={`cl-fullscreen-root ${drawerOpen ? 'is-open' : ''}`}
         aria-hidden={!drawerOpen}>
         <button
           type='button'
-          className='cl-drawer-mask'
+          className='cl-fullscreen-mask'
           aria-label='关闭菜单'
           tabIndex={drawerOpen ? 0 : -1}
           onClick={closeDrawer}
         />
         <div
           ref={drawerPanelRef}
-          className='cl-drawer-panel'
+          className='cl-fullscreen-panel'
           role='dialog'
           aria-modal='true'
           tabIndex={-1}
-          aria-label='站点菜单'>
-          <div className='cl-drawer-head'>
-            <button
-              type='button'
-              className='cl-icon-btn cl-drawer-close'
-              aria-label='关闭'
-              onClick={closeDrawer}>
-              <i className='fas fa-times' />
-            </button>
+          aria-label='全屏站点菜单'>
+          {/* 顶栏操作区 */}
+          <div className='cl-fullscreen-topbar'>
             <SmartLink
               href='/'
-              className='cl-drawer-brand'
-              aria-label='时光的弧线'
+              className='cl-fullscreen-brand'
+              aria-label='返回首页'
               onClick={closeDrawer}>
               <BrandLockup compact href={null} hideEn />
             </SmartLink>
-            <div className='cl-drawer-head-actions'>
-              {darkModeButton}
+
+            <div className='cl-fullscreen-topbar-actions'>
               {searchButton}
+              {darkModeButton}
+              <button
+                type='button'
+                className='cl-icon-btn cl-fullscreen-close'
+                aria-label='关闭菜单'
+                onClick={closeDrawer}>
+                <i className='fas fa-times' aria-hidden='true' />
+              </button>
             </div>
           </div>
-          <MenuList
-            customMenu={customMenu}
-            customNav={customNav}
-            variant='drawer'
-            wing='drawer'
-            onNavigate={closeDrawer}
-          />
-          <p className='cl-drawer-foot'>Circle of Life</p>
+
+          {/* 核心大号艺术字体主导航（完整接入 MenuList，支持所有自定义菜单及二级子菜单展开） */}
+          <div className='cl-fullscreen-nav-body'>
+            <MenuList
+              {...props}
+              variant='drawer'
+              wing='drawer'
+              onNavigate={closeDrawer}
+            />
+          </div>
         </div>
       </div>,
       document.body
     )
 
   return (
-    <header
-      className={`cl-header sticky top-0 z-40 w-full ${
-        scrolled ? 'is-scrolled' : ''
-      } ${showProgress ? 'cl-header--reading' : ''} ${
-        drawerOpen ? 'is-drawer-open' : ''
-      }`}>
-      <div className='cl-header-inner cl-header-inner--desktop'>
-        <div
-          className={`cl-header-wing cl-header-wing--left ${
-            scrolled ? 'is-gathered' : ''
-          }`}>
-          <MenuList {...props} variant='header' wing='left' collapsed={scrolled} />
-        </div>
-
-        <div className='cl-header-center'>
-          <BrandLockup compact href='/' collapsed={scrolled} />
-        </div>
-
-        <div
-          className={`cl-header-wing cl-header-wing--right ${
-            scrolled ? 'is-gathered' : ''
-          }`}>
-          <MenuList {...props} variant='header' wing='right' collapsed={scrolled} />
-          {actions(false)}
-        </div>
-      </div>
-
-      <div className='cl-header-inner cl-header-inner--mobile'>
-        <div className='cl-header-mobile-side cl-header-mobile-side--left'>
-          {hamburger}
-        </div>
-        <div className='cl-header-center'>
-          <BrandLockup compact href='/' collapsed={scrolled} />
-        </div>
-        <div className='cl-header-mobile-side cl-header-mobile-side--right'>
-          {searchButton}
-        </div>
-      </div>
-
+    <>
       {showProgress ? <ReadingProgress /> : null}
+
+      {/* 固定悬浮母层 (脱离文档流，严格水平居中) */}
+      <aside className='cl-floating-header' aria-label='悬浮顶栏'>
+        {/* 正中悬浮胶囊 */}
+        <nav className='cl-floating-pill' aria-label='主导航'>
+          {/* 左侧 Logo: 圆环 ArcMark */}
+          <SmartLink
+            href='/'
+            className='cl-floating-pill-logo-link'
+            aria-label='时光的弧线 - 返回首页'>
+            <ArcMark size={24} className='cl-floating-pill-logo' />
+          </SmartLink>
+
+          {/* 手机端中间品牌标识: 时光的弧线 (仅移动端视口展示) */}
+          <span className='cl-floating-pill-brand-text' translate='no'>
+            时光的弧线
+          </span>
+
+          {/* 桌面端 4 个主导航：首页、随笔、相册、关于 */}
+          <div className='cl-floating-pill-nav'>
+            <SmartLink href='/' className='cl-floating-pill-link'>
+              首页
+            </SmartLink>
+            <SmartLink href='/archive' className='cl-floating-pill-link'>
+              随笔
+            </SmartLink>
+            <SmartLink href='/album' className='cl-floating-pill-link'>
+              相册
+            </SmartLink>
+            <SmartLink href='/about' className='cl-floating-pill-link'>
+              关于
+            </SmartLink>
+          </div>
+
+          {/* 移动端内置右端暖金纯图标按钮 (仅移动端视口展示) */}
+          <button
+            type='button'
+            onClick={() => setDrawerOpen(true)}
+            className='cl-pill-menu-btn cl-pill-menu-btn--mobile'
+            aria-label='打开全站菜单'
+            aria-expanded={drawerOpen}>
+            <i className='fas fa-bars cl-pill-menu-icon' aria-hidden='true' />
+          </button>
+        </nav>
+      </aside>
+
+      {/* PC 桌面端独立悬浮右上角暖金纯图标按钮 (仅桌面端视口展示) */}
+      <button
+        type='button'
+        ref={hamburgerRef}
+        onClick={() => setDrawerOpen(true)}
+        className='cl-floating-desktop-menu-btn'
+        aria-label='打开全站菜单'
+        aria-expanded={drawerOpen}>
+        <i className='fas fa-bars cl-desktop-menu-icon' aria-hidden='true' />
+      </button>
+
       {drawer}
+
       <SearchOverlay
         open={searchOpen}
         items={props.searchIndex || []}
         onClose={() => setSearchOpen(false)}
       />
-    </header>
+    </>
   )
 }

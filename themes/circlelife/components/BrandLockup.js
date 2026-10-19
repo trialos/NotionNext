@@ -54,7 +54,8 @@ export function BrandLockup({
         <span className='cl-lockup-row-text inline-flex items-center gap-2.5 min-w-0'>
           <span
             className='cl-lockup-cn cl-lockup-cn--row font-medium tracking-[0.04em] text-[var(--cl-text)]'
-            style={{ fontFamily: 'var(--cl-font-display)' }}>
+            style={{ fontFamily: 'var(--cl-font-display)' }}
+            translate='no'>
             时光的弧线
           </span>
           {!hideEn && (
@@ -64,7 +65,8 @@ export function BrandLockup({
               </span>
               <span
                 className='cl-lockup-en cl-lockup-en--row uppercase tracking-[0.14em] text-[var(--cl-muted)]'
-                style={{ fontFamily: 'var(--cl-font-mono)' }}>
+                style={{ fontFamily: 'var(--cl-font-mono)' }}
+                translate='no'>
                 Circle of Life
               </span>
             </>
@@ -74,13 +76,15 @@ export function BrandLockup({
         <span className='cl-lockup-text flex min-w-0 flex-col leading-none'>
           <span
             className='cl-lockup-cn font-medium tracking-[0.04em] text-[var(--cl-text)]'
-            style={{ fontFamily: 'var(--cl-font-display)' }}>
+            style={{ fontFamily: 'var(--cl-font-display)' }}
+            translate='no'>
             时光的弧线
           </span>
           {!hideEn && (
             <span
               className='cl-lockup-en uppercase tracking-[0.16em] text-[var(--cl-muted)]'
-              style={{ fontFamily: 'var(--cl-font-mono)' }}>
+              style={{ fontFamily: 'var(--cl-font-mono)' }}
+              translate='no'>
               Circle of Life
             </span>
           )}

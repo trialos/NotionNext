@@ -23,7 +23,7 @@ export const tokenStyle = `
         --cl-radius-sm: 6px;
         --cl-shadow-sm: none;
         --cl-shadow-md: none;
-        --cl-font-display: 'Newsreader', 'Noto Serif SC', 'Songti SC', serif;
+        --cl-font-display: 'Newsreader', 'Noto Serif SC', 'Songti SC', 'STSong', 'Songti TC', 'HiraMinProN-W3', serif;
         --cl-font-body: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
         --cl-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         --cl-media-radius: 10px;

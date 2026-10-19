@@ -159,29 +159,31 @@ export const MenuItemDrop = ({
             href={link?.href}
             target={link?.target}
             className={`cl-drawer-link ${isCurrent ? 'is-current' : ''}`}
-            data-index={drawerIndex}
             onClick={e => {
               if (handleAlbumNavClick(e)) return
               onNavigate?.(e)
             }}>
-            <i className={`${iconClass} cl-nav-ico`} aria-hidden='true' />
-            <span>{label}</span>
+            <span className='cl-drawer-num' aria-hidden='true'>
+              {drawerIndex}
+            </span>
+            <span className='cl-drawer-title'>{label}</span>
           </SmartLink>
         ) : (
           <div className='cl-drawer-group'>
             <button
               type='button'
               className={`cl-drawer-link cl-drawer-toggle ${isCurrent ? 'is-current' : ''}`}
-              data-index={drawerIndex}
               aria-expanded={show}
               onClick={() => changeShow(v => !v)}>
-              <i className={`${iconClass} cl-nav-ico`} aria-hidden='true' />
-              <span>{label}</span>
-              <i
-                className={`fas fa-chevron-down cl-drawer-chevron ${
-                  show ? 'is-open' : ''
-                }`}
-              />
+              <span className='cl-drawer-num' aria-hidden='true'>
+                {drawerIndex}
+              </span>
+              <span className='cl-drawer-title'>{label}</span>
+              <span
+                className={`cl-drawer-toggle-ico ${show ? 'is-open' : ''}`}
+                aria-hidden='true'>
+                {show ? '×' : '+'}
+              </span>
             </button>
             {show ? (
               <ul className='cl-drawer-sub'>

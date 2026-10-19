@@ -577,4 +577,164 @@ export const homeStyle = `
       #theme-circlelife .cl-deck-stage:active {
         cursor: grabbing;
       }
+
+      /* —— 首页 8° 倾斜交错流光照片墙 (HomeTiltWall) —— */
+      #theme-circlelife .cl-home-tilt-track-wrapper {
+        position: relative;
+        width: 100vw;
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+        height: 220vh;
+        background: var(--cl-bg);
+      }
+
+      #theme-circlelife .cl-home-tilt-sticky {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        height: 100dvh;
+        width: 100%;
+        overflow: hidden;
+      }
+
+      #theme-circlelife .cl-home-tilt-section {
+        position: sticky;
+        top: 0;
+        width: 100%;
+        height: 100vh;
+        height: 100dvh;
+        overflow: hidden;
+        background: var(--cl-bg);
+        user-select: none;
+      }
+
+      #theme-circlelife .cl-home-tilt-rotated {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform-origin: center center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 24px;
+        width: 150vw;
+        height: 180vh;
+        pointer-events: none;
+      }
+
+      @media (max-width: 1024px) {
+        #theme-circlelife .cl-home-tilt-rotated {
+          gap: 18px;
+        }
+      }
+
+      @media (max-width: 767px) {
+        #theme-circlelife .cl-home-tilt-rotated {
+          gap: 12px;
+        }
+      }
+
+      #theme-circlelife .cl-home-tilt-col {
+        position: relative;
+        flex: 0 0 auto;
+        width: clamp(220px, 20vw, 360px);
+        height: 100%;
+        overflow: visible;
+        contain: layout;
+      }
+
+      @media (max-width: 1180px) {
+        #theme-circlelife .cl-home-tilt-col {
+          width: clamp(200px, 26vw, 300px);
+        }
+      }
+
+      @media (max-width: 767px) {
+        #theme-circlelife .cl-home-tilt-col {
+          width: clamp(125px, 34vw, 150px);
+        }
+      }
+
+      #theme-circlelife .cl-home-tilt-track {
+        display: flex;
+        flex-direction: column;
+        will-change: transform;
+        transform: translate3d(0, 0, 0);
+      }
+
+      #theme-circlelife .cl-home-tilt-set {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        padding-bottom: 24px;
+      }
+
+      @media (max-width: 1024px) {
+        #theme-circlelife .cl-home-tilt-set {
+          gap: 18px;
+          padding-bottom: 18px;
+        }
+      }
+
+      @media (max-width: 767px) {
+        #theme-circlelife .cl-home-tilt-set {
+          gap: 12px;
+          padding-bottom: 12px;
+        }
+      }
+
+      #theme-circlelife .cl-home-tilt-set-b {
+        content-visibility: auto;
+        contain-intrinsic-size: auto 3000px;
+      }
+
+      /* 直角卡片：纯净无框、无阴影、无圆角、间隙即背景底色，防重排隔离 */
+      #theme-circlelife .cl-home-tilt-item {
+        position: relative;
+        width: 100%;
+        overflow: hidden;
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        contain: paint layout;
+        background-color: color-mix(in srgb, var(--cl-border, #e5e0d8) 35%, var(--cl-surface, #fff));
+      }
+
+      #theme-circlelife .cl-home-tilt-item img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        border-radius: 0 !important;
+        opacity: 0;
+        transition: opacity 0.4s ease-out;
+      }
+
+      #theme-circlelife .cl-home-tilt-item img.is-loaded {
+        opacity: 1;
+      }
+
+      /* 顶部与底部的微弱过渡渐变，让它与 Header / 下方模块柔和自然交融 */
+      #theme-circlelife .cl-home-tilt-fade-top {
+        background: linear-gradient(
+          180deg,
+          color-mix(in srgb, var(--cl-bg) 85%, transparent) 0%,
+          color-mix(in srgb, var(--cl-bg) 30%, transparent) 60%,
+          transparent 100%
+        );
+      }
+
+      #theme-circlelife .cl-home-tilt-fade-bottom {
+        background: linear-gradient(
+          0deg,
+          var(--cl-bg) 0%,
+          color-mix(in srgb, var(--cl-bg) 60%, transparent) 50%,
+          transparent 100%
+        );
+      }
 `
