@@ -959,13 +959,15 @@ export const albumStyle = `
 
   .cl-album-stack-grid-img-wrap {
     width: 100%;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 3 / 4;
     position: relative;
     overflow: hidden;
     border: none !important;
     padding: 0 !important;
     box-shadow: none !important;
-    display: block;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
   }
 
   .cl-album-stack-grid-img {
@@ -973,6 +975,7 @@ export const albumStyle = `
     height: 100%;
     display: block;
     object-fit: contain;
+    object-position: center bottom;
     border-radius: 0 !important;
     border: none !important;
     outline: none !important;
@@ -990,7 +993,7 @@ export const albumStyle = `
   }
 
   .cl-album-stack-grid-info {
-    padding: 8px 2px 0;
+    padding: 10px 0 0;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
