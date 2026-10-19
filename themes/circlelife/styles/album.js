@@ -123,6 +123,12 @@ export const albumStyle = `
     position: relative;
   }
 
+  @media (max-width: 1023px) {
+    .cl-album-stack-root {
+      padding: 2rem 1.5rem 6rem;
+    }
+  }
+
   @media (max-width: 767px) {
     .cl-album-stack-root {
       padding: 1.5rem 1rem 5rem;
@@ -225,8 +231,8 @@ export const albumStyle = `
   /* STACK 先锋架构：「左侧定点锚定 · 右侧照片滚轮」 */
   .cl-shelf-stack-container {
     display: grid;
-    grid-template-columns: minmax(280px, 360px) 1fr;
-    gap: 48px;
+    grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+    gap: clamp(24px, 3.5vw, 48px);
     align-items: start;
     position: relative;
     width: 100%;
@@ -493,7 +499,9 @@ export const albumStyle = `
 
   /* 中央主封面图 */
   .cl-shelf-wheel-cover-wrap {
-    flex: 0 0 auto;
+    flex: 0 1 auto;
+    max-width: 100%;
+    min-width: 0;
     display: flex;
     justify-content: flex-start;
     align-items: center;
@@ -502,7 +510,7 @@ export const albumStyle = `
   .cl-shelf-wheel-cover {
     position: relative;
     display: block;
-    width: auto;
+    width: 100%;
     max-width: 100%;
     cursor: pointer;
     overflow: hidden;
@@ -625,8 +633,8 @@ export const albumStyle = `
     display: none;
   }
 
-  /* —— 移动端先锋艺术展架排版 (方案 A · 吸顶定点中轴 HUD + 滚轮流转) —— */
-  @media (max-width: 767px) {
+  /* —— 移动端/平板先锋艺术展架排版 (对齐全局 1024 导航断点：吸顶定点中轴 HUD + 滚轮流转) —— */
+  @media (max-width: 1023px) {
     .cl-shelf-stack-container {
       display: flex;
       flex-direction: column;
@@ -641,15 +649,15 @@ export const albumStyle = `
       display: none;
     }
 
-    /* 移动端专属吸顶定点中轴 HUD (对齐导航栏高质感透明毛玻璃材质) */
+    /* 移动/平板专属吸顶定点中轴 HUD (对齐导航栏高质感透明毛玻璃材质) */
     .cl-shelf-mobile-sticky-hud {
       display: block;
       position: sticky;
       top: 52px; /* 紧贴顶部站点导航栏下方 */
       z-index: 28;
-      width: calc(100% + 2rem);
-      margin: 0 -1rem; /* 伸展横贯至视口两侧边缘 */
-      padding: 10px 1.25rem 12px;
+      width: calc(100% + 3rem);
+      margin: 0 -1.5rem; /* 平板端伸展横贯至视口两侧边缘 */
+      padding: 12px 1.5rem 14px;
       box-sizing: border-box;
       background-color: color-mix(in srgb, var(--cl-bg) 48%, transparent);
       backdrop-filter: blur(16px) saturate(1.12);
@@ -787,7 +795,7 @@ export const albumStyle = `
     }
 
     .cl-shelf-wheel-cover-wrap {
-      flex: 0 0 auto;
+      flex: 0 1 auto;
       width: 100%;
       max-width: 100%;
       display: flex;
@@ -799,7 +807,8 @@ export const albumStyle = `
     }
 
     .cl-shelf-wheel-cover {
-      width: 100%;
+      width: auto;
+      max-width: 100%;
       position: relative;
       overflow: hidden;
       display: flex;
@@ -819,7 +828,7 @@ export const albumStyle = `
       width: auto;
       height: auto;
       max-width: 100%;
-      max-height: 380px;
+      max-height: 480px; /* 平板/大屏手机拥有更大画幅，绝不截断 */
       object-fit: contain;
       border-radius: 0 !important;
       border: none !important;
@@ -887,11 +896,24 @@ export const albumStyle = `
     }
   }
 
-  /* —— GRID 紧凑网格模式（自适应 CSS Grid 对称铺满，彻底消除右侧空白） —— */
+  /* 手机端进一步微调图片高度与 HUD 边距 */
+  @media (max-width: 767px) {
+    .cl-shelf-mobile-sticky-hud {
+      width: calc(100% + 2rem);
+      margin: 0 -1rem;
+      padding: 10px 1.25rem 12px;
+    }
+
+    .cl-shelf-wheel-cover-img {
+      max-height: 380px;
+    }
+  }
+
+  /* —— GRID 网格大画幅画册模式（2~3 列大气排版，3:2 胶片比例，彻底告别微缩图） —— */
   .cl-album-stack-grid-view {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 32px 28px;
     width: 100%;
     padding-bottom: 90px;
     box-sizing: border-box;
@@ -899,8 +921,8 @@ export const albumStyle = `
 
   @media (max-width: 767px) {
     .cl-album-stack-grid-view {
-      grid-template-columns: repeat(2, 1fr);
-      gap: 14px;
+      grid-template-columns: 1fr;
+      gap: 24px;
       padding-bottom: 70px;
     }
   }
@@ -921,7 +943,7 @@ export const albumStyle = `
 
   .cl-album-stack-grid-img-wrap {
     width: 100%;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 3 / 2;
     position: relative;
     overflow: hidden;
     border: none !important;
@@ -962,7 +984,7 @@ export const albumStyle = `
   .cl-album-stack-grid-title {
     margin: 0;
     font-family: var(--cl-font-display, sans-serif);
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     font-weight: 600;
     color: var(--cl-text);
   }

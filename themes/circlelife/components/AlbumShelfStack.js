@@ -345,8 +345,8 @@ export default function AlbumShelfStack({ decks = [], onOpen }) {
                   <img
                     src={coverSrc}
                     alt={deck.name}
-                    width='400'
-                    height='300'
+                    width='780'
+                    height='520'
                     decoding='async'
                     loading={i === 0 ? 'eager' : 'lazy'}
                     fetchPriority={i === 0 ? 'high' : undefined}
