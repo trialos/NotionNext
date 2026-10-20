@@ -32,7 +32,7 @@
 
 | 模块 / 主题 | 权威设计规范位置 | 核心范围与职责 | 适用任务类型 |
 | :--- | :--- | :--- | :--- |
-| **主站 Circle of Life 主题** | 1. **`withcol-private/docs/design-system/circlelife-DESIGN.md`**（本地自动探测）<br>2. `withcol-private/docs/architecture/circlelife-THEME-ARCH.md`<br>3. `themes/circlelife/styles/` | 当前成熟基准：纸感杂志风格、纸色 `#F5F0E4`、朱砂红 `#B24A33`、Newsreader / 思源宋体、1024px 导航、关于我 3D 摄影瀑布展墙与动态显存回收。支持随博主意图演进。 | 主站日常样式优化、影集画廊交互打磨、转筒与抽牌调整、关于我展墙与序言幕布维护 |
+| **主站 Circle of Life 主题** | 1. **`withcol-private/docs/design-system/circlelife-DESIGN.md`**（本地自动探测）<br>2. `withcol-private/docs/architecture/circlelife-THEME-ARCH.md`<br>3. `themes/circlelife/styles/` | 当前成熟基准：纸感杂志风格、纸色 `#F5F0E4`、朱砂红 `#B24A33`、Newsreader / 思源宋体、1024px 导航、关于我 3D 摄影瀑布展墙与动态显存回收。支持随博主意图演进。 | 主站日常样式优化、影集画廊交互打磨、首页倾斜照片墙与抽牌调整、关于我展墙与序言幕布维护 |
 | **XuHome 主题** | `docs/design/xuhome/DESIGN.md` | Neo-brutalist 风格规范、全套 Token（色彩、间距、圆角）、深浅模式对比度、200ms ease-out 控制台抽屉动画 | `xuhome` 主题样式重构、布局调整、组件新增 |
 | **全局色彩系统演进** | `docs/developer/THEME_COLOR_TOKEN_ROADMAP.zh-CN.md` | 主题色变量命名规范（`<THEME>_COLOR_*` 与 `--<theme>-color-*`）、语义色迁移标准与非目标 | 主题色彩配置扩展、调色板变量化改造 |
 | **主题控制台** | `docs/developer/THEME_CONSOLE_DESIGN.zh-CN.md` | 控制台交互约定、4 个浮动入口、深浅配色分组标准、最小配色暴露清单 | 主题控制台功能扩展、交互适配、移动端响应式 |
