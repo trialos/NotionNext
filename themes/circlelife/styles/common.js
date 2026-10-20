@@ -320,4 +320,38 @@ export const commonStyle = `
         -ms-overflow-style: none;
         scrollbar-width: none;
       }
+
+      /* 跳过链接：键盘用户按一次 Tab 直达正文。
+         常态完全移出屏外且不接收指针，focus 时才落回顶部显现，不影响纸感版面 */
+      #theme-circlelife .cl-skip-link {
+        position: fixed;
+        top: 0;
+        left: 50%;
+        z-index: 300;
+        transform: translate(-50%, -180%);
+        opacity: 0;
+        pointer-events: none;
+        padding: 0.5rem 1.1rem;
+        border-radius: 0 0 12px 12px;
+        background: var(--cl-surface, #f8f5ee);
+        color: var(--cl-text, #23201d);
+        border: 1px solid var(--cl-gold, #c4a47c);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+        font-family: var(--cl-font-mono, monospace);
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+        text-decoration: none;
+        white-space: nowrap;
+        transition:
+          transform 0.18s var(--cl-ease, ease),
+          opacity 0.18s var(--cl-ease, ease);
+      }
+      #theme-circlelife .cl-skip-link:focus,
+      #theme-circlelife .cl-skip-link:focus-visible {
+        transform: translate(-50%, 0);
+        opacity: 1;
+        pointer-events: auto;
+        outline: 2px solid var(--cl-gold, #c4a47c);
+        outline-offset: 2px;
+      }
 `

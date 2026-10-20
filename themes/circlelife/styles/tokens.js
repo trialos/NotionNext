@@ -19,6 +19,10 @@ export const tokenStyle = `
         --cl-accent-press: #97402b;
         --cl-accent-soft: #f0e0d6;
         --cl-accent-ink: #fcfaf4;
+        /* 暖金辅助强调：深浅模式共用一套值，暗底上通过阴影与描边区分层次 */
+        --cl-gold: #c4a47c;
+        --cl-gold-ink: #ffffff;
+        --cl-gold-shadow: rgba(196, 164, 124, 0.4);
         --cl-radius: 10px;
         --cl-radius-sm: 6px;
         --cl-shadow-sm: none;

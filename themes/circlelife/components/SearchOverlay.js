@@ -84,7 +84,8 @@ export default function SearchOverlay({ open, items = [], onClose }) {
             关闭
           </button>
         </div>
-        <ul className='cl-search-results'>
+        {/* 异步结果集：aria-live 让屏幕阅读器播报结果变化 */}
+        <ul className='cl-search-results' aria-live='polite' aria-atomic='false'>
           {results.length ? (
             results.map(item => (
               <li key={`${item.type}-${item.href}`}>

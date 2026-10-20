@@ -52,13 +52,6 @@ export const albumStyle = `
     flex-direction: column;
   }
 
-  /* 画廊全屏沉浸模式下保留博客默认顶栏，保证全站连贯性与导航完整 */
-  html.cl-album-gallery-active #theme-circlelife .cl-header {
-    flex: 0 0 auto;
-    z-index: 50;
-    border-bottom: 1px solid color-mix(in srgb, var(--cl-border) 45%, transparent);
-  }
-
   html.cl-album-gallery-active #theme-circlelife > #container-inner,
   html.cl-album-gallery-active #theme-circlelife #container-wrapper,
   html.cl-album-gallery-active #theme-circlelife #container-wrapper > div,

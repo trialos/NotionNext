@@ -126,6 +126,11 @@ const LayoutBase = props => {
       className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth${isAlbumPage ? ' cl-is-album' : ''}${isAboutPage ? ' cl-is-about' : ''}${isHomePage ? ' cl-is-home' : ''}${showSidebar ? ' cl-has-sidebar' : ''}`}>
       <Style />
 
+      {/* 跳过链接：键盘用户按一次 Tab 即可直达正文，视觉上常态隐藏 */}
+      <a href='#main-content' className='cl-skip-link'>
+        {locale?.COMMON?.SKIP_TO_CONTENT || '跳到正文'}
+      </a>
+
       <Header {...props} />
       <TitleBar {...props} />
 
@@ -144,6 +149,8 @@ const LayoutBase = props => {
                 }`
           }`}>
           <div
+            id='main-content'
+            tabIndex={-1}
             className={`min-w-0 flex-1 ${
               wide
                 ? 'w-full max-w-none'

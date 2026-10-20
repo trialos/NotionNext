@@ -261,189 +261,6 @@ export const homeStyle = `
         }
       }
 
-      /* —— Home wheel（影集弧形转筒）—— */
-      #theme-circlelife .cl-wheel {
-        margin-bottom: 1.75rem;
-      }
-      #theme-circlelife .cl-wheel-head {
-        position: relative;
-        z-index: 300; /* 永远压过转筒卡片（卡片 zIndex ≤200），防「全部影集」被边缘叠卡遮挡误触 */
-        display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
-        gap: 0.75rem;
-        margin: 0 0 0.6rem;
-      }
-      #theme-circlelife .cl-wheel-mast {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.3rem;
-        padding-left: 0.85rem;
-        border-left: 2px solid var(--cl-accent);
-      }
-      #theme-circlelife .cl-wheel-kicker {
-        font-family: var(--cl-font-mono);
-        font-size: 0.68rem;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        color: var(--cl-faint);
-        line-height: 1;
-      }
-      #theme-circlelife .cl-wheel-title {
-        font-family: var(--cl-font-display);
-        font-size: clamp(1.2rem, 2.6vw, 1.5rem);
-        font-weight: 600;
-        letter-spacing: -0.03em;
-        color: var(--cl-text);
-        line-height: 1.2;
-        margin: 0;
-        text-wrap: balance;
-      }
-      #theme-circlelife .cl-wheel-head-actions {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.6rem;
-      }
-      #theme-circlelife .cl-wheel-pause {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 2.5rem;
-        height: 2.5rem;
-        border: 0;
-        border-radius: 9999px;
-        background: color-mix(in srgb, var(--cl-text) 7%, transparent);
-        color: var(--cl-muted);
-        cursor: pointer;
-        transition:
-          background 0.15s var(--cl-ease),
-          color 0.15s var(--cl-ease);
-      }
-      #theme-circlelife .cl-wheel-pause:hover {
-        color: var(--cl-text);
-        background: color-mix(in srgb, var(--cl-text) 12%, transparent);
-      }
-      #theme-circlelife .cl-wheel-pause i {
-        font-size: 0.7rem;
-      }
-      #theme-circlelife .cl-wheel-all {
-        font-family: var(--cl-font-mono);
-        font-size: 0.78rem;
-        letter-spacing: 0.06em;
-        color: var(--cl-muted);
-        text-decoration: none;
-        padding: 0.5rem 0.75rem;
-        transition: color 0.15s var(--cl-ease);
-      }
-      #theme-circlelife .cl-wheel-all:hover {
-        color: var(--cl-accent);
-      }
-      /* 转筒舞台：卡片位姿全由 rAF 内联 transform 驱动 */
-      #theme-circlelife .cl-wheel-viewport {
-        position: relative;
-        height: clamp(15rem, 32vw, 19rem);
-        outline: none;
-        touch-action: pan-y;
-      }
-      #theme-circlelife .cl-wheel-viewport:focus-visible {
-        outline: 2px solid var(--cl-accent);
-        outline-offset: 4px;
-        border-radius: var(--cl-radius);
-      }
-      #theme-circlelife .cl-wheel-stage {
-        position: absolute;
-        inset: 0;
-      }
-      #theme-circlelife .cl-wheel-card {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        width: clamp(11rem, 24vw, 15rem);
-        text-decoration: none;
-        will-change: transform;
-        cursor: pointer;
-      }
-      #theme-circlelife .cl-wheel-viewport.is-dragging {
-        cursor: grabbing;
-        user-select: none;
-      }
-      #theme-circlelife .cl-wheel-viewport.is-dragging .cl-wheel-card {
-        pointer-events: none;
-      }
-      #theme-circlelife .cl-wheel-stack {
-        position: relative;
-        display: block;
-        width: 100%;
-        height: clamp(9.5rem, 20vw, 11.5rem);
-      }
-      /* 叠卡位姿/阴影照抄影集书架（原比例 contain，永不裁切） */
-      #theme-circlelife .cl-wheel-shot {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        width: auto;
-        height: auto;
-        max-width: 78%;
-        max-height: 92%;
-        object-fit: contain;
-        border-radius: 10px;
-        box-shadow:
-          0 0 0 1px color-mix(in srgb, var(--cl-text) 10%, transparent),
-          0 10px 28px color-mix(in srgb, var(--cl-text) 12%, transparent);
-        transform-origin: center center;
-        transition:
-          transform 0.25s var(--cl-ease),
-          opacity 0.2s ease;
-      }
-      html.dark #theme-circlelife .cl-wheel-shot {
-        box-shadow:
-          0 0 0 1px color-mix(in srgb, #fff 14%, transparent),
-          0 10px 28px rgba(0, 0, 0, 0.5);
-      }
-      #theme-circlelife .cl-wheel-shot--0 {
-        transform: translate(-50%, -50%) rotate(-2deg);
-      }
-      #theme-circlelife .cl-wheel-shot--1 {
-        transform: translate(-58%, -54%) rotate(-8deg);
-        opacity: 0.92;
-      }
-      #theme-circlelife .cl-wheel-shot--2 {
-        transform: translate(-40%, -48%) rotate(7deg);
-        opacity: 0.88;
-      }
-      #theme-circlelife .cl-wheel-card:hover .cl-wheel-shot--0 {
-        transform: translate(-50%, -52%) rotate(-1deg);
-      }
-      #theme-circlelife .cl-wheel-card:hover .cl-wheel-shot--1 {
-        transform: translate(-62%, -56%) rotate(-10deg);
-      }
-      #theme-circlelife .cl-wheel-card img {
-        -webkit-user-drag: none;
-      }
-      #theme-circlelife .cl-wheel-meta {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-        padding: 0.55rem 0.15rem 0;
-        text-align: left;
-      }
-      #theme-circlelife .cl-wheel-name {
-        font-family: var(--cl-font-display);
-        font-size: 1.05rem;
-        font-weight: 600;
-        letter-spacing: -0.02em;
-        line-height: 1.25;
-        color: var(--cl-text);
-        text-wrap: balance;
-      }
-      #theme-circlelife .cl-wheel-meta-line {
-        font-family: var(--cl-font-mono);
-        font-size: 0.68rem;
-        letter-spacing: 0.08em;
-        color: var(--cl-faint);
-      }
-
       /* —— Timeline —— */
       #theme-circlelife .cl-timeline {
         padding-bottom: 1.5rem;
@@ -579,48 +396,60 @@ export const homeStyle = `
       }
 
       /* —— 首页 8° 倾斜交错流光照片墙 (HomeTiltWall) —— */
+      /* 首页容器本身已是全宽，无需 100vw + 负 margin 的满屏 hack（会带出横向滚动条） */
+      /* 区块随页面滚走（不 sticky）：去掉粘连子树后 iOS 合成压力最小，
+         与参考站 moment.priority.vision 的 .home-wrapper（3 屏）同构。
+         240vh 提供约 2.4 屏的浏览时长，避免「一拉就到底」 */
       #theme-circlelife .cl-home-tilt-track-wrapper {
         position: relative;
-        width: 100vw;
-        left: 50%;
-        right: 50%;
-        margin-left: -50vw;
-        margin-right: -50vw;
-        height: 220vh;
+        width: 100%;
+        height: 240vh;
         background: var(--cl-bg);
       }
 
-      #theme-circlelife .cl-home-tilt-sticky {
-        position: sticky;
-        top: 0;
-        height: 100vh;
-        height: 100dvh;
-        width: 100%;
-        overflow: hidden;
-      }
-
       #theme-circlelife .cl-home-tilt-section {
-        position: sticky;
-        top: 0;
+        position: relative;
         width: 100%;
-        height: 100vh;
-        height: 100dvh;
+        height: 100%;
         overflow: hidden;
         background: var(--cl-bg);
         user-select: none;
       }
 
+      /* 完全滚出视口后释放光栅纹理：画布在 DPR3 下是数十 MB 级的大图层，
+         离屏仍持有会让下方文章滚动持续背着显存压力。wrapper 同为纸色，不会闪白 */
+      #theme-circlelife .cl-home-tilt-section.is-offscreen {
+        visibility: hidden;
+      }
+
+      /* 平移层：尺寸等于视口，每帧只写 translate。
+         把 rotate/scale 留给内层静态变换后，大图层不再每帧重写变换串 */
+      #theme-circlelife .cl-home-tilt-pan {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      /* 仅在滚动期间临时提升图层：停手 150ms 后归还，避免常驻大纹理 */
+      #theme-circlelife .cl-home-tilt-section.is-flowing .cl-home-tilt-pan,
+      #theme-circlelife .cl-home-tilt-section.is-flowing .cl-home-tilt-track {
+        will-change: transform;
+      }
+
+      /* 母画卷：rotate + scale 静态化，缩放档位由 --cl-tilt-scale 注入（仅 resize 时更新）。
+         高度必须高于 section（240vh），否则区块上下会露出底色 */
       #theme-circlelife .cl-home-tilt-rotated {
         position: absolute;
         top: 50%;
         left: 50%;
         transform-origin: center center;
+        transform: translate(-50%, -50%) rotate(8deg) scale(var(--cl-tilt-scale, 1.08));
         display: flex;
         justify-content: center;
         align-items: center;
         gap: 24px;
         width: 150vw;
-        height: 180vh;
+        height: 260vh;
         pointer-events: none;
       }
 
@@ -657,11 +486,12 @@ export const homeStyle = `
         }
       }
 
+      /* 不声明常驻 will-change，也不使用 translate3d：
+         与参考站一致，避免每条列都常驻一个接近 4096 纹理上限的图层 */
       #theme-circlelife .cl-home-tilt-track {
         display: flex;
         flex-direction: column;
-        will-change: transform;
-        transform: translate3d(0, 0, 0);
+        transform: translateY(0);
       }
 
       #theme-circlelife .cl-home-tilt-set {
@@ -685,12 +515,9 @@ export const homeStyle = `
         }
       }
 
-      #theme-circlelife .cl-home-tilt-set-b {
-        content-visibility: auto;
-        contain-intrinsic-size: auto 3000px;
-      }
-
-      /* 直角卡片：纯净无框、无阴影、无圆角、间隙即背景底色，防重排隔离 */
+      /* 直角卡片：纯净无框、无阴影、无圆角、间隙即背景底色
+         注意：严禁在密集卡片子项上声明 contain: paint / translateZ(0)，
+         否则每个卡片都会生成独立合成层，触发 Layerize 长任务 */
       #theme-circlelife .cl-home-tilt-item {
         position: relative;
         width: 100%;
@@ -698,7 +525,6 @@ export const homeStyle = `
         border-radius: 0 !important;
         border: none !important;
         box-shadow: none !important;
-        contain: paint layout;
         background-color: color-mix(in srgb, var(--cl-border, #e5e0d8) 35%, var(--cl-surface, #fff));
       }
 

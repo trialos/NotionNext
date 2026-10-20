@@ -6,9 +6,16 @@ import { adapterNotionBlockMap } from '@/lib/utils/notion.util'
 import { checkStrIsNotionId, checkStrIsUuid } from '@/lib/utils'
 import { idToUuid } from 'notion-utils'
 import { extractImagesFromBlockMap } from '@/themes/circlelife/components/extractPhotoImages'
-import { compressImage } from '@/lib/db/notion/mapImage'
+import { buildImageSources } from '@/themes/circlelife/components/imageSrcset'
 import Head from 'next/head'
 import { DynamicLayout } from '@/themes/theme'
+
+/**
+ * 展墙列数：移动 1 列、平板 2 列、桌面 3 列，
+ * sizes 必须与 themes/circlelife/styles/about.js 的列宽保持一致
+ */
+const ABOUT_IMAGE_SIZES =
+  '(max-width: 767px) 100vw, (max-width: 1023px) 50vw, 33vw'
 
 /**
  * 关于我：无限视差平铺网格画廊
@@ -22,43 +29,21 @@ import { DynamicLayout } from '@/themes/theme'
 const AboutIndex = props => {
   const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
   const firstCard = props.aboutCards?.[0]
-  const secondCard = props.aboutCards?.[1]
   return (
     <>
       <Head>
-        {/* 静默预加载首屏核心 LCP 图片（置顶最前列，消灭资源发现延迟） */}
+        {/* 首屏 LCP：只预加载首图一张，并与 srcset 候选集对齐，避免二次下载 */}
         {firstCard?.src && (
           <link
-            key='preload-lcp-0'
             rel='preload'
             as='image'
             href={firstCard.src}
-            fetchpriority='high'
-          />
-        )}
-        {secondCard?.src && (
-          <link
-            key='preload-lcp-1'
-            rel='preload'
-            as='image'
-            href={secondCard.src}
-            fetchpriority='high'
+            imageSrcSet={firstCard.srcSet || undefined}
+            imageSizes={firstCard.sizes || undefined}
+            fetchPriority='high'
           />
         )}
       </Head>
-      {/* SSR 预备 LCP 节点：让浏览器在解析 HTML 第一瞬间完成 DOM 绑定，彻底归零 166ms 发现延迟 */}
-      {firstCard?.src && (
-        <div className='sr-only pointer-events-none absolute h-0 w-0 overflow-hidden' aria-hidden='true'>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={firstCard.src}
-            alt=''
-            fetchPriority='high'
-            decoding='async'
-            style={{ width: 1, height: 1 }}
-          />
-        </div>
-      )}
       <DynamicLayout theme={theme} layoutName='LayoutAbout' {...props} />
     </>
   )
@@ -124,7 +109,9 @@ export async function getStaticProps({ locale }) {
           : [post.title || '关于', post.category || 'Circle of Life', 'Self-Portrait', post.publishDay || '']
 
             const rawCover = post.pageCoverThumbnail || post.pageCover || extractedImages[0]?.url || ''
-            const cover = compressImage(rawCover, 1200)
+            const coverSources = buildImageSources(rawCover, {
+              sizes: ABOUT_IMAGE_SIZES
+            })
 
         const defaultRatios = [1.5, 1.25, 0.8, 1.333, 1.0, 1.4]
         const firstImgRatio = extractedImages[0]?.aspectRatio || defaultRatios[cards.length % defaultRatios.length]
@@ -134,7 +121,10 @@ export async function getStaticProps({ locale }) {
           title: post.title || '关于',
           caption: captionText,
           lines,
-          src: cover,
+          src: coverSources.src,
+          srcSet: coverSources.srcSet,
+          sizes: coverSources.sizes,
+          key: rawCover,
           aspectRatio: firstImgRatio,
           date: post.date?.start_date || post.publishDay || '',
           author: post.author || '',
@@ -163,7 +153,7 @@ export async function getStaticProps({ locale }) {
 
           // 遍历关于单页正文里的全部图片，提取为画廊卡片
           images.forEach((img, idx) => {
-            if (img.url && !cards.some(c => c.src === img.url)) {
+            if (img.url && !cards.some(c => (c.key || c.src) === img.url)) {
               const cText = img.caption || singleAboutPage.summary || ''
               const imgLines = cText
                 ? (cText.includes('\n')
@@ -181,12 +171,19 @@ export async function getStaticProps({ locale }) {
               const defaultRatios = [1.5, 1.25, 0.8, 1.333, 1.0, 1.4]
               const finalRatio = img.aspectRatio || defaultRatios[cards.length % defaultRatios.length]
 
+              const imgSources = buildImageSources(img.url, {
+                sizes: ABOUT_IMAGE_SIZES
+              })
+
               cards.push({
                 id: `${singleAboutPage.id}-img-${idx}`,
                 title: img.caption ? img.caption.split(/\r?\n/)[0] : `${singleAboutPage.title} #${idx + 1}`,
                 caption: cText,
                 lines: imgLines,
-                src: compressImage(img.url, 1200),
+                src: imgSources.src,
+                srcSet: imgSources.srcSet,
+                sizes: imgSources.sizes,
+                key: img.url,
                 aspectRatio: finalRatio,
                 date: singleAboutPage.date?.start_date || singleAboutPage.publishDay || '',
                 author: singleAboutPage.author || '',
@@ -209,7 +206,11 @@ export async function getStaticProps({ locale }) {
         p &&
         p.status === 'Published' &&
         (p.pageCoverThumbnail || p.pageCover) &&
-        !cards.some(c => c.id === p.id || c.src === (p.pageCoverThumbnail || p.pageCover))
+        !cards.some(
+          c =>
+            c.id === p.id ||
+            (c.key || c.src) === (p.pageCoverThumbnail || p.pageCover)
+        )
     )
     for (const post of published) {
       if (cards.length >= 9) break
@@ -230,12 +231,20 @@ export async function getStaticProps({ locale }) {
       const defaultRatios = [1.5, 1.25, 0.8, 1.333, 1.0, 1.4]
       const finalRatio = defaultRatios[cards.length % defaultRatios.length]
 
+      const fallbackCover = post.pageCoverThumbnail || post.pageCover || ''
+      const fallbackSources = buildImageSources(fallbackCover, {
+        sizes: ABOUT_IMAGE_SIZES
+      })
+
       cards.push({
         id: post.id,
         title: post.title || '时光的弧线',
         caption: captionText,
         lines,
-        src: compressImage(post.pageCoverThumbnail || post.pageCover, 1200),
+        src: fallbackSources.src,
+        srcSet: fallbackSources.srcSet,
+        sizes: fallbackSources.sizes,
+        key: fallbackCover,
         aspectRatio: finalRatio,
         date: post.date?.start_date || post.publishDay || '',
         author: post.author || 'Felix',

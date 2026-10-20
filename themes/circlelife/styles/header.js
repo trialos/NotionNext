@@ -46,8 +46,21 @@ export const headerStyle = `
         box-shadow: 0 8px 28px rgba(0, 0, 0, 0.08);
       }
 
-      /* 手机端拉长横幅 (对标设计截图) */
-      @media (max-width: 767px) {
+      /* 窄屏滚动中把毛玻璃降档：24px → 8px，并用更实的底色补回可读性。
+         桌面端不挂滚动监听，is-scrolling 不会出现 */
+      @media (max-width: 1023px) {
+        .cl-floating-pill.is-scrolling {
+          background: rgba(30, 30, 30, 0.94);
+          backdrop-filter: blur(8px) saturate(1.05);
+          -webkit-backdrop-filter: blur(8px) saturate(1.05);
+        }
+        :root:not(.dark) .cl-floating-pill.is-scrolling {
+          background: rgba(250, 246, 238, 0.97);
+        }
+      }
+
+      /* 平板与手机端拉长横幅 (对标设计截图) */
+      @media (max-width: 1023px) {
         .cl-floating-pill {
           width: min(calc(100vw - 2.25rem), 400px);
           display: flex;
@@ -78,13 +91,10 @@ export const headerStyle = `
         font-size: 0.96rem;
         font-weight: 500;
         letter-spacing: 0.04em;
-        color: #e5e2dc;
+        color: var(--cl-text);
         user-select: none;
       }
-      :root:not(.dark) .cl-floating-pill-brand-text {
-        color: #20190f;
-      }
-      @media (min-width: 768px) {
+      @media (min-width: 1024px) {
         .cl-floating-pill-brand-text {
           display: none !important;
         }
@@ -98,30 +108,111 @@ export const headerStyle = `
         padding-left: 0.35rem;
         padding-right: 0.35rem;
       }
-      @media (min-width: 768px) {
+      @media (min-width: 1024px) {
         .cl-floating-pill-nav {
           display: inline-flex;
         }
       }
 
       .cl-floating-pill-link {
-        color: #cfcac2;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        color: var(--cl-muted);
         font-family: var(--cl-font-display, inherit);
         font-size: 0.92rem;
         font-weight: 500;
         text-decoration: none;
         letter-spacing: 0.02em;
         white-space: nowrap;
+        background: transparent;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
         transition: color 0.15s ease;
       }
-      :root:not(.dark) .cl-floating-pill-link {
-        color: #55524c;
+      .cl-floating-pill-link:hover,
+      .cl-floating-pill-link.is-open,
+      .cl-floating-pill-link[aria-current='page'] {
+        color: var(--cl-gold);
       }
-      .cl-floating-pill-link:hover {
-        color: #ffffff;
+
+      /* 父级菜单项的下拉指示符 */
+      .cl-pill-caret {
+        font-size: 0.58em;
+        line-height: 1;
+        opacity: 0.6;
+        transition: transform 0.2s var(--cl-ease);
       }
-      :root:not(.dark) .cl-floating-pill-link:hover {
-        color: #1a1917;
+      .cl-floating-pill-link.is-open .cl-pill-caret {
+        transform: rotate(180deg);
+      }
+
+      /* 父级菜单就地下拉：暖金薄描边的毛玻璃浮层 */
+      .cl-pill-item {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+      }
+      .cl-pill-sub {
+        position: absolute;
+        top: calc(100% + 0.72rem);
+        left: 50%;
+        transform: translate(-50%, -6px);
+        min-width: 9.5rem;
+        padding: 0.4rem;
+        border-radius: 14px;
+        border: 1px solid color-mix(in srgb, var(--cl-gold) 32%, transparent);
+        background: color-mix(in srgb, var(--cl-surface) 92%, transparent);
+        backdrop-filter: blur(20px) saturate(1.15);
+        -webkit-backdrop-filter: blur(20px) saturate(1.15);
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.18s var(--cl-ease), transform 0.22s var(--cl-ease),
+          visibility 0s linear 0.18s;
+        z-index: 5;
+      }
+      .cl-pill-sub.is-open {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transform: translate(-50%, 0);
+        transition-delay: 0s;
+      }
+      .cl-pill-sub::before {
+        /* 覆盖按钮与浮层之间的间隙，避免 hover 移动时闪断 */
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: -0.72rem;
+        height: 0.72rem;
+      }
+      .cl-pill-sub-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.1rem;
+      }
+      .cl-pill-sublink {
+        display: block;
+        padding: 0.5rem 0.7rem;
+        border-radius: 9px;
+        color: var(--cl-text);
+        font-size: 0.86rem;
+        line-height: 1.35;
+        white-space: nowrap;
+        text-decoration: none;
+        transition: color 0.15s ease, background 0.15s ease;
+      }
+      .cl-pill-sublink:hover,
+      .cl-pill-sublink:focus-visible {
+        color: var(--cl-gold);
+        background: color-mix(in srgb, var(--cl-gold) 14%, transparent);
       }
 
       /* 移动端内置右端纯图标暖金胶囊按钮 */
@@ -134,19 +225,19 @@ export const headerStyle = `
         padding: 0;
         border-radius: 9999px;
         border: 0;
-        background: #c4a47c;
-        color: #ffffff;
+        background: var(--cl-gold);
+        color: var(--cl-gold-ink);
         font-size: 0.88rem;
         cursor: pointer;
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
         transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), filter 0.18s ease;
-        box-shadow: 0 2px 10px rgba(196, 164, 124, 0.35);
+        box-shadow: 0 2px 10px var(--cl-gold-shadow);
       }
       .cl-pill-menu-btn--mobile:active {
         transform: scale(0.94);
       }
-      @media (min-width: 768px) {
+      @media (min-width: 1024px) {
         .cl-pill-menu-btn--mobile {
           display: none !important;
         }
@@ -164,25 +255,25 @@ export const headerStyle = `
         padding: 0.44rem 1.05rem;
         border-radius: 9999px;
         border: 0;
-        background: #c4a47c;
-        color: #ffffff;
+        background: var(--cl-gold);
+        color: var(--cl-gold-ink);
         font-size: 0.95rem;
         line-height: 1;
         cursor: pointer;
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
-        box-shadow: 0 4px 18px rgba(196, 164, 124, 0.4);
+        box-shadow: 0 4px 18px var(--cl-gold-shadow);
         transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.18s ease, box-shadow 0.2s ease;
       }
       .cl-floating-desktop-menu-btn:hover {
         transform: scale(1.06);
         filter: brightness(1.08);
-        box-shadow: 0 6px 22px rgba(196, 164, 124, 0.55);
+        box-shadow: 0 6px 22px color-mix(in srgb, var(--cl-gold) 55%, transparent);
       }
       .cl-floating-desktop-menu-btn:active {
         transform: scale(0.96);
       }
-      @media (max-width: 767px) {
+      @media (max-width: 1023px) {
         .cl-floating-desktop-menu-btn {
           display: none !important;
         }
@@ -190,14 +281,75 @@ export const headerStyle = `
 
       /* 键盘高对比度 Focus 焦点环 (Vercel Guidelines) */
       .cl-floating-pill-link:focus-visible,
+      .cl-pill-sublink:focus-visible,
       .cl-pill-menu-btn--mobile:focus-visible,
       .cl-floating-desktop-menu-btn:focus-visible,
       .cl-drawer-link:focus-visible,
       .cl-drawer-sublink:focus-visible,
       .cl-fullscreen-top-btn:focus-visible,
       .cl-fullscreen-close:focus-visible {
-        outline: 2px solid var(--cl-accent, #c4a47c) !important;
+        outline: 2px solid var(--cl-gold) !important;
         outline-offset: 3px !important;
+      }
+
+      /* ==========================================================================
+         1.5 通用图标按钮与品牌锁定
+         Header 抽屉、MobileToc、SearchInput、BrandLockup 共用。
+         刻意使用裸类名（不加 #theme-circlelife 前缀）：抽屉按钮同时带
+         .cl-fullscreen-top-btn，同特异性下由文件后方规则覆盖为 2.65rem，
+         若在此提高特异性会把它缩回 2.15rem，造成抽屉顶栏按钮变小。
+         ========================================================================== */
+      .cl-icon-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.15rem;
+        height: 2.15rem;
+        padding: 0;
+        border-radius: 9999px;
+        border: 1px solid transparent;
+        background: transparent;
+        color: var(--cl-muted);
+        line-height: 1;
+        cursor: pointer;
+        touch-action: manipulation;
+        transition:
+          color 0.15s var(--cl-ease),
+          border-color 0.15s var(--cl-ease),
+          background 0.15s var(--cl-ease),
+          transform 0.15s var(--cl-ease);
+      }
+      .cl-icon-btn i {
+        font-size: 0.92rem;
+        line-height: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .cl-icon-btn:hover {
+        color: var(--cl-accent);
+        border-color: var(--cl-border);
+        background: var(--cl-accent-soft);
+      }
+
+      /* 品牌锁定：中文衬线比例 + 英文等宽字距，防止抽屉顶栏品牌走形 */
+      .cl-lockup-mark {
+        display: block;
+        flex: none;
+      }
+      .cl-lockup-cn {
+        font-family: var(--cl-font-display);
+        font-size: 1.02rem;
+        line-height: 1.35;
+        padding-top: 0.08em;
+        padding-bottom: 0.06em;
+      }
+      .cl-lockup-en {
+        font-family: var(--cl-font-mono);
+        font-size: 0.62rem;
+        letter-spacing: 0.16em;
+        margin-top: 0.22rem;
+        line-height: 1.2;
       }
 
       /* ==========================================================================
@@ -464,7 +616,7 @@ export const headerStyle = `
         color: #6d6961;
       }
       .cl-drawer-sublink:hover {
-        color: var(--cl-accent, #c4a47c);
+        color: var(--cl-gold);
         transform: translateX(4px);
       }
 
@@ -490,7 +642,8 @@ export const headerStyle = `
       .cl-fullscreen-root.is-open .cl-drawer-item:nth-child(6) { animation-delay: 0.25s; }
       .cl-fullscreen-root.is-open .cl-drawer-item:nth-child(7) { animation-delay: 0.29s; }
 
-      /* 移动端抽屉菜单自适应：顶部上靠对齐与视口高度/宽度弹性缩放 */
+      /* 移动端抽屉菜单自适应：尺寸与间距交给下面的 ≤1023 块统一处理，
+         这里只保留容器级的内边距、圆角与角标尺寸 */
       @media (max-width: 767px) {
         .cl-fullscreen-root {
           padding: 0.65rem;
@@ -506,16 +659,10 @@ export const headerStyle = `
           padding-top: clamp(0.75rem, 2.5vh, 1.5rem);
           padding-bottom: 1rem;
           align-items: stretch;
-          justify-content: flex-start;
         }
         .cl-drawer-list {
           width: 100%;
           padding: 0;
-          gap: clamp(0.75rem, 2.2vh, 1.35rem);
-        }
-        .cl-drawer-title {
-          font-size: clamp(1.75rem, 6.8vw, 2.4rem) !important;
-          line-height: 1.12;
         }
         .cl-drawer-num {
           font-size: clamp(0.75rem, 3.2vw, 0.9rem);
@@ -530,8 +677,33 @@ export const headerStyle = `
           margin-left: calc(2ch + 0.65rem);
           gap: 0.5rem;
         }
+      }
+
+      /* ==========================================================================
+         3.1 手机与平板（≤1023px）：与桌面同一套版面密度
+         实测问题：桌面靠 clamp 上限 4rem=64px 自然撑满（列表占 76%），
+         手机被压到 28px、6 条只占 42%，底部空 408px。
+         这里放大字号并加大间距，再用 auto 外边距把整块垂直居中。
+         注意：不能用 justify-content: center —— 内容溢出时它会把首项顶出
+         可视区且滚不到；auto 外边距在溢出时会塌缩为 0，自动退回顶部对齐。
+         ========================================================================== */
+      @media (max-width: 1023px) {
+        .cl-drawer-title {
+          font-size: clamp(2.1rem, 9.6vw, 2.6rem) !important;
+          line-height: 1.14;
+        }
+        .cl-drawer-list {
+          gap: clamp(0.9rem, 2.6vh, 1.5rem);
+        }
+        /* 垂直居中要加在「nav-body 的直接弹性子项」上：
+           MenuList 的结构是 nav-body > .cl-main-nav > .cl-drawer-list，
+           加在 list 上不会吸收剩余空间（实测 margin 仍为 0） */
+        .cl-fullscreen-nav-body > .cl-main-nav {
+          margin-block: auto;
+          width: 100%;
+        }
         .cl-drawer-sublink {
-          font-size: clamp(1rem, 4vw, 1.25rem);
+          font-size: clamp(1.05rem, 4.2vw, 1.4rem);
         }
       }
 
@@ -662,6 +834,7 @@ export const headerStyle = `
       @media (prefers-reduced-motion: reduce) {
         .cl-floating-pill,
         .cl-pill-menu-btn,
+        .cl-pill-sub,
         .cl-fullscreen-panel,
         .cl-fullscreen-mask,
         .cl-drawer-item,
@@ -671,6 +844,32 @@ export const headerStyle = `
         .cl-search-overlay * {
           animation-duration: 0.01ms !important;
           transition-duration: 0.01ms !important;
+        }
+      }
+
+      /* ==========================================================================
+         7. 不支持 backdrop-filter 时的实色降级
+         低端 Android / 老版 Firefox 上毛玻璃会完全失效，
+         退化为不透明背景，保证文字对比度与可读性
+         ========================================================================== */
+      @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+        .cl-floating-pill {
+          background: rgba(28, 26, 24, 0.97);
+        }
+        :root:not(.dark) .cl-floating-pill {
+          background: rgba(250, 246, 238, 0.99);
+        }
+        .cl-pill-sub {
+          background: var(--cl-surface);
+        }
+        .cl-fullscreen-mask {
+          background: rgba(0, 0, 0, 0.88);
+        }
+        .cl-fullscreen-panel {
+          background: #16120f;
+        }
+        :root:not(.dark) .cl-fullscreen-panel {
+          background: #f8f5ee;
         }
       }
 `

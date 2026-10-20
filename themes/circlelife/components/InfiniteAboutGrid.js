@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useMemo } from 'react'
+import { useGlobal } from '@/lib/global'
 
 // 优雅的保底卡片（无内容时呈现，避免白屏）
 const FALLBACK_CARDS = [
@@ -70,6 +71,7 @@ const FALLBACK_CARDS = [
 ]
 
 export default function InfiniteAboutGrid({ cards = [], summary = '', title = '' }) {
+  const { locale } = useGlobal()
   const containerRef = useRef(null)
   const stageRef = useRef(null)
   const backdropRef = useRef(null)
@@ -146,6 +148,11 @@ export default function InfiniteAboutGrid({ cards = [], summary = '', title = ''
           if (entry.isIntersecting) {
             const src = img.dataset.src
             if (src && img.getAttribute('src') !== src) {
+              // srcset 先写，浏览器才会按 DPR 从候选集里选档
+              if (img.dataset.srcset) {
+                img.srcset = img.dataset.srcset
+                if (img.dataset.sizes) img.sizes = img.dataset.sizes
+              }
               img.src = src
               if (typeof img.decode === 'function') {
                 img
@@ -163,8 +170,10 @@ export default function InfiniteAboutGrid({ cards = [], summary = '', title = ''
               }
             }
           } else {
-            // 滑出视口 1000px 缓冲区之外：卸载解码位图，把内存归还给操作系统与浏览器
+            // 滑出视口 800px 缓冲区之外：成对卸载 src/srcset，把解码位图归还给系统
             if (img.getAttribute('src') && !img.dataset.critical) {
+              if (img.hasAttribute('srcset')) img.removeAttribute('srcset')
+              if (img.hasAttribute('sizes')) img.removeAttribute('sizes')
               img.removeAttribute('src')
               img.classList.remove('is-loaded')
             }
@@ -205,14 +214,23 @@ export default function InfiniteAboutGrid({ cards = [], summary = '', title = ''
       img.alt = card.title || '关于'
       img.decoding = 'async'
       img.draggable = false
-      img.dataset.src = card.src || '/images/starter/about/about-image-01.jpg'
+      img.dataset.src = card.src || ''
+      if (card.srcSet) img.dataset.srcset = card.srcSet
+      if (card.sizes) img.dataset.sizes = card.sizes
 
-      // 首屏关键路径卡片（Set A 的前 cols 张）：免等待直接挂载，绑定 high 抓取优先级，与 <head> preload 形成秒开闭环
+      // 首屏关键路径卡片（Set A 的前 cols 张）：免等待直接挂载；
+      // 只有第一张拿 high 抓取优先级，避免多图互抢带宽
       const isCritical = isSetA && cardIdx < Math.max(2, cols)
-      if (isCritical) {
+      if (isCritical && card.src) {
         img.dataset.critical = 'true'
-        img.src = card.src || '/images/starter/about/about-image-01.jpg'
-        img.setAttribute('fetchpriority', 'high')
+        if (card.srcSet) {
+          img.srcset = card.srcSet
+          if (card.sizes) img.sizes = card.sizes
+        }
+        img.src = card.src
+        if (isSetA && cardIdx === 0) {
+          img.setAttribute('fetchpriority', 'high')
+        }
         if (typeof img.decode === 'function') {
           img
             .decode()
@@ -499,6 +517,43 @@ export default function InfiniteAboutGrid({ cards = [], summary = '', title = ''
       scroll.target += delta * 0.85
     }
 
+    // 键盘平移：画布是本页唯一的手势独占功能，键盘用户必须能操作。
+    // 直接改写既有的 scroll.target，与滚轮/拖拽完全同构，复用同一套 Lerp 物理量
+    const KEY_STEP = 140
+    const KEY_STEP_LARGE = 620
+    const onKeyDown = e => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+
+      // 序言幕布打开时：向下键收起幕布并进入画廊（与滚轮下拨一致）
+      if (isHeroOpen) {
+        if (e.key === 'ArrowDown' || e.key === 'PageDown') {
+          closeHero()
+          scroll.target += KEY_STEP
+          e.preventDefault()
+        }
+        return
+      }
+
+      const step = e.key === 'PageUp' || e.key === 'PageDown' ? KEY_STEP_LARGE : KEY_STEP
+      switch (e.key) {
+        case 'ArrowUp':
+          scroll.target -= step
+          break
+        case 'ArrowDown':
+          scroll.target += step
+          break
+        case 'Home':
+          scroll.target = 0
+          break
+        case 'End':
+          scroll.target = KEY_STEP_LARGE * 4
+          break
+        default:
+          return
+      }
+      e.preventDefault()
+    }
+
     const onResize = () => {
       calculateLayout()
     }
@@ -508,6 +563,7 @@ export default function InfiniteAboutGrid({ cards = [], summary = '', title = ''
     rafId = requestAnimationFrame(render)
 
     stage.addEventListener('pointerdown', onPointerDown)
+    stage.addEventListener('keydown', onKeyDown)
     window.addEventListener('pointermove', onPointerMove)
     window.addEventListener('pointerup', onPointerUp)
     window.addEventListener('pointercancel', onPointerUp)
@@ -522,6 +578,7 @@ export default function InfiniteAboutGrid({ cards = [], summary = '', title = ''
       captionObserver.disconnect()
       memoryLifecycleObserver.disconnect()
       stage.removeEventListener('pointerdown', onPointerDown)
+      stage.removeEventListener('keydown', onKeyDown)
       window.removeEventListener('pointermove', onPointerMove)
       window.removeEventListener('pointerup', onPointerUp)
       window.removeEventListener('pointercancel', onPointerUp)
@@ -551,6 +608,11 @@ export default function InfiniteAboutGrid({ cards = [], summary = '', title = ''
   return (
     <div
       ref={stageRef}
+      tabIndex={0}
+      role='application'
+      aria-label={
+        locale?.COMMON?.ABOUT_CANVAS_KEYS || '摄影展墙，使用上下方向键平移'
+      }
       className='cl-about-stage relative h-screen h-[100dvh] w-full overflow-hidden select-none bg-[var(--cl-bg)]'>
       {/* 摄影瀑布展墙画布 */}
       <div

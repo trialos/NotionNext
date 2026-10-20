@@ -2,7 +2,9 @@
  * Circle of Life — about：关于页 2D 无限视差平铺网格专属样式
  */
 export const aboutStyle = `
-  /* —— 关于页：视口严格锁定与无缝视差画布（彻底禁止移动端橡皮筋露底与外部网页滚动） —— */
+  /* —— 关于页：视口严格锁定与无缝视差画布 ——
+     手势策略按指针类型收口：粗指针（手机）保留 pinch-zoom 与纵向滚动，
+     细指针（桌面）才彻底接管手势，避免桌面端画布被浏览器手势打断 */
   html.cl-about-locked,
   body.cl-about-locked {
     position: fixed !important;
@@ -14,9 +16,9 @@ export const aboutStyle = `
     height: 100vh !important;
     height: 100dvh !important;
     overflow: hidden !important;
-    overscroll-behavior: none !important;
+    overscroll-behavior: auto;
     -webkit-overflow-scrolling: auto !important;
-    touch-action: none !important;
+    touch-action: pan-y pinch-zoom;
   }
 
   #theme-circlelife.cl-is-about {
@@ -27,8 +29,8 @@ export const aboutStyle = `
     height: 100dvh;
     max-height: 100dvh;
     overflow: hidden !important;
-    overscroll-behavior: none !important;
-    touch-action: none !important;
+    overscroll-behavior: auto;
+    touch-action: pan-y pinch-zoom;
   }
 
   #theme-circlelife.cl-is-about #container-inner,
@@ -39,32 +41,22 @@ export const aboutStyle = `
     padding: 0;
     margin: 0;
     overflow: hidden;
-    touch-action: none;
+    touch-action: pan-y pinch-zoom;
   }
 
-  /* 顶栏浮于画廊之上，带有纸质磨砂质感 */
-  #theme-circlelife.cl-is-about .cl-header {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 40;
-    background: color-mix(in srgb, var(--cl-bg) 88%, transparent);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-bottom: 1px solid var(--cl-border);
-    transition:
-      background-color 0.28s var(--cl-ease, cubic-bezier(0.16, 1, 0.3, 1)),
-      border-color 0.28s var(--cl-ease, cubic-bezier(0.16, 1, 0.3, 1)),
-      box-shadow 0.28s var(--cl-ease, cubic-bezier(0.16, 1, 0.3, 1));
+  /* 桌面端（鼠标/触控板）才由画布完全接管手势 */
+  @media (pointer: fine) {
+    html.cl-about-locked,
+    body.cl-about-locked,
+    #theme-circlelife.cl-is-about,
+    #theme-circlelife.cl-is-about #container-inner,
+    #theme-circlelife.cl-is-about #container-wrapper {
+      overscroll-behavior: none !important;
+      touch-action: none !important;
+    }
   }
 
-  #theme-circlelife.cl-is-about .cl-header.is-scrolled {
-    background: color-mix(in srgb, var(--cl-bg) 95%, transparent);
-    border-bottom-color: color-mix(in srgb, var(--cl-border) 60%, transparent);
-    box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.05);
-  }
-
+  /* 画布与舞台是拖拽面，必须由脚本接管手势（这层不分指针类型） */
   .cl-about-stage {
     touch-action: none !important;
     overscroll-behavior: none !important;
@@ -417,7 +409,6 @@ export const aboutStyle = `
     cursor: pointer;
     background: transparent;
     border: none;
-    outline: none;
     padding: 6px 14px;
     border-radius: 9999px;
     transition: opacity 0.3s ease, transform 0.25s ease, color 0.25s ease;
@@ -474,7 +465,6 @@ export const aboutStyle = `
     text-transform: uppercase;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
     cursor: pointer;
-    outline: none;
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation !important;
@@ -530,6 +520,22 @@ export const aboutStyle = `
       padding: 0 12px 0 8px;
       font-size: 10px;
     }
+  }
+
+  /* 键盘焦点可见：与影集/文章页统一走朱砂强调。
+     tokens.js 的全局规则用的是 :where()（特异性为 0），会被本页高特异性选择器盖掉，
+     因此这里显式补一条，确保关于页 Tab 遍历时始终有可见焦点环 */
+  #theme-circlelife.cl-is-about button:focus-visible,
+  #theme-circlelife.cl-is-about a:focus-visible:not(.cl-skip-link),
+  #theme-circlelife.cl-is-about [tabindex]:focus-visible {
+    outline: 2px solid var(--cl-accent, #b24a33);
+    outline-offset: 3px;
+  }
+
+  /* 画布本身是整屏元素，焦点环改为内嵌，避免在视口外缘出现一圈粗线 */
+  #theme-circlelife.cl-is-about .cl-about-stage:focus-visible {
+    outline: 2px solid var(--cl-accent, #b24a33);
+    outline-offset: -3px;
   }
 `
 

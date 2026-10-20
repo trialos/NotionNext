@@ -1,51 +1,72 @@
 'use client'
 
 import { useEffect, useRef, useMemo } from 'react'
-
-// 高品质默认兜底图片池（当 Notion 尚未加载时保证视觉完整度，绝不抓取无关影集）
-const FALLBACK_CARDS = [
-  { id: 'fb-1', src: '/images/starter/about/about-image-01.jpg', aspectRatio: 1.333 },
-  { id: 'fb-2', src: '/images/starter/about/about-image-02.jpg', aspectRatio: 0.8 },
-  { id: 'fb-3', src: '/images/starter/about/about-image-01.jpg', aspectRatio: 1.5 },
-  { id: 'fb-4', src: '/images/starter/about/about-image-02.jpg', aspectRatio: 1.25 },
-  { id: 'fb-5', src: '/images/starter/about/about-image-01.jpg', aspectRatio: 1.0 },
-  { id: 'fb-6', src: '/images/starter/about/about-image-02.jpg', aspectRatio: 1.4 },
-  { id: 'fb-7', src: '/images/starter/about/about-image-01.jpg', aspectRatio: 1.333 },
-  { id: 'fb-8', src: '/images/starter/about/about-image-02.jpg', aspectRatio: 0.8 },
-  { id: 'fb-9', src: '/images/starter/about/about-image-01.jpg', aspectRatio: 1.5 }
-]
+import { buildImageSources } from './imageSrcset'
+import {
+  computeTiltProgress,
+  computeTiltTravel,
+  EASE_TAU_DESKTOP,
+  EASE_TAU_NARROW,
+  easeTiltProgress
+} from './tiltProgress'
+import { buildColumnBuckets, computeSlotsPerColumn } from './tiltLayout'
 
 /**
  * 首页全屏倾斜交错流光照片墙 (HomeTiltWall) - 多轴联动与严苛边界控制版
  * 1. 顺时针倾斜 8°（走向严格对齐 "\"）
- * 2. 多轴滚动联动：下拉时交错列产生大幅相对运动，同时倾斜母画布产生横向与垂直向平移（Diagonal Pan），让第3列、第4列完整进入中心视野
- * 3. 严格边界脱离保护：一旦完全滚出首屏轨道（rect.bottom <= 0），立即彻底冻结终态，完全停止 RAF 计算与事件响应，绝不干扰下方内容
- * 4. 220vh 充足粘性行程，直接映射页面滚动行程
+ * 2. 微视差：位移 = 区块高 × 0.12（对齐参考站 moment.priority.vision 实测值）
+ * 3. 严格边界脱离保护：一旦完全滚出首屏区块（rect.bottom <= 0），立即彻底冻结终态，停止 RAF 计算与事件响应
+ * 4. 整屏区块随页面滚走（不 sticky）：去掉粘连子树后 iOS 合成压力最小
  * 5. 遵照 Vercel 规范：支持 prefers-reduced-motion，首屏图片异步解码防爆显存
+ * 6. 无图源时整块不渲染（不再用示例图冒充博主作品）
  */
 export default function HomeTiltWall({ homeCoverImages = [] }) {
   const trackWrapperRef = useRef(null)
   const containerRef = useRef(null)
+  const panRef = useRef(null)
   const rotatedRef = useRef(null)
 
   // 严格只读取用户指定的 HomeCover 页面图片；不向一般影集回退
   const displayCards = useMemo(() => {
-    if (Array.isArray(homeCoverImages) && homeCoverImages.length > 0) {
-      return homeCoverImages.map((im, idx) => ({
-        id: im.id || `hc-${idx}`,
-        src: typeof im === 'string' ? im : im.src || im.url,
-        aspectRatio: im.aspectRatio || (idx % 3 === 0 ? 0.8 : idx % 2 === 0 ? 1.333 : 1.0),
-        title: im.title || ''
-      }))
-    }
-    return FALLBACK_CARDS
+    if (!Array.isArray(homeCoverImages)) return []
+    return homeCoverImages
+      .filter(im => im && (typeof im === 'string' || im.src || im.url))
+      .map((im, idx) => {
+        const aspectRatio =
+          (typeof im === 'string' ? 0 : im.aspectRatio) ||
+          (idx % 3 === 0 ? 0.8 : idx % 2 === 0 ? 1.333 : 1.0)
+
+        // 数据层已给出候选集；纯字符串入参时在此兜底派生，保证档位一致
+        if (typeof im === 'string') {
+          const sources = buildImageSources(im)
+          return {
+            id: `hc-${idx}`,
+            src: sources.src,
+            srcSet: sources.srcSet,
+            sizes: sources.sizes,
+            aspectRatio,
+            title: ''
+          }
+        }
+
+        return {
+          id: im.id || `hc-${idx}`,
+          src: im.src || im.url,
+          srcSet: im.srcSet || '',
+          sizes: im.sizes || '',
+          aspectRatio,
+          title: im.title || ''
+        }
+      })
   }, [homeCoverImages])
 
   useEffect(() => {
     const trackWrapper = trackWrapperRef.current
     const container = containerRef.current
+    const panLayer = panRef.current
     const rotated = rotatedRef.current
-    if (!trackWrapper || !container || !rotated) return
+    if (!trackWrapper || !container || !panLayer || !rotated) return
+    if (!displayCards.length) return
 
     let isDestroyed = false
     let isVisible = true
@@ -61,37 +82,76 @@ export default function HomeTiltWall({ homeCoverImages = [] }) {
     let targetProgress = 0  // 0 到 1
     let currentProgress = 0 // 平滑插值进度
     let idleOffset = 0      // 静止时的呼吸微漫游
-    const IDLE_SPEED = 0.12 // 舒缓呼吸速度
-    const TRAVEL_DISTANCE = 960 // 滚动时奇偶列的大幅度对流行程
+    const IDLE_SPEED = 0.12 // 舒缓呼吸速度（呼吸节奏保持不变）
+
+    // 列位移按「行程 × 比例」派生，区块高度变化时手感保持一致
+    let cachedSpan = 1
+    let cachedTravel = 0
+    let easeTau = EASE_TAU_DESKTOP
 
     let maxPanX = 120
     let maxPanY = 90
-    let cachedScrollMax = 1000
+    // 轨道在文档中的绝对顶部（不是 0：上方可能有公告、刊头等占位）
+    let cachedTop = 0
+    let cachedWallHeight = 0
     let cachedBottomLimit = 2000
+    let lastWidth = typeof window !== 'undefined' ? window.innerWidth : 0
+    let resizeTimer = null
+    let scrollCount = 0
+    let flowingTimer = null
 
     const updateGeometry = () => {
       const winW = typeof window !== 'undefined' ? window.innerWidth : 1200
       maxPanX = winW < 640 ? 60 : winW < 1024 ? 90 : 130
       maxPanY = winW < 640 ? 40 : winW < 1024 ? 65 : 100
+      easeTau = winW < 1024 ? EASE_TAU_NARROW : EASE_TAU_DESKTOP
 
       if (trackWrapper) {
         const rect = trackWrapper.getBoundingClientRect()
         const scrollY = window.scrollY || window.pageYOffset || 0
-        const top = rect.top + scrollY
         const h = trackWrapper.offsetHeight
-        cachedScrollMax = Math.max(1, h - window.innerHeight)
-        cachedBottomLimit = top + h
+        cachedTop = rect.top + scrollY
+        cachedWallHeight = h
+        cachedBottomLimit = cachedTop + h
+        // 整屏区块随页面滚走：行程就是区块自身高度（不再减去视口）
+        cachedSpan = Math.max(1, h)
+        cachedTravel = computeTiltTravel(cachedSpan)
       }
     }
 
-    const applyRotatedTransform = () => {
+    // 相对轨道自身的滚动进度：分子必须减去 cachedTop，否则动画会整体超前
+    const computeProgress = scrollY =>
+      computeTiltProgress({
+        scrollY,
+        top: cachedTop,
+        wallHeight: cachedWallHeight,
+        viewportHeight: window.innerHeight,
+        pinned: false
+      })
+
+    // 每帧只翻译 pan 层（视口大小、成本低）；
+    // rotate/scale 由 CSS 变量静态承载，不再每帧重写大图层的整段变换串
+    const applyPanTransform = () => {
       // 随滚动进行对角线与横向平移，平滑将两侧及后续列带入中心视野
       const winW = typeof window !== 'undefined' ? window.innerWidth : 1200
       // 移动端初始微调，避免绝对居中遮蔽，保证首屏两侧列均有明显露出，下拉时整网格横移展开
       const initialShiftX = winW < 640 ? -18 : 0
       const panX = initialShiftX + (currentProgress - 0.5) * -maxPanX
       const panY = (currentProgress - 0.5) * -maxPanY
-      rotated.style.transform = `translate3d(calc(-50% + ${panX.toFixed(1)}px), calc(-50% + ${panY.toFixed(1)}px), 0) rotate(${ROTATE_DEG}deg) scale(${currentScale.toFixed(4)})`
+      if (panLayer) {
+        panLayer.style.transform = `translate(${panX.toFixed(1)}px, ${panY.toFixed(1)}px)`
+      }
+    }
+
+    // 滚动期间临时提示浏览器提升图层；静止后移除，避免长期占用大纹理
+    const markFlowing = () => {
+      if (!container) return
+      container.classList.add('is-flowing')
+      if (flowingTimer) clearTimeout(flowingTimer)
+      flowingTimer = setTimeout(() => {
+        container.classList.remove('is-flowing')
+        flowingTimer = null
+      }, 150)
     }
 
     const updateScale = () => {
@@ -102,37 +162,95 @@ export default function HomeTiltWall({ homeCoverImages = [] }) {
       const isMobile = (container.offsetWidth || window.innerWidth) < 640
       const scaleMultiplier = isMobile ? 1.06 : 1.15
       currentScale = Math.max(s / w, r / h) * scaleMultiplier
+      // 静态 rotate+scale：只在尺寸变化时写一次 CSS 变量
+      container.style.setProperty('--cl-tilt-scale', currentScale.toFixed(4))
       updateGeometry()
-      applyRotatedTransform()
+      applyPanTransform()
     }
 
-    // 显存生命周期观察器（仅解码视口内及其近邻缓冲区的真实图片，防爆显存）
+    // —— 取图预算：错峰挂载 ——
+    // 前 IMMEDIATE_COLUMNS 列立即挂载保证首屏不空窗，其余列按批摊到空闲时隙，
+    // 避免一进页面就同时解码几十张大图（此前实测 31 张同时挂 src）
+    const LOAD_BATCH = 6
+    const IMMEDIATE_COLUMNS = 3
+    /** 实测补足列内容高度时的最大追加次数，防止异常数据导致死循环 */
+    const MAX_FILL_ATTEMPTS = 40
+    const loadQueue = []
+    let drainHandle = null
+    let drainViaIdle = false
+    let draining = false
+
+    const markLoaded = img => {
+      if (!isDestroyed) img.classList.add('is-loaded')
+    }
+
+    const decodeImage = img => {
+      if (typeof img.decode === 'function') {
+        img
+          .decode()
+          .then(() => markLoaded(img))
+          .catch(() => markLoaded(img))
+      } else {
+        img.onload = () => markLoaded(img)
+      }
+    }
+
+    const mountImage = img => {
+      if (isDestroyed) return
+      const src = img.dataset.src
+      if (!src || img.getAttribute('src') === src) return
+      // srcset 必须先写：sizes 与候选集齐备后浏览器才会按 DPR 选档
+      if (img.dataset.srcset) {
+        img.srcset = img.dataset.srcset
+        if (img.dataset.sizes) img.sizes = img.dataset.sizes
+      }
+      img.src = src
+      decodeImage(img)
+    }
+
+    // 回收必须与挂载成对：只删 src 而留下 srcset，浏览器仍会按候选集重新拉取
+    const unloadImage = img => {
+      if (img.dataset.critical === 'true') return
+      if (img.hasAttribute('srcset')) img.removeAttribute('srcset')
+      if (img.hasAttribute('sizes')) img.removeAttribute('sizes')
+      if (img.hasAttribute('src')) img.removeAttribute('src')
+      img.classList.remove('is-loaded')
+      const queued = loadQueue.indexOf(img)
+      if (queued > -1) loadQueue.splice(queued, 1)
+    }
+
+    const drainQueue = () => {
+      draining = false
+      drainHandle = null
+      if (isDestroyed) return
+      loadQueue.splice(0, LOAD_BATCH).forEach(mountImage)
+      if (loadQueue.length) scheduleDrain()
+    }
+
+    const scheduleDrain = () => {
+      if (draining || isDestroyed) return
+      draining = true
+      drainViaIdle =
+        typeof window !== 'undefined' &&
+        typeof window.requestIdleCallback === 'function'
+      drainHandle = drainViaIdle
+        ? window.requestIdleCallback(drainQueue, { timeout: 400 })
+        : setTimeout(drainQueue, 80)
+    }
+
+    const scheduleMount = img => {
+      if (img.getAttribute('src') || loadQueue.includes(img)) return
+      loadQueue.push(img)
+      scheduleDrain()
+    }
+
+    // 显存生命周期观察器：入屏排队挂载，离屏成对卸载
     const memoryLifecycleObserver = new IntersectionObserver(
       entries => {
         entries.forEach(entry => {
           const img = entry.target
-          if (entry.isIntersecting) {
-            const src = img.dataset.src
-            if (src && img.getAttribute('src') !== src) {
-              img.src = src
-              if (typeof img.decode === 'function') {
-                img.decode().then(() => {
-                  if (!isDestroyed) img.classList.add('is-loaded')
-                }).catch(() => {
-                  if (!isDestroyed) img.classList.add('is-loaded')
-                })
-              } else {
-                img.onload = () => {
-                  if (!isDestroyed) img.classList.add('is-loaded')
-                }
-              }
-            }
-          } else {
-            if (img.getAttribute('src') && !img.dataset.critical) {
-              img.removeAttribute('src')
-              img.classList.remove('is-loaded')
-            }
-          }
+          if (entry.isIntersecting) scheduleMount(img)
+          else unloadImage(img)
         })
       },
       { rootMargin: '800px 0px 800px 0px' }
@@ -147,6 +265,7 @@ export default function HomeTiltWall({ homeCoverImages = [] }) {
       columns = []
 
       const winW = window.innerWidth
+      const winH = window.innerHeight
       let colCount = 5
       if (winW < 640) {
         colCount = 3
@@ -158,19 +277,62 @@ export default function HomeTiltWall({ homeCoverImages = [] }) {
         colCount = 6
       }
 
-      let pool = [...displayCards]
-      while (pool.length < colCount * 5) {
-        pool = pool.concat(displayCards)
-      }
+      // 列宽只能实测：CSS 是 clamp(220px, 20vw, 360px)，并在 1180 / 767 两个断点改写，
+      // 用 JS 常量推断会偏。临时挂一个同 class 的探针，量完立刻移除（不能留在画布里，
+      // 否则会多出一条空列参与 gap 与居中）
+      const probe = document.createElement('div')
+      probe.className = 'cl-home-tilt-col'
+      probe.style.visibility = 'hidden'
+      probe.style.pointerEvents = 'none'
+      rotated.appendChild(probe)
+      const colWidth = probe.offsetWidth || 300
+      probe.remove()
 
-      const colBuckets = Array.from({ length: colCount }, () => [])
-      pool.forEach((card, idx) => {
-        colBuckets[idx % colCount].push(card)
+      const colGap = winW <= 767 ? 12 : winW <= 1024 ? 18 : 24
+
+      // 覆盖校验：画布旋转 8° 后，视口四角需要「列带」足够宽才不会被裁出空白。
+      // 只按断点定列数时，手机上 3 列×132px 的带子比旋转后的视口外接框窄，左下/右下会露白。
+      // 因此这里按外接框反算最少列数（列宽实测，不再猜）。
+      // 窄屏列少（3~4 条），旋转后侧边最容易露白，余量给 1.25；
+      // 宽屏列多，1.02 足够，多留反而无谓增加列数
+      const coverageMargin = winW < 1024 ? 1.25 : 1.02
+      const rotatedNeedWidth =
+        (winW * Math.cos(rad) + winH * Math.sin(rad)) * coverageMargin
+      const minColsForCoverage = Math.ceil(
+        (rotatedNeedWidth + colGap) / (colWidth + colGap)
+      )
+      colCount = Math.min(8, Math.max(colCount, minColsForCoverage))
+      const avgRatio =
+        displayCards.reduce(
+          (sum, card) => sum + (card.aspectRatio || 1.333),
+          0
+        ) / displayCards.length
+      const itemHeight = colWidth / avgRatio + colGap
+
+      const slots = computeSlotsPerColumn({
+        viewportHeight: window.innerHeight,
+        itemHeight,
+        count: displayCards.length
       })
 
-      for (let c = 0; c < colCount; c++) {
+      // 连续分块 + 同行去撞：替代原先 idx % colCount 的跨列步进
+      const colBuckets = buildColumnBuckets(displayCards, {
+        colCount,
+        slots
+      })
+
+      // 列内容高度下限的推导（曾经的露白根因）：
+    // 轨道内容 = A + B = 2A，按 modulo 最多向上位移 A；
+    // 旋转+居中后列顶还可能在视口上方 overhang 处，
+    // 于是要求的 A ≥ 视口高 + overhang，否则向上位移后底部必然露白。
+    const viewportH = window.innerHeight
+
+    for (let c = 0; c < colCount; c++) {
+        const bucket = colBuckets[c] || []
         const colDiv = document.createElement('div')
         colDiv.className = 'cl-home-tilt-col'
+        // 必须先入 DOM：否则下面量 setA 高度恒为 0，补足逻辑会一路加到上限
+        rotated.appendChild(colDiv)
 
         const track = document.createElement('div')
         track.className = 'cl-home-tilt-track'
@@ -179,22 +341,57 @@ export default function HomeTiltWall({ homeCoverImages = [] }) {
         // Set A: 基础卡片集
         const setA = document.createElement('div')
         setA.className = 'cl-home-tilt-set cl-home-tilt-set-a'
-        colBuckets[c].forEach((card, cIdx) => {
-          const itemEl = createItemElement(card, cIdx, true, colCount)
+        const used = bucket.slice()
+        used.forEach((card, cIdx) => {
+          const itemEl = createItemElement(card, cIdx, true, c)
           setA.appendChild(itemEl)
         })
         track.appendChild(setA)
 
-        // Set B: 无缝对齐闭环集
+        // 覆盖基准为「画布高度」：轨道内容 = 2A、最大向上位移 A，
+        // 因此 A ≥ 画布高即可保证任何位移位置都不露白（画布已含旋转余量）
+        const canvasHeight = rotated.clientHeight || viewportH * 2.6
+        const needHeight = canvasHeight + 32
+
+        // 注意单位：祖先有 rotate+scale，getBoundingClientRect() 返回的是「屏幕像素」，
+        // 而 clientHeight / translateY 用的是「布局像素」。这里必须用 offsetHeight，
+        // 否则判据会虚高（实测 1529 vs 1109），列还没铺满就停止追加，首屏底部露白
+        let fillGuard = 0
+        let measured = setA.offsetHeight
+        while (
+          measured > 0 &&
+          bucket.length &&
+          measured < needHeight &&
+          fillGuard < MAX_FILL_ATTEMPTS
+        ) {
+          const card = bucket[fillGuard % bucket.length]
+          setA.appendChild(createItemElement(card, used.length, true, c))
+          used.push(card)
+          fillGuard++
+          measured = setA.offsetHeight
+        }
+
+        // 反向收敛：竖构图会把张数算多（重复更密），超出 1.35 倍需求就从尾部回收，
+        // 但必须保证裁完仍高于 needHeight
+        const trimFloor = needHeight * 1.35
+        while (used.length > 2 && measured > trimFloor) {
+          const avgItem = measured / used.length
+          if (measured - avgItem < needHeight) break
+          const last = setA.lastElementChild
+          if (!last) break
+          setA.removeChild(last)
+          used.pop()
+          measured = setA.offsetHeight
+        }
+
+        // Set B: 必须与 A 完全一致，才能无缝闭环
         const setB = document.createElement('div')
         setB.className = 'cl-home-tilt-set cl-home-tilt-set-b'
-        colBuckets[c].forEach((card, cIdx) => {
-          const itemEl = createItemElement(card, cIdx, false, colCount)
+        used.forEach((card, cIdx) => {
+          const itemEl = createItemElement(card, cIdx, false, c)
           setB.appendChild(itemEl)
         })
         track.appendChild(setB)
-
-        rotated.appendChild(colDiv)
 
         columns.push({
           colDiv,
@@ -210,13 +407,17 @@ export default function HomeTiltWall({ homeCoverImages = [] }) {
         if (isDestroyed) return
         columns.forEach(col => {
           if (col.setA) {
-            col.halfHeight = col.setA.offsetHeight || 2000
+            // 必须用布局像素：translateY 也在布局像素空间，
+            // 用 getBoundingClientRect() 会拿到被 rotate+scale 放大的值（实测偏差 38%），
+            // 模数变大后回卷时刻错位，周期性露出空隙
+            const h = col.setA.offsetHeight
+            col.halfHeight = h > 1 ? h : 2000
           }
         })
       })
     }
 
-    const createItemElement = (card, cardIdx, isSetA, colCount) => {
+    const createItemElement = (card, cardIdx, isSetA, colIndex) => {
       const item = document.createElement('div')
       item.className = 'cl-home-tilt-item'
 
@@ -228,22 +429,17 @@ export default function HomeTiltWall({ homeCoverImages = [] }) {
       img.decoding = 'async'
       img.draggable = false
       img.dataset.src = card.src
+      if (card.srcSet) img.dataset.srcset = card.srcSet
+      if (card.sizes) img.dataset.sizes = card.sizes
 
-      const isCritical = isSetA && cardIdx < Math.max(2, colCount)
-      if (isCritical) {
+      // 首屏不空窗：前几列立即挂载且不回收
+      const immediate = isSetA && colIndex < IMMEDIATE_COLUMNS
+      if (immediate) {
         img.dataset.critical = 'true'
-        img.src = card.src
-        img.setAttribute('fetchpriority', 'high')
-        if (typeof img.decode === 'function') {
-          img.decode().then(() => {
-            if (!isDestroyed) img.classList.add('is-loaded')
-          }).catch(() => {
-            if (!isDestroyed) img.classList.add('is-loaded')
-          })
-        } else {
-          img.onload = () => {
-            if (!isDestroyed) img.classList.add('is-loaded')
-          }
+        mountImage(img)
+        // 只有与页面 preload 对应的那一张拿最高优先级，其余按默认排队
+        if (isSetA && colIndex === 0 && cardIdx === 0) {
+          img.setAttribute('fetchpriority', 'high')
         }
       }
 
@@ -256,58 +452,97 @@ export default function HomeTiltWall({ homeCoverImages = [] }) {
     const isReducedMotion = () => Boolean(motionQuery && motionQuery.matches)
 
     // 核心物理渲染循环
-    const render = () => {
+    // - 呼吸漂移按时间戳推进，与帧率解耦，降帧不会让漂移变慢
+    // - 仅有呼吸漂移（进度已稳定）时降到 30fps，位移视觉无差别，主线程开销减半
+    let frame = 0
+    let lastTs = 0
+    const render = ts => {
       if (isDestroyed || !isVisible || isExited || isReducedMotion()) return
 
+      const now = typeof ts === 'number' ? ts : 0
+      const dt = lastTs ? Math.min(64, Math.max(0, now - lastTs)) : 16.7
+      lastTs = now
+      frame++
+
+      const progressing = currentProgress !== targetProgress
+
       // 平滑缓动插值追赶目标滚动进度
-      currentProgress += (targetProgress - currentProgress) * 0.12
-      if (Math.abs(targetProgress - currentProgress) < 0.0005) {
-        currentProgress = targetProgress
+      if (progressing) {
+        // dt 归一化：120Hz / 60Hz / 掉帧时的收敛时间一致
+        currentProgress = easeTiltProgress(
+          currentProgress,
+          targetProgress,
+          dt,
+          easeTau
+        )
       }
 
-      idleOffset += IDLE_SPEED
+      idleOffset += IDLE_SPEED * (dt / 16.7)
 
-      // 更新倾斜画布的横向与纵向视差平移
-      applyRotatedTransform()
+      // 纯呼吸帧隔帧渲染（30fps）；滚动跟随时保持满帧，避免拖影
+      if (progressing || frame % 2 === 0) {
+        // 更新平移层（只翻 z 轴平移，rotate/scale 已静态化）
+        applyPanTransform()
 
-      // 更新各列的交错流动位移
-      columns.forEach(col => {
-        if (!col.track) return
-        const h = col.halfHeight || 2000
-        const scrollDisplacement = col.dir * (currentProgress * TRAVEL_DISTANCE)
-        const totalDisplacement = (idleOffset * col.dir + scrollDisplacement) % h
-        const normalizedY = totalDisplacement < 0 ? totalDisplacement + h : totalDisplacement
+        // 更新各列的交错流动位移
+        columns.forEach(col => {
+          if (!col.track) return
+          const h = col.halfHeight || 2000
+          const scrollDisplacement = col.dir * (currentProgress * cachedTravel)
+          const totalDisplacement = (idleOffset * col.dir + scrollDisplacement) % h
+          const normalizedY = totalDisplacement < 0 ? totalDisplacement + h : totalDisplacement
 
-        col.track.style.transform = `translate3d(0, ${(-normalizedY).toFixed(1)}px, 0)`
-      })
+          // 2D translateY：与参考站一致，不强制生成 3D 图层
+          col.track.style.transform = `translateY(${(-normalizedY).toFixed(1)}px)`
+        })
+      }
 
       rafId = requestAnimationFrame(render)
     }
 
     // 滚动监听器：严格限定作用范围，脱离首屏轨道彻底切断 (零布局抖动，零强制重排)
     const onScroll = () => {
+      scrollCount++
+      // 首次交互时兜底再校正一次几何：挂载初期布局可能仍在收敛，
+      // 若用户此时就开始滑动，用旧基准会整段偏移
+      if (scrollCount <= 3) updateGeometry()
       const scrollY = window.scrollY || window.pageYOffset || 0
 
-      // 1. 完全滚入首屏下方（用户在浏览文章列表或页脚）：彻底冻结终态，不产生任何动作
+      // 滚动期间才提示浏览器提升图层，停手 150ms 后归还
+      if (scrollY > cachedTop && scrollY < cachedBottomLimit) markFlowing()
+
+      // 1. 完全滚入首屏下方（用户在浏览文章列表或页脚）：彻底冻结终态，不产生任何动作。
+      //    已冻结过就直接返回，保证文章区滚动时这里零成本
       if (scrollY >= cachedBottomLimit) {
         if (!isExited) {
           isExited = true
           targetProgress = 1
           currentProgress = 1
-          applyRotatedTransform()
+          applyPanTransform()
           if (rafId) {
             cancelAnimationFrame(rafId)
             rafId = null
           }
         }
+        if (container?.classList.contains('is-flowing')) {
+          container.classList.remove('is-flowing')
+        }
+        if (flowingTimer) {
+          clearTimeout(flowingTimer)
+          flowingTimer = null
+        }
         return
       }
 
-      // 2. 位于首屏上方（罕见负滚动）：重置归零
-      if (scrollY <= 0) {
+      // 2. 位于轨道上方（含罕见负滚动）：归零，并解除冻结以便再次下滑时能恢复动画
+      if (scrollY <= cachedTop) {
+        isExited = false
         targetProgress = 0
         currentProgress = 0
-        applyRotatedTransform()
+        applyPanTransform()
+        if (!rafId && !isDestroyed && isVisible && !isReducedMotion()) {
+          rafId = requestAnimationFrame(render)
+        }
         return
       }
 
@@ -319,8 +554,8 @@ export default function HomeTiltWall({ homeCoverImages = [] }) {
         }
       }
 
-      // 计算首屏粘性轨道内的滚动比例 [0, 1]（纯数学计算，零 DOM 重排）
-      targetProgress = Math.min(1, Math.max(0, scrollY / cachedScrollMax))
+      // 计算相对轨道顶部的滚动比例 [0, 1]（纯数学计算，零 DOM 重排）
+      targetProgress = computeProgress(scrollY)
     }
 
     // 视口观察器
@@ -335,17 +570,50 @@ export default function HomeTiltWall({ homeCoverImages = [] }) {
             cancelAnimationFrame(rafId)
             rafId = null
           }
+          // 完全离屏：隐藏以释放光栅纹理，避免下方文章滚动继续背着这块大画布的显存
+          if (container) {
+            container.classList.add('is-offscreen')
+            container.classList.remove('is-flowing')
+          }
         } else if (visible && !rafId && !isDestroyed && !isExited) {
+          // 先恢复可见，下一帧再启动渲染，避免刚显示就重绘出现空白帧
+          container?.classList.remove('is-offscreen')
           rafId = requestAnimationFrame(render)
+        } else {
+          container?.classList.remove('is-offscreen')
         }
       },
       { threshold: 0 }
     )
 
-    const onResize = () => {
-      updateScale()
-      buildColumns()
+    // 几何校正：SSR/hydration 期间布局可能尚未稳定（实测挂载瞬间轨道顶部会读到
+    // 924px 的临时值，随后回落到 0），若直接缓存会让整段进度基准偏移。
+    // 因此在首帧后、load 后各校正一次，并用 ResizeObserver 跟进后续布局变化
+    const refreshGeometry = () => {
+      if (isDestroyed) return
+      updateGeometry()
       onScroll()
+    }
+
+    const onResize = () => {
+      // 缩放与几何校正立即执行，避免拖拽过程中画面变形
+      updateScale()
+
+      // 只有视口宽度真正变化才重建列结构：移动端地址栏收起仅改变高度，
+      // 若也触发重建，滚动中会出现整片照片墙闪白
+      const width = window.innerWidth
+      if (width === lastWidth) {
+        onScroll()
+        return
+      }
+      lastWidth = width
+
+      if (resizeTimer) clearTimeout(resizeTimer)
+      resizeTimer = setTimeout(() => {
+        if (isDestroyed) return
+        buildColumns()
+        onScroll()
+      }, 150)
     }
 
     updateScale()
@@ -353,6 +621,16 @@ export default function HomeTiltWall({ homeCoverImages = [] }) {
     viewObserver.observe(trackWrapper)
     onScroll()
     rafId = requestAnimationFrame(render)
+
+    // 首帧后再校正一次几何（此时 React 已完成 hydration、布局稳定）
+    const firstFrameId = requestAnimationFrame(refreshGeometry)
+    window.addEventListener('load', refreshGeometry)
+
+    const geometryObserver =
+      typeof ResizeObserver !== 'undefined'
+        ? new ResizeObserver(refreshGeometry)
+        : null
+    geometryObserver?.observe(document.body)
 
     const onMotionChange = () => {
       if (isReducedMotion()) {
@@ -364,32 +642,71 @@ export default function HomeTiltWall({ homeCoverImages = [] }) {
     }
     motionQuery?.addEventListener?.('change', onMotionChange)
 
+    // 标签页切走时彻底停机，回来再续帧（IntersectionObserver 不会因切页触发）
+    const onVisibility = () => {
+      if (isDestroyed) return
+      if (document.hidden) {
+        if (rafId) {
+          cancelAnimationFrame(rafId)
+          rafId = null
+        }
+        lastTs = 0
+      } else if (!rafId && isVisible && !isExited && !isReducedMotion()) {
+        rafId = requestAnimationFrame(render)
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+
     window.addEventListener('scroll', onScroll, { passive: true })
     window.addEventListener('resize', onResize)
 
     return () => {
       isDestroyed = true
       if (rafId) cancelAnimationFrame(rafId)
+      if (resizeTimer) clearTimeout(resizeTimer)
+      if (flowingTimer) clearTimeout(flowingTimer)
+      container?.classList.remove('is-flowing')
+      if (drainHandle) {
+        if (
+          drainViaIdle &&
+          typeof window !== 'undefined' &&
+          typeof window.cancelIdleCallback === 'function'
+        ) {
+          window.cancelIdleCallback(drainHandle)
+        } else {
+          clearTimeout(drainHandle)
+        }
+        drainHandle = null
+      }
+      loadQueue.length = 0
       viewObserver.disconnect()
       memoryLifecycleObserver.disconnect()
       motionQuery?.removeEventListener?.('change', onMotionChange)
+      document.removeEventListener('visibilitychange', onVisibility)
       window.removeEventListener('scroll', onScroll)
       window.removeEventListener('resize', onResize)
+      window.removeEventListener('load', refreshGeometry)
+      cancelAnimationFrame(firstFrameId)
+      geometryObserver?.disconnect()
     }
   }, [displayCards])
 
+  // 没有图源时整块不渲染，避免用示例图冒充博主作品
+  if (!displayCards.length) return null
+
+  // 首屏 LCP 的 preload 由主题布局（LayoutPostList）在 SSR 阶段输出，
+  // 组件内 critical 图会自行带 fetchpriority，此处不重复声明
   return (
     <div ref={trackWrapperRef} className='cl-home-tilt-track-wrapper'>
-      {/* 粘性吸顶视窗：在 220vh 行程内牢牢吸附在屏幕，提供充沛的滚轮交错视差流光体验 */}
+      {/* 240vh 区块随页面滚走：提供约 2.4 屏的浏览时长，内部只做 0.12 微视差 */}
       <section
         ref={containerRef}
-        className='cl-home-tilt-sticky cl-home-tilt-section select-none bg-[var(--cl-bg)]'>
-        {/* 8° 倾斜并随滚轮产生横向/垂直对角线位移的无限照片瀑布流母画卷 */}
-        <div
-          ref={rotatedRef}
-          className='cl-home-tilt-rotated'
-          aria-hidden='true'
-        />
+        className='cl-home-tilt-section select-none bg-[var(--cl-bg)]'>
+        {/* 平移层：每帧只翻 translate，尺寸=视口；旋转与缩放交给内层静态变换 */}
+        <div ref={panRef} className='cl-home-tilt-pan' aria-hidden='true'>
+          {/* 8° 倾斜的无限照片瀑布流母画卷（rotate/scale 静态，缩放值走 CSS 变量） */}
+          <div ref={rotatedRef} className='cl-home-tilt-rotated' />
+        </div>
 
         {/* 顶部与底部微弱过渡渐变遮罩 */}
         <div className='cl-home-tilt-fade-top pointer-events-none absolute inset-x-0 top-0 h-28 z-10' />

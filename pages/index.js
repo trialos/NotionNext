@@ -6,14 +6,13 @@ import {
   fetchGlobalAllData,
   getPostBlocks
 } from '@/lib/db/SiteDataApi'
-import { loadPhotoImages } from '@/lib/db/notion/photoImages'
+import { loadPhotoImages, resolveHomeCoverImages } from '@/lib/db/notion/photoImages'
 import { formatNotionBlock } from '@/lib/db/notion/getPostBlocks'
 import { generateRobotsTxt } from '@/lib/utils/robots.txt'
 import { generateRss, shouldGenerateRssForLocale } from '@/lib/utils/rss'
 import { generateSitemapXml } from '@/lib/utils/sitemap.xml'
 import { DynamicLayout } from '@/themes/theme'
 import Head from 'next/head'
-import { compressImage } from '@/lib/db/notion/mapImage'
 import { generateRedirectJson } from '@/lib/utils/redirect'
 import { checkDataFromAlgolia } from '@/lib/plugins/algolia'
 import pLimit from 'p-limit'
@@ -26,42 +25,25 @@ import { adapterNotionBlockMap } from '@/lib/utils/notion.util'
  */
 const Index = props => {
   const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
-  const firstCard = props.homeCoverImages?.[0]
-  const secondCard = props.homeCoverImages?.[1]
+  // 首屏 LCP：只预加载首图一张。主题布局内的 Head 在本项目 SSR 阶段不生效，
+  // 因此放在页面级 Head；图片本身由 LayoutIndex 渲染，这里不重复下载。
+  // 必须同时给出 imagesrcset/imagesizes：否则浏览器按 sizes 选中 512 档，
+  // 却已被预加载了 1024 档，会白下载两份
+  const heroLcp = props.homeCoverImages?.[0]
   return (
     <>
-      <Head>
-        {firstCard?.src && (
+      {heroLcp?.src ? (
+        <Head>
           <link
-            key='preload-hero-0'
             rel='preload'
             as='image'
-            href={firstCard.src}
-            fetchpriority='high'
-          />
-        )}
-        {secondCard?.src && (
-          <link
-            key='preload-hero-1'
-            rel='preload'
-            as='image'
-            href={secondCard.src}
-            fetchpriority='high'
-          />
-        )}
-      </Head>
-      {firstCard?.src && (
-        <div className='sr-only pointer-events-none absolute h-0 w-0 overflow-hidden' aria-hidden='true'>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={firstCard.src}
-            alt=''
+            href={heroLcp.src}
+            imageSrcSet={heroLcp.srcSet || undefined}
+            imageSizes={heroLcp.sizes || undefined}
             fetchPriority='high'
-            decoding='async'
-            style={{ width: 1, height: 1 }}
           />
-        </div>
-      )}
+        </Head>
+      ) : null}
       <DynamicLayout theme={theme} layoutName='LayoutIndex' {...props} />
     </>
   )
@@ -217,43 +199,10 @@ export async function getStaticProps(req) {
   }
   props.photoDecks = photoDecks
 
-  // 首页倾斜流光照片墙专属图源
-  // 优先精准定位指定的 HomeCover 页面 (ID: 3fe96e7033d3808f9b98f07cec6937ad)，或 type=HomeCover
-  const targetCoverId = '3fe96e7033d3808f9b98f07cec6937ad'
-  let homeCoverPages = (props.allPages || []).filter(
-    p =>
-      p &&
-      ((p.id && p.id.replace(/-/g, '') === targetCoverId) ||
-        (p.type &&
-          typeof p.type === 'string' &&
-          p.type.toLowerCase().trim() === 'homecover') ||
-        (p.title && p.title.toLowerCase().trim() === 'homecover'))
-  )
-  if (homeCoverPages.length === 0) {
-    homeCoverPages = [
-      { id: '3fe96e70-33d3-808f-9b98-f07cec6937ad', title: 'homecover' }
-    ]
-  }
-
-  const homeCoverImages = []
-  for (const p of homeCoverPages) {
-    try {
-      const imgs = await loadPhotoImages(p)
-      imgs.forEach(im => {
-        if (im?.url) {
-          homeCoverImages.push({
-            id: im.id || im.url,
-            src: compressImage(im.url, 1200),
-            aspectRatio: im.aspectRatio || 1.333,
-            title: im.caption || p.title || ''
-          })
-        }
-      })
-    } catch (e) {
-      console.warn('[homeCoverImages] load failed for', p.id, e.message)
-    }
-  }
-  props.homeCoverImages = homeCoverImages
+  // 首页首屏照片墙图源：按 homecover 语义解析，私有页面 ID 只从服务端环境变量注入
+  props.homeCoverImages = await resolveHomeCoverImages(props.allPages || [], {
+    pageId: process.env.CIRCLELIFE_HOME_COVER_PAGE_ID
+  })
   delete props.allPages
 
   return {
