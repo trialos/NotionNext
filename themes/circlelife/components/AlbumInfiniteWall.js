@@ -140,6 +140,7 @@ export default function AlbumInfiniteWall({
 
     let colData = []
     let wallResizeObserver = null
+    let wallElRef = null
 
     // 测量所有列高与计算最大滚动边界（建立在所有列实际渲染高度之上的安全界限）
     const updateBounds = () => {
@@ -153,8 +154,11 @@ export default function AlbumInfiniteWall({
       })
 
       winH = window.innerHeight
-      // 安全结束界限：严格保留 140px 纯净留白，坚决杜绝与任何一列照片重叠
-      const safeEndTop = maxColHeight + 140
+      // 安全结束界限：严格保留 140px 纯净留白，坚决杜绝与任何一列照片重叠。
+      // 留白要从照片实际起点算起，而照片起点是 CSS 里由导航带推导的 top，
+      // 故必须叠加 wallEl.offsetTop（否则刘海机上边界会直接压进末排照片）
+      const wallTop = wallElRef?.offsetTop || 0
+      const safeEndTop = wallTop + maxColHeight + 140
       maxScroll = Math.max(0, safeEndTop - winH + 280)
 
       if (endMarkerRef.current) {
@@ -284,6 +288,7 @@ export default function AlbumInfiniteWall({
       const wallEl = document.createElement('div')
       wallEl.className = 'cl-about-masonry-wall cl-album-masonry-wall'
       container.appendChild(wallEl)
+      wallElRef = wallEl
 
       if (typeof ResizeObserver !== 'undefined') {
         wallResizeObserver?.disconnect()

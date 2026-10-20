@@ -640,26 +640,28 @@ export const albumStyle = `
       display: none;
     }
 
-    /* 移动/平板专属吸顶定点中轴 HUD (对齐导航栏高质感透明毛玻璃材质) */
+    /* 移动/平板吸顶 HUD：外层退化为「居中吸顶轨道」，本身透明不接管点击，
+       胶囊外观全部由内层 .cl-shelf-mobile-hud-inner 承载（与导航胶囊同语言）。
+       净空由 --cl-nav-band 推导，禁止再写死像素 */
     .cl-shelf-mobile-sticky-hud {
-      display: block;
+      display: flex;
+      justify-content: center;
       position: sticky;
-      top: 52px; /* 紧贴顶部站点导航栏下方 */
+      top: calc(var(--cl-nav-band) + 14px);
       z-index: 28;
       width: calc(100% + 3rem);
-      margin: 0 -1.5rem; /* 平板端伸展横贯至视口两侧边缘 */
-      padding: 12px 1.5rem 14px;
+      margin: 0 -1.5rem; /* 轨道经负 margin 后恰为 100vw，保证与导航胶囊严格同心 */
+      padding: 0;
       box-sizing: border-box;
-      background-color: color-mix(in srgb, var(--cl-bg) 48%, transparent);
-      backdrop-filter: blur(16px) saturate(1.12);
-      -webkit-backdrop-filter: blur(16px) saturate(1.12);
-      border-bottom: 1px solid color-mix(in srgb, var(--cl-border) 45%, transparent);
-      transition: background-color var(--cl-dur, 0.3s) var(--cl-ease, ease);
+      background-color: transparent;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      border-bottom: 0;
+      pointer-events: none;
     }
 
     .dark .cl-shelf-mobile-sticky-hud {
-      background-color: color-mix(in srgb, var(--cl-bg) 58%, transparent);
-      border-bottom-color: color-mix(in srgb, var(--cl-border) 50%, transparent);
+      background-color: transparent;
     }
 
     @keyframes clHudCrossFade {
@@ -673,11 +675,34 @@ export const albumStyle = `
       }
     }
 
-    .cl-shelf-mobile-hud-inner {
+    /* HUD 胶囊本体：与 header.js 的导航胶囊同宽、同圆角、同磨砂语言，
+       作为「导航胶囊的第二颗胶囊」悬浮在导航带下方。
+       必须带 button. 前缀：album.js 顶部有 button.cl-shelf-mobile-hud-inner 的按钮重置
+       （border:none / background:transparent / padding:0），特异度高于裸类名会把它冲掉 */
+    button.cl-shelf-mobile-hud-inner {
       animation: clHudCrossFade 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       display: flex;
       flex-direction: column;
+      justify-content: center;
       gap: 3px;
+      width: min(calc(100vw - 2.25rem), 400px);
+      max-width: 100%;
+      min-height: var(--cl-nav-height);
+      padding: 8px 14px;
+      box-sizing: border-box;
+      border-radius: 9999px;
+      border: 1px solid color-mix(in srgb, var(--cl-border) 60%, transparent);
+      background-color: color-mix(in srgb, var(--cl-bg) 72%, transparent);
+      backdrop-filter: blur(16px) saturate(1.12);
+      -webkit-backdrop-filter: blur(16px) saturate(1.12);
+      box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.14);
+      pointer-events: auto;
+      transition: background-color var(--cl-dur, 0.3s) var(--cl-ease, ease),
+        border-color 0.2s ease;
+    }
+
+    .dark button.cl-shelf-mobile-hud-inner {
+      background-color: color-mix(in srgb, var(--cl-bg) 82%, transparent);
     }
 
     .cl-shelf-mobile-hud-top {
@@ -887,16 +912,24 @@ export const albumStyle = `
     }
   }
 
-  /* 手机端进一步微调图片高度与 HUD 边距 */
+  /* 手机端轨道边距微调（胶囊宽度由 --cl-nav-height 与 100vw 统一约束，无需改 padding） */
   @media (max-width: 767px) {
     .cl-shelf-mobile-sticky-hud {
       width: calc(100% + 2rem);
       margin: 0 -1rem;
-      padding: 10px 1.25rem 12px;
     }
 
     .cl-shelf-wheel-cover-img {
       max-height: 380px;
+    }
+  }
+
+  /* 不支持毛玻璃时用实色纸底兜底。
+     导航栏那份回退在 header.js，而 headerStyle 比 albumStyle 更早注入，救不到这里 */
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    button.cl-shelf-mobile-hud-inner,
+    .dark button.cl-shelf-mobile-hud-inner {
+      background-color: var(--cl-bg);
     }
   }
 
@@ -1460,9 +1493,11 @@ export const albumStyle = `
     box-sizing: border-box;
   }
 
-  /* 彻底消除首排图片顶部荒漠空白：将瀑布展墙绝对定位起点紧凑贴合顶栏与顶部居中胶囊，保持 14px 垂直对称间距 */
+  /* 首排照片起点 = 导航带 + 14px 间距 + 28px Hero 胶囊 + 14px 间距 = band + 56。
+     !important 必须保留：about.js 的 .cl-about-masonry-wall{top:0} 在 style.js 中注入更晚。
+     注意 AlbumInfiniteWall.js 的卷尾留白会读取本元素的 offsetTop，两者必须同步 */
   .cl-album-masonry-wall {
-    top: 56px !important;
+    top: calc(var(--cl-nav-band) + 56px) !important;
   }
 
   /* 影集展墙完结区域：独立界限，严格隔离在所有照片下方 */
@@ -1552,11 +1587,13 @@ export const albumStyle = `
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   }
 
-  /* 顶部居中当前影集胶囊按钮（绝对锚定在画廊舞台内部，严格以顶栏底边为原点，保持 14px-28px-14px 垂直对称） */
+  /* 顶部居中当前影集胶囊按钮（绝对锚定在画廊舞台内部，以悬浮导航带底边为原点，
+     保持 14px-28px-14px 垂直对称；#container-inner 的 relative z-10 会压平本层 z-index，
+     故只能靠几何避让，不可试图抬 z-index 盖过导航栏） */
   .cl-album-prologue-top-btn,
   .cl-album-prologue-center-btn {
     position: absolute;
-    top: 14px;
+    top: calc(var(--cl-nav-band) + 14px);
     left: 50%;
     transform: translateX(-50%) translateY(0);
     z-index: 35;
@@ -1605,7 +1642,8 @@ export const albumStyle = `
     outline-offset: 2px;
   }
 
-  /* 顶栏收缩时，Hero 按钮阴影联动强化（随舞台自然上浮，无需硬编码 top） */
+  /* 画廊虚拟滚动越过后强化阴影以拉开与照片的层次；
+     导航栏已改为常驻悬浮、不再收缩，故此处只联动阴影、不联动 top */
   .cl-album-prologue-top-btn.is-scrolled,
   .cl-album-prologue-center-btn.is-scrolled {
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.1);
@@ -1645,7 +1683,6 @@ export const albumStyle = `
   @media (max-width: 767px) {
     .cl-album-prologue-top-btn,
     .cl-album-prologue-center-btn {
-      top: 14px;
       max-width: 60vw;
       height: 28px;
       min-height: 28px;

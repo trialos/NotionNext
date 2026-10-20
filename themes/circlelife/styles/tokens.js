@@ -34,6 +34,19 @@ export const tokenStyle = `
         --cl-media-ratio: 4 / 3;
         --cl-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
         --cl-dur: 0.28s;
+        /* 导航带几何（全站唯一真源）：悬浮胶囊顶边 / 胶囊实高 / 带底边。
+           所有需要让开导航栏的浮层一律由 --cl-nav-band 推导，禁止再写死像素 */
+        --cl-nav-top: max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.65rem));
+        --cl-nav-height: 2.5rem;
+        --cl-nav-band: calc(var(--cl-nav-top) + var(--cl-nav-height));
+      }
+
+      /* ≤1023px：胶囊内嵌 2.35rem 汉堡按钮，导航带随之变高。
+         --cl-nav-band 在计算值时才展开，会自动跟随本覆盖，无需重复声明 */
+      @media (max-width: 1023px) {
+        :root {
+          --cl-nav-height: 3.25rem;
+        }
       }
 
       .dark {

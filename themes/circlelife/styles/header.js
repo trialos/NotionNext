@@ -8,7 +8,7 @@ export const headerStyle = `
          ========================================================================== */
       .cl-floating-header {
         position: fixed;
-        top: max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.65rem));
+        top: var(--cl-nav-top);
         left: 0;
         right: 0;
         z-index: 60;
@@ -28,6 +28,10 @@ export const headerStyle = `
         pointer-events: auto;
         display: inline-flex;
         align-items: center;
+        /* globals.css 有裸 nav{flex-wrap:wrap}，会让菜单项过多时折行、把导航带撑破；
+           min-height 与 --cl-nav-height 配对，保证影集浮层推导出的净空恒等于胶囊实高 */
+        flex-wrap: nowrap;
+        min-height: var(--cl-nav-height);
         gap: clamp(0.75rem, 1.8vw, 1.25rem);
         padding: 0.38rem 1.25rem;
         border-radius: 9999px;
@@ -246,7 +250,7 @@ export const headerStyle = `
       /* PC 桌面端独立悬浮右上角暖金纯图标胶囊按钮 */
       .cl-floating-desktop-menu-btn {
         position: fixed;
-        top: max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.65rem));
+        top: var(--cl-nav-top);
         right: max(1.5rem, calc(env(safe-area-inset-right, 0px) + 1.25rem));
         z-index: 60;
         display: inline-flex;
