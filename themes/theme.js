@@ -1,4 +1,4 @@
-import BLOG, { LAYOUT_MAPPINGS } from '@/blog.config'
+import BLOG from '@/blog.config'
 import getConfig from 'next/config'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
@@ -148,6 +148,59 @@ async function resolveThemeLayout(themeName, layoutName, emptyLayout) {
   return emptyLayout
 }
 
+/* ==========================================================================
+   模块级布局注册表（SSR 骨架竞态根治）
+
+   背景：next/dynamic 只有在**模块求值期**创建，Next 的 SSR 预加载链路才能在
+   服务端渲染前完成主题模块加载。此前 useLayoutByTheme() 与
+   getBaseLayoutByTheme() 都在**渲染期**才 dynamic()，导致部分页面的静态产物
+   直接落成 LayoutLoading 骨架（`min-h-screen w-full bg-[#f6f6f1]`）而非真实
+   布局：首屏是灰屏而非纸色，SEO/社交抓到的也是骨架，同一 URL 在不同构建中
+   结果可能不同（见私有库 circlelife-THEME-ARCH 排错 14）。
+
+   做法：模块求值期一次性为主主题预建全部布局，渲染期只做查表。
+   非主主题（?theme= 切换）首次访问时按需补注册，行为与改造前完全一致。
+   ========================================================================== */
+const layoutRegistry = new Map()
+
+/** 页面级布局：解析失败时兜底 EmptyPageLayout */
+const registerPageLayout = (themeName, layoutName) => {
+  const key = `${themeName}:${layoutName}`
+  if (layoutRegistry.has(key)) return layoutRegistry.get(key)
+  const Component = dynamic(
+    () => resolveThemeLayout(themeName, layoutName, EmptyPageLayout),
+    { ssr: true, loading: getLayoutLoading(layoutName) }
+  )
+  layoutRegistry.set(key, Component)
+  return Component
+}
+
+/**
+ * 基础布局（LayoutBase）：解析失败时兜底 EmptyBaseLayout。
+ * 与页面级链路分开，避免把「基础布局兜底」误用成「页面布局兜底」。
+ */
+const registerBaseLayout = themeName => {
+  if (baseLayoutCache.has(themeName)) return baseLayoutCache.get(themeName)
+  const Component = dynamic(
+    () => resolveThemeLayout(themeName, 'LayoutBase', EmptyBaseLayout),
+    { ssr: true }
+  )
+  baseLayoutCache.set(themeName, Component)
+  return Component
+}
+
+// 预建主主题的全部布局名（来自路由 → 布局映射表，外加基础布局）
+// 注意：blog.config.js 是 CommonJS 的 module.exports，没有具名导出，
+// LAYOUT_MAPPINGS 必须从 BLOG 上取（直接从 '@/blog.config' 具名导入会是 undefined）
+const PRIMARY_THEME = normalizeThemeName(BLOG.THEME)
+const LAYOUT_NAMES = Array.from(
+  new Set([...Object.values(BLOG.LAYOUT_MAPPINGS || {}), 'LayoutBase'])
+)
+
+// 模块求值期一次性预建：SSR 可预加载，静态产物不再落成骨架
+LAYOUT_NAMES.forEach(layoutName => registerPageLayout(PRIMARY_THEME, layoutName))
+registerBaseLayout(PRIMARY_THEME)
+
 /**
  * 获取主题配置（始终动态加载，与运行时 BLOG.THEME / URL ?theme 一致；不依赖编译期别名）。
  * @param {string} themeQuery - 主题查询参数（支持多个主题用逗号分隔）
@@ -191,16 +244,9 @@ const getCurrentTheme = (router, fallbackTheme) => {
  */
 export const getBaseLayoutByTheme = theme => {
   const normalizedTheme = normalizeThemeName(theme)
-  if (baseLayoutCache.has(normalizedTheme)) {
-    return baseLayoutCache.get(normalizedTheme)
-  }
-  const DynamicBaseLayout = dynamic(
-    () =>
-      resolveThemeLayout(normalizedTheme, 'LayoutBase', EmptyBaseLayout),
-    { ssr: true }
-  )
-  baseLayoutCache.set(normalizedTheme, DynamicBaseLayout)
-  return DynamicBaseLayout
+  // 组件引用来自模块级注册表：同一主题恒定返回同一个组件，
+  // 客户端导航不会因组件类型变化而 remount 整棵子树
+  return registerBaseLayout(normalizedTheme)
 }
 
 /**
@@ -225,16 +271,12 @@ export const useLayoutByTheme = ({ layoutName, theme }) => {
   const cacheKey = `${themeQuery}:${layoutName}`
 
   if (layoutByThemeCache.has(cacheKey)) {
-    scheduleFixThemeDOM(themeQuery === BLOG.THEME ? 80 : 240)
+    // 同一主题 + 同一布局：组件引用稳定，主题根不会重复，无需再修 DOM
     return layoutByThemeCache.get(cacheKey)
   }
 
-  const loadLayout = () =>
-    resolveThemeLayout(themeQuery, layoutName, EmptyPageLayout)
-  const DynamicLayoutComponent = dynamic(loadLayout, {
-    ssr: true,
-    loading: getLayoutLoading(layoutName)
-  })
+  // 组件由模块级注册表提供（主主题已在模块求值期预建）
+  const DynamicLayoutComponent = registerPageLayout(themeQuery, layoutName)
   layoutByThemeCache.set(cacheKey, DynamicLayoutComponent)
   scheduleFixThemeDOM(themeQuery === BLOG.THEME ? 80 : 240)
   return DynamicLayoutComponent
@@ -246,7 +288,7 @@ export const useLayoutByTheme = ({ layoutName, theme }) => {
  * @returns
  */
 const getLayoutNameByPath = path => {
-  const layoutName = LAYOUT_MAPPINGS[path] || 'LayoutSlug'
+  const layoutName = BLOG.LAYOUT_MAPPINGS?.[path] || 'LayoutSlug'
   //   console.log('path-layout',path,layoutName)
   return layoutName
 }
@@ -259,6 +301,7 @@ const fixThemeDOM = () => {
   if (isBrowser) {
     const elements = document.querySelectorAll('[id^="theme-"]')
     if (elements?.length > 1) {
+      // 移除重复的主题根节点，保留文档顺序里最后出现的那个（当前生效的）
       for (let i = 0; i < elements.length - 1; i++) {
         if (
           elements[i] &&
@@ -268,7 +311,9 @@ const fixThemeDOM = () => {
           elements[i].parentNode.removeChild(elements[i])
         }
       }
-      elements[0]?.scrollIntoView()
+      // 滚到存活下来的那个主题根：原写法指向 elements[0]，
+      // 而它已在上面被移除，对游离节点调 scrollIntoView 是空操作
+      elements[elements.length - 1]?.scrollIntoView()
     }
   }
 }

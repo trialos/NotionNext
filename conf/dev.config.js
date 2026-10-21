@@ -8,6 +8,12 @@ module.exports = {
   BACKGROUND_LIGHT: '#eeeeee', // use hex value, don't forget '#' e.g #fffefc
   BACKGROUND_DARK: '#000000', // use hex value, don't forget '#'
 
+  // 浏览器 chrome 底色（<meta name="theme-color">，即移动端地址栏/状态栏）：
+  // 必须与页面底色一致，否则浏览器壳与页面割裂。
+  // 这里给的是首屏（SSR）值；深色模式切换后由 components/SEO.js 在运行时
+  // 按页面实际底色重写，因此深浅两套不会失配。
+  BROWSER_THEME_COLOR: '#f5f0e4',
+
   // Redis 缓存数据库地址
   REDIS_URL: process.env.REDIS_URL || '',
 

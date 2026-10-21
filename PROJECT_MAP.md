@@ -79,11 +79,12 @@ flowchart TD
 ## 四、 核心代码目录速查
 
 * `themes/circlelife/`：主站当前运行的核心主题实现目录
+* `themes/theme.js`：**全站共享**的主题动态布局装载层。布局 `next/dynamic` 组件一律走**模块级注册表**（模块求值期预建，渲染期只查表）——在渲染期才 `dynamic()` 会让部分页面的静态产物落成骨架屏（详见私有库 `circlelife-THEME-ARCH.md` 排错 14）。`blog.config.js` 是 CommonJS，具名导入恒为 undefined，取值走 `BLOG.*`
 * `pages/archive/index.js`：归档页数据入口；按月分组，circlelife 下会裁剪 pageProps 与 `archivePosts` 白名单字段
 * `themes/circlelife/components/ArchiveIndex.js`、`archiveFilter.js`、`BlogListArchive.js`：归档筛选索引、分类/标签聚合纯函数、时间线条目
 * `themes/circlelife/components/navConfig.js`：Notion 菜单行序归一化；首页固定最前，不再左右翼重排
 * `themes/circlelife/styles/archive.js`：归档宽屏/筛选/时间线样式；宽屏容器 token 在 `styles/tokens.js`
-* `themes/circlelife/styles/article.js`：文章页全屏壳（全出血封面 + 宽容器 + TOC 细轨）、封面渐隐、正文排版体系；排版参数 token 在 `styles/tokens.js` 的 `--cl-prose-*` / `--cl-article-*`
+* `themes/circlelife/styles/article.js`：文章页全屏壳（全出血封面 + 宽容器 + TOC 细轨）、封面遮罩溶解与顶部压暗、正文排版体系；排版参数 token 在 `styles/tokens.js` 的 `--cl-prose-*` / `--cl-article-*`（溶解曲线是 `--cl-article-cover-mask`，深浅两套停靠点）
 * `themes/circlelife/components/imageSrcset.js`：Notion 反代取图档位与 srcSet 候选集（默认 512/1024 两档，可用 `widths` 覆盖；全出血封面用 `[1024, 2048]` + `sizes=100vw`）
 * `docs/design/`：官方设计规范中心（`xuhome/` 为备用主题规范；主站专属纸感设计体系已迁移至私有库 `withcol-private/docs/design-system/`）
 * `docs/developer/themes/`：开源主题架构与实现手册（包含 `CLAUDE.md`, `HEO.md` 等；Circlelife 核心架构推演已迁移至私有库 `withcol-private/docs/architecture/`）
@@ -91,6 +92,7 @@ flowchart TD
 * `components/`：跨主题通用公共组件（`NotionPage`, `NotionTabs`, `PrismMac` 等）
 * `lib/db/SiteDataApi.js`：全站 Notion 数据清洗与拉取总入口
 * `lib/config.js`：`siteConfig()` 全局动态配置读取与优先级控制
+* `components/SEO.js`：全站 `<Head>`（SEO + PWA 提示）。其中 `theme-color`（浏览器地址栏/状态栏底色）**首屏取 `conf/dev.config.js` 的 `BROWSER_THEME_COLOR`，运行时再按页面实际底色重写以跟随深浅模式**；注意该 meta 由 next/head 托管，命令式改属性会被重渲染冲掉，必须走 React state
 * `conf/`：原子化配置文件（最终由 `blog.config.js` 统一聚合）
 * `tools/notionnext-content-mcp/`：内容操作 MCP 服务器
 * `scripts/translate/`：多语言翻译 CLI 工具集

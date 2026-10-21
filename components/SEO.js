@@ -5,7 +5,7 @@ import { createSiteUrl, normalizeSiteUrl } from '@/lib/sitemap-utils'
 import { isHttpLink, loadExternalResource } from '@/lib/utils'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 /**
  * 页面的Head头，有用于SEO
@@ -22,12 +22,50 @@ const SEO = props => {
   let url = PATH?.length ? createSiteUrl(LINK, SUB_PATH) || LINK : LINK
   let image
   const router = useRouter()
-  const meta = getSEOMeta(props, router, useGlobal()?.locale)
+  const globalCtx = useGlobal()
+  const meta = getSEOMeta(props, router, globalCtx?.locale)
+  const isDarkMode = globalCtx?.isDarkMode
   const webFontUrl = siteConfig('FONT_URL')
   const hasWebFontUrl = Array.isArray(webFontUrl)
     ? webFontUrl.filter(Boolean).length > 0
     : Boolean(webFontUrl)
   const hasGoogleFontsUrl = containsGoogleFontsUrl(webFontUrl)
+
+  const BACKGROUND_DARK = siteConfig('BACKGROUND_DARK', '', NOTION_CONFIG)
+  // 浏览器 chrome 底色（地址栏/状态栏）：首屏用这个值，
+  // 深色模式切换后由下面的 effect 按页面实际底色重写
+  const BROWSER_THEME_COLOR = siteConfig(
+    'BROWSER_THEME_COLOR',
+    BACKGROUND_DARK,
+    NOTION_CONFIG
+  )
+
+  /**
+   * theme-color 必须与页面底色一致，并跟随明暗切换。
+   * 页面底色由主题的 CSS 变量决定（各主题不同），运行时读计算值最可靠、也与主题无关；
+   * 深色模式是 class 驱动而非 prefers-color-scheme，所以只能在切换后重取。
+   * 注意：meta 由 next/head 托管，命令式改属性会被下次渲染冲掉，
+   * 因此这里读出颜色后写进 state，由 React 作为 content 属性下发。
+   */
+  const [browserColor, setBrowserColor] = useState(BROWSER_THEME_COLOR)
+  useEffect(() => {
+    const apply = () => {
+      const rootBg = getComputedStyle(document.documentElement)
+        .getPropertyValue('--cl-bg')
+        .trim()
+      const bodyBg = getComputedStyle(document.body).backgroundColor
+      const next =
+        rootBg ||
+        (bodyBg && bodyBg !== 'rgba(0, 0, 0, 0)' && bodyBg !== 'transparent'
+          ? bodyBg
+          : '')
+      if (next) setBrowserColor(next)
+    }
+    apply()
+    // 主题样式是动态注入的，晚一点再取一次兜底
+    const timer = window.setTimeout(apply, 250)
+    return () => window.clearTimeout(timer)
+  }, [isDarkMode])
 
   useEffect(() => {
     if (!hasWebFontUrl) return
@@ -75,7 +113,6 @@ const SEO = props => {
     ? meta?.category?.[0]
     : meta?.category || KEYWORDS // section 主要是像是 category 這樣的分類，Facebook 用這個來抓連結的分類
   const favicon = siteConfig('BLOG_FAVICON')
-  const BACKGROUND_DARK = siteConfig('BACKGROUND_DARK', '', NOTION_CONFIG)
 
   const SEO_BAIDU_SITE_VERIFICATION = siteConfig(
     'SEO_BAIDU_SITE_VERIFICATION',
@@ -128,7 +165,7 @@ const SEO = props => {
       <title>{title}</title>
       <meta
         name='theme-color'
-        content={pwaEnabled ? pwaConfig.themeColor : BACKGROUND_DARK}
+        content={pwaEnabled ? pwaConfig.themeColor : browserColor}
       />
       <meta
         name='viewport'
