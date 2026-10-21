@@ -80,6 +80,8 @@ flowchart TD
 
 * `themes/circlelife/`：主站当前运行的核心主题实现目录
 * `themes/theme.js`：**全站共享**的主题动态布局装载层。布局 `next/dynamic` 组件一律走**模块级注册表**（模块求值期预建，渲染期只查表）——在渲染期才 `dynamic()` 会让部分页面的静态产物落成骨架屏（详见私有库 `circlelife-THEME-ARCH.md` 排错 14）。`blog.config.js` 是 CommonJS，具名导入恒为 undefined，取值走 `BLOG.*`
+  * **主主题的 loader 必须用可静态识别的 `import()`**（`primaryThemeLayouts`，每个布局一条字面量 import）。`next/dynamic` 只有在 loader 里的 `import()` 能被 babel 静态识别时才会生成 `loadableGenerated`，客户端水合才能同步 require 该 chunk；用模板字面量 `import(\`@/themes/${x}\`)` 则是 context import，插件识别不了 → 主题 chunk 不进 script 列表 → 水合时组件还处在 loading 态 → **整棵树 hydration 不匹配** → 新旧两棵树并存、页面高度翻倍再回落 → **CLS 直接到 1.0**。其余主题（`?theme=` 切换）仍走 context import，代价是切换时一次闪烁，属可接受的边缘场景
+* `components/NotionPage.js`：Notion 正文渲染。承担**正文标题层级修正**——react-notion-x 给 Notion 标题统一 +1 偏移（假定 Notion 页面标题是 h1），而本站文章标题本身已是 `h1`；正文缺 Notion h1 时首个正文标题会变成 `<h3>`，形成 h1 → h3 的层级跳跃（`heading-order` 失分）。修法是在正文根节点挂 `notionRootRef`，缺 `.notion-h1` 时把 `.notion-h2/h3/h4` 降级为 `H2/H3/H4`，**只换标签、保留 class 与 `data-id`**（样式与目录锚点不受影响）
 * `pages/archive/index.js`：归档页数据入口；按月分组，circlelife 下会裁剪 pageProps 与 `archivePosts` 白名单字段
 * `themes/circlelife/components/ArchiveIndex.js`、`archiveFilter.js`、`BlogListArchive.js`：归档筛选索引、分类/标签聚合纯函数、时间线条目
 * `themes/circlelife/components/navConfig.js`：Notion 菜单行序归一化；首页固定最前，不再左右翼重排
