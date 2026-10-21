@@ -62,6 +62,7 @@ export function BrandLockup({
               <span className='cl-lockup-sep' aria-hidden='true'>
                 ·
               </span>
+              {' '}
               <span
                 className='cl-lockup-en cl-lockup-en--row uppercase tracking-[0.14em] text-[var(--cl-muted)]'
                 style={{ fontFamily: 'var(--cl-font-mono)' }}
@@ -94,11 +95,14 @@ export function BrandLockup({
 
   if (!href) return inner
 
+  // 无障碍名直接取可见文字，不再用 aria-label 覆盖：
+  // 可见文字里分隔符「·」是 aria-hidden 的装饰件，用 aria-label 写全反而与可见标签
+  // 不一致（label-content-name-mismatch）。CN 与 EN 之间补一个空格，
+  // 让读屏得到「时光的弧线 Circle of Life」（flex 容器忽略纯空白文本节点，视觉不变）。
   return (
     <SmartLink
       href={href}
-      className='cl-brand inline-flex flex-shrink-0 no-underline hover:opacity-85'
-      aria-label='时光的弧线 · Circle of Life'>
+      className='cl-brand inline-flex flex-shrink-0 no-underline hover:opacity-85'>
       {inner}
     </SmartLink>
   )

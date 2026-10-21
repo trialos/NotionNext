@@ -307,4 +307,23 @@ export const commonStyle = `
         outline: 2px solid var(--cl-gold, #c4a47c);
         outline-offset: 2px;
       }
+
+      /* —— 首屏内容淡入 ——
+         原先由 headlessui <Transition appear> 承担：服务端渲染的是「入场中」class，
+         客户端首次渲染却已是「已入场」class，两者不一致 → React 判定整棵树
+         hydration 不匹配 → 丢弃服务端 DOM 改为客户端重渲染。期间新旧两棵树并存，
+         页面高度翻倍再回落 → CLS 直接到 1.0（Core Web Vitals 不合格）。
+         改为纯 CSS 动画：服务端与客户端输出完全一致，不会触发 hydration 重渲染。
+         只动 opacity —— 不动 transform，避免给 fixed 定位的子元素（如目录 fab）造出包含块。 */
+      @keyframes clContentIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      #theme-circlelife #main-content {
+        animation: clContentIn 0.7s var(--cl-ease, ease) backwards;
+      }
 `

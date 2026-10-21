@@ -163,14 +163,74 @@ async function resolveThemeLayout(themeName, layoutName, emptyLayout) {
    ========================================================================== */
 const layoutRegistry = new Map()
 
+/* ==========================================================================
+   主主题的静态 layout loader（CLS 1.0 根治）
+
+   背景：next/dynamic 只有在 loader 里的 import() 能被 babel 静态识别时，才会生成
+   loadableGenerated —— 客户端水合时就能同步 require 该 chunk，不必等异步下载。
+   这里原本用的是模板字面量的 context import（import(`@/themes/${x}`)），插件识别不了，
+   于是主题 chunk 从未被预加载（实测 <link rel=preload> 里没有它）：
+     · 客户端水合时，主题组件还处在 loading 态（灰屏骨架），
+     · 与服务端渲染出来的实体布局不一致 → React 判定**整棵树 hydration 不匹配**，
+     · 丢弃服务端 DOM 改为客户端重渲染；期间新旧两棵树并存，
+     · 页面高度翻倍再回落 → **CLS 直接到 1.0**（Core Web Vitals 不合格）。
+
+   做法：主主题改用可静态识别的 import()，它的 chunk 本来每个页面都要用，
+   预加载是净收益；其余主题（?theme= 切换）仍走 context import，
+   代价只是切换时的一次闪烁 + 同样的 CLS（可接受，属边缘场景）。
+   ========================================================================== */
+const PRIMARY_THEME_NAME = 'circlelife'
+const primaryThemeLayouts = {
+  LayoutBase: dynamic(() => import('@/themes/circlelife').then(m => m.LayoutBase), {
+    ssr: true
+  }),
+  LayoutIndex: dynamic(() => import('@/themes/circlelife').then(m => m.LayoutIndex), {
+    ssr: true
+  }),
+  LayoutPostList: dynamic(
+    () => import('@/themes/circlelife').then(m => m.LayoutPostList),
+    { ssr: true }
+  ),
+  LayoutSlug: dynamic(() => import('@/themes/circlelife').then(m => m.LayoutSlug), {
+    ssr: true
+  }),
+  LayoutArchive: dynamic(
+    () => import('@/themes/circlelife').then(m => m.LayoutArchive),
+    { ssr: true }
+  ),
+  LayoutAlbum: dynamic(() => import('@/themes/circlelife').then(m => m.LayoutAlbum), {
+    ssr: true
+  }),
+  LayoutAbout: dynamic(() => import('@/themes/circlelife').then(m => m.LayoutAbout), {
+    ssr: true
+  }),
+  LayoutSearch: dynamic(() => import('@/themes/circlelife').then(m => m.LayoutSearch), {
+    ssr: true
+  }),
+  Layout404: dynamic(() => import('@/themes/circlelife').then(m => m.Layout404), {
+    ssr: true
+  }),
+  LayoutTagIndex: dynamic(
+    () => import('@/themes/circlelife').then(m => m.LayoutTagIndex),
+    { ssr: true }
+  ),
+  LayoutCategoryIndex: dynamic(
+    () => import('@/themes/circlelife').then(m => m.LayoutCategoryIndex),
+    { ssr: true }
+  )
+}
+
 /** 页面级布局：解析失败时兜底 EmptyPageLayout */
 const registerPageLayout = (themeName, layoutName) => {
   const key = `${themeName}:${layoutName}`
   if (layoutRegistry.has(key)) return layoutRegistry.get(key)
-  const Component = dynamic(
-    () => resolveThemeLayout(themeName, layoutName, EmptyPageLayout),
-    { ssr: true, loading: getLayoutLoading(layoutName) }
-  )
+  const Component =
+    themeName === PRIMARY_THEME_NAME && primaryThemeLayouts[layoutName]
+      ? primaryThemeLayouts[layoutName]
+      : dynamic(() => resolveThemeLayout(themeName, layoutName, EmptyPageLayout), {
+          ssr: true,
+          loading: getLayoutLoading(layoutName)
+        })
   layoutRegistry.set(key, Component)
   return Component
 }
@@ -181,10 +241,12 @@ const registerPageLayout = (themeName, layoutName) => {
  */
 const registerBaseLayout = themeName => {
   if (baseLayoutCache.has(themeName)) return baseLayoutCache.get(themeName)
-  const Component = dynamic(
-    () => resolveThemeLayout(themeName, 'LayoutBase', EmptyBaseLayout),
-    { ssr: true }
-  )
+  const Component =
+    themeName === PRIMARY_THEME_NAME
+      ? primaryThemeLayouts.LayoutBase
+      : dynamic(() => resolveThemeLayout(themeName, 'LayoutBase', EmptyBaseLayout), {
+          ssr: true
+        })
   baseLayoutCache.set(themeName, Component)
   return Component
 }

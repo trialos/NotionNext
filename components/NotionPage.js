@@ -21,6 +21,7 @@ const NotionPage = ({ post, className }) => {
   const POST_DISABLE_GALLERY_CLICK = siteConfig('POST_DISABLE_GALLERY_CLICK')
   const POST_DISABLE_DATABASE_CLICK = siteConfig('POST_DISABLE_DATABASE_CLICK')
   const SPOILER_TEXT_TAG = siteConfig('SPOILER_TEXT_TAG')
+  const notionRootRef = useRef(null)
 
   const zoomRef = useRef(null)
   const IMAGE_ZOOM_IN_WIDTH = siteConfig('IMAGE_ZOOM_IN_WIDTH', 1200)
@@ -111,9 +112,44 @@ const NotionPage = ({ post, className }) => {
   // const cleanBlockMap = cleanBlocksWithWarn(post?.blockMap);
   // console.log('NotionPage render with post:', post);
 
+  /**
+   * 修正正文标题层级
+   *
+   * react-notion-x 给 Notion 标题统一 +1 偏移（它假定 Notion 页面标题是 h1）：
+   *   Notion h1 → <h2 class="notion-h notion-h1">、h2 → <h3>、h3 → <h4>。
+   * 本站文章标题本身已经是 <h1>，若正文里没有 Notion h1，首个正文标题就是 <h3>，
+   * 从 h1 直接跳到 h3 —— 触发 heading-order（标题层级跳跃）。
+   *
+   * 这里在缺 Notion h1 时把正文标题整体降一级，补上缺失的 h2。
+   * 只调整标签，class（notion-h2 等）与 data-id 原样保留，样式与锚点不受影响。
+   */
+  useEffect(() => {
+    const root = notionRootRef.current
+    if (!root) return
+    // 正文里有 Notion h1 → react-notion-x 的 +1 偏移本来就是对的，不动
+    if (root.querySelector('.notion-h1')) return
+    const demotions = [
+      ['.notion-h2', 'H2'],
+      ['.notion-h3', 'H3'],
+      ['.notion-h4', 'H4']
+    ]
+    demotions.forEach(([selector, tag]) => {
+      root.querySelectorAll(selector).forEach(el => {
+        if (el.tagName === tag) return
+        const next = document.createElement(tag)
+        Array.from(el.attributes).forEach(attr =>
+          next.setAttribute(attr.name, attr.value)
+        )
+        while (el.firstChild) next.appendChild(el.firstChild)
+        el.replaceWith(next)
+      })
+    })
+  }, [post])
+
   return (
     <div
       id='notion-article'
+      ref={notionRootRef}
       className={`mx-auto overflow-hidden ${className || ''}`}>
       <NotionRenderer
         recordMap={post?.blockMap}
