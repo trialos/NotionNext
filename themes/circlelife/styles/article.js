@@ -133,7 +133,9 @@ export const articleStyle = `
         height: var(--cl-article-cover-h);
         overflow: hidden;
         border-radius: 0;
-        background: var(--cl-paper-2);
+        /* 容器底色 = 页面底色：遮罩让图片像素透明后透出的就是它，
+           若用 paper-2 会在溶解区留下一条可见色带 */
+        background: var(--cl-bg);
       }
       @media (max-width: 767px) {
         #theme-circlelife .cl-article-cover {
@@ -146,28 +148,38 @@ export const articleStyle = `
         object-fit: cover;
         object-position: center;
         display: block;
+        /* 底边溶解：遮罩让照片像素自己透明、露出封面容器（= 页面底色）。
+           与「盖一层色纱」的区别：纱是盖在照片上的实体，遮罩是照片真的没了。
+           mask-size / mask-repeat 必须显式写全，漏写会让遮罩平铺 */
+        -webkit-mask-image: var(--cl-article-cover-mask);
+        mask-image: var(--cl-article-cover-mask);
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
       }
-      /* 渐隐溶入：底部多级过渡到纸色 --cl-bg，与正文纸面无缝衔接（去卡片后的全屏形态） */
-      #theme-circlelife .cl-article-cover-fade {
+      /* 顶部极轻压暗：全出血形态下导航胶囊浮在图上，浅色头图时胶囊会与背景糊在一起，
+         压一层极淡暗膜保证胶囊边界与文字始终可辨。只作用于全屏形态（卡片回退不渲染该节点） */
+      #theme-circlelife .cl-article-cover-scrim {
         position: absolute;
         left: 0;
         right: 0;
-        bottom: 0;
-        height: var(--cl-article-cover-fade-h);
+        top: 0;
+        height: var(--cl-article-cover-scrim-h);
         pointer-events: none;
         background: linear-gradient(
           180deg,
-          transparent 0%,
-          transparent 32%,
-          color-mix(in srgb, var(--cl-bg) 45%, transparent) 58%,
-          color-mix(in srgb, var(--cl-bg) 85%, transparent) 82%,
-          var(--cl-bg) 100%
+          var(--cl-article-cover-scrim) 0%,
+          color-mix(in srgb, var(--cl-article-cover-scrim) 42%, transparent) 58%,
+          transparent 100%
         );
       }
       /* 回退形态（CIRCLELIFE_ARTICLE_CARD=true）：旧卡片封面几何与 surface 渐隐 */
       #theme-circlelife .cl-article--card .cl-article-cover {
         border-radius: var(--cl-radius) var(--cl-radius) 0 0;
         height: 180px;
+        /* 卡片形态的溶解终点是卡片自身底色 */
+        background: var(--cl-surface);
       }
       @media (min-width: 768px) {
         #theme-circlelife .cl-article--card .cl-article-cover {
@@ -179,14 +191,9 @@ export const articleStyle = `
           height: 150px;
         }
       }
-      #theme-circlelife .cl-article--card .cl-article-cover-fade {
-        height: 55%;
-        background: linear-gradient(
-          180deg,
-          transparent 0%,
-          color-mix(in srgb, var(--cl-surface) 55%, transparent) 55%,
-          var(--cl-surface) 100%
-        );
+      #theme-circlelife .cl-article--card .cl-article-cover-img {
+        -webkit-mask-image: var(--cl-article-cover-mask-card);
+        mask-image: var(--cl-article-cover-mask-card);
       }
 
       /* —— 全屏文章壳：宽容器 + TOC 细轨（≥1280px 双栏，与归档宽屏同构） —— */

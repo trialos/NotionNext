@@ -39,6 +39,11 @@ export const tokenStyle = `
         --cl-nav-top: max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.65rem));
         --cl-nav-height: 2.5rem;
         --cl-nav-band: calc(var(--cl-nav-top) + var(--cl-nav-height));
+        /* 胶囊圆角半径：border-radius:9999px 的体育场形，半径 = 实高/2。
+           阅读进度基座线两端各内缩此值，端点正好落在胶囊底弧与平直段的切点上，
+           线段与圆弧相切 → 完全收在胶囊轮廓内。calc() 引用 --cl-nav-height，
+           在计算值时才展开，会自动跟随 ≤1023px 的高度覆盖，禁止在媒体查询里重复声明 */
+        --cl-pill-radius: calc(var(--cl-nav-height) / 2);
         /* 宽屏页面容器（归档等大屏模块共用）：最大宽 / 流动 gutter / 双栏间距 */
         --cl-wide-max: 112.5rem;
         --cl-wide-pad: clamp(1rem, 3vw, 3rem);
@@ -66,7 +71,33 @@ export const tokenStyle = `
         --cl-article-gap: 3rem; /* 轨-正文列间距 */
         --cl-article-pad: clamp(1rem, 3vw, 2.5rem); /* 宽容器左右 gutter */
         --cl-article-cover-h: clamp(280px, 42vh, 480px); /* 全出血封面高 */
-        --cl-article-cover-fade-h: 65%; /* 封面底部渐隐溶入纸面的区域占比 */
+        --cl-article-cover-scrim-h: 22%; /* 封面顶部极轻压暗区高度：保证浅色头图上导航胶囊仍读得清 */
+        --cl-article-cover-scrim: rgba(20, 16, 12, 0.26); /* 顶部压暗色（明暗模式同值；暗底上无可感影响） */
+        /* 封面底边溶解：用遮罩让照片像素自己透明掉、露出封面容器（= 页面底色），
+           而不是盖一层色纱。盖纱时那片区域是"照片+色纱"（读作一块黑边），
+           遮罩时那片区域就是页面本身的底色（照片真正化进去，没有黑边实体）。
+           停靠点 = 照片保持原样的比例，其后逐级溶解。
+           浅色：照片 55% 原样 + 底部 45% 溶入纸色。色标与原七级渐隐曲线逐点对应
+           （区域% → 封面% = 55 + 区域% × 0.45，遮罩 α = 1 − 覆盖层 α），
+           改用遮罩后浅色观感逐像素不变 */
+        --cl-article-cover-mask: linear-gradient(
+          to bottom,
+          #000 0,
+          #000 55%,
+          #000 62%,
+          rgba(0, 0, 0, 0.86) 71%,
+          rgba(0, 0, 0, 0.62) 81%,
+          rgba(0, 0, 0, 0.34) 89%,
+          rgba(0, 0, 0, 0.12) 95.5%,
+          transparent 100%
+        );
+        /* 卡片回退形态：照片 45% 原样 + 底部 55% 溶入卡片 surface（沿用旧渐隐的 55% 区） */
+        --cl-article-cover-mask-card: linear-gradient(
+          to bottom,
+          #000 0,
+          #000 45%,
+          transparent 100%
+        );
       }
 
       /* ≤1023px：胶囊内嵌 2.35rem 汉堡按钮，导航带随之变高。
@@ -92,6 +123,19 @@ export const tokenStyle = `
         --cl-accent-press: #c98a26;
         --cl-accent-soft: #3a2e18;
         --cl-accent-ink: #14110e;
+        /* 深色模式的目标色是近黑 #14110e，照片要跨越的亮度差远大于浅色模式。
+           若沿用浅色的长溶解（45%），照片中下段会被整片压黑 —— 读作"照片被切断"，
+           而且照片的可用范围被吃掉一大半。故深色单独给一版短溶解：
+           照片 80% 保持原样、底部 20% 溶入页面底色，黑边只剩底缘一道细溶解。
+           卡片回退形态沿用 --cl-article-cover-mask-card，不受此覆盖影响 */
+        --cl-article-cover-mask: linear-gradient(
+          to bottom,
+          #000 0,
+          #000 80%,
+          rgba(0, 0, 0, 0.55) 87%,
+          rgba(0, 0, 0, 0.22) 93.5%,
+          transparent 100%
+        );
       }
 
       html:has(#theme-circlelife),

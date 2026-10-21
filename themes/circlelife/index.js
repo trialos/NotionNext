@@ -394,7 +394,10 @@ const LayoutSlug = props => {
                   fetchPriority='high'
                   decoding='async'
                 />
-                <div className='cl-article-cover-fade' aria-hidden='true' />
+                {/* 顶部极轻压暗：仅全屏形态。卡片回退形态封面小且不浮导航，不加此层 */}
+                {!ARTICLE_CARD ? (
+                  <div className='cl-article-cover-scrim' aria-hidden='true' />
+                ) : null}
               </div>
             ) : null
 

@@ -719,17 +719,24 @@ export const headerStyle = `
          4. 阅读进度条 (Reading Progress Bar) — 嵌入胶囊底边的基座线
          旧形态为视口顶部全宽细线，与悬浮胶囊分离；现改为胶囊内 absolute 底边，
          随胶囊宽度自适应（桌面窄胶囊 / 移动宽胶囊），朱砂自左向右填充
+
+         几何：胶囊是 border-radius:9999px 的体育场形，底边 = 中间平直段 + 两端圆弧，
+         圆弧与平直段的切点距左右边缘各恰为半径 R。故基座线两端各内缩 R
+         (--cl-pill-radius = 胶囊实高/2)，线段正好落在平直段上、与圆弧相切，
+         100% 收在胶囊轮廓内（胶囊无 overflow:hidden，会裁掉父级就地下拉 .cl-pill-sub，
+         因此不能靠 overflow 裁切，必须靠内缩）。再上移 1px 贴住 1px 描边的内缘。
          ========================================================================== */
       .cl-read-progress {
         position: absolute;
-        left: 1px;
-        right: 1px;
-        bottom: 0;
+        left: var(--cl-pill-radius);
+        right: var(--cl-pill-radius);
+        bottom: 1px;
         height: 2px;
         z-index: 1;
         pointer-events: none;
         background: color-mix(in srgb, var(--cl-border) 70%, transparent);
-        border-radius: 0 0 9999px 9999px;
+        /* 2px 高的轨道：两端自然收成半圆；朱砂填充也被 overflow 裁在同一形状内 */
+        border-radius: 9999px;
         overflow: hidden;
       }
       .cl-read-progress-bar {
