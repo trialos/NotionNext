@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 /**
- * 文章阅读进度：贴在顶栏底边，transform scaleX
+ * 文章阅读进度：嵌入悬浮胶囊导航底边的基座线，transform scaleX
  */
 export default function ReadingProgress({ targetSelector = '#article-wrapper' }) {
   const [progress, setProgress] = useState(0)

@@ -18,8 +18,10 @@ export const headerStyle = `
         pointer-events: none;
       }
 
-      /* 非全屏沉浸页（文章详情、归档列表等）提供顶部避让空间，防止被悬浮胶囊遮挡 */
-      #theme-circlelife:not(.cl-is-home):not(.cl-is-album):not(.cl-is-about) #container-inner {
+      /* 非全屏沉浸页（归档列表等）提供顶部避让空间，防止被悬浮胶囊遮挡。
+         全屏文章页（cl-is-article）除外：封面全出血直铺视口顶，导航浮于图上；
+         无封面文章的避让由文章壳 --no-cover 规则自持 */
+      #theme-circlelife:not(.cl-is-home):not(.cl-is-album):not(.cl-is-about):not(.cl-is-article) #container-inner {
         padding-top: max(4.5rem, calc(env(safe-area-inset-top, 0px) + 4rem));
       }
 
@@ -42,6 +44,8 @@ export const headerStyle = `
         box-shadow: 0 10px 32px rgba(0, 0, 0, 0.32);
         white-space: nowrap;
         transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        /* 阅读进度基座线的定位容器（不加 overflow，避免裁剪父级就地下拉 .cl-pill-sub） */
+        position: relative;
       }
 
       :root:not(.dark) .cl-floating-pill {
@@ -712,17 +716,20 @@ export const headerStyle = `
       }
 
       /* ==========================================================================
-         4. 阅读进度条 (Reading Progress Bar)
+         4. 阅读进度条 (Reading Progress Bar) — 嵌入胶囊底边的基座线
+         旧形态为视口顶部全宽细线，与悬浮胶囊分离；现改为胶囊内 absolute 底边，
+         随胶囊宽度自适应（桌面窄胶囊 / 移动宽胶囊），朱砂自左向右填充
          ========================================================================== */
       .cl-read-progress {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
+        position: absolute;
+        left: 1px;
+        right: 1px;
+        bottom: 0;
         height: 2px;
-        z-index: 70;
+        z-index: 1;
         pointer-events: none;
         background: color-mix(in srgb, var(--cl-border) 70%, transparent);
+        border-radius: 0 0 9999px 9999px;
         overflow: hidden;
       }
       .cl-read-progress-bar {

@@ -30,6 +30,14 @@ export const PostMeta = props => {
     )
   }
 
+  if (post.readTime) {
+    parts.push(
+      <span key='read' className='cl-meta-read'>
+        约 {post.readTime} 分钟
+      </span>
+    )
+  }
+
   if (post.category) {
     parts.push(
       <SmartLink

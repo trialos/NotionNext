@@ -124,25 +124,20 @@ export const articleStyle = `
         white-space: nowrap;
       }
 
-      /* —— Article cover band —— */
+      /* —— Article cover band：全屏形态全出血 / 回退卡片形态保留旧几何 —— */
       #theme-circlelife .cl-article-card {
         padding: 0;
       }
       #theme-circlelife .cl-article-cover {
         position: relative;
-        height: 180px;
+        height: var(--cl-article-cover-h);
         overflow: hidden;
-        border-radius: var(--cl-radius) var(--cl-radius) 0 0;
+        border-radius: 0;
         background: var(--cl-paper-2);
       }
-      @media (min-width: 768px) {
+      @media (max-width: 767px) {
         #theme-circlelife .cl-article-cover {
           height: 200px;
-        }
-      }
-      @media (max-width: 640px) {
-        #theme-circlelife .cl-article-cover {
-          height: 150px;
         }
       }
       #theme-circlelife .cl-article-cover-img {
@@ -152,13 +147,40 @@ export const articleStyle = `
         object-position: center;
         display: block;
       }
+      /* 渐隐溶入：底部多级过渡到纸色 --cl-bg，与正文纸面无缝衔接（去卡片后的全屏形态） */
       #theme-circlelife .cl-article-cover-fade {
         position: absolute;
         left: 0;
         right: 0;
         bottom: 0;
-        height: 55%;
+        height: var(--cl-article-cover-fade-h);
         pointer-events: none;
+        background: linear-gradient(
+          180deg,
+          transparent 0%,
+          transparent 32%,
+          color-mix(in srgb, var(--cl-bg) 45%, transparent) 58%,
+          color-mix(in srgb, var(--cl-bg) 85%, transparent) 82%,
+          var(--cl-bg) 100%
+        );
+      }
+      /* 回退形态（CIRCLELIFE_ARTICLE_CARD=true）：旧卡片封面几何与 surface 渐隐 */
+      #theme-circlelife .cl-article--card .cl-article-cover {
+        border-radius: var(--cl-radius) var(--cl-radius) 0 0;
+        height: 180px;
+      }
+      @media (min-width: 768px) {
+        #theme-circlelife .cl-article--card .cl-article-cover {
+          height: 200px;
+        }
+      }
+      @media (max-width: 640px) {
+        #theme-circlelife .cl-article--card .cl-article-cover {
+          height: 150px;
+        }
+      }
+      #theme-circlelife .cl-article--card .cl-article-cover-fade {
+        height: 55%;
         background: linear-gradient(
           180deg,
           transparent 0%,
@@ -166,15 +188,82 @@ export const articleStyle = `
           var(--cl-surface) 100%
         );
       }
+
+      /* —— 全屏文章壳：宽容器 + TOC 细轨（≥1280px 双栏，与归档宽屏同构） —— */
+      #theme-circlelife .cl-article-shell {
+        width: 100%;
+        max-width: var(--cl-article-shell);
+        margin-inline: auto;
+        /* 全出血版面：gutter 兜底避让刘海/圆角安全区（横屏 notch） */
+        padding-left: max(var(--cl-article-pad), env(safe-area-inset-left, 0px));
+        padding-right: max(var(--cl-article-pad), env(safe-area-inset-right, 0px));
+      }
+      /* 无封面文章：壳顶让开悬浮胶囊导航带 */
+      #theme-circlelife .cl-article-shell--no-cover {
+        padding-top: calc(var(--cl-nav-band) + 1.25rem);
+      }
+      #theme-circlelife .cl-article-shell--toc {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+      }
+      #theme-circlelife .cl-article-rail {
+        display: none;
+      }
+      @media (min-width: 1280px) {
+        #theme-circlelife .cl-article-shell--toc {
+          grid-template-columns: var(--cl-article-rail) minmax(0, 1fr);
+          column-gap: var(--cl-article-gap);
+          align-items: start;
+        }
+        #theme-circlelife .cl-article-rail {
+          display: block;
+          position: sticky;
+          top: calc(var(--cl-nav-band) + 1.5rem);
+          align-self: start;
+          max-height: calc(100vh - var(--cl-nav-band) - 3rem);
+          overflow-y: auto;
+          overscroll-behavior: contain;
+          scrollbar-width: thin;
+          /* 与加高后的封面 + hero 标题对齐 */
+          padding-top: 3rem;
+        }
+      }
+      #theme-circlelife .cl-article-main {
+        min-width: 0;
+        /* 宽壳内正文列以舒适测量宽封顶，剩余纸面即杂志页的留白边际 */
+        max-width: var(--cl-prose-measure);
+      }
       #theme-circlelife .cl-article-inner {
         position: relative;
         z-index: 1;
+        padding: 1.5rem 0 0.5rem;
+      }
+      /* 回退形态：旧卡片内距 */
+      #theme-circlelife .cl-article--card .cl-article-inner {
+        padding: 1.5rem 1.25rem;
+      }
+      @media (min-width: 768px) {
+        #theme-circlelife .cl-article--card .cl-article-inner {
+          padding: 2.25rem 2rem;
+        }
       }
       #theme-circlelife .cl-article-card .cl-article-hero {
         margin-top: 0;
       }
 
-      /* —— Article —— */
+      /* 回顶按钮：全屏文章贴宽容器内容右缘（与归档 cl-is-archive 同款推导） */
+      @media (min-width: 768px) {
+        #theme-circlelife.cl-is-article .cl-backtop {
+          right: max(
+            calc(var(--cl-article-pad) + 0.5rem),
+            calc(
+              (100vw - var(--cl-article-shell)) / 2 + var(--cl-article-pad) + 0.5rem
+            )
+          );
+        }
+      }
+
+      /* —— Article：正文排版体系（纸感杂志 · 克制） —— */
       /* 目录/锚点跳转目标：跳转定位给吸顶栏留出空间 */
       #theme-circlelife .notion-h {
         scroll-margin-top: 5rem;
@@ -218,11 +307,14 @@ export const articleStyle = `
         line-height: 1.28;
         color: var(--cl-text);
         margin: 0 0 0.7rem;
+        text-wrap: balance;
       }
+
+      /* —— 正文容器：字号/行高/字族走 --cl-prose-* token —— */
       #theme-circlelife #article-wrapper.cl-prose-wrap {
         font-family: var(--cl-font-body);
-        font-size: 1.02rem;
-        line-height: 1.85;
+        font-size: var(--cl-prose-size);
+        line-height: var(--cl-prose-leading);
         color: var(--cl-text);
         contain: layout;
       }
@@ -240,6 +332,8 @@ export const articleStyle = `
         content-visibility: auto;
         contain-intrinsic-size: auto 60px;
       }
+
+      /* —— 标题阶梯：衬线 + 前置大留白 —— */
       #theme-circlelife #article-wrapper.cl-prose-wrap h1,
       #theme-circlelife #article-wrapper.cl-prose-wrap h2,
       #theme-circlelife #article-wrapper.cl-prose-wrap h3,
@@ -247,33 +341,178 @@ export const articleStyle = `
         font-family: var(--cl-font-display);
         font-weight: 600;
         letter-spacing: -0.01em;
-        margin-top: 1.6em;
+        line-height: 1.4;
+        color: var(--cl-text);
+        padding: 0;
+        text-wrap: balance;
       }
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-h1 {
+        font-size: var(--cl-prose-h1);
+        margin: var(--cl-prose-h1-gap) 0 0.8em;
+      }
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-h2 {
+        font-size: var(--cl-prose-h2);
+        margin: var(--cl-prose-h2-gap) 0 0.7em;
+      }
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-h3 {
+        font-size: var(--cl-prose-h3);
+        margin: var(--cl-prose-h3-gap) 0 0.6em;
+      }
+      /* 内容开头的标题不吃前置留白 */
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-h1:first-child,
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-h2:first-child,
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-h3:first-child {
+        margin-top: 0;
+      }
+
+      /* —— 段落节奏：首行缩进 2em + 段间 0.5em —— */
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-text {
+        padding: 0;
+        margin: 0 0 var(--cl-prose-gap);
+        text-indent: var(--cl-prose-indent);
+      }
+      /* 免缩进：仅限块内片段上下文（引用/callout/折叠/多列）；顶层正文段一律缩进 */
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-column-list .notion-text,
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-quote .notion-text,
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-callout .notion-text,
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-toggle .notion-text {
+        text-indent: 0;
+      }
+      /* 开关 CIRCLELIFE_PROSE_INDENT=false：回到纯段距模式 */
+      #theme-circlelife #article-wrapper.cl-prose-wrap.cl-indent-off .notion-text {
+        text-indent: 0;
+      }
+
+      /* —— 链接：朱砂细下划线 —— */
       #theme-circlelife #article-wrapper.cl-prose-wrap .notion-link {
         color: var(--cl-accent) !important;
+        opacity: 1;
         border-bottom: 1px solid color-mix(in srgb, var(--cl-accent) 30%, transparent);
         transition: border-color 0.15s var(--cl-ease);
       }
       #theme-circlelife #article-wrapper.cl-prose-wrap .notion-link:hover {
         border-bottom-color: var(--cl-accent);
       }
+
+      /* —— 引用块：衬线 + 3px 朱砂左线 —— */
       #theme-circlelife #article-wrapper.cl-prose-wrap .notion-quote {
-        border-left: 2px solid var(--cl-accent);
-        padding-left: 1rem;
-        margin: 1.25em 0;
-        color: var(--cl-muted);
+        border-left: 3px solid var(--cl-accent);
+        padding: 0.1em 0 0.1em 1rem;
+        margin: var(--cl-prose-block-gap) 0;
+        font-size: 1em;
         font-family: var(--cl-font-display);
+        color: var(--cl-text);
       }
-      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-code,
-      #theme-circlelife #article-wrapper.cl-prose-wrap code {
-        background: var(--cl-paper-2) !important;
-        border-radius: var(--cl-radius-sm);
-        border: 1px solid var(--cl-border);
-      }
+
+      /* —— callout：纸底轻框 —— */
       #theme-circlelife #article-wrapper.cl-prose-wrap .notion-callout {
         border: 1px solid var(--cl-border);
         background: color-mix(in srgb, var(--cl-paper-2) 45%, var(--cl-surface));
         border-radius: var(--cl-radius-sm);
+        padding: 0.85em 1em;
+        margin: var(--cl-prose-block-gap) 0;
+      }
+
+      /* —— 代码块：等宽 + 纸二底 —— */
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-code {
+        font-family: var(--cl-font-mono);
+        font-size: var(--cl-prose-code-size);
+        line-height: var(--cl-prose-code-leading);
+        background: var(--cl-paper-2) !important;
+        border: 1px solid var(--cl-border);
+        border-radius: var(--cl-radius-sm);
+        padding: 1em 1.1em;
+        margin: var(--cl-prose-block-gap) 0;
+      }
+      /* 代码块内层 code 不吃行内样式 */
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-code code {
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+        padding: 0;
+        font-size: inherit;
+        font-family: inherit;
+        color: inherit;
+      }
+      /* 行内代码 */
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-inline-code {
+        font-family: var(--cl-font-mono);
+        font-size: 0.88em;
+        color: var(--cl-text);
+        background: var(--cl-paper-2);
+        border: 1px solid var(--cl-border);
+        border-radius: var(--cl-radius-sm);
+        padding: 0.1em 0.35em;
+      }
+
+      /* —— 列表：行距收敛、标记弱化 —— */
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-list {
+        margin: 0 0 var(--cl-prose-gap);
+      }
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-list li {
+        padding: 0.3em 0;
+      }
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-list li::marker {
+        color: var(--cl-faint);
+      }
+
+      /* —— 图片：圆角 + 上下呼吸 + 图注居中 —— */
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-asset-wrapper {
+        margin: var(--cl-prose-media-gap) 0;
+      }
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-image {
+        border-radius: var(--cl-media-radius);
+      }
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-asset-caption {
+        font-size: var(--cl-prose-caption-size);
+        line-height: 1.6;
+        color: var(--cl-muted);
+        text-align: center;
+        padding: 0.6em 0 0;
+      }
+
+      /* —— 分割线：居中短线 + 大留白 —— */
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-hr {
+        border: 0;
+        padding: 0;
+        background: var(--cl-border-strong);
+        height: 1px;
+        width: 3rem;
+        margin: 2.4em auto;
+      }
+
+      /* —— 表格：细线克制 —— */
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-simple-table {
+        border: 1px solid var(--cl-border);
+        border-collapse: collapse;
+        font-size: 0.95em;
+        margin: var(--cl-prose-block-gap) 0;
+      }
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-simple-table td,
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-simple-table th {
+        border: 1px solid var(--cl-border);
+        padding: 0.5em 0.75em;
+      }
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-simple-table-header-cell,
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-simple-table-header-row td {
+        background: color-mix(in srgb, var(--cl-paper-2) 55%, var(--cl-surface));
+        font-weight: 600;
+      }
+
+      /* —— 书签卡片 / 折叠块：轻描边 —— */
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-bookmark {
+        border: 1px solid var(--cl-border);
+        border-radius: var(--cl-radius-sm);
+        background: var(--cl-surface);
+        padding: 0.9em 1em;
+        margin: var(--cl-prose-block-gap) 0;
+      }
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-toggle {
+        padding: 0.3em 0;
+        margin: 0 0 var(--cl-prose-gap);
+      }
+      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-toggle > summary {
+        cursor: pointer;
       }
       /* article back */
       #theme-circlelife .cl-article-back {
@@ -298,29 +537,36 @@ export const articleStyle = `
         padding-top: 0.85rem;
         border-top: 1px solid var(--cl-border);
       }
-      /* mobile TOC fab + drawer */
+      /* mobile/tablet TOC fab + drawer */
       #theme-circlelife .cl-toc-fab {
         display: none;
+        position: fixed;
+        right: max(1rem, env(safe-area-inset-right, 0px));
+        bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
+        z-index: 35;
+        align-items: center;
+        justify-content: center;
+        min-height: 2.6rem;
+        padding: 0.45rem 0.95rem;
+        border-radius: 9999px;
+        border: 1px solid var(--cl-border-strong);
+        background: var(--cl-surface);
+        color: var(--cl-text);
+        font-size: 0.82rem;
+        font-weight: 600;
+        box-shadow: 0 6px 20px color-mix(in srgb, var(--cl-text) 12%, transparent);
+        cursor: pointer;
       }
+      /* 回退卡片形态：仅手机显示 fab（桌面侧栏已有目录） */
       @media (max-width: 767px) {
         #theme-circlelife .cl-toc-fab {
           display: inline-flex;
-          position: fixed;
-          right: max(1rem, env(safe-area-inset-right, 0px));
-          bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
-          z-index: 35;
-          align-items: center;
-          justify-content: center;
-          min-height: 2.6rem;
-          padding: 0.45rem 0.95rem;
-          border-radius: 9999px;
-          border: 1px solid var(--cl-border-strong);
-          background: var(--cl-surface);
-          color: var(--cl-text);
-          font-size: 0.82rem;
-          font-weight: 600;
-          box-shadow: 0 6px 20px color-mix(in srgb, var(--cl-text) 12%, transparent);
-          cursor: pointer;
+        }
+      }
+      /* 全屏形态：平板档 768–1279 也显示 fab（细轨仅 ≥1280） */
+      @media (min-width: 768px) and (max-width: 1279px) {
+        #theme-circlelife:not(.cl-article-card-mode) .cl-toc-fab {
+          display: inline-flex;
         }
       }
       .cl-toc-drawer-root {

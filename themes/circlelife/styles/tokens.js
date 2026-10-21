@@ -43,6 +43,30 @@ export const tokenStyle = `
         --cl-wide-max: 112.5rem;
         --cl-wide-pad: clamp(1rem, 3vw, 3rem);
         --cl-wide-gap: clamp(2rem, 3.5vw, 4rem);
+        /* —— 文章正文排版 token（--cl-prose-*）：正文节奏的唯一真源 —— */
+        --cl-prose-size: 1.06rem; /* 正文字号（约 17px；行宽由 --cl-prose-measure 控制） */
+        --cl-prose-leading: 1.85; /* 正文行高 */
+        --cl-prose-indent: 2em; /* 首行缩进 */
+        --cl-prose-gap: 0.5em; /* 段间距（与缩进叠加的呼吸量） */
+        --cl-prose-h1: 1.6rem; /* 文内 H1/H2/H3 衬线阶梯 */
+        --cl-prose-h2: 1.28rem;
+        --cl-prose-h3: 1.1rem;
+        --cl-prose-h1-gap: 2.6em; /* 标题前置大留白（章节呼吸） */
+        --cl-prose-h2-gap: 2.4em;
+        --cl-prose-h3-gap: 2em;
+        --cl-prose-block-gap: 1.5em; /* 引用/callout/代码/分割线上下距 */
+        --cl-prose-media-gap: 1.6em; /* 图片上下距 */
+        --cl-prose-caption-size: 0.8rem; /* 图注字号 */
+        --cl-prose-code-size: 0.85em; /* 代码块字号 */
+        --cl-prose-code-leading: 1.7; /* 代码块行高 */
+        --cl-prose-measure: 60rem; /* 正文列测量宽（宽屏阅读，约 56 个中文字符/行） */
+        /* —— 全屏文章壳 token（--cl-article-*）：与影集/归档同构的宽页面 —— */
+        --cl-article-shell: 88rem; /* 宽容器：轨 15rem + 距 3rem + 正文列（测量宽封顶） */
+        --cl-article-rail: 15rem; /* TOC 细轨宽 */
+        --cl-article-gap: 3rem; /* 轨-正文列间距 */
+        --cl-article-pad: clamp(1rem, 3vw, 2.5rem); /* 宽容器左右 gutter */
+        --cl-article-cover-h: clamp(280px, 42vh, 480px); /* 全出血封面高 */
+        --cl-article-cover-fade-h: 65%; /* 封面底部渐隐溶入纸面的区域占比 */
       }
 
       /* ≤1023px：胶囊内嵌 2.35rem 汉堡按钮，导航带随之变高。

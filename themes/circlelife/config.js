@@ -21,6 +21,15 @@ const CONFIG = {
   CIRCLELIFE_HOME_RECENT_COUNT: 5,
   CIRCLELIFE_ARTICLE_COVER: true,
 
+  /**
+   * 文章页形态：false=全屏纸面（默认，与影集/归档同构，封面全出血 + 宽容器 + TOC 细轨）
+   * true=旧卡片窄栏形态（LayoutBase 侧栏目录），供回退对比
+   */
+  CIRCLELIFE_ARTICLE_CARD: false,
+
+  /** 文章正文：首行缩进 2em（false 时回到纯段距模式，段间 0.5em 仍保留） */
+  CIRCLELIFE_PROSE_INDENT: true,
+
   CIRCLELIFE_SIDEBAR_ONLY_ON_POST: true,
 
   CIRCLELIFE_POST_LIST_COVER: false,

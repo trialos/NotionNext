@@ -19,6 +19,9 @@ export const IMAGE_TIERS = {
   desktop: 1024
 }
 
+/** 默认候选档（既有调用不变）；全出血封面等大图场景可传 widths: [1024, 2048] */
+const DEFAULT_WIDTHS = [IMAGE_TIERS.mobile, IMAGE_TIERS.desktop]
+
 /**
  * 照片墙栏宽 clamp(220px, 20vw, 360px)，再叠加画布 scale(1.06~1.42)。
  * 桌面 360 × 1.42 ≈ 512 CSS px → DPR1/DPR2 都落到 1024 档；
@@ -59,12 +62,17 @@ function withWidth(url, width) {
 /**
  * 生成单个图片的取图候选
  * @param {string} url 原始地址
- * @param {{ sizes?: string }} [options]
+ * @param {{ sizes?: string, widths?: number[] }} [options]
+ *   widths 自定义候选档（至少两档，末档作为 src）；默认 [512, 1024] 保持既有行为
  * @returns {{ src: string, srcSet: string, sizes: string }}
  *  非反代地址时 srcSet 为空字符串，调用方应退化为纯 src
  */
 export function buildImageSources(url, options = {}) {
   const sizes = options.sizes || DEFAULT_SIZES
+  const widths =
+    Array.isArray(options.widths) && options.widths.length >= 2
+      ? options.widths
+      : DEFAULT_WIDTHS
 
   if (typeof url !== 'string' || !url) {
     return { src: '', srcSet: '', sizes: '' }
@@ -74,12 +82,14 @@ export function buildImageSources(url, options = {}) {
     return { src: url, srcSet: '', sizes: '' }
   }
 
-  const mobile = withWidth(url, IMAGE_TIERS.mobile)
-  const desktop = withWidth(url, IMAGE_TIERS.desktop)
+  const candidates = widths.map(width => ({
+    url: withWidth(url, width),
+    width
+  }))
 
   return {
-    src: desktop,
-    srcSet: `${mobile} ${IMAGE_TIERS.mobile}w, ${desktop} ${IMAGE_TIERS.desktop}w`,
+    src: candidates[candidates.length - 1].url,
+    srcSet: candidates.map(c => `${c.url} ${c.width}w`).join(', '),
     sizes
   }
 }

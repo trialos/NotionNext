@@ -329,8 +329,6 @@ export const Header = props => {
 
   return (
     <>
-      {showProgress ? <ReadingProgress /> : null}
-
       {/* 固定悬浮母层 (脱离文档流，严格水平居中) */}
       <aside className='cl-floating-header' aria-label='悬浮顶栏'>
         {/* 正中悬浮胶囊 */}
@@ -422,6 +420,9 @@ export const Header = props => {
             aria-expanded={drawerOpen}>
             <i className='fas fa-bars cl-pill-menu-icon' aria-hidden='true' />
           </button>
+
+          {/* 阅读进度：嵌入胶囊底边，作为胶囊的基座线（朱砂自左向右填充） */}
+          {showProgress ? <ReadingProgress /> : null}
         </nav>
       </aside>
 

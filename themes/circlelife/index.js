@@ -8,13 +8,13 @@
  */
 
 import replaceSearchResult from '@/components/Mark'
-import LazyImage from '@/components/LazyImage'
 import NotionIcon from '@/components/NotionIcon'
 import NotionPage from '@/components/NotionPage'
 import ShareBar from '@/components/ShareBar'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { isBrowser } from '@/lib/utils'
+import { compressImage } from '@/lib/db/notion/mapImage'
 import { Transition } from '@headlessui/react'
 import SmartLink from '@/components/SmartLink'
 import dynamic from 'next/dynamic'
@@ -36,6 +36,7 @@ import LayoutAbout from './components/LayoutAbout'
 import { AlbumUIProvider } from './components/albumContext'
 import ArticleBack from './components/ArticleBack'
 import BackToTop from './components/BackToTop'
+import Catalog from './components/Catalog'
 import { Footer } from './components/Footer'
 import { Header } from './components/Header'
 import HomeTiltWall from './components/HomeTiltWall'
@@ -49,6 +50,7 @@ import { SideBar } from './components/SideBar'
 import PageMast from './components/PageMast'
 import TlPageHero from './components/TlPageHero'
 import CONFIG from './config'
+import { buildImageSources } from './components/imageSrcset'
 import { Style } from './style'
 
 const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
@@ -99,8 +101,17 @@ const LayoutBase = props => {
     true,
     CONFIG
   )
+  // 文章页全屏化（默认）：与影集/归档/关于同构的 wide 外壳，封面全出血、宽容器内自立双栏
+  // CIRCLELIFE_ARTICLE_CARD=true 时回退旧卡片窄栏形态（含 LayoutBase 侧栏目录）
+  const ARTICLE_CARD = siteConfig('CIRCLELIFE_ARTICLE_CARD', false, CONFIG)
+  const isArticlePage = Boolean(post) && !isAlbumPage && !isAboutPage
   const wide =
-    fullWidth || isAlbumPage || isAboutPage || isHomePage || isArchivePage
+    fullWidth ||
+    isAlbumPage ||
+    isAboutPage ||
+    isHomePage ||
+    isArchivePage ||
+    (isArticlePage && !ARTICLE_CARD)
   // 与 SideBar 的渲染条件对齐：无目录的页面不预留侧栏槽，避免内容被空槽挤偏
   const hasDesktopToc = Boolean(post?.toc && post.toc.length > 2)
   const showSidebar =
@@ -138,7 +149,7 @@ const LayoutBase = props => {
     </Head>
     <div
       id='theme-circlelife'
-      className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth${isAlbumPage ? ' cl-is-album' : ''}${isAboutPage ? ' cl-is-about' : ''}${isHomePage ? ' cl-is-home' : ''}${isArchivePage ? ' cl-is-archive' : ''}${showSidebar ? ' cl-has-sidebar' : ''}`}>
+      className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth${isAlbumPage ? ' cl-is-album' : ''}${isAboutPage ? ' cl-is-about' : ''}${isHomePage ? ' cl-is-home' : ''}${isArchivePage ? ' cl-is-archive' : ''}${isArticlePage && !ARTICLE_CARD ? ' cl-is-article' : ''}${isArticlePage && ARTICLE_CARD ? ' cl-article-card-mode' : ''}${showSidebar ? ' cl-has-sidebar' : ''}`}>
       <Style />
 
       {/* 跳过链接：键盘用户按一次 Tab 即可直达正文，视觉上常态隐藏 */}
@@ -152,7 +163,7 @@ const LayoutBase = props => {
         <div
           id='container-wrapper'
           className={`relative mx-auto flex justify-center ${
-            isAlbumPage || isAboutPage || isHomePage || isArchivePage
+            isAlbumPage || isAboutPage || isHomePage || isArchivePage || (isArticlePage && !ARTICLE_CARD)
               ? 'max-w-none w-full flex-col items-stretch px-0 py-0'
               : `px-4 py-8 md:px-6 ${LAYOUT_SIDEBAR_REVERSE ? 'md:flex-row-reverse' : ''} ${
                   LAYOUT_VERTICAL
@@ -343,59 +354,127 @@ const LayoutSlug = props => {
         <PostLock validPassword={validPassword} />
       ) : (
         post && (
-          <article className='cl-card cl-article-card overflow-hidden'>
-            {siteConfig('CIRCLELIFE_ARTICLE_COVER', true, CONFIG) &&
-            (post.pageCoverThumbnail || post.pageCover) ? (
+          (() => {
+            const ARTICLE_CARD = siteConfig(
+              'CIRCLELIFE_ARTICLE_CARD',
+              false,
+              CONFIG
+            )
+            const PROSE_INDENT = siteConfig(
+              'CIRCLELIFE_PROSE_INDENT',
+              true,
+              CONFIG
+            )
+            const hasCover =
+              siteConfig('CIRCLELIFE_ARTICLE_COVER', true, CONFIG) &&
+              (post.pageCoverThumbnail || post.pageCover)
+            const hasToc = Boolean(post.toc && post.toc.length > 2)
+
+            // 封面取图：优先 Notion 原图代理地址，归一到 2048 档保全出血清晰度
+            // （LazyImage 会把 width 改写封顶 1080 且不透传 srcSet，故封面直出 img）
+            const coverSrc = post.pageCover
+              ? compressImage(post.pageCover, 1600)
+              : post.pageCoverThumbnail
+            const coverSources = buildImageSources(coverSrc, {
+              sizes: ARTICLE_CARD
+                ? '(max-width: 767px) 100vw, 48rem'
+                : '100vw',
+              widths: [1024, 2048]
+            })
+
+            const cover = hasCover ? (
               <div className='cl-article-cover'>
-                <LazyImage
-                  src={post.pageCoverThumbnail || post.pageCover}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={coverSources.src}
+                  srcSet={coverSources.srcSet || undefined}
+                  sizes={coverSources.sizes || undefined}
                   alt=''
-                  priority
                   className='cl-article-cover-img'
+                  fetchPriority='high'
+                  decoding='async'
                 />
                 <div className='cl-article-cover-fade' aria-hidden='true' />
               </div>
-            ) : null}
-            <div className='cl-article-inner px-5 py-6 md:px-8 md:py-9'>
-            <ArticleBack className='cl-article-back--top' postId={post?.id} />
-            {isPage ? (
-              <PageMast
-                title={post.title}
-                description={post.summary || undefined}
-                className='cl-page-mast--article'
-              />
-            ) : (
-              <header className='cl-article-hero'>
-                <h1 className='cl-article-title'>
-                  {siteConfig('POST_TITLE_ICON') && (
-                    <NotionIcon icon={post.pageIcon} />
+            ) : null
+
+            const body = (
+              <>
+                <ArticleBack className='cl-article-back--top' postId={post?.id} />
+                {isPage ? (
+                  <PageMast
+                    title={post.title}
+                    description={post.summary || undefined}
+                    className='cl-page-mast--article'
+                  />
+                ) : (
+                  <header className='cl-article-hero'>
+                    <h1 className='cl-article-title'>
+                      {siteConfig('POST_TITLE_ICON') && (
+                        <NotionIcon icon={post.pageIcon} />
+                      )}
+                      {post.title}
+                    </h1>
+                    <PostMeta post={post} />
+                  </header>
+                )}
+                <div
+                  id='article-wrapper'
+                  className={`cl-prose-wrap${
+                    PROSE_INDENT ? '' : ' cl-indent-off'
+                  }`}>
+                  <NotionPage post={post} />
+                  {siteConfig('CIRCLELIFE_SHOW_SHARE', false, CONFIG) ? (
+                    <ShareBar post={post} />
+                  ) : null}
+                </div>
+                <div className='cl-article-back-row'>
+                  <ArticleBack className='cl-article-back--bottom' postId={post?.id} />
+                </div>
+                {siteConfig('CIRCLELIFE_SHOW_COMMENT', false, CONFIG) ? (
+                  <section
+                    className='mt-8 border-t border-[var(--cl-border)] pt-6'
+                    aria-label={locale?.COMMON?.COMMENTS || 'Comments'}>
+                    <h2 className='cl-kicker mb-4 !text-[var(--cl-muted)]'>
+                      {locale?.COMMON?.COMMENTS || '评论'}
+                    </h2>
+                    <Comment frontMatter={post} />
+                  </section>
+                ) : null}
+              </>
+            )
+
+            /* 回退形态：旧卡片窄栏（含 LayoutBase 侧栏目录） */
+            if (ARTICLE_CARD) {
+              return (
+                <article className='cl-card cl-article-card cl-article--card overflow-hidden'>
+                  {cover}
+                  <div className='cl-article-inner'>{body}</div>
+                </article>
+              )
+            }
+
+            /* 全屏形态：全出血封面 + 宽容器双栏壳（TOC 细轨 + 正文列） */
+            return (
+              <article className='cl-article-page'>
+                {cover}
+                <div
+                  className={`cl-article-shell${
+                    hasToc ? ' cl-article-shell--toc' : ''
+                  }${hasCover ? '' : ' cl-article-shell--no-cover'}`}>
+                  {hasToc && (
+                    <div className='cl-article-rail'>
+                      <h2 className='cl-sidebar-title'>目录</h2>
+                      <Catalog toc={post.toc} />
+                    </div>
                   )}
-                  {post.title}
-                </h1>
-                <PostMeta post={post} />
-              </header>
-            )}
-            <div id='article-wrapper' className='cl-prose-wrap'>
-              <NotionPage post={post} />
-              {siteConfig('CIRCLELIFE_SHOW_SHARE', false, CONFIG) ? (
-                <ShareBar post={post} />
-              ) : null}
-            </div>
-            <div className='cl-article-back-row'>
-              <ArticleBack className='cl-article-back--bottom' postId={post?.id} />
-            </div>
-            {siteConfig('CIRCLELIFE_SHOW_COMMENT', false, CONFIG) ? (
-              <section
-                className='mt-8 border-t border-[var(--cl-border)] pt-6'
-                aria-label={locale?.COMMON?.COMMENTS || 'Comments'}>
-                <h2 className='cl-kicker mb-4 !text-[var(--cl-muted)]'>
-                  {locale?.COMMON?.COMMENTS || '评论'}
-                </h2>
-                <Comment frontMatter={post} />
-              </section>
-            ) : null}
-            </div>
-          </article>
+                  <div className='cl-article-main'>
+                    <div className='cl-article-inner'>{body}</div>
+                  </div>
+                </div>
+              </article>
+            )
+          })()
         )
       )}
       {post?.toc && post.toc.length > 2 ? <MobileToc toc={post.toc} /> : null}
