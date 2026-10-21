@@ -1,4 +1,5 @@
 import BLOG from '@/blog.config'
+import Head from 'next/head'
 import useNotification from '@/components/Notification'
 import TechGrow from '@/components/TechGrow'
 import { siteConfig } from '@/lib/config'
@@ -32,8 +33,23 @@ const Slug = props => {
     return valid
   }
   const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
+  const coverLcp = props.coverLcp
   return (
     <>
+      {/* 头图 LCP 预加载：必须同时给出 imagesrcset / imagesizes，
+          否则浏览器按 sizes 选中 1024 档、却已预加载 2048 档，会白下载两份 */}
+      {coverLcp?.src ? (
+        <Head>
+          <link
+            rel='preload'
+            as='image'
+            href={coverLcp.src}
+            imageSrcSet={coverLcp.srcSet || undefined}
+            imageSizes={coverLcp.sizes || undefined}
+            fetchPriority='high'
+          />
+        </Head>
+      ) : null}
       {access.unlockError && <p role='alert' className='p-4 text-center text-red-600'>{access.unlockError}</p>}
       {props.postUnlockUnavailable
         ? <ArticleLock unavailable post={props.post} />
