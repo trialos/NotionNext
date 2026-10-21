@@ -619,11 +619,6 @@ export const albumStyle = `
     display: none;
   }
 
-  /* 桌面端隐藏移动端专属刊头 */
-  .cl-shelf-mobile-head {
-    display: none;
-  }
-
   /* —— 移动端/平板先锋艺术展架排版 (对齐全局 1024 导航断点：吸顶定点中轴 HUD + 滚轮流转) —— */
   @media (max-width: 1023px) {
     .cl-shelf-stack-container {

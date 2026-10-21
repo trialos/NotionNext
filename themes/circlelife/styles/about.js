@@ -173,12 +173,6 @@ export const aboutStyle = `
     }
   }
 
-  /* 悬停智能提层 (Hover Lift)：兼容类名 */
-  .cl-about-item.is-hovered {
-    z-index: 9999 !important;
-    transform: translateY(-4px) scale(1.02);
-  }
-
   .cl-about-item .item-wrapper {
     background: transparent !important;
   }
@@ -194,17 +188,9 @@ export const aboutStyle = `
     transition: box-shadow 0.35s ease;
   }
 
-  .cl-about-item.is-hovered .item-image {
-    box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.32);
-  }
-
   .dark .cl-about-item .item-image {
     background-color: rgba(255, 255, 255, 0.06) !important;
     box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.45);
-  }
-
-  .dark .cl-about-item.is-hovered .item-image {
-    box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.8);
   }
 
   .cl-about-item .item-image img {

@@ -35,20 +35,19 @@ export function ArcMark({ size = 28, className = '' }) {
  */
 export function BrandLockup({
   compact = false,
-  collapsed = false,
   layout = 'stack',
   href = '/',
   className = '',
   hideEn = false
 }) {
   const isRow = layout === 'row'
-  const mark = isRow ? (compact ? 22 : 26) : collapsed ? 22 : compact ? 26 : 32
+  const mark = isRow ? (compact ? 22 : 26) : compact ? 26 : 32
 
   const inner = (
     <span
       className={`cl-lockup inline-flex items-center ${
         isRow ? 'cl-lockup--row gap-2' : 'gap-2.5'
-      } ${collapsed && !isRow ? 'cl-lockup--collapsed' : 'cl-lockup--expanded'} ${className}`}>
+      } ${className}`}>
       <ArcMark size={mark} className='cl-lockup-mark' />
       {isRow ? (
         <span className='cl-lockup-row-text inline-flex items-center gap-2.5 min-w-0'>

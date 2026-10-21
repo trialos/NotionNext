@@ -73,9 +73,6 @@ export const commonStyle = `
       #theme-circlelife .cl-meta a:hover {
         color: var(--cl-accent);
       }
-      #theme-circlelife .cl-meta-muted {
-        color: var(--cl-faint);
-      }
       #theme-circlelife .cl-dot {
         margin: 0 0.35rem;
         color: var(--cl-faint);
@@ -184,35 +181,6 @@ export const commonStyle = `
         min-height: 1.75rem;
       }
 
-      #theme-circlelife .cl-page-hero {
-        margin-bottom: 1.5rem;
-        padding-bottom: 0.9rem;
-        border-bottom: 1px solid var(--cl-border);
-      }
-      #theme-circlelife .cl-page-hero h1 {
-        font-family: var(--cl-font-display);
-        font-size: 1.45rem;
-        font-weight: 600;
-        letter-spacing: -0.02em;
-        margin: 0;
-      }
-
-      #theme-circlelife .cl-archive-item {
-        position: relative;
-      }
-      #theme-circlelife .cl-archive-item::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0.7em;
-        width: 5px;
-        height: 5px;
-        margin-left: -3px;
-        border-radius: 9999px;
-        background: var(--cl-accent);
-        opacity: 0.55;
-      }
-
       /* 档案页脚式翻页：hairline 细线 + mono 三段式（与文章页「← 返回」同语言） */
       #theme-circlelife .cl-pager-bar {
         display: flex;
@@ -282,21 +250,6 @@ export const commonStyle = `
         input[type='search']::-webkit-search-cancel-button {
         -webkit-appearance: none;
         appearance: none;
-      }
-      /* 归档月份锚点：跳转时给吸顶栏留出空间 */
-      #theme-circlelife .cl-archive-section {
-        scroll-margin-top: 5rem;
-      }
-      /* media hooks reserved */
-      #theme-circlelife .cl-media-grid {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 0.75rem;
-      }
-      @media (max-width: 640px) {
-        #theme-circlelife .cl-media-grid {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
       }
       #theme-circlelife .cl-media-card {
         display: block;

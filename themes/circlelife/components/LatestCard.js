@@ -16,20 +16,18 @@ function coverOf(post) {
  * 首页报头：叠层抽牌
  * outgoing 克隆飞出卸载；current 原位替换；under 仅 peek 不参与抬起动画
  */
-export default function LatestCard({ post, posts }) {
+export default function LatestCard({ posts }) {
   const enabled = siteConfig('CIRCLELIFE_HOME_LATEST_CARD', true, CONFIG)
   const max = Number(siteConfig('CIRCLELIFE_HERO_COUNT', 5, CONFIG)) || 5
   const autoMs = Number(siteConfig('CIRCLELIFE_HERO_AUTO_MS', 6000, CONFIG)) || 0
   const useCover = siteConfig('CIRCLELIFE_HERO_COVER', true, CONFIG)
 
   const slides = useMemo(() => {
-    const list = (
-      Array.isArray(posts) && posts.length ? posts : post ? [post] : []
-    )
+    const list = (Array.isArray(posts) ? posts : [])
       .filter(p => p?.href && p?.title)
       .slice(0, Math.max(1, max))
     return list
-  }, [posts, post, max])
+  }, [posts, max])
 
   const [index, setIndex] = useState(0)
   const [outgoing, setOutgoing] = useState(null) // { slide, dir: 1|-1 }

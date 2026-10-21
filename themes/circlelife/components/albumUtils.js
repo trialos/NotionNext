@@ -27,14 +27,6 @@ export function photoAlbumTag(p) {
   return ''
 }
 
-/** @deprecated use photoAlbumTag */
-export function photoAlbumName(p) {
-  return (
-    photoAlbumTag(p) ||
-    siteConfig('CIRCLELIFE_ALBUM_DEFAULT_NAME', '未分辑', CONFIG)
-  )
-}
-
 /** caption 与 title/summary 相同时不展示 */
 export function uniqueCaption(caption, title, summary) {
   const c = (caption || '').trim()

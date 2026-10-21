@@ -104,7 +104,7 @@ export const headerStyle = `
         }
       }
 
-      /* PC 桌面端 4 个主导航项：首页、随笔、相册、关于 */
+      /* 桌面端主导航项由 Notion 菜单派生 */
       .cl-floating-pill-nav {
         display: none;
         align-items: center;

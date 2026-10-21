@@ -320,12 +320,7 @@ export const Header = props => {
 
           {/* 核心大号艺术字体主导航（完整接入 MenuList，支持所有自定义菜单及二级子菜单展开） */}
           <div className='cl-fullscreen-nav-body'>
-            <MenuList
-              {...props}
-              variant='drawer'
-              wing='drawer'
-              onNavigate={closeDrawer}
-            />
+            <MenuList {...props} onNavigate={closeDrawer} />
           </div>
         </div>
       </div>,

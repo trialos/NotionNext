@@ -20,8 +20,14 @@ import SmartLink from '@/components/SmartLink'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import ArchiveIndex from './components/ArchiveIndex'
 import BlogListArchive from './components/BlogListArchive'
+import {
+  ARCHIVE_ALL,
+  buildArchiveFacets,
+  filterArchivePosts
+} from './components/archiveFilter'
 import { BlogListPage } from './components/BlogListPage'
 import { BlogListScroll } from './components/BlogListScroll'
 import AlbumStage from './components/AlbumStage'
@@ -40,7 +46,6 @@ import { PostLock } from './components/PostLock'
 import { PostMeta } from './components/PostMeta'
 import SearchInput from './components/SearchInput'
 import { SideBar } from './components/SideBar'
-import TitleBar from './components/TitleBar'
 import PageMast from './components/PageMast'
 import TlPageHero from './components/TlPageHero'
 import CONFIG from './config'
@@ -51,7 +56,7 @@ const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
 /**
  * 基础布局框架
  * 1.其它页面都嵌入在LayoutBase中
- * 2.采用左右两侧布局，移动端使用顶部导航栏
+ * 2.文章页可带侧栏；列表页与归档等大屏模块按各自布局展开
  * @returns {JSX.Element}
  * @constructor
  */
@@ -75,6 +80,15 @@ const LayoutBase = props => {
         router.asPath.split('?')[0].replace(/\/$/, '') === '')) &&
     !router?.query?.s
 
+  const archivePath =
+    (typeof router?.asPath === 'string'
+      ? router.asPath.split('?')[0].replace(/\/$/, '')
+      : '') || ''
+  const isArchivePage =
+    router?.pathname === '/archive' ||
+    archivePath === '/archive' ||
+    /^\/[a-z]{2}(?:-[A-Z]{2})?\/archive$/.test(archivePath)
+
   const LAYOUT_VERTICAL =
     post && siteConfig('CIRCLELIFE_ARTICLE_LAYOUT_VERTICAL', false, CONFIG)
 
@@ -85,7 +99,8 @@ const LayoutBase = props => {
     true,
     CONFIG
   )
-  const wide = fullWidth || isAlbumPage || isAboutPage || isHomePage
+  const wide =
+    fullWidth || isAlbumPage || isAboutPage || isHomePage || isArchivePage
   // 与 SideBar 的渲染条件对齐：无目录的页面不预留侧栏槽，避免内容被空槽挤偏
   const hasDesktopToc = Boolean(post?.toc && post.toc.length > 2)
   const showSidebar =
@@ -123,7 +138,7 @@ const LayoutBase = props => {
     </Head>
     <div
       id='theme-circlelife'
-      className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth${isAlbumPage ? ' cl-is-album' : ''}${isAboutPage ? ' cl-is-about' : ''}${isHomePage ? ' cl-is-home' : ''}${showSidebar ? ' cl-has-sidebar' : ''}`}>
+      className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth${isAlbumPage ? ' cl-is-album' : ''}${isAboutPage ? ' cl-is-about' : ''}${isHomePage ? ' cl-is-home' : ''}${isArchivePage ? ' cl-is-archive' : ''}${showSidebar ? ' cl-has-sidebar' : ''}`}>
       <Style />
 
       {/* 跳过链接：键盘用户按一次 Tab 即可直达正文，视觉上常态隐藏 */}
@@ -132,13 +147,12 @@ const LayoutBase = props => {
       </a>
 
       <Header {...props} />
-      <TitleBar {...props} />
 
       <div id='container-inner' className='relative z-10 w-full flex-1'>
         <div
           id='container-wrapper'
           className={`relative mx-auto flex justify-center ${
-            isAlbumPage || isAboutPage || isHomePage
+            isAlbumPage || isAboutPage || isHomePage || isArchivePage
               ? 'max-w-none w-full flex-col items-stretch px-0 py-0'
               : `px-4 py-8 md:px-6 ${LAYOUT_SIDEBAR_REVERSE ? 'md:flex-row-reverse' : ''} ${
                   LAYOUT_VERTICAL
@@ -276,7 +290,7 @@ const LayoutPostList = props => {
       <div className={useTimeline ? 'cl-home-content-container max-w-4xl mx-auto w-full px-4 md:px-6 py-12' : ''}>
         {useTimeline &&
           siteConfig('CIRCLELIFE_HOME_LATEST_CARD', true, CONFIG) && (
-            <LatestCard posts={heroPosts} post={heroPosts[0]} />
+            <LatestCard posts={heroPosts} />
           )}
 
         {siteConfig('POST_LIST_STYLE') === 'page' ? (
@@ -500,26 +514,134 @@ const LayoutSearch = props => {
  */
 const LayoutArchive = props => {
   const { archivePosts } = props
-  const { locale } = useGlobal()
-  const keys = Object.keys(archivePosts || {}).sort((a, b) =>
-    String(b).localeCompare(String(a), undefined, {
-      sensitivity: 'base',
-      numeric: true
-    })
+  const [activeCategoryKey, setActiveCategoryKey] = useState(ARCHIVE_ALL)
+  const [activeTagKey, setActiveTagKey] = useState(ARCHIVE_ALL)
+  const [tagIndexCollapsed, setTagIndexCollapsed] = useState(false)
+
+  const facets = useMemo(
+    () => buildArchiveFacets(archivePosts),
+    [archivePosts]
   )
+  const filteredArchivePosts = useMemo(
+    () => filterArchivePosts(archivePosts, activeCategoryKey, activeTagKey),
+    [archivePosts, activeCategoryKey, activeTagKey]
+  )
+  const keys = useMemo(
+    () =>
+      Object.keys(filteredArchivePosts).sort((a, b) =>
+        String(b).localeCompare(String(a), undefined, {
+          sensitivity: 'base',
+          numeric: true
+        })
+      ),
+    [filteredArchivePosts]
+  )
+  const filteredCount = useMemo(
+    () =>
+      Object.values(filteredArchivePosts).reduce(
+        (total, posts) => total + posts.length,
+        0
+      ),
+    [filteredArchivePosts]
+  )
+  const archiveMonths = useMemo(
+    () => Object.keys(archivePosts || {}).sort(),
+    [archivePosts]
+  )
+  const archiveRange =
+    archiveMonths.length > 1
+      ? `${archiveMonths[0]} — ${archiveMonths[archiveMonths.length - 1]}`
+      : archiveMonths[0] || ''
+
+  const activeCategory = facets.categories.find(
+    category => category.key === activeCategoryKey
+  )
+  const activeCategoryName =
+    activeCategoryKey === ARCHIVE_ALL
+      ? ''
+      : activeCategory?.name || '未分类'
+  const activeScope =
+    facets.scopes.get(activeCategoryKey) || facets.scopes.get(ARCHIVE_ALL)
+  const activeTagName =
+    activeTagKey === ARCHIVE_ALL
+      ? ''
+      : activeScope?.tags.find(tag => tag.key === activeTagKey)?.name || ''
+
+  const handleCategoryChange = key => {
+    setActiveCategoryKey(key)
+    setActiveTagKey(ARCHIVE_ALL)
+    setTagIndexCollapsed(false)
+  }
+
+  const handleTagChange = key => {
+    setActiveTagKey(key)
+    setTagIndexCollapsed(key !== ARCHIVE_ALL)
+  }
+
+  const hasPosts = facets.totalCount > 0
+  const statusLabel =
+    activeCategoryKey === ARCHIVE_ALL ? '全站归档文章' : activeCategoryName
+  const stage = (
+    <div className='cl-archive-stage w-full pb-16'>
+      {hasPosts && (
+        <div
+          className='cl-archive-stage__head'
+          role='status'
+          aria-live='polite'
+          aria-atomic='true'>
+          <span className='cl-archive-stage__label'>
+            当前筛选：
+            <strong>
+              {statusLabel}
+              {activeTagName ? ` / #${activeTagName}` : ''}
+            </strong>
+          </span>
+          <span className='cl-archive-stage__count'>
+            共 {filteredCount} 篇
+          </span>
+        </div>
+      )}
+      {keys.map(archiveTitle => (
+        <BlogListArchive
+          key={archiveTitle}
+          archiveTitle={archiveTitle}
+          archivePosts={filteredArchivePosts}
+          activeTagName={activeTagName}
+        />
+      ))}
+      {keys.length === 0 && (
+        <p className='cl-archive-empty' role='status'>
+          {hasPosts ? '没有符合筛选条件的文章' : '暂无归档文章'}
+        </p>
+      )}
+    </div>
+  )
+
   return (
-    <>
-      <TlPageHero eyebrow='时间线' title={locale?.NAV?.ARCHIVE || '时间线'} />
-      <div className='w-full pb-16'>
-        {keys.map(archiveTitle => (
-          <BlogListArchive
-            key={archiveTitle}
-            archiveTitle={archiveTitle}
-            archivePosts={archivePosts}
-          />
-        ))}
-      </div>
-    </>
+    <div className='cl-archive-page w-full'>
+      <TlPageHero
+        eyebrow='ARCHIVE · 时间线与脉络'
+        title='全部文章'
+        className='cl-page-mast--archive'
+      />
+      {hasPosts ? (
+        <ArchiveIndex
+          facets={facets}
+          activeCategoryKey={activeCategoryKey}
+          activeTagKey={activeTagKey}
+          activeCategoryName={activeCategoryName}
+          activeTagName={activeTagName}
+          archiveRange={archiveRange}
+          collapsed={tagIndexCollapsed}
+          onCategoryChange={handleCategoryChange}
+          onTagChange={handleTagChange}
+          onToggleCollapsed={() => setTagIndexCollapsed(value => !value)}>
+          {stage}
+        </ArchiveIndex>
+      ) : (
+        stage
+      )}
+    </div>
   )
 }
 

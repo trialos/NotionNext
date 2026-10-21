@@ -39,6 +39,10 @@ export const tokenStyle = `
         --cl-nav-top: max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.65rem));
         --cl-nav-height: 2.5rem;
         --cl-nav-band: calc(var(--cl-nav-top) + var(--cl-nav-height));
+        /* 宽屏页面容器（归档等大屏模块共用）：最大宽 / 流动 gutter / 双栏间距 */
+        --cl-wide-max: 112.5rem;
+        --cl-wide-pad: clamp(1rem, 3vw, 3rem);
+        --cl-wide-gap: clamp(2rem, 3.5vw, 4rem);
       }
 
       /* ≤1023px：胶囊内嵌 2.35rem 汉堡按钮，导航带随之变高。
@@ -83,9 +87,8 @@ export const tokenStyle = `
         text-decoration: none;
       }
 
-      /* 键盘焦点可见：主题根与 body 上的 portal（抽屉/子菜单）一并覆盖 */
-      :where(#theme-circlelife, .cl-drawer-root, .cl-toc-drawer-root, .cl-submenu)
-        :focus-visible {
+      /* 键盘焦点可见：主题根与 body 上的移动目录 portal 一并覆盖 */
+      :where(#theme-circlelife, .cl-toc-drawer-root) :focus-visible {
         outline: 2px solid var(--cl-accent);
         outline-offset: 2px;
       }
@@ -95,12 +98,8 @@ export const tokenStyle = `
         html,
         #theme-circlelife,
         #theme-circlelife *,
-        .cl-drawer-root,
-        .cl-drawer-root *,
         .cl-toc-drawer-root,
-        .cl-toc-drawer-root *,
-        .cl-submenu,
-        .cl-submenu * {
+        .cl-toc-drawer-root * {
           scroll-behavior: auto !important;
           transition-duration: 0.01ms !important;
           animation-duration: 0.01ms !important;

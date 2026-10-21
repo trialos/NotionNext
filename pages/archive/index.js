@@ -6,6 +6,16 @@ import { formatDateFmt } from '@/lib/utils/formatDate'
 import { DynamicLayout } from '@/themes/theme'
 import { useEffect } from 'react'
 
+const CIRCLELIFE_ARCHIVE_POST_FIELDS = [
+  'id',
+  'title',
+  'href',
+  'category',
+  'publishDate',
+  'publishDay',
+  'tagItems'
+]
+
 /**
  * 归档首页
  * @param {*} props
@@ -32,15 +42,12 @@ const ArchiveIndex = props => {
 
 export async function getStaticProps({ locale }) {
   const props = await fetchGlobalAllData({ from: 'archive-index', locale })
-  // 处理分页
-  props.posts = props.allPages?.filter(
+  const posts = (props.allPages || []).filter(
     page => page.type === 'Post' && page.status === 'Published'
   )
   delete props.allPages
 
-  const postsSortByDate = Object.create(props.posts)
-
-  postsSortByDate.sort((a, b) => {
+  const postsSortByDate = [...posts].sort((a, b) => {
     return b?.publishDate - a?.publishDate
   })
 
@@ -55,8 +62,28 @@ export async function getStaticProps({ locale }) {
     }
   })
 
+  props.posts = posts
+
+  const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
+  if (theme === 'circlelife') {
+    // circlelife 的 LayoutArchive/BlogListArchive 只消费这些字段；
+    // 归档 UI 新增字段时必须同步更新，否则应保留完整 post 对象。
+    Object.keys(archivePosts).forEach(month => {
+      archivePosts[month] = archivePosts[month].map(post => {
+        const slim = {}
+        CIRCLELIFE_ARCHIVE_POST_FIELDS.forEach(field => {
+          if (post?.[field] !== undefined) slim[field] = post[field]
+        })
+        return slim
+      })
+    })
+    delete props.posts
+    delete props.latestPosts
+    delete props.tagOptions
+    delete props.categoryOptions
+  }
+
   props.archivePosts = archivePosts
-  delete props.allPages
 
   return {
     props,
