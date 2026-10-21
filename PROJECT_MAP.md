@@ -89,6 +89,8 @@ flowchart TD
 * `docs/design/`：官方设计规范中心（`xuhome/` 为备用主题规范；主站专属纸感设计体系已迁移至私有库 `withcol-private/docs/design-system/`）
 * `docs/developer/themes/`：开源主题架构与实现手册（包含 `CLAUDE.md`, `HEO.md` 等；Circlelife 核心架构推演已迁移至私有库 `withcol-private/docs/architecture/`）
 * `pages/`：Next.js 路由入口、SSG/ISR 页面生命周期
+* `pages/[prefix]/[slug]/index.js`：文章页路由；`getStaticProps` 解析主题配置并算出 `coverLcp`（头图 LCP 预加载信息），预加载必须放在**页面级**（主题内的 `<Head>` 在 SSR 阶段会被丢弃）
+* `lib/db/notion/articleCover.js`：文章头图 LCP 预加载信息（`resolveArticleCoverPreload`）；候选集必须与主题实际渲染一致，否则等于白下载 2048 档
 * `components/`：跨主题通用公共组件（`NotionPage`, `NotionTabs`, `PrismMac` 等）
 * `lib/db/SiteDataApi.js`：全站 Notion 数据清洗与拉取总入口
 * `lib/config.js`：`siteConfig()` 全局动态配置读取与优先级控制
