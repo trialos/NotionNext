@@ -1,11 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { ARCHIVE_ALL } from './archiveFilter'
+import FilterTrack, { formatCount } from './FilterTrack'
 
 const TAG_PANEL_ID = 'archive-tag-index-panel'
-
-function formatCount(count) {
-  return String(count || 0).padStart(2, '0')
-}
 
 function CategoryTrack({
   facets,
@@ -14,38 +11,18 @@ function CategoryTrack({
   onCategoryChange
 }) {
   return (
-    <div className='cl-archive-cats'>
-      <div className='cl-archive-cats__row'>
-        <div
-          className='cl-archive-cats__track'
-          role='group'
-          aria-label='按分类筛选'
-        >
-          {facets.categories.map(category => {
-            const label =
-              category.key === ARCHIVE_ALL ? '全部' : category.name || '未分类'
-            return (
-              <button
-                key={category.key}
-                type='button'
-                className='cl-archive-cat'
-                aria-pressed={activeCategoryKey === category.key}
-                aria-label={`${label}，${category.count} 篇`}
-                onClick={() => onCategoryChange(category.key)}
-              >
-                <span>{label}</span>
-                <span className='cl-archive-cat__count' aria-hidden='true'>
-                  {formatCount(category.count)}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-        {archiveRange ? (
-          <span className='cl-archive-cats__range'>{archiveRange}</span>
-        ) : null}
-      </div>
-    </div>
+    <FilterTrack
+      items={facets.categories.map(category => ({
+        key: category.key,
+        label: category.key === ARCHIVE_ALL ? '全部' : category.name || '未分类',
+        count: category.count
+      }))}
+      activeKey={activeCategoryKey}
+      onSelect={onCategoryChange}
+      range={archiveRange}
+      unit='篇'
+      ariaLabel='按分类筛选'
+    />
   )
 }
 

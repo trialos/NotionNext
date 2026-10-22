@@ -4,138 +4,21 @@
 export const archiveStyle = `
       #theme-circlelife .cl-archive-page {
         --cl-archive-date-col: 3.4rem;
-        --cl-archive-underline: 2px;
         width: 100%;
         max-width: var(--cl-wide-max);
         min-width: 0;
         margin-inline: auto;
-        padding: 2rem var(--cl-wide-pad) 0;
+        /* 顶部间距自持（--cl-mast-top）：与影集页刊头落在同一条基线上，
+           两页刊头切页不跳位。归档页已退出 #container-inner 的通用导航避让 */
+        padding: var(--cl-mast-top) var(--cl-wide-pad) 0;
       }
 
-      /* —— Archive mast（结构对齐影集刊头，竖线固定暖金橙） —— */
-      #theme-circlelife .cl-page-mast--archive {
-        margin: 0 0 1.35rem;
-        padding: 0.15rem 0 0.15rem 0.85rem;
-        border-left: 2px solid var(--cl-gold);
-      }
-      #theme-circlelife .cl-page-mast--archive .cl-page-mast-inner {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-      }
-      #theme-circlelife .cl-page-mast--archive .cl-page-mast-kicker {
-        margin: 0;
-        font-family: var(--cl-font-mono);
-        font-size: 0.6875rem;
-        font-weight: 500;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        color: var(--cl-muted);
-        line-height: 1;
-      }
-      #theme-circlelife .cl-page-mast--archive .cl-page-mast-title {
-        margin: 0;
-        font-family: var(--cl-font-display);
-        font-size: clamp(1.75rem, 3.6vw, 2.4rem);
-        font-weight: 600;
-        letter-spacing: -0.025em;
-        line-height: 1.2;
-        color: var(--cl-text);
-        text-wrap: balance;
-      }
+      /* —— Archive mast：排版统一走 styles/mast.js 的 cl-page-mast--section，
+             此处只保留归档专属的暖金竖线（styles/mast.js 内已声明） —— */
 
-      /* —— Category track —— */
-      #theme-circlelife .cl-archive-cats {
-        min-width: 0;
-        margin: 0 0 0.85rem;
-        border-bottom: 1px solid var(--cl-border);
-      }
-      #theme-circlelife .cl-archive-cats__row {
-        display: flex;
-        align-items: stretch;
-        gap: 1.5rem;
-        min-width: 0;
-      }
-      #theme-circlelife .cl-archive-cats__track {
-        display: flex;
-        flex: 1 1 auto;
-        align-items: stretch;
-        gap: clamp(1.1rem, 2.8vw, 1.9rem);
-        min-width: 0;
-        overflow-x: auto;
-        overflow-y: hidden;
-        margin: 0 -0.35rem;
-        padding: 0.25rem 0.35rem 0;
-        scrollbar-width: none;
-        -webkit-overflow-scrolling: touch;
-      }
-      #theme-circlelife .cl-archive-cats__range {
-        display: none;
-        flex: none;
-        align-self: center;
-        font-family: var(--cl-font-mono);
-        font-size: 0.64rem;
-        letter-spacing: 0.06em;
-        color: var(--cl-faint);
-        white-space: nowrap;
-        font-variant-numeric: tabular-nums;
-      }
-      #theme-circlelife .cl-archive-cats__track::-webkit-scrollbar {
-        display: none;
-      }
-      #theme-circlelife .cl-archive-cat {
-        position: relative;
-        display: inline-flex;
-        flex: 0 0 auto;
-        align-items: flex-start;
-        gap: 0.18rem;
-        min-height: 2.5rem;
-        padding: 0.3rem 0 0.72rem;
-        border: 0;
-        background: transparent;
-        color: var(--cl-muted);
-        font-family: var(--cl-font-display);
-        font-size: 1rem;
-        font-weight: 600;
-        letter-spacing: 0.01em;
-        line-height: 1.2;
-        cursor: pointer;
-        transition: color 0.15s var(--cl-ease);
-      }
-      #theme-circlelife .cl-archive-cat:hover,
-      #theme-circlelife .cl-archive-cat[aria-pressed='true'] {
-        color: var(--cl-accent);
-      }
-      #theme-circlelife .cl-archive-cat::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        height: var(--cl-archive-underline);
-        background: var(--cl-accent);
-        transform: scaleX(0);
-        transform-origin: left;
-        transition: transform 0.2s var(--cl-ease);
-      }
-      #theme-circlelife .cl-archive-cat[aria-pressed='true']::after {
-        transform: scaleX(1);
-      }
-      #theme-circlelife .cl-archive-cat__count {
-        margin-top: 0.02rem;
-        font-family: var(--cl-font-mono);
-        font-size: 0.6rem;
-        font-weight: 500;
-        line-height: 1;
-        letter-spacing: 0;
-        color: var(--cl-faint);
-        font-variant-numeric: tabular-nums;
-      }
-      #theme-circlelife
-        .cl-archive-cat[aria-pressed='true']
-        .cl-archive-cat__count {
-        color: var(--cl-accent);
-      }
+      /* —— 分类轨道（Category track）——
+             形态与影集页标签栏完全一致，样式统一走 styles/filterTrack.js 的
+             .cl-cat-track*（唯一真源），此处不再重复实现。 —— */
 
       /* —— Filter body / tag rail —— */
       #theme-circlelife .cl-archive-body {
@@ -513,9 +396,6 @@ export const archiveStyle = `
       }
 
       @media (min-width: 1024px) {
-        #theme-circlelife .cl-archive-cats__range {
-          display: inline-flex;
-        }
         #theme-circlelife .cl-archive-page {
           --cl-archive-date-col: 4.75rem;
         }
@@ -553,22 +433,6 @@ export const archiveStyle = `
       }
 
       @media (max-width: 767px) {
-        #theme-circlelife .cl-archive-cats {
-          position: relative;
-        }
-        #theme-circlelife .cl-archive-cats::after {
-          content: '';
-          position: absolute;
-          top: 0;
-          right: 0;
-          bottom: 1px;
-          width: 1.35rem;
-          pointer-events: none;
-          background: linear-gradient(to right, transparent, var(--cl-bg));
-        }
-        #theme-circlelife .cl-archive-cats__track {
-          padding-right: 1.35rem;
-        }
         #theme-circlelife .cl-archive-tagindex.is-collapsed
           .cl-archive-tagindex__panel {
           display: none;

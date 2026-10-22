@@ -103,118 +103,41 @@ export const albumStyle = `
   }
 
   /* —— 影集先锋艺术展架 (AlbumShelfStack) —— */
+  /* 内容列与归档页同源（--cl-wide-max / --cl-wide-pad）：两页刊头的内容列
+     左缘一致，切页时刊头不横跳。刊头顶部走 --cl-mast-top，与归档页同基线 */
   .cl-album-stack-root {
-    max-width: 1720px;
+    max-width: var(--cl-wide-max);
     margin: 0 auto;
-    padding: max(5.5rem, calc(env(safe-area-inset-top, 0px) + 4.8rem)) 2rem 7rem;
+    padding: var(--cl-mast-top) var(--cl-wide-pad) 7rem;
     box-sizing: border-box;
     position: relative;
   }
 
   @media (max-width: 1023px) {
     .cl-album-stack-root {
-      padding: max(5.2rem, calc(env(safe-area-inset-top, 0px) + 4.5rem)) 1.5rem 6rem;
+      padding: var(--cl-mast-top) var(--cl-wide-pad) 6rem;
     }
   }
 
   @media (max-width: 767px) {
     .cl-album-stack-root {
-      padding: max(5.2rem, calc(env(safe-area-inset-top, 0px) + 4.5rem)) 1rem 5rem;
+      padding: var(--cl-mast-top) var(--cl-wide-pad) 5rem;
     }
   }
 
   .cl-album-stack-head {
-    margin-bottom: 3.5rem;
+    /* 分类轨道行高约 45px（较原胶囊行高约 25px）。此处的下间距同时承担两件事：
+       ① 轨道容器自身的 0.85rem 下边距会与本处 margin-bottom 折叠（取大者）；
+       ② 补偿轨道行变高带来的纵向增量，使书架首屏大图整体位置净位移约 0。
+       数值由浏览器实测标定（改后需复核首屏大图不跳动）。 */
+    margin-bottom: 2.4rem;
   }
 
-  .cl-album-stack-mast {
-    padding: 0.15rem 0 0.15rem 0.85rem;
-    border-left: 2px solid var(--cl-vermilion, #b93a2b);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
+  /* 刊头排版（竖线 / 眉题 / 大标题）统一走 styles/mast.js 的
+     cl-page-mast--section + cl-page-mast--album（朱砂竖线），此处不再重复实现 */
 
-  .cl-album-stack-kicker {
-    font-family: var(--cl-font-mono, 'JetBrains Mono', monospace);
-    font-size: 11px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: var(--cl-muted, #716b64);
-    line-height: 1;
-  }
-
-  .cl-album-stack-main-title {
-    margin: 0;
-    font-family: var(--cl-font-display, 'Hanken Grotesk', sans-serif);
-    font-size: clamp(1.75rem, 3.6vw, 2.4rem);
-    font-weight: 600;
-    letter-spacing: -0.025em;
-    color: var(--cl-text, #23201d);
-    line-height: 1.2;
-    text-wrap: balance;
-  }
-
-  /* 动态 Notion「专辑」分类标签 */
-  .cl-album-stack-tags {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 1.5rem;
-    padding-left: 0.85rem;
-  }
-
-  .cl-album-stack-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 12px;
-    border-radius: 9999px;
-    border: 1px solid var(--cl-border, rgba(0, 0, 0, 0.08));
-    background: transparent;
-    color: var(--cl-muted, #716b64);
-    font-family: var(--cl-font-mono, 'JetBrains Mono', monospace);
-    font-size: 11px;
-    letter-spacing: 0.04em;
-    cursor: pointer;
-    touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
-    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-  }
-
-  .cl-album-stack-tag:focus-visible {
-    outline: 2px solid var(--cl-vermilion, #b93a2b);
-    outline-offset: 2px;
-  }
-
-  .cl-album-stack-tag:hover {
-    color: var(--cl-text, #23201d);
-    border-color: color-mix(in srgb, var(--cl-text) 30%, transparent);
-  }
-
-  .dark .cl-album-stack-tag:hover {
-    color: rgba(255, 255, 255, 0.95);
-  }
-
-  .cl-album-stack-tag.is-active {
-    background: var(--cl-text, #23201d) !important;
-    border-color: var(--cl-text, #23201d) !important;
-    color: var(--cl-bg, #fff) !important;
-  }
-
-  .dark .cl-album-stack-tag.is-active {
-    background: rgba(255, 255, 255, 0.92) !important;
-    color: #121212 !important;
-  }
-
-  .cl-album-stack-tag-count {
-    opacity: 0.7;
-    font-size: 10px;
-    font-variant-numeric: tabular-nums;
-  }
-
-
+  /* 分类轨道（标签栏）：与归档页分类菜单栏同构，样式统一走
+     styles/filterTrack.js 的 .cl-cat-track*（唯一真源），此处不再重复实现 */
 
   /* STACK 先锋架构：「左侧定点锚定 · 右侧照片滚轮」 */
   .cl-shelf-stack-container {

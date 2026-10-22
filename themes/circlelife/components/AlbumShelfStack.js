@@ -1,4 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { formatDateFmt } from '@/lib/utils/formatDate'
+import FilterTrack from './FilterTrack'
+import PageMast from './PageMast'
 
 /**
  * 影集先锋艺术展架 (AlbumShelfStack)
@@ -40,6 +43,19 @@ export default function AlbumShelfStack({ decks = [], onOpen }) {
     if (selectedTag === 'ALL') return decks
     return decks.filter(d => (d.photos?.[0]?.albumTag || '').trim() === selectedTag)
   }, [decks, selectedTag])
+
+  // 专辑时间跨度（与归档页 archiveRange 同口径：取 publishDate 的年-月，首尾各一）
+  const albumRange = useMemo(() => {
+    const months = decks
+      .map(d => d.photos?.[0]?.publishDate)
+      .filter(Boolean)
+      .map(ts => formatDateFmt(ts, 'yyyy-MM'))
+      .sort()
+    if (!months.length) return ''
+    return months.length > 1
+      ? `${months[0]} — ${months[months.length - 1]}`
+      : months[0]
+  }, [decks])
 
   // 视口中轴吸附监听：计算卡片中心与视口中心的绝对距离，100% 精准锁定滑到正中央的影集
   useEffect(() => {
@@ -124,33 +140,32 @@ export default function AlbumShelfStack({ decks = [], onOpen }) {
     <div className='cl-album-stack-root'>
       {/* 顶部艺术刊头与 Notion 专辑分类标签 */}
       <header className='cl-album-stack-head'>
-        <div className='cl-album-stack-mast'>
-          <span className='cl-album-stack-kicker'>ARCHIVE · 影集展架</span>
-          <h1 className='cl-album-stack-main-title'>全部影集</h1>
-        </div>
+        {/* 刊头与归档页同构（同一 PageMast 组件 + 同一份 mast.js 排版），
+            仅竖线强调色不同：归档暖金 / 影集朱砂 */}
+        <PageMast
+          eyebrow='ARCHIVE · 影集展架'
+          title='全部影集'
+          className='cl-page-mast--section cl-page-mast--album'
+        />
 
-        {/* 动态识别 Notion「专辑」的分类切换条 */}
+        {/* 影集分类轨道：与归档页分类菜单栏同构（同一 FilterTrack 组件 +
+            同一份 filterTrack.js 样式），计数在标签右上角、右端显示专辑时间跨度 */}
         {categories.length > 1 && (
-          <nav className='cl-album-stack-tags' aria-label='影集分类'>
-            {categories.map(cat => {
-              const isSelected = selectedTag === cat.id
-              return (
-                <button
-                  key={cat.id}
-                  type='button'
-                  aria-pressed={isSelected}
-                  aria-label={`分类：${cat.name}，共 ${cat.count} 部影集`}
-                  className={`cl-album-stack-tag ${isSelected ? 'is-active' : ''}`}
-                  onClick={() => {
-                    setSelectedTag(cat.id)
-                    setActiveIndex(0)
-                  }}>
-                  <span className='cl-album-stack-tag-name'>{cat.name}</span>
-                  <span className='cl-album-stack-tag-count'>{cat.count}</span>
-                </button>
-              )
-            })}
-          </nav>
+          <FilterTrack
+            items={categories.map(cat => ({
+              key: cat.id,
+              label: cat.name,
+              count: cat.count
+            }))}
+            activeKey={selectedTag}
+            onSelect={key => {
+              setSelectedTag(key)
+              setActiveIndex(0)
+            }}
+            range={albumRange}
+            unit='部影集'
+            ariaLabel='影集分类'
+          />
         )}
       </header>
 
@@ -200,7 +215,8 @@ export default function AlbumShelfStack({ decks = [], onOpen }) {
                 <div className='cl-shelf-pinned-mast'>
                   <span className='cl-shelf-pinned-dot' aria-hidden='true' />
                   <span className='cl-shelf-pinned-kicker'>
-                    PROJECT · {String(activeIndex + 1).padStart(2, '0')} / {String(filteredDecks.length).padStart(2, '0')}
+                    ALBUM · {String(activeIndex + 1).padStart(2, '0')} /{' '}
+                    {String(filteredDecks.length).padStart(2, '0')}
                   </span>
                 </div>
 

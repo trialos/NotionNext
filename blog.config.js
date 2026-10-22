@@ -20,6 +20,11 @@ const BLOG = {
   BIO: process.env.NEXT_PUBLIC_BIO || '一个普通的干饭人🍚', // 作者简介
   LINK: process.env.NEXT_PUBLIC_LINK || 'https://tangly1024.com', // 网站地址
   KEYWORDS: process.env.NEXT_PUBLIC_KEYWORD || 'Notion, 博客', // 网站关键词 英文逗号隔开
+  // —— 浏览器页签标题（也可用 Notion 配置表里的同名列覆盖）——
+  // HOME_TITLE：首页页签；ARCHIVE_TITLE：归档页页签（与导航项「文章」同名）
+  HOME_TITLE:
+    process.env.NEXT_PUBLIC_HOME_TITLE || '时光的弧线|Circle of Life',
+  ARCHIVE_TITLE: process.env.NEXT_PUBLIC_ARCHIVE_TITLE || '文章',
   BLOG_FAVICON: process.env.NEXT_PUBLIC_FAVICON || '/favicon.ico', // blog favicon 配置, 默认使用 /public/favicon.ico，支持在线图片，如 https://img.imesong.com/favicon.png
   PWA_ENABLE: process.env.NEXT_PUBLIC_PWA_ENABLE || false, // 是否启用 PWA 安装入口；也可在 Notion_Config 中配置 PWA_ENABLE=true
   PWA_NAME: process.env.NEXT_PUBLIC_PWA_NAME || '', // PWA 安装名称；默认读取站点标题，通常无需单独配置

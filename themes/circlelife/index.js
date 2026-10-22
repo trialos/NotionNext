@@ -15,7 +15,6 @@ import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { isBrowser } from '@/lib/utils'
 import { compressImage } from '@/lib/db/notion/mapImage'
-import { Transition } from '@headlessui/react'
 import SmartLink from '@/components/SmartLink'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
@@ -64,7 +63,7 @@ const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
  */
 const LayoutBase = props => {
   const { children, post } = props
-  const { onLoading, fullWidth, locale } = useGlobal()
+  const { fullWidth, locale } = useGlobal()
   const router = useRouter()
   const isAlbumPage =
     router?.pathname === '/album' ||
@@ -183,25 +182,17 @@ const LayoutBase = props => {
                   ? 'w-full max-w-5xl'
                   : 'w-full max-w-3xl'
             }`}>
-            {isAlbumPage || isHomePage ? (
-              <div className='w-full'>
-                {props.slotTop}
-                {children}
-              </div>
-            ) : (
-              <Transition
-                show={!onLoading}
-                enter='transition ease-in-out duration-700 transform order-first'
-                enterFrom='opacity-0 translate-y-16'
-                enterTo='opacity-100'
-                leave='transition ease-in-out duration-300 transform'
-                leaveFrom='opacity-100 translate-y-0'
-                leaveTo='opacity-0 -translate-y-16'
-                unmount={false}>
-                {props.slotTop}
-                {children}
-              </Transition>
-            )}
+            {/* 入场动效：统一由 styles/common.js 的纯 CSS 动画 clContentIn 承担
+                （#main-content 上的 opacity 淡入，服务端与客户端输出一致）。
+                原先这里用的是 headlessui <Transition> + translate-y-16：文章 / 归档
+                等页会「从下往上」滑入，而影集 / 首页直接显示，两页观感不一致；且该
+                transform 会给 position: fixed 的子元素（目录 fab、回顶按钮）造出
+                包含块，动画期间回顶按钮实测漂移约 13px。按设计规范「只淡入、不位移」，
+                此处统一改为不位移。 */}
+            <div className='w-full'>
+              {props.slotTop}
+              {children}
+            </div>
           </div>
 
           {showSidebar && (
@@ -703,7 +694,7 @@ const LayoutArchive = props => {
       <TlPageHero
         eyebrow='ARCHIVE · 时间线与脉络'
         title='全部文章'
-        className='cl-page-mast--archive'
+        className='cl-page-mast--section cl-page-mast--archive'
       />
       {hasPosts ? (
         <ArchiveIndex

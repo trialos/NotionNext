@@ -1,3 +1,4 @@
+import BLOG from '@/blog.config'
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import { getPwaConfig } from '@/lib/pwa'
@@ -6,6 +7,15 @@ import { isHttpLink, loadExternalResource } from '@/lib/utils'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
+
+/**
+ * 页签标题覆盖：优先读 Notion 配置表（props，服务端与客户端同源），
+ * 其次读 blog.config.js。两端取同一来源 —— 刻意不走 siteConfig：
+ * 它在服务端读不到 Notion/主题配置（要等 useEffect 跑完），
+ * 会让 SSR 与客户端算出的标题不一致，页签在 hydration 后闪一下。
+ */
+const titleOverride = (key, NOTION_CONFIG) =>
+  NOTION_CONFIG?.[key] || BLOG?.[key] || ''
 
 /**
  * 页面的Head头，有用于SEO
@@ -416,25 +426,44 @@ const getIsoTime = value => {
  * @param {*} router
  */
 export const getSEOMeta = (props, router, locale) => {
-  const { post, siteInfo, tag, category, page } = props
+  const { post, siteInfo, tag, category, page, NOTION_CONFIG } = props
   const keyword = router?.query?.s
 
   const TITLE = siteConfig('TITLE')
   switch (router.route) {
-    case '/':
+    case '/': {
+      // 首页页签：优先用 HOME_TITLE 覆盖（品牌串），否则退回「站点标题 | 站点描述」
+      const homeTitle = titleOverride('HOME_TITLE', NOTION_CONFIG)
       return {
-        title: `${siteInfo?.title} | ${siteInfo?.description}`,
+        title: homeTitle || `${siteInfo?.title} | ${siteInfo?.description}`,
         description: `${siteInfo?.description}`,
         image: `${siteInfo?.pageCover}`,
         slug: '',
         type: 'website'
       }
-    case '/archive':
+    }
+    case '/archive': {
+      // 归档页页签：ARCHIVE_TITLE 覆盖（默认「文章」，与导航项同名），
+      // 未配置时退回语言包里的「归档」
+      const archiveTitle = titleOverride('ARCHIVE_TITLE', NOTION_CONFIG)
       return {
-        title: `${locale.NAV.ARCHIVE} | ${siteInfo?.title}`,
+        title: archiveTitle
+          ? `${archiveTitle} | ${siteInfo?.title}`
+          : `${locale.NAV.ARCHIVE} | ${siteInfo?.title}`,
         description: `${siteInfo?.description}`,
         image: `${siteInfo?.pageCover}`,
         slug: 'archive',
+        type: 'website'
+      }
+    }
+    case '/about':
+      // 关于页没有 post 属性，若走 default 分支会拼出「| loading」并覆盖主题自己的标题。
+      // 这里显式给标题/描述，取值与主题 LayoutAbout 同源，两处产出完全一致。
+      return {
+        title: `${props.aboutTitle || locale.NAV.ABOUT} | ${siteInfo?.title}`,
+        description: props.aboutSummary || `${siteInfo?.description}`,
+        image: `${siteInfo?.pageCover}`,
+        slug: 'about',
         type: 'website'
       }
     case '/page/[page]':
@@ -523,7 +552,9 @@ export const getSEOMeta = (props, router, locale) => {
       return {
         title: post
           ? `${post?.title} | ${siteInfo?.title}`
-          : `${siteInfo?.title} | loading`,
+          : // 兜底：尚无 post 数据的路由（如临时跳转）显示站点标题 + loading；
+            // 已知会命中此分支的页面（如 /about）已在上方单独处理，不会泄漏到页签
+            `${siteInfo?.title} | loading`,
         description: post?.summary,
         type: post?.type,
         slug: post?.slug,

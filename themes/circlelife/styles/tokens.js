@@ -48,6 +48,11 @@ export const tokenStyle = `
         --cl-wide-max: 112.5rem;
         --cl-wide-pad: clamp(1rem, 3vw, 3rem);
         --cl-wide-gap: clamp(2rem, 3.5vw, 4rem);
+        /* 刊头顶部基准（归档 / 影集两页共用）：距视口顶部的固定值。
+           桌面 88px = 导航带 60px + 28px（14-28-14 节奏的中段值）；
+           ≤1023px 收到 83.2px，与移动端导航带 72px 对齐。
+           两页刊头必须落在同一条基线上，禁止再在页面样式里各写各的顶部数值 */
+        --cl-mast-top: max(5.5rem, calc(env(safe-area-inset-top, 0px) + 4.8rem));
         /* —— 文章正文排版 token（--cl-prose-*）：正文节奏的唯一真源 —— */
         --cl-prose-size: 1.06rem; /* 正文字号（约 17px；行宽由 --cl-prose-measure 控制） */
         --cl-prose-leading: 1.85; /* 正文行高 */
@@ -105,6 +110,8 @@ export const tokenStyle = `
       @media (max-width: 1023px) {
         :root {
           --cl-nav-height: 3.25rem;
+          /* 刊头基准同步收窄（与影集页原值逐档等价） */
+          --cl-mast-top: max(5.2rem, calc(env(safe-area-inset-top, 0px) + 4.5rem));
         }
       }
 
