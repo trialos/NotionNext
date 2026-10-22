@@ -1,6 +1,8 @@
 'use client'
 
+import { siteConfig } from '@/lib/config'
 import { useEffect, useRef, useMemo } from 'react'
+import CONFIG from '../config'
 import { buildImageSources } from './imageSrcset'
 import {
   computeTiltProgress,
@@ -12,6 +14,29 @@ import {
 import { buildColumnBuckets, computeSlotsPerColumn } from './tiltLayout'
 
 /**
+ * 题字呼吸参数（滚动位移的三档系数不在此声明：它们由 CSS 的
+ * --cl-wall-flow 表达式分别乘 0.62 / 0.5 / 0.38 承担，此处不重复一份）
+ */
+/** 呼吸幅度（px）：题字随照片墙的常驻呼吸轻微起伏 */
+const WALL_TITLE_BREATH_PX = 7
+/** 呼吸三角波的周期（以 idleOffset 的像素漂移量计）：越大摆动越慢 */
+const WALL_TITLE_BREATH_PERIOD = 220
+/** 墙尾淡出起点（进度）：越过就开始淡 */
+const WALL_TITLE_FADE_START = 0.66
+/** 墙尾淡出终点（进度）：到此彻底隐去（墙底越过题字基线之前） */
+const WALL_TITLE_FADE_END = 0.88
+
+/**
+ * 只在值真的变了时才写自定义属性。
+ * 静止时呼吸与位移几乎不变，省掉每帧的样式失效与重算。
+ */
+const setVarIfChanged = (el, name, value) => {
+  if (!el) return
+  if (el.style.getPropertyValue(name) === value) return
+  el.style.setProperty(name, value)
+}
+
+/**
  * 首页全屏倾斜交错流光照片墙 (HomeTiltWall) - 多轴联动与严苛边界控制版
  * 1. 顺时针倾斜 8°（走向严格对齐 "\"）
  * 2. 微视差：位移 = 区块高 × 0.12（对齐参考站 moment.priority.vision 实测值）
@@ -19,12 +44,19 @@ import { buildColumnBuckets, computeSlotsPerColumn } from './tiltLayout'
  * 4. 整屏区块随页面滚走（不 sticky）：去掉粘连子树后 iOS 合成压力最小
  * 5. 遵照 Vercel 规范：支持 prefers-reduced-motion，首屏图片异步解码防爆显存
  * 6. 无图源时整块不渲染（不再用示例图冒充博主作品）
+ * 7. 题字（--cl-wall-*）：与照片墙同源的漂移与呼吸，唯一写入者是本组件既有的 RAF 循环
  */
-export default function HomeTiltWall({ homeCoverImages = [] }) {
+export default function HomeTiltWall({
+  homeCoverImages = [],
+  showWallTitle = true,
+  titleZh = '与我同行',
+  titleEn = 'WITH CIRCLE OF LIFE'
+}) {
   const trackWrapperRef = useRef(null)
   const containerRef = useRef(null)
   const panRef = useRef(null)
   const rotatedRef = useRef(null)
+  const titleRef = useRef(null)
 
   // 严格只读取用户指定的 HomeCover 页面图片；不向一般影集回退
   const displayCards = useMemo(() => {
@@ -141,6 +173,37 @@ export default function HomeTiltWall({ homeCoverImages = [] }) {
       if (panLayer) {
         panLayer.style.transform = `translate(${panX.toFixed(1)}px, ${panY.toFixed(1)}px)`
       }
+    }
+
+    // 题字：与照片墙同源的漂移与呼吸。
+    // 只写 3 个 CSS 变量（common / flow / alpha），各行的位移系数由 CSS 承担；
+    // 子树仅数个节点，样式重算代价可忽略。
+    const applyTitleMotion = () => {
+      const title = titleRef.current
+      if (!title) return
+
+      // 画布漂移（与 pan 层同源）+ 呼吸（三角波，避免锯齿回卷造成的跳变）
+      const panY = (currentProgress - 0.5) * -maxPanY
+      const phase =
+        (idleOffset % WALL_TITLE_BREATH_PERIOD) / WALL_TITLE_BREATH_PERIOD
+      const breath = (1 - Math.abs(phase * 2 - 1)) * 2 - 1 // ∈ [-1, 1]
+      const common = panY + breath * WALL_TITLE_BREATH_PX
+      const flow = -currentProgress * cachedTravel
+
+      // 墙尾淡出：墙底越过题字基线之前就已淡尽
+      let alpha = 1
+      if (currentProgress > WALL_TITLE_FADE_START) {
+        const t = Math.min(
+          1,
+          (currentProgress - WALL_TITLE_FADE_START) /
+            (WALL_TITLE_FADE_END - WALL_TITLE_FADE_START)
+        )
+        alpha = 1 - t * t * (3 - 2 * t) // smoothstep
+      }
+
+      setVarIfChanged(title, '--cl-wall-common', `${common.toFixed(1)}px`)
+      setVarIfChanged(title, '--cl-wall-flow', `${flow.toFixed(1)}px`)
+      setVarIfChanged(title, '--cl-wall-alpha', alpha.toFixed(3))
     }
 
     // 滚动期间临时提示浏览器提升图层；静止后移除，避免长期占用大纹理
@@ -484,6 +547,9 @@ export default function HomeTiltWall({ homeCoverImages = [] }) {
         // 更新平移层（只翻 z 轴平移，rotate/scale 已静态化）
         applyPanTransform()
 
+        // 更新题字（与画布同源的漂移与呼吸）
+        applyTitleMotion()
+
         // 更新各列的交错流动位移
         columns.forEach(col => {
           if (!col.track) return
@@ -694,6 +760,11 @@ export default function HomeTiltWall({ homeCoverImages = [] }) {
   // 没有图源时整块不渲染，避免用示例图冒充博主作品
   if (!displayCards.length) return null
 
+  // 题字开关：主题配置可整体关掉，showWallTitle 再按页面收窄（仅首页）
+  const titleEnabled =
+    showWallTitle &&
+    siteConfig('CIRCLELIFE_HOME_WALL_TITLE', true, CONFIG) !== false
+
   // 首屏 LCP 的 preload 由主题布局（LayoutPostList）在 SSR 阶段输出，
   // 组件内 critical 图会自行带 fetchpriority，此处不重复声明
   return (
@@ -707,6 +778,23 @@ export default function HomeTiltWall({ homeCoverImages = [] }) {
           {/* 8° 倾斜的无限照片瀑布流母画卷（rotate/scale 静态，缩放值走 CSS 变量） */}
           <div ref={rotatedRef} className='cl-home-tilt-rotated' />
         </div>
+
+        {/* 同行题字：与照片墙同源的漂移与呼吸。
+            刻意放在 pan 层之外（pan 是 aria-hidden 的装饰画布），题字必须留在无障碍树中。
+            外层行元素承载滚动位移的 transform，内层 span 承载入场关键帧，两者互不覆盖。 */}
+        {titleEnabled ? (
+          <div ref={titleRef} className='cl-home-tilt-title'>
+            <h1 className='cl-home-tilt-title-zh'>
+              <span>{titleZh}</span>
+            </h1>
+            <span className='cl-home-tilt-title-rule' aria-hidden='true'>
+              <span />
+            </span>
+            <p className='cl-home-tilt-title-en' lang='en'>
+              <span>{titleEn}</span>
+            </p>
+          </div>
+        ) : null}
 
         {/* 顶部与底部微弱过渡渐变遮罩 */}
         <div className='cl-home-tilt-fade-top pointer-events-none absolute inset-x-0 top-0 h-28 z-10' />

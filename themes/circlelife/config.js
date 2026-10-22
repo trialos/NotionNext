@@ -13,6 +13,11 @@ const CONFIG = {
 
   CIRCLELIFE_HOME_TIMELINE: true,
   CIRCLELIFE_HOME_LATEST_CARD: true,
+  /**
+   * 首页照片墙题字（与照片墙同源的漂移与呼吸）：
+   * 第一行「与我同行」+ 第二行「WITH CIRCLE OF LIFE」，关掉后首页不渲染该浮层
+   */
+  CIRCLELIFE_HOME_WALL_TITLE: true,
   CIRCLELIFE_LATEST_KICKER: '最近',
   CIRCLELIFE_HERO_COUNT: 5,
   CIRCLELIFE_HERO_AUTO_MS: 6000,

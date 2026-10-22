@@ -285,7 +285,11 @@ const LayoutPostList = props => {
       ) : null}
 
       {useTimeline && (
-        <HomeTiltWall homeCoverImages={props.homeCoverImages || []} />
+        <HomeTiltWall
+          homeCoverImages={props.homeCoverImages || []}
+          // 题字只出现在首页：/page/[page] 同样有照片墙，但不重复出现题字
+          showWallTitle={router.pathname === '/'}
+        />
       )}
 
       <div className={useTimeline ? 'cl-home-content-container max-w-4xl mx-auto w-full px-4 md:px-6 py-12' : ''}>

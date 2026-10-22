@@ -563,4 +563,150 @@ export const homeStyle = `
           transparent 100%
         );
       }
+
+      /* —— 同行题字：与照片墙同源的漂移与呼吸 ——
+         题字不是压在照片上的 UI，而是照片墙水流里的一个声部：
+         继承画布漂移（--cl-wall-common）与滚动位移（--cl-wall-flow），
+         两行之间再给一点差速形成纵深；墙尾由 --cl-wall-alpha 淡出。
+
+         关键约束（勿改）：
+         1. 题字是 position: fixed 的浮层 → 整条祖先链上不得出现
+            transform / filter / backdrop-filter / perspective / contain /
+            will-change，否则 fixed 会被降级成相对该祖先定位而随页面滚走。
+            祖先链：#theme-circlelife → #container-inner → #container-wrapper
+                   → .cl-home-tilt-track-wrapper → .cl-home-tilt-section
+            （overflow: hidden 不会裁剪 fixed 后代；visibility: hidden 会继承，
+              正好用于 .is-offscreen 退场闸门）
+         2. 题字不得成为任何 position: fixed 元素的祖先（会给后代造包含块）。
+         3. 退场淡出与光晕类效果必须浅色 + 深色两种模式分别验证。 */
+      #theme-circlelife .cl-home-tilt-title {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 46vh;
+        z-index: 20;
+        pointer-events: none; /* 装饰层，绝不拦截点击 */
+        text-align: center;
+      }
+
+      #theme-circlelife .cl-home-tilt-title-zh {
+        margin: 0;
+        padding-left: 0.16em; /* 抵消末字后字距造成的视觉左偏 */
+        font-family: var(--cl-font-display);
+        font-weight: 500;
+        font-size: clamp(2.6rem, 7.2vw, 5.25rem);
+        line-height: 1.06;
+        letter-spacing: 0.16em;
+        color: var(--cl-wall-ink);
+        text-shadow: var(--cl-wall-halo);
+        opacity: var(--cl-wall-alpha, 1);
+        transform: translate3d(
+          0,
+          calc(var(--cl-wall-common, 0px) + var(--cl-wall-flow, 0px) * 0.62),
+          0
+        );
+        will-change: transform;
+      }
+
+      #theme-circlelife .cl-home-tilt-title-zh > span {
+        display: inline-block;
+        animation: clWallTitleIn 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both;
+      }
+
+      #theme-circlelife .cl-home-tilt-title-rule {
+        display: block;
+        width: 2.75rem;
+        height: 1px;
+        margin: 1.1rem auto;
+        background: var(--cl-accent);
+        opacity: var(--cl-wall-alpha, 1);
+        transform: translate3d(
+          0,
+          calc(var(--cl-wall-common, 0px) + var(--cl-wall-flow, 0px) * 0.5),
+          0
+        );
+        will-change: transform;
+      }
+
+      #theme-circlelife .cl-home-tilt-title-rule > span {
+        display: block;
+        width: 100%;
+        height: 100%;
+        background: inherit;
+        transform-origin: center center;
+        animation: clWallRuleIn 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.5s both;
+      }
+
+      #theme-circlelife .cl-home-tilt-title-en {
+        margin: 0;
+        padding-left: 0.34em;
+        font-family: var(--cl-font-mono);
+        font-weight: 500;
+        font-size: clamp(0.7rem, 1.15vw, 0.86rem);
+        line-height: 1.4;
+        letter-spacing: 0.34em;
+        text-transform: uppercase;
+        color: var(--cl-wall-ink);
+        text-shadow: var(--cl-wall-halo-sm);
+        opacity: calc(0.9 * var(--cl-wall-alpha, 1));
+        transform: translate3d(
+          0,
+          calc(var(--cl-wall-common, 0px) + var(--cl-wall-flow, 0px) * 0.38),
+          0
+        );
+        will-change: transform;
+      }
+
+      #theme-circlelife .cl-home-tilt-title-en > span {
+        display: inline-block;
+        animation: clWallSubIn 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.62s both;
+      }
+
+      @media (max-width: 767px) {
+        #theme-circlelife .cl-home-tilt-title-zh {
+          letter-spacing: 0.12em;
+          padding-left: 0.12em;
+        }
+        #theme-circlelife .cl-home-tilt-title-en {
+          font-size: 0.64rem;
+          letter-spacing: 0.24em;
+          padding-left: 0.24em;
+        }
+      }
+
+      /* 入场：纯 CSS 关键帧（服务端与客户端输出完全一致 → 无 hydration 不匹配），
+         只作用在内层 span；外层行元素的 transform 留给滚动漂移，两者永不互相覆盖。
+         曲线用 expo-out，不用回弹/果冻（设计规范排斥夸张弹跳） */
+      @keyframes clWallTitleIn {
+        from {
+          opacity: 0;
+          transform: translate3d(0, 0.9em, 0);
+        }
+        to {
+          opacity: 1;
+          transform: translate3d(0, 0, 0);
+        }
+      }
+
+      @keyframes clWallRuleIn {
+        from {
+          opacity: 0;
+          transform: scaleX(0);
+        }
+        to {
+          opacity: 1;
+          transform: scaleX(1);
+        }
+      }
+
+      @keyframes clWallSubIn {
+        from {
+          opacity: 0;
+          transform: translate3d(0, 0.7em, 0);
+        }
+        to {
+          opacity: 1;
+          transform: translate3d(0, 0, 0);
+        }
+      }
 `
