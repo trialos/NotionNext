@@ -359,12 +359,15 @@ describe('circlelife 首页精选文章章', () => {
       )
     })
 
-    test('章节内不设标题，只留右上角「全部文章 N 篇 →」', () => {
+    test('章节内不设标题，只留右上角「全部文章 →」（不写篇数）', () => {
       expect(stageSource).not.toContain('cl-home-articles-kicker')
       expect(stageSource).not.toContain("className='cl-home-articles-title'")
       expect(stageSource).toContain("className='cl-home-sec-link'")
       expect(stageSource).toContain('全部文章')
       expect(stageSource).toContain("aria-label='精选文章'")
+      // 出口不再带篇数 → 计数变量与入参一并退场
+      expect(stageSource).not.toContain('totalLabel')
+      expect(stageSource).not.toContain('postCount')
     })
 
     test('文章层全部叠在一格里，靠 opacity 换篇', () => {
@@ -437,9 +440,11 @@ describe('circlelife 首页精选文章章', () => {
       expect(homeArticlesStyle).toContain(
         'padding: var(--cl-home-section-pad) var(--cl-wide-pad) 1rem'
       )
-      // 影集段：章节外边距用同一个统一值
+      // 影集段：章节上外边距用同一个统一值；
+      // 影集段是最后一段 → 下外边距归零（Footer 自带内边距，段尾不留白）
       const { homeStyle } = require('../../../themes/circlelife/styles/home')
-      expect(homeStyle).toContain('margin-block: var(--cl-home-section-pad)')
+      expect(homeStyle).toContain('margin-top: var(--cl-home-section-pad)')
+      expect(homeStyle).toContain('margin-bottom: 0')
     })
 
     test('首页不再有「近期」段（博主判定冗余，已下线）', () => {

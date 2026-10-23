@@ -6,6 +6,12 @@ import {
 } from './homeAlbumFocus'
 
 /**
+ * 桌面端右栏的「文案栏」最小宽（≈11rem）：
+ * 封面再大也不能把文案挤没 —— 4:5 封面撑到视口底时，宽度不够就让给文案栏。
+ */
+const ALBUM_COPY_MIN_W = 176
+
+/**
  * 首页精选影集段 (HomeAlbumShowcase)
  *
  * 形态参考 thereach.travel 的 Destination Discoverer 段：
@@ -38,6 +44,9 @@ export default function HomeAlbumShowcase({ albums = [] }) {
   const stageRef = useRef(null)
   // 取景框：桌面 display:contents（透明通道），移动端 = 真正的窗口
   const viewportRef = useRef(null)
+  // 右侧 sticky 面板（桌面）：封面高度按「视口高 − 面板顶距」量出来，
+  // 让封面的底边正好落在视口底 → 段尾不留白，Footer 紧接
+  const panelRef = useRef(null)
   // 上一档焦点：溶解时旧封面要在新封面下面垫底（不透明），所以要记住「谁是上一档」
   const prevActiveRef = useRef(0)
   const prevActiveIndex = prevActiveRef.current
@@ -138,6 +147,25 @@ export default function HomeAlbumShowcase({ albums = [] }) {
       const win = computeSweepWindow(bodyTop, releaseAt, 0.25)
       sweepStart = win.start
       sweepLength = win.length
+
+      // 封面宽度（桌面）：让 4:5 封面的**底边落在视口底** ——
+      //   面板顶距 = nav-band + 2.5rem（sticky top）→ 封面高 = 视口高 − 顶距，
+      //   宽按 4:5 反推（高 × 0.8）。面板底边与视口底重合 → 段底抵达视口底的
+      //   那一刻面板正好释放、Footer 紧接，段尾不再留一段白。
+      //   右栏宽度不够时退让给文案栏（保底 ALBUM_COPY_MIN_W），宁可留白不溢出。
+      //   量测只发生在这里（mount / resize / 字体就绪 / 断点切换），滚动路径零读取。
+      const panel = panelRef.current
+      if (isMobile || !panel) {
+        if (panel) panel.style.removeProperty('--cl-home-album-cover-w')
+      } else {
+        const panelStyle = getComputedStyle(panel)
+        const panelTop = parseFloat(panelStyle.top) || 0
+        const colGap = parseFloat(panelStyle.columnGap) || 0
+        const desired = (window.innerHeight - panelTop) * 0.8
+        const avail = panel.clientWidth - colGap - ALBUM_COPY_MIN_W
+        const coverW = Math.max(120, Math.min(desired, avail))
+        panel.style.setProperty('--cl-home-album-cover-w', `${Math.floor(coverW)}px`)
+      }
 
       // 几何变了 → 进度重算，当前档直接落位（不播过渡）
       scrollY = window.scrollY || 0
@@ -253,12 +281,8 @@ export default function HomeAlbumShowcase({ albums = [] }) {
       className='cl-home-album'
       style={{ '--cl-home-album-count': albums.length }}
       aria-label='精选影集'>
-      {/* 段头：与精选文章段同形 —— 只有右上角一个出口，没有标题与眉题 */}
-      <header className='cl-home-album-head'>
-        <a className='cl-home-sec-link' href='/album'>
-          全部影集 <span aria-hidden='true'>→</span>
-        </a>
-      </header>
+      {/* 段头已撤：影集段不再有任何出口（博主定稿）——
+          只留段内的「进入影集 →」这一个入口，段落语义由 aria-label 承担。 */}
 
       <div className='cl-home-album-body' ref={bodyRef}>
         {/* 移动端满幅照片舞台（桌面 display:none → 不发起图片请求）。
@@ -349,6 +373,7 @@ export default function HomeAlbumShowcase({ albums = [] }) {
 
         {/* 右侧：桌面 = sticky 钉住的面板（移动端隐藏：照片已铺底、CTA 已进窗口） */}
         <div
+          ref={panelRef}
           className='cl-home-album-panel'
           aria-labelledby={`cl-home-album-name-${active?.id}`}>
           <div className='cl-home-album-panel-copy' key={active?.id}>

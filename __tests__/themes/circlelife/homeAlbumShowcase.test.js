@@ -786,6 +786,26 @@ describe('circlelife 首页精选影集段', () => {
       expect(showcaseSource).toContain("mq.addEventListener?.('change'")
     })
 
+    test('封面宽度由 JS 量测写入 --cl-home-album-cover-w（底边落在视口底 → 段尾不留白）', () => {
+      // 封面宽 = (视口高 − 面板顶距) × 0.8 → 高 = 视口高 − 顶距 → 底边落在视口底
+      expect(showcaseSource).toContain('--cl-home-album-cover-w')
+      // 文案栏保底：封面再大也不能把文案挤没
+      expect(showcaseSource).toContain('ALBUM_COPY_MIN_W')
+      // 量测只发生在 measure()（mount / resize / 字体就绪 / 断点切换），不在滚动路径
+      expect(showcaseSource).toContain('panel.clientWidth')
+      // 轨道：文案栏吃剩余，封面列按量出来的宽
+      expect(albumStyle).toMatch(
+        /grid-template-columns:\s*minmax\(0, 1fr\) var\(--cl-home-album-cover-w, 22rem\);/
+      )
+      // 4:5 的比例挂在 img 上（盒子填满轨道 → 高 = 宽 ÷ 0.8）
+      expect(albumStyle).toMatch(
+        /\.cl-home-album-figure \{[^}]*width: 100%;/
+      )
+      expect(albumStyle).toMatch(
+        /\.cl-home-album-img \{[^}]*aspect-ratio: 4 \/ 5;/
+      )
+    })
+
     test('不做 hover 预选（会与换挡打架），改为键盘聚焦接管', () => {
       // 只查 JSX 属性（注释里可以解释为什么删）
       expect(showcaseSource).not.toContain('onMouseEnter={')
@@ -908,15 +928,19 @@ describe('circlelife 首页精选影集段', () => {
   })
 
   describe('DOM 与无障碍', () => {
-    test('段标题已撤：section 用 aria-label 命名（首页已有 h1，不得制造第二个 h1）', () => {
-      // 段头只留右上角一个出口（与精选文章段同形），标题与眉题都已下线
+    test('段标题与段头出口都已撤：section 用 aria-label 命名（首页已有 h1，不得制造第二个 h1）', () => {
+      // 段头整块撤除（博主定稿：影集段不再有任何出口，只留段内「进入影集 →」）
       expect(showcaseSource).toContain("aria-label='精选影集'")
       expect(showcaseSource).not.toContain('cl-home-album-title')
       expect(showcaseSource).not.toContain('cl-home-album-kicker')
       expect(showcaseSource).not.toContain('<h1')
       expect(showcaseSource).not.toContain('PageMast')
-      // 出口与文章段共用同一个类 → 两段段头同形
-      expect(showcaseSource).toContain("className='cl-home-sec-link'")
+      // 段头与它的出口链接都已下线（正文里的「进入影集 →」不受影响）
+      expect(showcaseSource).not.toContain('cl-home-album-head')
+      expect(showcaseSource).not.toContain('cl-home-sec-link')
+      expect(showcaseSource).not.toContain('全部影集')
+      // 死 CSS 一并清掉
+      expect(albumStyle).not.toContain('.cl-home-album-head')
     })
 
     test('影集名只在左列出现：左列是 h2，中间面板不再有专辑名', () => {

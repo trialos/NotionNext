@@ -299,10 +299,7 @@ const LayoutPostList = props => {
         siteConfig('CIRCLELIFE_HOME_ARTICLE_STAGE', true, CONFIG) &&
         Array.isArray(props.homeArticles) &&
         props.homeArticles.length > 0 && (
-          <HomeArticleStage
-            articles={props.homeArticles}
-            postCount={props.postCount}
-          />
+          <HomeArticleStage articles={props.homeArticles} />
         )}
 
       {/* 首页精选影集段：照片墙（Hero）与文章段之后 */}

@@ -15,7 +15,7 @@ import {
  *   只推进「当前是第几篇」→ 底部时间轴上的游标从旧滑到新，文章随之交叉淡入淡出。
  * - 章节本体是 `100svh + 行程` 的滚动轨：行程 = (篇数 − 1) × 步距。
  *   6 篇 → 50svh 行程，滚过半屏就走完全部精选文章（不像「一篇一屏」那样要滚 6 屏）。
- * - 章节内**不设标题**：只留右上角「全部文章 N 篇 →」这一个出口。
+ * - 章节内**不设标题**：只留右上角「全部文章 →」这一个出口（不写篇数）。
  *
  * 底部时间轴（唯一大胆的元素）：
  * - 刻度按 publishDay 的**真实日距比例**分布（标尺是一把真尺子，不是等距装饰）
@@ -34,7 +34,7 @@ export const ARTICLE_STEP_VH = 10
 
 const pad2 = n => String(n).padStart(2, '0')
 
-export default function HomeArticleStage({ articles = [], postCount = 0 }) {
+export default function HomeArticleStage({ articles = [] }) {
   // 展示顺序：**由旧到新** —— 往下滚 = 时间往前走，底部时间轴的游标随之
   // 从左（最旧）滑到右（最新）。数据层给的是「新到旧」（上限截断取最新几篇），
   // 这里反向排列，得到一条与滚动同向的时间轴。
@@ -200,7 +200,6 @@ export default function HomeArticleStage({ articles = [], postCount = 0 }) {
   if (!count) return null
 
   const rangeLabel = formatMonthRange(list.map(a => a.publishDay))
-  const totalLabel = postCount ? `${postCount}` : `${count}`
 
   return (
     <section
@@ -211,7 +210,7 @@ export default function HomeArticleStage({ articles = [], postCount = 0 }) {
       <div className='cl-home-articles-panel' ref={panelRef}>
         <div className='cl-home-articles-top'>
           <a className='cl-home-sec-link' href='/archive'>
-            全部文章 {totalLabel} 篇 <span aria-hidden='true'>→</span>
+            全部文章 <span aria-hidden='true'>→</span>
           </a>
         </div>
 

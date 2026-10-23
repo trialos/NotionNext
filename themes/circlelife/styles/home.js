@@ -472,18 +472,11 @@ export const homeStyle = `
         --cl-home-album-rule: var(--cl-home-mark);
         max-width: var(--cl-wide-max);
         margin-inline: auto;
-        /* 章节间距与精选文章段统一（照片墙→文章、文章→影集两处一致） */
-        margin-block: var(--cl-home-section-pad);
+        /* 章节间距与精选文章段统一（照片墙→文章、文章→影集两处一致）。
+           影集段是最后一段：底边不再叠一段空白，Footer 自带内边距 → 紧接而来。 */
+        margin-top: var(--cl-home-section-pad);
+        margin-bottom: 0;
         padding-inline: var(--cl-wide-pad);
-      }
-
-      /* 段头：与精选文章段同形 —— 只有右上角一个出口（样式共用 .cl-home-sec-link） */
-      #theme-circlelife .cl-home-album-head {
-        display: flex;
-        align-items: baseline;
-        justify-content: flex-end;
-        gap: 1.5rem;
-        margin-bottom: clamp(1rem, 1.8vw, 1.5rem);
       }
 
       /* 主体：左列目录 + 右侧 sticky 面板 */
@@ -643,13 +636,18 @@ export const homeStyle = `
         transform: scaleY(1);
       }
 
-      /* 右侧 sticky 面板 */
+      /* 右侧 sticky 面板
+         轨道：文案栏吃剩余宽度，封面列按 JS 量出来的 --cl-home-album-cover-w 走。
+         封面宽 = (视口高 − 面板顶距) × 0.8 → 高 = 宽 ÷ 0.8 = 视口高 − 顶距
+         → 封面底边正好落在视口底 → 面板底边 = 视口底 → 段尾不留白、Footer 紧接。
+         22rem 是 JS 未跑（SSR 首帧）时的兜底，接近原尺寸，无首屏跳变。 */
       #theme-circlelife .cl-home-album-panel {
         position: sticky;
         top: calc(var(--cl-nav-band) + 2.5rem);
         align-self: start;
         display: grid;
-        grid-template-columns: minmax(240px, 30rem) minmax(0, 1fr);
+        grid-template-columns:
+          minmax(0, 1fr) var(--cl-home-album-cover-w, 22rem);
         gap: clamp(1.5rem, 3vw, 3rem);
         align-items: start;
       }
@@ -716,11 +714,14 @@ export const homeStyle = `
       }
 
       /* 封面图：全部封面叠在同一网格单元（焦点切换不改 src → 不闪白），
-         定长 4/5 盒 + cover → 零 CLS */
+         定长 4/5 盒 + cover → 零 CLS
+         4:5 的比例挂在 img 上（width:100% + aspect-ratio），
+         盒子填满轨道 → 封面高 = 轨道宽 ÷ 0.8 = 视口高 − 面板顶距 → 底边落在视口底 */
       #theme-circlelife .cl-home-album-figure {
         position: relative;
         display: grid;
         grid-template-columns: minmax(0, 1fr);
+        width: 100%;
         margin: 0;
         border-radius: var(--cl-media-radius);
         background: var(--cl-paper-2);
