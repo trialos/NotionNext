@@ -80,7 +80,7 @@ export default function HomeArticleStage({ articles = [], postCount = 0 }) {
   // 图版宽度：窄屏下按「实际可用高度」动态算 —— 图版与文字上下叠放，
   // 图能开多大取决于文字块实际占多高（标题行数、摘要行数都会变），
   // 纯 CSS 的 svh 公式算不准，所以这里量一次再写回 CSS 变量。
-  // 桌面端图文并排，图版高度不占额外空间 → 用 420px 上限即可。
+  // 桌面端图文并排，图版高度不占额外空间 → 直接用 --cl-home-article-plate。
   const fitPlates = useCallback(() => {
     const stage = stageRef.current
     if (!stage || typeof window === 'undefined') return

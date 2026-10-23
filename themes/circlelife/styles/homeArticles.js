@@ -131,11 +131,18 @@ export const homeArticlesStyle = `
   /* 图版下面不再重复「分类 · 日期」——文字区的 meta 行已经有一份。
      （博主指出重复：图版题注与文章 meta 是同一组信息，摆两遍是噪音。） */
 
-  /* 文字栏：贴右边缘（margin-left:auto）→ 与影集段的「文字块在右」同位，
-     图与文之间留出一段大气隙，两段的横向 footprint 完全一致。 */
+  /* 文字栏：贴右边缘 → 与影集段的「文字块在右」同位，图与文之间留出一段大气隙，
+     两段的横向 footprint 完全一致。
+
+     ⚠️ 宽度必须写成**定值**（width: min(100%, 测量宽)），不能只写 max-width：
+     只写 max-width 时，grid 项的宽度是 fit-content（且 margin-left:auto 会让
+     stretch 失效）→ 摘要短的篇目收缩成窄块，margin-left:auto 把整块顶到右缘，
+     **标题左边缘随标题长度漂移**。实测 @1440：《罪与罚》观后感左缘 1000、
+     谈孤独 1077，其余四篇 762 —— 同一段里两篇明显右飘。
+     定宽后六篇左边缘完全一致（桌面同为 762 = 右缘 1382 − 620）。 */
   #theme-circlelife .cl-home-article-body {
+    width: min(100%, var(--cl-home-article-measure));
     margin-left: auto;
-    max-width: var(--cl-home-article-measure);
   }
 
   /* 文字栏 */

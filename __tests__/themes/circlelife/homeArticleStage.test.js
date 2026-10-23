@@ -387,14 +387,22 @@ describe('circlelife 首页精选文章章', () => {
       expect(stageSource).toContain("aria-label='精选文章'")
     })
 
-    test('图文整组居中（整组贴左会在右侧留一大块空白）', () => {
+    test('图左 · 文贴右（文字栏定宽贴右缘，左边缘不随标题长度漂移）', () => {
       // 改版后：图版贴左边缘、文字栏贴右边缘（margin-left:auto），
       // 横向 footprint 与影集段一致 —— 不再靠「限宽居中」收窄
       expect(homeArticlesStyle).not.toContain('--cl-home-article-spread')
       expect(homeArticlesStyle).toMatch(
         /\.cl-home-article-body \{[^}]*margin-left: auto;/
       )
+      // ⚠️ 宽度必须是**定值**，不能只写 max-width：
+      // 只写 max-width 时 grid 项的宽度是 fit-content（margin-left:auto 会让
+      // stretch 失效）→ 摘要短的篇目收缩成窄块，再被 auto 外边距顶到右缘，
+      // 标题左边缘随标题长度漂移。实测 @1440：《罪与罚》观后感左缘 1000、
+      // 谈孤独 1077，其余四篇 762 —— 同一段里两篇明显右飘。
       expect(homeArticlesStyle).toMatch(
+        /\.cl-home-article-body \{[^}]*width: min\(100%, var\(--cl-home-article-measure\)\);/
+      )
+      expect(homeArticlesStyle).not.toMatch(
         /\.cl-home-article-body \{[^}]*max-width: var\(--cl-home-article-measure\);/
       )
       // 栅格：图版列 + 文字列，列间距走全站宽容器的间距 token
