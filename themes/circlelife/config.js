@@ -22,7 +22,13 @@ const CONFIG = {
   CIRCLELIFE_HERO_COUNT: 5,
   CIRCLELIFE_HERO_AUTO_MS: 6000,
   CIRCLELIFE_HERO_COVER: true,
-  CIRCLELIFE_HOME_FILM_COUNT: 6,
+  /**
+   * 首页「精选影集」段：最多放几辑
+   * 排序规则 = Notion「精选」勾选的优先，不足用最新影集补齐
+   */
+  CIRCLELIFE_HOME_ALBUM_COUNT: 4,
+  /** 首页精选影集段总开关 */
+  CIRCLELIFE_HOME_ALBUM_SHOWCASE: true,
   CIRCLELIFE_HOME_RECENT_COUNT: 5,
   CIRCLELIFE_ARTICLE_COVER: true,
 

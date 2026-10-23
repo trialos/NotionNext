@@ -8,6 +8,8 @@ import {
 } from '@/lib/db/SiteDataApi'
 import { loadPhotoImages, resolveHomeCoverImages } from '@/lib/db/notion/photoImages'
 import { formatNotionBlock } from '@/lib/db/notion/getPostBlocks'
+import { buildImageSources } from '@/themes/circlelife/components/imageSrcset'
+import { isFeaturedAlbum } from '@/themes/circlelife/components/homeAlbumFocus'
 import { generateRobotsTxt } from '@/lib/utils/robots.txt'
 import { generateRss, shouldGenerateRssForLocale } from '@/lib/utils/rss'
 import { generateSitemapXml } from '@/lib/utils/sitemap.xml'
@@ -153,11 +155,15 @@ export async function getStaticProps(req) {
     props.posts = cleanPostSummaries(props.posts)
   }
   props.latestPosts = cleanPostSummaries(props.latestPosts)
-  // 首页影集转筒：最新 N 辑（type=Photo）拉正文图，与影集页共用管线；
-  // 不依赖 Notion 页面封面，发新一辑自动出现
-  const filmCount =
-    Number(siteConfig('CIRCLELIFE_HOME_FILM_COUNT', 6, props?.NOTION_CONFIG)) ||
-    6
+  // 首页「精选影集」段：Notion「精选」勾选的优先，不足用最新影集补齐。
+  // 只下发封面与摘要，不再下发全部正文图 URL —— 旧实现把 6 辑 67 张图的
+  // URL 塞进首页 pageProps 却无人消费，白付约 17 KB（占整包 24%）。
+  const homeAlbumCount = Math.max(
+    1,
+    Number(
+      siteConfig('CIRCLELIFE_HOME_ALBUM_COUNT', 4, props?.NOTION_CONFIG)
+    ) || 4
+  )
   const filmBatch = Math.max(
     1,
     Math.min(
@@ -167,37 +173,52 @@ export async function getStaticProps(req) {
       ) || 4
     )
   )
-  const photoPages = cleanPostSummaries(
-    (props.allPages || [])
-      .filter(
-        p =>
-          p &&
-          (p.type === 'Photo' || p.type === 'photo') &&
-          p.status === 'Published'
-      )
-      .sort((a, b) => (b.publishDate || 0) - (a.publishDate || 0))
-      .slice(0, filmCount)
+  const byDateDesc = (a, b) => (b.publishDate || 0) - (a.publishDate || 0)
+  const allPhotoPages = cleanPostSummaries(
+    (props.allPages || []).filter(
+      p =>
+        p &&
+        (p.type === 'Photo' || p.type === 'photo') &&
+        p.status === 'Published'
+    )
   )
-  const photoDecks = []
-  for (let i = 0; i < photoPages.length; i += filmBatch) {
-    const slice = photoPages.slice(i, i + filmBatch)
+  const featuredPages = allPhotoPages.filter(isFeaturedAlbum).sort(byDateDesc)
+  const restPages = allPhotoPages.filter(p => !isFeaturedAlbum(p)).sort(byDateDesc)
+  const orderedPhotoPages = [...featuredPages, ...restPages].slice(
+    0,
+    homeAlbumCount
+  )
+  const homeAlbums = []
+  for (let i = 0; i < orderedPhotoPages.length; i += filmBatch) {
+    const slice = orderedPhotoPages.slice(i, i + filmBatch)
     const parts = await Promise.all(
       slice.map(async p => {
-        const images = (await loadPhotoImages(p))
-          .map(im => im?.url)
-          .filter(Boolean)
+        const images = (await loadPhotoImages(p)).filter(im => im?.url)
+        const cover = images[0]
+        if (!cover) return null
+        const sources = buildImageSources(cover.url, {
+          sizes: '(max-width: 1023px) 92vw, 620px'
+        })
         return {
           id: p.id,
           name: p.title,
-          date: p.publishDay,
+          href: `/album?view=gallery&deck=${p.id}`,
+          summary: p.summary || '',
+          date: p.publishDay || '',
           count: images.length,
-          images
+          featured: isFeaturedAlbum(p),
+          cover: {
+            url: cover.url,
+            src: sources.src,
+            srcSet: sources.srcSet,
+            sizes: sources.sizes
+          }
         }
       })
     )
-    photoDecks.push(...parts.filter(d => d.images.length > 0))
+    homeAlbums.push(...parts.filter(Boolean))
   }
-  props.photoDecks = photoDecks
+  props.homeAlbums = homeAlbums
 
   // 首页首屏照片墙图源：按 homecover 语义解析，私有页面 ID 只从服务端环境变量注入
   props.homeCoverImages = await resolveHomeCoverImages(props.allPages || [], {

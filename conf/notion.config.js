@@ -36,6 +36,7 @@ module.exports = {
     category: process.env.NEXT_PUBLIC_NOTION_PROPERTY_CATEGORY || 'category',
     author: process.env.NEXT_PUBLIC_NOTION_PROPERTY_AUTHOR || '作者',
     album: process.env.NEXT_PUBLIC_NOTION_PROPERTY_ALBUM || '专辑',
+    featured: process.env.NEXT_PUBLIC_NOTION_PROPERTY_FEATURED || '精选', // 影集精选标记（首页精选影集段）
     date: process.env.NEXT_PUBLIC_NOTION_PROPERTY_DATE || 'date',
     tags: process.env.NEXT_PUBLIC_NOTION_PROPERTY_TAGS || 'tags',
     icon: process.env.NEXT_PUBLIC_NOTION_PROPERTY_ICON || 'icon',

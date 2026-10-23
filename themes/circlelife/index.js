@@ -39,6 +39,7 @@ import Catalog from './components/Catalog'
 import { Footer } from './components/Footer'
 import { Header } from './components/Header'
 import HomeTiltWall from './components/HomeTiltWall'
+import HomeAlbumShowcase from './components/HomeAlbumShowcase'
 import LatestCard from './components/LatestCard'
 import ListScrollMemory from './components/ListScrollMemory'
 import MobileToc from './components/MobileToc'
@@ -291,6 +292,14 @@ const LayoutPostList = props => {
           showWallTitle={router.pathname === '/'}
         />
       )}
+
+      {/* 首页精选影集段：照片墙（Hero）与文章列表之间 */}
+      {router.pathname === '/' &&
+        siteConfig('CIRCLELIFE_HOME_ALBUM_SHOWCASE', true, CONFIG) &&
+        Array.isArray(props.homeAlbums) &&
+        props.homeAlbums.length > 0 && (
+          <HomeAlbumShowcase albums={props.homeAlbums} />
+        )}
 
       <div className={useTimeline ? 'cl-home-content-container max-w-4xl mx-auto w-full px-4 md:px-6 py-12' : ''}>
         {useTimeline &&

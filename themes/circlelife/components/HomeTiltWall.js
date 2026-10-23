@@ -631,6 +631,12 @@ export default function HomeTiltWall({
         const visible = Boolean(entry && entry.isIntersecting)
         isVisible = visible
 
+        // 照片墙在视口内时压制回顶按钮（滚到下方影集/文章列表后自动恢复）
+        document.documentElement.classList.toggle(
+          'cl-home-hero-active',
+          visible
+        )
+
         if (!visible) {
           if (rafId) {
             cancelAnimationFrame(rafId)
@@ -746,6 +752,8 @@ export default function HomeTiltWall({
       }
       loadQueue.length = 0
       viewObserver.disconnect()
+      // 卸载时摘除状态类：否则切页后回顶按钮会永久隐藏
+      document.documentElement.classList.remove('cl-home-hero-active')
       memoryLifecycleObserver.disconnect()
       motionQuery?.removeEventListener?.('change', onMotionChange)
       document.removeEventListener('visibilitychange', onVisibility)
