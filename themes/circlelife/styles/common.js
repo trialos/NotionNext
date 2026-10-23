@@ -34,16 +34,6 @@ export const commonStyle = `
         font-size: 0.72rem;
         letter-spacing: 0.04em;
       }
-      #theme-circlelife .cl-deck-author {
-        margin-right: 0.35rem;
-      }
-      #theme-circlelife .cl-deck-chip-row {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 0.4rem;
-        margin-top: 0.35rem;
-      }
 
       #theme-circlelife .cl-kicker {
         display: flex;
@@ -156,6 +146,13 @@ export const commonStyle = `
         pointer-events: auto;
         transform: translateY(0);
         transition-delay: 0s;
+      }
+      /* 首页精选文章章钉住时，底部时间轴会与回顶键重叠 →
+         该段隐藏回顶键（与影集段同一处理；文章章只占 1.5 屏，藏掉不伤导航）。 */
+      html.cl-home-article-active #theme-circlelife .cl-backtop.is-visible {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
       }
       #theme-circlelife .cl-backtop:hover {
         color: var(--cl-accent);

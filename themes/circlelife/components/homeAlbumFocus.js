@@ -91,25 +91,39 @@ export function computeSweepLength(sweepStart, sweepEnd) {
 }
 
 /**
- * 影集是否被标记为「精选」。
+ * 条目是否被标记为「精选」。
  *
- * 主路径是 Notion 的 Checkbox 属性（解析后为真正的布尔值）。
- * 同时兼容 Select/MultiSelect 降级形态（数组或字符串），以便博主
- * 临时改用选项列时无需改代码。
+ * 主路径是 Notion 的 Checkbox 属性（解析后为真正的布尔值，键名由
+ * BLOG.NOTION_PROPERTY_NAME 把列名「精选」映射成 featured）。
+ * 同时兼容原始列名「精选」与 Select/MultiSelect 降级形态（数组或字符串），
+ * 以便博主临时改用选项列时无需改代码。
+ *
+ * 影集与文章共用同一张 Notion 表（靠 type 区分），所以这一判定对两者通用。
  *
  * @param {object} page Notion 页面属性对象
  * @returns {boolean}
  */
-export function isFeaturedAlbum(page) {
+export function isFeaturedEntry(page) {
   if (!page) return false
-  const raw = page.featured
+  const raw = page.featured !== undefined ? page.featured : page['精选']
   if (typeof raw === 'boolean') return raw
   if (Array.isArray(raw)) {
-    return raw.some(v => v === '精选' || v === 'Featured' || v === '__YES__')
+    return raw.some(
+      v => v === '精选' || v === 'Featured' || v === '__YES__' || v === 'Yes'
+    )
   }
   if (typeof raw === 'string') {
-    return raw === '精选' || raw === 'Featured' || raw === '__YES__' || raw === 'true'
+    return (
+      raw === '精选' ||
+      raw === 'Featured' ||
+      raw === '__YES__' ||
+      raw === 'Yes' ||
+      raw === 'true'
+    )
   }
   return false
 }
+
+/** 旧名保留：影集段的精选判定（与 isFeaturedEntry 同语义） */
+export const isFeaturedAlbum = isFeaturedEntry
 

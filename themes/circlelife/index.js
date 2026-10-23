@@ -40,7 +40,7 @@ import { Footer } from './components/Footer'
 import { Header } from './components/Header'
 import HomeTiltWall from './components/HomeTiltWall'
 import HomeAlbumShowcase from './components/HomeAlbumShowcase'
-import LatestCard from './components/LatestCard'
+import HomeArticleStage from './components/HomeArticleStage'
 import ListScrollMemory from './components/ListScrollMemory'
 import MobileToc from './components/MobileToc'
 import { PostLock } from './components/PostLock'
@@ -234,7 +234,7 @@ const LayoutIndex = props => {
  * @returns
  */
 const LayoutPostList = props => {
-  const { category, tag, keyword, latestPosts } = props
+  const { category, tag, keyword } = props
   const router = useRouter()
   // 刊头描述：在自定义菜单（含子菜单）里找与当前分类/标签同链接的行，取其 summary
   const menuSummaryFor = path => {
@@ -265,8 +265,9 @@ const LayoutPostList = props => {
     !router?.query?.s &&
     (router.pathname === '/' || router.pathname === '/page/[page]')
 
-  // latestPosts 已按 Notion 行序截取，不再退回当前页的 posts（那会在翻页后换成另一组）。
-  const heroPosts = (Array.isArray(latestPosts) ? latestPosts : []).filter(Boolean)
+  // 首页与列表页分流：首页下半部已是全屏章节（精选文章一文一屏 + 近期单栏排版），
+  // 列表容器（窄栏时间线）只留给 /page/[page]、/category/*、/tag/* 等列表页。
+  const isHome = router.pathname === '/'
 
   return (
     <>
@@ -293,7 +294,18 @@ const LayoutPostList = props => {
         />
       )}
 
-      {/* 首页精选影集段：照片墙（Hero）与文章列表之间 */}
+      {/* 首页精选文章章：一窗一屏 + 底部时间标尺（顺序在影集段之前） */}
+      {isHome &&
+        siteConfig('CIRCLELIFE_HOME_ARTICLE_STAGE', true, CONFIG) &&
+        Array.isArray(props.homeArticles) &&
+        props.homeArticles.length > 0 && (
+          <HomeArticleStage
+            articles={props.homeArticles}
+            postCount={props.postCount}
+          />
+        )}
+
+      {/* 首页精选影集段：照片墙（Hero）与文章段之后 */}
       {router.pathname === '/' &&
         siteConfig('CIRCLELIFE_HOME_ALBUM_SHOWCASE', true, CONFIG) &&
         Array.isArray(props.homeAlbums) &&
@@ -301,22 +313,20 @@ const LayoutPostList = props => {
           <HomeAlbumShowcase albums={props.homeAlbums} />
         )}
 
-      <div className={useTimeline ? 'cl-home-content-container max-w-4xl mx-auto w-full px-4 md:px-6 py-12' : ''}>
-        {useTimeline &&
-          siteConfig('CIRCLELIFE_HOME_LATEST_CARD', true, CONFIG) && (
-            <LatestCard posts={heroPosts} />
+      {!isHome && (
+        <div
+          className={
+            useTimeline
+              ? 'cl-home-content-container max-w-4xl mx-auto w-full px-4 md:px-6 py-12'
+              : ''
+          }>
+          {siteConfig('POST_LIST_STYLE') === 'page' ? (
+            <BlogListPage {...props} useTimeline={useTimeline} />
+          ) : (
+            <BlogListScroll {...props} useTimeline={useTimeline} />
           )}
-
-        {siteConfig('POST_LIST_STYLE') === 'page' ? (
-          <BlogListPage
-            {...props}
-            useTimeline={useTimeline}
-            recentMode={router.pathname === '/'}
-          />
-        ) : (
-          <BlogListScroll {...props} useTimeline={useTimeline} />
-        )}
-      </div>
+        </div>
+      )}
     </>
   )
 }

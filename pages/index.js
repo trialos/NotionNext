@@ -9,7 +9,7 @@ import {
 import { loadPhotoImages, resolveHomeCoverImages } from '@/lib/db/notion/photoImages'
 import { formatNotionBlock } from '@/lib/db/notion/getPostBlocks'
 import { buildImageSources } from '@/themes/circlelife/components/imageSrcset'
-import { isFeaturedAlbum } from '@/themes/circlelife/components/homeAlbumFocus'
+import { isFeaturedAlbum, isFeaturedEntry } from '@/themes/circlelife/components/homeAlbumFocus'
 import { generateRobotsTxt } from '@/lib/utils/robots.txt'
 import { generateRss, shouldGenerateRssForLocale } from '@/lib/utils/rss'
 import { generateSitemapXml } from '@/lib/utils/sitemap.xml'
@@ -219,6 +219,45 @@ export async function getStaticProps(req) {
     homeAlbums.push(...parts.filter(Boolean))
   }
   props.homeAlbums = homeAlbums
+
+  // —— 首页下半部：精选文章章 + 收尾「近期」段 ——
+  // 与影集段同源的规则：Notion「精选」勾选优先。但文章侧**只显示勾选的**，
+  // 不用最新文章补齐 —— 精选是博主的手动策展，补齐会稀释这个信号。
+  const homeArticleCount = Math.max(
+    1,
+    Number(
+      siteConfig('CIRCLELIFE_HOME_ARTICLE_COUNT', 6, props?.NOTION_CONFIG) || 6
+    )
+  )
+  const allPostPages = cleanPostSummaries(
+    (props.allPages || []).filter(
+      p => p && p.type === 'Post' && p.status === 'Published'
+    )
+  )
+  const featuredPosts = allPostPages
+    .filter(isFeaturedEntry)
+    .sort(byDateDesc)
+    .slice(0, homeArticleCount)
+  props.homeArticles = featuredPosts.map(p => {
+    const coverSrc = p.pageCover || p.pageCoverThumbnail || ''
+    // 图版只有 420px 宽 → 1024 档足够；不要 2048 档（651KB，纯浪费）
+    const sources = buildImageSources(coverSrc, {
+      sizes: '(max-width: 1023px) 242px, 420px',
+      widths: [512, 1024]
+    })
+    return {
+      id: p.id,
+      href: p.href,
+      title: p.title,
+      summary: p.summary || '',
+      category: p.category || '',
+      publishDay: p.publishDay || '',
+      publishDate: p.publishDate || 0,
+      // undefined 不能被 JSON 序列化（会直接让 build 挂在 prerender 阶段）
+      readTime: p.readTime || 0,
+      cover: { src: sources.src, srcSet: sources.srcSet, sizes: sources.sizes }
+    }
+  })
 
   // 首页首屏照片墙图源：按 homecover 语义解析，私有页面 ID 只从服务端环境变量注入
   props.homeCoverImages = await resolveHomeCoverImages(props.allPages || [], {

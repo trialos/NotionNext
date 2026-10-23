@@ -252,15 +252,10 @@ export default function HomeAlbumShowcase({ albums = [] }) {
       ref={sectionRef}
       className='cl-home-album'
       style={{ '--cl-home-album-count': albums.length }}
-      aria-labelledby='cl-home-album-title'>
+      aria-label='精选影集'>
+      {/* 段头：与精选文章段同形 —— 只有右上角一个出口，没有标题与眉题 */}
       <header className='cl-home-album-head'>
-        <div className='cl-home-album-head-text'>
-          <span className='cl-home-album-kicker'>SELECTED ALBUMS</span>
-          <h2 id='cl-home-album-title' className='cl-home-album-title'>
-            精选影集
-          </h2>
-        </div>
-        <a className='cl-home-album-all' href='/album'>
+        <a className='cl-home-sec-link' href='/album'>
           全部影集 <span aria-hidden='true'>→</span>
         </a>
       </header>
@@ -335,11 +330,13 @@ export default function HomeAlbumShowcase({ albums = [] }) {
                     onFocus={() => handleItemFocus(index)}
                     onBlur={handleItemBlur}>
                     <span className='cl-home-album-item-rule' aria-hidden='true' />
-                    <h3
+                    {/* 名字提到 h2：段标题已撤，h1（题字）之后直接是 h2，
+                        避免 h1 → h3 的层级跳跃（id 与面板的 aria-labelledby 引用不变）。 */}
+                    <h2
                       className='cl-home-album-item-name'
                       id={`cl-home-album-name-${album.id}`}>
                       {album.name}
-                    </h3>
+                    </h2>
                     <span className='cl-home-album-item-count'>
                       {album.count} 张
                     </span>

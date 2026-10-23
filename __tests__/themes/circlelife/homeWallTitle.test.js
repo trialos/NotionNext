@@ -197,6 +197,34 @@ describe('circlelife 首页照片墙题字', () => {
       expect(tiltProgress.EASE_TAU_DESKTOP).toBe(120)
       expect(tiltProgress.EASE_TAU_NARROW).toBe(96)
     })
+
+    // —— 退场冻结必须把题字一起带到淡出终态 ——
+    // 背景：从文章返回首页时，滚动位置会被恢复到文章段（远在墙尾之下）。
+    // 墙尾冻结分支若只更新平移层、不更新题字，--cl-wall-alpha 会冻结在 1
+    // （满透明）→ 题字这个 fixed 浮层就盖在当前内容上（博主实测过，生产同 bug）。
+    test('墙尾冻结时必须同步更新题字（alpha 不能冻结在满透明）', () => {
+      const exitBlock = themeSource.match(
+        /if \(scrollY >= cachedBottomLimit\) \{([\s\S]*?)\n      \}/
+      )
+      expect(exitBlock).not.toBeNull()
+      // 冻结分支里要调用 applyTitleMotion（把 alpha 推到 0）
+      expect(exitBlock[1]).toContain('applyTitleMotion()')
+      // 且 currentProgress 被置为 1（alpha 由它派生）
+      expect(exitBlock[1]).toContain('currentProgress = 1')
+    })
+
+    test('视口观察器不单信 IO 快照：越过墙尾一律算「不可见」', () => {
+      // 恢复滚动时 IO 可能先拿恢复**之前**的旧矩形报一次「可见」、
+      // 再报「不可见」，两次回调先后不保证 → 谁后到谁说了算，
+      // 题字会停在满透明、回顶键也会一直藏着。这里用滚动位置兜底。
+      const observerBlock = themeSource.match(
+        /const viewObserver = new IntersectionObserver\(([\s\S]*?)\n    \)/
+      )
+      expect(observerBlock).not.toBeNull()
+      expect(observerBlock[1]).toContain('scrolledPast')
+      expect(observerBlock[1]).toContain('cachedBottomLimit')
+      expect(observerBlock[1]).toContain('!scrolledPast')
+    })
   })
 
   describe('fixed 定位的前置条件：祖先链不得含包含块属性', () => {

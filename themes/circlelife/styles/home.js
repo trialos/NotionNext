@@ -1,275 +1,11 @@
 /**
- * Circle of Life — home：Hero 抽牌 + Timeline + Cards + deck 触控补充
+ * Circle of Life — home：Timeline + Cards
+ *
+ * 首页的「精选文章章」与收尾「近期」段已迁到 styles/homeArticles.js
+ * （一文一屏 + 时间标尺 + 单栏排版），本片段只留列表页仍在用的
+ * 时间线 / 卡片形态。抽牌（LatestCard）已随首页改版下线。
  */
 export const homeStyle = `
-      /* —— Hero deck (抽牌 · outgoing 克隆) —— */
-      #theme-circlelife .cl-latest-card,
-      #theme-circlelife .cl-hero,
-      #theme-circlelife .cl-deck {
-        position: relative;
-        margin-bottom: 1.75rem;
-        border: none;
-        background: transparent;
-        box-shadow: none;
-        padding: 0;
-        /* 翻页 DOM 变化不参与滚动锚定：防止卡片半露时自动翻页带动页面跳动 */
-        overflow-anchor: none;
-      }
-      #theme-circlelife .cl-deck-stage {
-        position: relative;
-        z-index: 1;
-        min-height: 11.5rem;
-      }
-      #theme-circlelife .cl-deck-under,
-      #theme-circlelife .cl-deck-current,
-      #theme-circlelife .cl-deck-outgoing {
-        position: absolute;
-        inset: 0;
-      }
-      #theme-circlelife .cl-deck-under {
-        z-index: 0;
-        transform: translateY(8px) scale(0.978);
-        opacity: 0.7;
-        pointer-events: none;
-        /* under never animates up/down on flip */
-        transition: none;
-      }
-      #theme-circlelife .cl-deck-current {
-        z-index: 1;
-      }
-      #theme-circlelife .cl-deck.is-swap-instant .cl-deck-current,
-      #theme-circlelife .cl-deck.is-swap-instant .cl-deck-current * {
-        transition: none !important;
-      }
-      #theme-circlelife .cl-deck-outgoing {
-        z-index: 2;
-        pointer-events: none;
-        transform-origin: 70% 100%;
-        transition:
-          transform 0.34s var(--cl-ease),
-          opacity 0.34s var(--cl-ease),
-          filter 0.34s var(--cl-ease);
-      }
-      /* next：左滑飞出；prev：右滑飞出 */
-      #theme-circlelife .cl-deck-outgoing.is-fly-next {
-        transform: translateX(-22%) rotate(-5deg) translateY(-8px);
-        opacity: 0;
-        filter: blur(0.3px);
-      }
-      #theme-circlelife .cl-deck-outgoing.is-fly-prev {
-        transform: translateX(22%) rotate(5deg) translateY(-8px);
-        opacity: 0;
-        filter: blur(0.3px);
-      }
-      #theme-circlelife .cl-deck-face {
-        position: relative;
-        height: 100%;
-        min-height: 11.5rem;
-        border: 1px solid var(--cl-border);
-        border-radius: var(--cl-radius);
-        background: var(--cl-surface);
-        overflow: hidden;
-        box-shadow: 0 1px 0 color-mix(in srgb, var(--cl-text) 4%, transparent);
-      }
-      #theme-circlelife .cl-deck-face--under {
-        box-shadow: none;
-      }
-      #theme-circlelife .cl-deck-cover {
-        position: absolute;
-        inset: 0;
-        z-index: 0;
-      }
-      #theme-circlelife .cl-deck-cover-img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: center;
-        display: block;
-      }
-      #theme-circlelife .cl-deck-cover-shade {
-        position: absolute;
-        inset: 0;
-        background:
-          linear-gradient(
-            180deg,
-            color-mix(in srgb, var(--cl-surface) 18%, transparent) 0%,
-            color-mix(in srgb, var(--cl-surface) 55%, transparent) 42%,
-            color-mix(in srgb, var(--cl-surface) 92%, transparent) 78%,
-            var(--cl-bg) 100%
-          ),
-          linear-gradient(
-            90deg,
-            color-mix(in srgb, var(--cl-surface) 35%, transparent) 0%,
-            transparent 40%
-          );
-      }
-      .dark #theme-circlelife .cl-deck-cover-shade {
-        background: linear-gradient(
-          180deg,
-          color-mix(in srgb, var(--cl-surface) 30%, transparent) 0%,
-          color-mix(in srgb, var(--cl-surface) 70%, transparent) 50%,
-          var(--cl-bg) 100%
-        );
-      }
-      /* 抽牌叠卡：移动端只露标题 —— 上一档被视口顶边切到时，
-         切到的是一行标题而不是半段正文（观感从「被切断」变成「卡片滑过去了」）。
-         照片底缘也溶进页面纸色（上面的 shade 收尾色 = --cl-bg），
-         消掉照片 → 纸面那条生硬的直线。 */
-      @media (max-width: 1023px) {
-        #theme-circlelife .cl-deck-face--under .cl-latest-summary {
-          display: none;
-        }
-      }
-      #theme-circlelife .cl-deck-content {
-        position: relative;
-        z-index: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        min-height: 11.5rem;
-        padding: 1.05rem 1.15rem 1.15rem;
-        gap: 0.35rem;
-      }
-      #theme-circlelife .cl-deck-face.has-cover .cl-latest-title {
-        text-shadow: 0 1px 0 color-mix(in srgb, var(--cl-surface) 40%, transparent);
-      }
-      #theme-circlelife .cl-deck-toolbar {
-        position: relative;
-        z-index: 3;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-top: 0.65rem;
-        gap: 0.5rem;
-      }
-      #theme-circlelife .cl-hero-controls {
-        display: flex;
-        align-items: center;
-        gap: 0.35rem;
-        font-family: var(--cl-font-mono);
-        font-size: 0.68rem;
-        color: var(--cl-faint);
-        letter-spacing: 0.06em;
-      }
-      #theme-circlelife .cl-hero-count {
-        font-family: var(--cl-font-mono);
-        font-size: 0.68rem;
-        color: var(--cl-faint);
-        letter-spacing: 0.08em;
-        font-variant-numeric: tabular-nums;
-      }
-      #theme-circlelife .cl-hero-nav {
-        position: relative;
-        width: 2.25rem;
-        height: 2.25rem;
-        border-radius: 9999px;
-        border: 1px solid var(--cl-border);
-        background: transparent;
-        color: var(--cl-muted);
-        cursor: pointer;
-        line-height: 1;
-        font-size: 1.1rem;
-        transition:
-          color 0.15s var(--cl-ease),
-          border-color 0.15s var(--cl-ease),
-          background 0.15s var(--cl-ease);
-      }
-      /* 视觉 36px 圆钮，热区扩到 44px */
-      #theme-circlelife .cl-hero-nav::after {
-        content: '';
-        position: absolute;
-        inset: -0.25rem;
-        border-radius: 9999px;
-      }
-      #theme-circlelife .cl-hero-nav:hover {
-        color: var(--cl-accent);
-        border-color: var(--cl-accent);
-        background: var(--cl-accent-soft);
-      }
-      #theme-circlelife .cl-latest-title {
-        align-self: flex-start;
-        display: -webkit-box;
-        width: fit-content;
-        max-width: 100%;
-        overflow: hidden;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
-        background-image: none;
-        font-family: var(--cl-font-display);
-        font-size: clamp(1.3rem, 3.2vw, 1.7rem);
-        font-weight: 600;
-        letter-spacing: -0.02em;
-        line-height: 1.3;
-        color: var(--cl-text);
-        text-decoration: underline;
-        text-decoration-color: transparent;
-        text-decoration-thickness: 1px;
-        text-underline-offset: 0.18em;
-        transition: color 0.15s var(--cl-ease), text-decoration-color 0.15s var(--cl-ease);
-      }
-      #theme-circlelife .cl-latest-title:hover {
-        color: var(--cl-accent);
-        text-decoration-color: var(--cl-accent);
-      }
-      #theme-circlelife .cl-latest-summary {
-        margin: 0.15rem 0 0;
-        font-size: 0.88rem;
-        line-height: 1.6;
-        color: var(--cl-muted);
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        max-width: 36em;
-      }
-      #theme-circlelife .cl-deck-chip-row {
-        margin-top: 0.35rem;
-      }
-      #theme-circlelife .cl-chip--on-cover {
-        backdrop-filter: blur(4px);
-      }
-      #theme-circlelife .cl-deck-dots {
-        position: relative;
-        z-index: 3;
-        display: flex;
-        justify-content: center;
-        gap: 0.4rem;
-        margin-top: 0.55rem;
-      }
-      #theme-circlelife .cl-hero-dot {
-        position: relative;
-        width: 6px;
-        height: 6px;
-        padding: 0;
-        border-radius: 9999px;
-        border: 1px solid var(--cl-border-strong);
-        background: transparent;
-        cursor: pointer;
-        transition:
-          background 0.15s var(--cl-ease),
-          border-color 0.15s var(--cl-ease),
-          transform 0.15s var(--cl-ease);
-      }
-      /* 圆点视觉 6px 不变，伪元素扩出 24px 触控热区 */
-      #theme-circlelife .cl-hero-dot::after {
-        content: '';
-        position: absolute;
-        inset: -9px;
-        border-radius: 9999px;
-      }
-      #theme-circlelife .cl-hero-dot.is-active {
-        background: var(--cl-accent);
-        border-color: var(--cl-accent);
-        transform: scale(1.2);
-      }
-      @media (max-width: 640px) {
-        #theme-circlelife .cl-deck-stage,
-        #theme-circlelife .cl-deck-face,
-        #theme-circlelife .cl-deck-content {
-          min-height: 10.25rem;
-        }
-      }
-
       /* —— Timeline —— */
       #theme-circlelife .cl-timeline {
         padding-bottom: 1.5rem;
@@ -397,15 +133,6 @@ export const homeStyle = `
         text-transform: none;
         color: var(--cl-faint);
       }
-      #theme-circlelife .cl-deck-stage {
-        touch-action: pan-y;
-        cursor: grab;
-        user-select: none;
-      }
-      #theme-circlelife .cl-deck-stage:active {
-        cursor: grabbing;
-      }
-
       /* —— 首页 8° 倾斜交错流光照片墙 (HomeTiltWall) —— */
       /* 首页容器本身已是全宽，无需 100vw + 负 margin 的满屏 hack（会带出横向滚动条） */
       /* 区块随页面滚走（不 sticky）：去掉粘连子树后 iOS 合成压力最小，
@@ -741,60 +468,22 @@ export const homeStyle = `
         );
         /* 焦点线：焦点条目恒定停在这里（= 裁切窗口的正中） */
         --cl-home-album-focus: var(--cl-home-album-focus-line);
-        /* 焦点竖线的颜色（朱砂） */
-        --cl-home-album-rule: var(--cl-accent);
+        /* 焦点竖线的颜色（朱砂）—— 与文章时间尺的游标同一条「位置标记」语汇 */
+        --cl-home-album-rule: var(--cl-home-mark);
         max-width: var(--cl-wide-max);
         margin-inline: auto;
-        margin-block: clamp(4rem, 9vw, 8rem);
+        /* 章节间距与精选文章段统一（照片墙→文章、文章→影集两处一致） */
+        margin-block: var(--cl-home-section-pad);
         padding-inline: var(--cl-wide-pad);
       }
 
-      /* 段头：等宽眉题 + 衬线大标题 + 右侧「全部影集」 */
+      /* 段头：与精选文章段同形 —— 只有右上角一个出口（样式共用 .cl-home-sec-link） */
       #theme-circlelife .cl-home-album-head {
         display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
+        align-items: baseline;
+        justify-content: flex-end;
         gap: 1.5rem;
-        margin-bottom: clamp(1.75rem, 3vw, 2.75rem);
-        padding-bottom: 0.85rem;
-        border-bottom: 1px solid var(--cl-border);
-      }
-      #theme-circlelife .cl-home-album-head-text {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        padding-left: 0.85rem;
-        border-left: 2px solid var(--cl-accent);
-      }
-      #theme-circlelife .cl-home-album-kicker {
-        font-family: var(--cl-font-mono);
-        font-size: 0.6875rem;
-        font-weight: 500;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        color: var(--cl-muted);
-        line-height: 1;
-      }
-      #theme-circlelife .cl-home-album-title {
-        margin: 0;
-        font-family: var(--cl-font-display);
-        font-size: clamp(1.75rem, 3.6vw, 2.4rem);
-        font-weight: 600;
-        letter-spacing: -0.025em;
-        line-height: 1.2;
-        color: var(--cl-text);
-        text-wrap: balance;
-      }
-      #theme-circlelife .cl-home-album-all {
-        font-family: var(--cl-font-display);
-        font-size: 0.9rem;
-        color: var(--cl-muted);
-        text-decoration: none;
-        white-space: nowrap;
-        transition: color var(--cl-dur) var(--cl-ease);
-      }
-      #theme-circlelife .cl-home-album-all:hover {
-        color: var(--cl-accent);
+        margin-bottom: clamp(1rem, 1.8vw, 1.5rem);
       }
 
       /* 主体：左列目录 + 右侧 sticky 面板 */
@@ -852,7 +541,7 @@ export const homeStyle = `
         display: flex;
         align-items: center;
         opacity: 0;
-        transition: opacity var(--cl-home-album-switch) var(--cl-ease);
+        transition: opacity var(--cl-home-switch) var(--cl-ease);
       }
       #theme-circlelife .cl-home-album-entry.is-active {
         opacity: 1;
@@ -1115,7 +804,7 @@ export const homeStyle = `
            淡入一定在下一次换挡前结束，垫底那张始终是不透明的
            → 被藏起来的两张永远不会从缝里透出来。 */
         #theme-circlelife .cl-home-album-cover.is-active {
-          animation: clHomeAlbumCoverIn var(--cl-home-album-switch) var(--cl-ease)
+          animation: clHomeAlbumCoverIn var(--cl-home-switch) var(--cl-ease)
             both;
         }
         @keyframes clHomeAlbumCoverIn {

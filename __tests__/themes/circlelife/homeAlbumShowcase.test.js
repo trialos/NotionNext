@@ -500,7 +500,7 @@ describe('circlelife 首页精选影集段', () => {
       expect(active).not.toBeNull()
       expect(active[1]).toContain('opacity: 1')
       // 交叉淡入的时长走 token（与封面溶解同源）
-      expect(entry[1]).toContain('var(--cl-home-album-switch)')
+      expect(entry[1]).toContain('var(--cl-home-switch)')
     })
 
     test('封面切换是溶解：旧封面不透明垫底，新封面淡入', () => {
@@ -531,9 +531,9 @@ describe('circlelife 首页精选影集段', () => {
       )
       expect(active).not.toBeNull()
       // 淡入走 token（与名字的交叉淡入同源），且必须短于换挡间隔（250ms）
-      expect(active[1]).toContain('clHomeAlbumCoverIn var(--cl-home-album-switch)')
+      expect(active[1]).toContain('clHomeAlbumCoverIn var(--cl-home-switch)')
       const { tokenStyle } = require('../../../themes/circlelife/styles/tokens')
-      expect(tokenStyle).toContain('--cl-home-album-switch: 240ms')
+      expect(tokenStyle).toContain('--cl-home-switch: 240ms')
       // 只画「当前 + 上一档」：其余封面被完全盖住，留着只是多合成两层全屏图
       expect(mobileStyle).toContain('.cl-home-album-cover.is-muted')
       expect(mobileStyle).toMatch(
@@ -817,20 +817,16 @@ describe('circlelife 首页精选影集段', () => {
       expect(showcaseSource).toContain('syncFocus()')
     })
 
-    test('文章段首尾：影集段照片不再压住下面的抽牌与时间线', () => {
+    test('文章段首尾：影集段照片不再压住下面的精选文章章', () => {
       // 舞台不得用负下边距抵消占位（sticky 底部约束会失效）
       const stage = mobileStyle.match(
         /\.cl-home-album-stage \{([\s\S]*?)\n\s{8}\}/
       )
       expect(stage).not.toBeNull()
       expect(stage[1]).not.toContain('margin-bottom: -100vh')
-      // 抽牌叠卡在移动端只露标题（被视口顶边切到时不是半段正文）
-      expect(homeStyle).toMatch(
-        /\.cl-deck-face--under \.cl-latest-summary \{\s*display: none;/
-      )
-      // 照片 → 纸面：抽牌封面底缘溶进页面纸色
-      expect(homeStyle).toContain('var(--cl-bg) 100%')
-      // 时间线首行让开导航带
+      // 照片 → 纸面：封面底部压暗溶进页面纸色
+      expect(homeStyle).toContain('.cl-home-album-scrim')
+      // 时间线首行让开导航带（列表页仍用时间线）
       expect(homeStyle).toMatch(
         /\.cl-timeline \{[^}]*scroll-margin-top: calc\(var\(--cl-nav-band\) \+ 1rem\)/
       )
@@ -912,25 +908,30 @@ describe('circlelife 首页精选影集段', () => {
   })
 
   describe('DOM 与无障碍', () => {
-    test('段标题是 h2（首页已有 h1，不得制造第二个 h1）', () => {
-      expect(showcaseSource).toContain(
-        "<h2 id='cl-home-album-title' className='cl-home-album-title'>"
-      )
+    test('段标题已撤：section 用 aria-label 命名（首页已有 h1，不得制造第二个 h1）', () => {
+      // 段头只留右上角一个出口（与精选文章段同形），标题与眉题都已下线
+      expect(showcaseSource).toContain("aria-label='精选影集'")
+      expect(showcaseSource).not.toContain('cl-home-album-title')
+      expect(showcaseSource).not.toContain('cl-home-album-kicker')
       expect(showcaseSource).not.toContain('<h1')
       expect(showcaseSource).not.toContain('PageMast')
+      // 出口与文章段共用同一个类 → 两段段头同形
+      expect(showcaseSource).toContain("className='cl-home-sec-link'")
     })
 
-    test('影集名只在左列出现：左列是 h3，中间面板不再有专辑名', () => {
+    test('影集名只在左列出现：左列是 h2，中间面板不再有专辑名', () => {
       // 名字由左列承担（左列是本段最大的字）
       expect(showcaseSource).toContain(
         "className='cl-home-album-item-name'"
       )
-      expect(showcaseSource).toContain('<h3')
+      // 段标题已撤 → h1（题字）之后直接是 h2，避免 h1 → h3 的层级跳跃
+      expect(showcaseSource).toContain('<h2')
+      expect(showcaseSource).not.toContain('<h3')
       // 中间面板不再重复渲染专辑名
       // （注意：id 前缀 cl-home-album-name- 是合法的，故按 className 精确匹配）
       expect(showcaseSource).not.toContain("className='cl-home-album-name'")
       expect(showcaseSource).not.toContain('className="cl-home-album-name"')
-      expect(showcaseSource).not.toContain('{active?.name}</h3>')
+      expect(showcaseSource).not.toContain('{active?.name}</h2>')
       expect(albumStyle).not.toContain('.cl-home-album-name')
     })
 

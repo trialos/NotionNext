@@ -227,11 +227,22 @@ describe('mapImgUrl 外链图片', () => {
       expect(proxySource(zoomed)).toBe(source)
     })
 
-    it.each([
-      encodeURIComponent(hotlinkBlockedUrl),
-      'https%3A%2F%2Fimages.unsplash.com%2Fbad%ZZ'
-    ])('未知图床或无效编码保持原样：%s', encodedSource => {
-      const image = `${BLOG.NOTION_HOST}/image/${encodedSource}?table=block&id=other-image`
+    it('未知图床：源地址不被改写，只附加档位参数', () => {
+      const image = `${BLOG.NOTION_HOST}/image/${encodeURIComponent(
+        hotlinkBlockedUrl
+      )}?table=block&id=other-image`
+
+      const compressed = compressImage(image, 1920)
+
+      // 源地址原样保留（不被重新编码 / 不被截断）；
+      // 代理 URL 上的 width 是「要 Notion 给多宽」的档位参数，照常附加
+      expect(proxySource(compressed)).toBe(hotlinkBlockedUrl)
+      expect(new URL(compressed).searchParams.get('width')).toBe('1920')
+      expect(new URL(compressed).searchParams.get('cache')).toBe('v2')
+    })
+
+    it('无效编码保持原样', () => {
+      const image = `${BLOG.NOTION_HOST}/image/https%3A%2F%2Fimages.unsplash.com%2Fbad%ZZ?table=block&id=other-image`
 
       expect(compressImage(image, 1920)).toBe(image)
     })

@@ -116,6 +116,17 @@ export const tokenStyle = `
         /* 英文副题字号小，光晕必须更紧，否则糊成一团 */
         --cl-wall-halo-sm: 0 0 2px rgba(16, 12, 8, 0.95), 0 1px 3px rgba(16, 12, 8, 0.7),
           0 0 8px rgba(16, 12, 8, 0.5);
+        /* —— 首页三段共通语言（照片墙 → 精选文章 → 精选影集）——
+           同一副骨架 + 同一条换档曲线 + 同一条朱砂位置线 + 同一段垂直节奏，
+           三段才读成同一部连续放映的胶片，而不是三块各自为政的版块。 */
+        /* 换档曲线：文章段游标滑动、影集段换页、题字退场共用同一时长 */
+        --cl-home-switch: 240ms;
+        /* 「位置标记」统一色：2px 朱砂竖线（文章时间尺的游标 / 影集取景框的竖线） */
+        --cl-home-mark: var(--cl-accent);
+        /* 章节之间的统一间距（照片墙→文章、文章→影集两处一致） */
+        --cl-home-section-gap: clamp(3.5rem, 8vw, 7rem);
+        /* 章节间距的最终值：至少让开固定导航胶囊（窄屏导航带更高） */
+        --cl-home-section-pad: max(var(--cl-nav-band), var(--cl-home-section-gap));
         /* —— 首页精选影集段（移动端：封面照片铺底）——
            照片上的文字不能用 --cl-bg / --cl-text（它们随明暗模式反转，
            压在照片上会有一半读不出来）→ 这里给固定浅色，明暗模式同值 */
@@ -132,7 +143,16 @@ export const tokenStyle = `
            ⚠️ 必须短于换挡的最小间隔（JS 的 ALBUM_FOCUS_MIN_MS = 250ms）：
            否则上一次淡入还没结束就换挡，垫底的那张封面仍是半透明的，
            会被藏起来的封面「透」出来（闪一下）。 */
-        --cl-home-album-switch: 240ms;
+        --cl-home-album-switch: var(--cl-home-switch);
+        /* —— 首页精选文章章（一窗一屏）——
+           图版在桌面与移动端同为 3:4，只是宽度不同 → 同一张图在两端
+           是同一个构图（换比例会让主体在手机与电脑上被切得不一样）。 */
+        --cl-home-article-plate: min(clamp(240px, 33vw, 480px), 54svh); /* 桌面图版宽（与影集封面同宽；再受窗口高度约束） */
+        --cl-home-article-plate-sm: 242px; /* 移动端图版宽（比例仍 3:4） */
+        --cl-home-article-measure: 620px; /* 摘要测量宽（文字栏贴右边缘） */
+        --cl-home-article-title: 54px; /* 标题字号（1440 基准；实际用 clamp） */
+        --cl-home-article-focus: 45%; /* 视口焦点线（判定当前篇） */
+        --cl-home-article-switch: var(--cl-home-switch);
       }
 
       /* ≤1023px：胶囊内嵌 2.35rem 汉堡按钮，导航带随之变高。

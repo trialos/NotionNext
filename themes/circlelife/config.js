@@ -12,7 +12,6 @@ const CONFIG = {
   CIRCLELIFE_MENU_SEARCH: true,
 
   CIRCLELIFE_HOME_TIMELINE: true,
-  CIRCLELIFE_HOME_LATEST_CARD: true,
   /**
    * 首页照片墙题字（与照片墙同源的漂移与呼吸）：
    * 第一行「与我同行」+ 第二行「WITH CIRCLE OF LIFE」，关掉后首页不渲染该浮层
@@ -29,6 +28,13 @@ const CONFIG = {
   CIRCLELIFE_HOME_ALBUM_COUNT: 4,
   /** 首页精选影集段总开关 */
   CIRCLELIFE_HOME_ALBUM_SHOWCASE: true,
+  /**
+   * 首页「精选文章」章：一文一屏
+   * 排序规则 = Notion「精选」勾选的（**只显示勾选的，不做最新补齐**）
+   */
+  CIRCLELIFE_HOME_ARTICLE_COUNT: 6,
+  /** 首页精选文章章总开关 */
+  CIRCLELIFE_HOME_ARTICLE_STAGE: true,
   CIRCLELIFE_HOME_RECENT_COUNT: 5,
   CIRCLELIFE_ARTICLE_COVER: true,
 

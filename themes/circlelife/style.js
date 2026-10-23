@@ -10,6 +10,7 @@ import { commonStyle } from './styles/common'
 import { filterTrackStyle } from './styles/filterTrack'
 import { headerStyle } from './styles/header'
 import { homeStyle } from './styles/home'
+import { homeArticlesStyle } from './styles/homeArticles'
 import { mastStyle } from './styles/mast'
 import { tokenStyle } from './styles/tokens'
 
@@ -26,6 +27,7 @@ ${commonStyle}
 ${mastStyle}
 ${filterTrackStyle}
 ${homeStyle}
+${homeArticlesStyle}
 ${archiveStyle}
 ${articleStyle}
 ${albumStyle}

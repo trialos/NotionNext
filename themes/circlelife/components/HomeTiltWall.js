@@ -585,6 +585,9 @@ export default function HomeTiltWall({
           targetProgress = 1
           currentProgress = 1
           applyPanTransform()
+          // 题字也要落到「淡出」终态：只更新平移层的话，--cl-wall-alpha 会冻结在
+          // 上一个值（多半是 1 = 满透明）→ 题字以 fixed 浮层盖在当前内容上。
+          applyTitleMotion()
           if (rafId) {
             cancelAnimationFrame(rafId)
             rafId = null
@@ -628,7 +631,13 @@ export default function HomeTiltWall({
     const viewObserver = new IntersectionObserver(
       entries => {
         const entry = entries[0]
-        const visible = Boolean(entry && entry.isIntersecting)
+        // 不只信 IO 的快照：恢复滚动（从文章返回首页）时，IO 可能先拿恢复**之前**
+        // 算出的旧矩形报一次「可见」、再报「不可见」，两次回调的先后不保证。
+        // 谁后到谁说了算 → 题字会停在满透明度盖在当前内容上、回顶键也一直藏着。
+        // 这里用真实滚动位置兜底：已经越过墙尾就一定算「不可见」。
+        const scrolledPast =
+          (window.scrollY || 0) >= cachedBottomLimit && cachedBottomLimit > 0
+        const visible = Boolean(entry && entry.isIntersecting) && !scrolledPast
         isVisible = visible
 
         // 照片墙在视口内时压制回顶按钮（滚到下方影集/文章列表后自动恢复）
