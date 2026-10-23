@@ -67,6 +67,9 @@
    yarn lint
    yarn test
    ```
+4. **Notion 数据拉取（构建期）**：
+   * 本机访问 `app.notion.com/api/v3` 会被 Cloudflare 拦（403）→ 构建日志出现 `[API<<--异常]: FetchError 403 Forbidden` → 站点回退到「oops」占位页 → 报 `.prev` 序列化错误（退出码 1）。**绕过**：构建时加环境变量 `API_BASE_URL=https://www.notion.so/api/v3`（`blog.config.js` 读该变量；**不要**改仓库默认值，Vercel 侧不受影响）。
+   * 失败构建会把占位数据写进 `.next/cache/notion/data/`（`global_data_*` / `site_*` / `build_static_paths_all_pages_*` 四个小文件）→ 之后即使网络恢复也会持续命中坏缓存、构建永远失败 → 需先删掉这几个文件再重建。
 
 ---
 
