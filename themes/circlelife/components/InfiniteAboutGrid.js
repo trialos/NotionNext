@@ -2,6 +2,10 @@
 
 import { useEffect, useRef, useMemo } from 'react'
 import { useGlobal } from '@/lib/global'
+import {
+  buildSizedSource,
+  computeTargetPixelWidth
+} from './imageSrcset'
 
 // 优雅的保底卡片（无内容时呈现，避免白屏）
 const FALLBACK_CARDS = [
@@ -148,12 +152,16 @@ export default function InfiniteAboutGrid({ cards = [], summary = '', title = ''
           if (entry.isIntersecting) {
             const src = img.dataset.src
             if (src && img.getAttribute('src') !== src) {
-              // srcset 先写，浏览器才会按 DPR 从候选集里选档
-              if (img.dataset.srcset) {
-                img.srcset = img.dataset.srcset
-                if (img.dataset.sizes) img.sizes = img.dataset.sizes
-              }
-              img.src = src
+              // ⚠️ 不用 srcset/sizes：Notion 代理在 srcset 选档路径下按 **CSS 宽度**
+              // 出图、不吃 DPR → Retina 上每张卡片都差 2~3 倍像素 → 被拉伸放大 → 发虚。
+              // 改为直连 width URL，档位按「卡片宽 × DPR」自算。
+              img.src = buildSizedSource(
+                src,
+                computeTargetPixelWidth(
+                  img.clientWidth || 320,
+                  typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1
+                )
+              )
               if (typeof img.decode === 'function') {
                 img
                   .decode()
@@ -170,10 +178,8 @@ export default function InfiniteAboutGrid({ cards = [], summary = '', title = ''
               }
             }
           } else {
-            // 滑出视口 800px 缓冲区之外：成对卸载 src/srcset，把解码位图归还给系统
+            // 滑出视口 800px 缓冲区之外：成对卸载 src，把解码位图归还给系统
             if (img.getAttribute('src') && !img.dataset.critical) {
-              if (img.hasAttribute('srcset')) img.removeAttribute('srcset')
-              if (img.hasAttribute('sizes')) img.removeAttribute('sizes')
               img.removeAttribute('src')
               img.classList.remove('is-loaded')
             }
@@ -215,18 +221,14 @@ export default function InfiniteAboutGrid({ cards = [], summary = '', title = ''
       img.decoding = 'async'
       img.draggable = false
       img.dataset.src = card.src || ''
-      if (card.srcSet) img.dataset.srcset = card.srcSet
-      if (card.sizes) img.dataset.sizes = card.sizes
 
       // 首屏关键路径卡片（Set A 的前 cols 张）：免等待直接挂载；
-      // 只有第一张拿 high 抓取优先级，避免多图互抢带宽
+      // 只有第一张拿 high 抓取优先级，避免多图互抢带宽。
+      // 第一张的 URL 必须与页面级 preload 的 href **完全一致**（= card.src，
+      // 1024 档直连 URL）→ 预加载精确命中，不白下载。
       const isCritical = isSetA && cardIdx < Math.max(2, cols)
       if (isCritical && card.src) {
         img.dataset.critical = 'true'
-        if (card.srcSet) {
-          img.srcset = card.srcSet
-          if (card.sizes) img.sizes = card.sizes
-        }
         img.src = card.src
         if (isSetA && cardIdx === 0) {
           img.setAttribute('fetchpriority', 'high')

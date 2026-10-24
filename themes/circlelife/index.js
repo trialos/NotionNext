@@ -50,7 +50,7 @@ import { SideBar } from './components/SideBar'
 import PageMast from './components/PageMast'
 import TlPageHero from './components/TlPageHero'
 import CONFIG from './config'
-import { buildImageSources } from './components/imageSrcset'
+import { buildSizedSource, computeTargetPixelWidth } from './components/imageSrcset'
 import { Style } from './style'
 
 const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
@@ -340,6 +340,26 @@ const LayoutSlug = props => {
   const waiting404 = siteConfig('POST_WAITING_TIME_FOR_404') * 1000
   // Notion Page 型页面（关于/往期整理等）用统一刊头；普通文章保持 hero+meta
   const isPage = post?.type === 'Page'
+  const ARTICLE_CARD = siteConfig('CIRCLELIFE_ARTICLE_CARD', false, CONFIG)
+  /**
+   * 头图取图档位：SSR 先给 1024 档（移动端够用），挂载后按「显示宽 × DPR」升级。
+   *
+   * 为什么不用 srcset：Notion 代理在 srcset 选档路径下按 **CSS 宽度**出图、
+   * 不吃 DPR → Retina 上头图差 2~3 倍像素（实测 440@DPR2 只拿到 343×343，
+   * 而显示要 880×400）→ 被拉伸放大 → 发虚。直连 width URL 才严格按参数出图。
+   */
+  const [coverTier, setCoverTier] = useState(1024)
+  useEffect(() => {
+    const update = () => {
+      const displayWidth = ARTICLE_CARD ? 768 : window.innerWidth
+      setCoverTier(
+        computeTargetPixelWidth(displayWidth, window.devicePixelRatio || 1)
+      )
+    }
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [ARTICLE_CARD])
   useEffect(() => {
     // 404
     if (!post) {
@@ -365,11 +385,6 @@ const LayoutSlug = props => {
       ) : (
         post && (
           (() => {
-            const ARTICLE_CARD = siteConfig(
-              'CIRCLELIFE_ARTICLE_CARD',
-              false,
-              CONFIG
-            )
             const PROSE_INDENT = siteConfig(
               'CIRCLELIFE_PROSE_INDENT',
               true,
@@ -380,25 +395,23 @@ const LayoutSlug = props => {
               (post.pageCoverThumbnail || post.pageCover)
             const hasToc = Boolean(post.toc && post.toc.length > 2)
 
-            // 封面取图：优先 Notion 原图代理地址，归一到 2048 档保全出血清晰度
+            // 封面取图：直连 Notion 的 width URL，档位按「显示宽 × DPR」自算。
             // （LazyImage 会把 width 改写封顶 1080 且不透传 srcSet，故封面直出 img）
+            //
+            // ⚠️ **不再走 srcset**（2026-10-24 实测）：Notion 代理在 srcset 选档路径下
+            // 按 **CSS 宽度**出图、不吃 DPR → Retina 上每张头图都差 2~3 倍像素
+            // （实测 440 宽 @DPR2 的头图只拿到 343×343，而显示要 880×400）→ 被拉伸放大 → 发虚。
+            // 直连路径则严格按 `width` 参数出图，自己算档位就正好。
             const coverSrc = post.pageCover
               ? compressImage(post.pageCover, 1600)
               : post.pageCoverThumbnail
-            const coverSources = buildImageSources(coverSrc, {
-              sizes: ARTICLE_CARD
-                ? '(max-width: 767px) 100vw, 48rem'
-                : '100vw',
-              widths: [1024, 2048]
-            })
+            const coverUrl = buildSizedSource(coverSrc, coverTier)
 
             const cover = hasCover ? (
               <div className='cl-article-cover'>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={coverSources.src}
-                  srcSet={coverSources.srcSet || undefined}
-                  sizes={coverSources.sizes || undefined}
+                  src={coverUrl}
                   alt=''
                   className='cl-article-cover-img'
                   fetchPriority='high'

@@ -36,16 +36,16 @@ const Slug = props => {
   const coverLcp = props.coverLcp
   return (
     <>
-      {/* 头图 LCP 预加载：必须同时给出 imagesrcset / imagesizes，
-          否则浏览器按 sizes 选中 1024 档、却已预加载 2048 档，会白下载两份 */}
+      {/* 头图 LCP 预加载：**只给 href**（直连 width URL）。
+          不带 imagesrcset / imagesizes —— 候选集路径下 Notion 代理按 CSS 宽度出图、
+          不吃 DPR（Retina 上头图发虚），且带候选集会让预加载落在另一个 URL 上、
+          白下载一份。href 与主题 SSR 的首屏档位一致 → 精确命中。 */}
       {coverLcp?.src ? (
         <Head>
           <link
             rel='preload'
             as='image'
             href={coverLcp.src}
-            imageSrcSet={coverLcp.srcSet || undefined}
-            imageSizes={coverLcp.sizes || undefined}
             fetchPriority='high'
           />
         </Head>

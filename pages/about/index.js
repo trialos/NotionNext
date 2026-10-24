@@ -32,14 +32,14 @@ const AboutIndex = props => {
   return (
     <>
       <Head>
-        {/* 首屏 LCP：只预加载首图一张，并与 srcset 候选集对齐，避免二次下载 */}
+        {/* 首屏 LCP：只预加载首图一张，**只给 href**（直连 width URL）。
+            候选集路径下 Notion 代理按 CSS 宽度出图、不吃 DPR（Retina 上发虚），
+            且带候选集会让预加载落在另一个 URL 上 → 白下载一份。 */}
         {firstCard?.src && (
           <link
             rel='preload'
             as='image'
             href={firstCard.src}
-            imageSrcSet={firstCard.srcSet || undefined}
-            imageSizes={firstCard.sizes || undefined}
             fetchPriority='high'
           />
         )}
