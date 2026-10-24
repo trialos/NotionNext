@@ -335,11 +335,26 @@ describe('circlelife 首页精选文章章', () => {
 
     test('图版用 3:4 直角框，桌面与移动端同比例（构图一致）', () => {
       expect(homeArticlesStyle).toContain('aspect-ratio: 3 / 4')
-      expect(homeArticlesStyle).toContain('object-fit: cover')
-      // img 必须绝对定位，否则 height:100% 会把 aspect-ratio 顶掉
+      // 图版已改 canvas：裁剪由 drawCover 按 object-fit:cover 规则完成
+      // （见 CanvasImage.js）。canvas 必须铺满框。
       expect(homeArticlesStyle).toMatch(
-        /\.cl-home-article-plate-frame img \{[^}]*position: absolute;/
+        /\.cl-home-article-plate-img \{[^}]*position: absolute;/
       )
+      expect(homeArticlesStyle).toMatch(
+        /\.cl-home-article-plate-img \{[^}]*width: 100%;/
+      )
+      expect(homeArticlesStyle).toMatch(
+        /\.cl-home-article-plate-img \{[^}]*height: 100%;/
+      )
+      // 裁剪算法（cover + 焦点）必须有实现，不能只靠 CSS
+      const canvasSource = readFile(
+        'themes',
+        'circlelife',
+        'components',
+        'CanvasImage.js'
+      )
+      expect(canvasSource).toContain('export function computeCoverRect')
+      expect(canvasSource).toContain('export function drawCover')
     })
 
     test('一窗一屏：窗口钉住 + 一段滚动行程（不是一篇一屏）', () => {
@@ -463,8 +478,17 @@ describe('circlelife 首页精选文章章', () => {
       expect(homeArticlesStyle).toContain('will-change: transform')
     })
 
-    test('图版是装饰图（alt 空），标题在文字里', () => {
-      expect(stageSource).toMatch(/<img[\s\S]{0,220}alt=''/)
+    test('图版是装饰图（canvas aria-hidden），标题在文字里', () => {
+      // 图版改用 canvas：canvas 没有 alt，装饰语义用 aria-hidden 表达
+      const canvasSource = readFile(
+        'themes',
+        'circlelife',
+        'components',
+        'CanvasImage.js'
+      )
+      expect(canvasSource).toContain("'aria-hidden': 'true'")
+      expect(stageSource).toContain("className='cl-home-article-plate-img'")
+      expect(stageSource).not.toMatch(/<img[\s\S]{0,220}alt=''/)
     })
   })
 

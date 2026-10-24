@@ -114,13 +114,14 @@ describe('文章封面取景：Notion 裁剪焦点 + 首页单独封面', () => 
       expect(low.pageCoverPosition).toBe(0)
     })
 
-    test('横幅与图版的 img 都按焦点定位（内联样式覆盖写死的 center）', () => {
-      // 文章页横幅
+    test('横幅与图版都按焦点定位（横幅用内联 objectPosition，图版用 canvas 的 position）', () => {
+      // 文章页横幅：仍是 <img>，内联 objectPosition 覆盖样式里的 center
       expect(themeIndexSource).toContain('post.pageCoverPosition ?? 0.5')
       expect(themeIndexSource).toContain('objectPosition')
-      // 首页图版
+      // 首页图版：已改 canvas（不进 LCP 候选）→ 焦点改由 canvas 的 position 传入
       expect(stageSource).toContain('article.cover.pos ?? 0.5')
-      expect(stageSource).toContain('objectPosition')
+      expect(stageSource).toContain('position={`50% ${(article.cover.pos ?? 0.5) * 100}%`}')
+      expect(stageSource).not.toContain('objectPosition')
     })
   })
 

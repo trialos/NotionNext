@@ -128,13 +128,15 @@ export const homeArticlesStyle = `
     overflow: hidden;
     background: var(--cl-paper-2);
   }
-  #theme-circlelife .cl-home-article-plate-frame img {
+  /* 图版是 canvas（不是 <img>）：canvas 的像素不进入 LCP 候选，
+     滚到影集段/文章段时不会再把 LCP 顶到十几秒（见 CanvasImage.js 的说明）。
+     裁剪与缩放由 canvas 自己按 object-fit:cover + Notion 取景焦点完成，
+     位图按源图尺寸分配 → 显存与原来的 <img> 解码纹理同口径。 */
+  #theme-circlelife .cl-home-article-plate-img {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    object-position: center;
     display: block;
   }
   /* 图版下面不再重复「分类 · 日期」——文字区的 meta 行已经有一份。

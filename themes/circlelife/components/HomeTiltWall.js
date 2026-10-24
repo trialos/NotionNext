@@ -4,6 +4,7 @@ import { siteConfig } from '@/lib/config'
 import { useEffect, useRef, useMemo } from 'react'
 import CONFIG from '../config'
 import { buildImageSources } from './imageSrcset'
+import { loadIntoCanvas } from './CanvasImage'
 import {
   computeTiltProgress,
   computeTiltTravel,
@@ -258,27 +259,56 @@ export default function HomeTiltWall({
       }
     }
 
-    const mountImage = img => {
+    // 卡片分两种承载：
+    // - **首屏那几张仍是 <img>**：它们是首屏最大的 LCP 候选，且正好对应页面级
+    //   preload（fetchpriority=high）。保留 <img> 才能让 preload 精确命中，
+    //   同时给整页一个「大候选」——之后滚来滚去，任何重新绘制的元素
+    //   （题字、影集封面…）都比它小，换不掉它 → LCP 稳定在首屏。
+    // - **其余卡片是 <canvas>**：canvas 的像素不进入 LCP 候选 → 照片墙深处
+    //   那些更大的卡片不会把 LCP 顶到十几秒。裁剪由 drawCover 按
+    //   object-fit:cover 完成（见 CanvasImage.js）。
+    const mountImage = el => {
       if (isDestroyed) return
-      const src = img.dataset.src
-      if (!src || img.getAttribute('src') === src) return
-      // srcset 必须先写：sizes 与候选集齐备后浏览器才会按 DPR 选档
-      if (img.dataset.srcset) {
-        img.srcset = img.dataset.srcset
-        if (img.dataset.sizes) img.sizes = img.dataset.sizes
+      const src = el.dataset.src
+      if (!src || el.dataset.mounted === 'true') return
+      el.dataset.mounted = 'true'
+      if (el.tagName === 'CANVAS') {
+        loadIntoCanvas(el, {
+          src,
+          srcSet: el.dataset.srcset,
+          sizes: el.dataset.sizes,
+          fetchPriority: el.dataset.fetchpriority,
+          position: 'center',
+          onReady: () => markLoaded(el)
+        })
+        return
       }
-      img.src = src
-      decodeImage(img)
+      // srcset 必须先写：sizes 与候选集齐备后浏览器才会按 DPR 选档
+      if (el.dataset.srcset) {
+        el.srcset = el.dataset.srcset
+        if (el.dataset.sizes) el.sizes = el.dataset.sizes
+      }
+      el.src = src
+      decodeImage(el)
     }
 
-    // 回收必须与挂载成对：只删 src 而留下 srcset，浏览器仍会按候选集重新拉取
-    const unloadImage = img => {
-      if (img.dataset.critical === 'true') return
-      if (img.hasAttribute('srcset')) img.removeAttribute('srcset')
-      if (img.hasAttribute('sizes')) img.removeAttribute('sizes')
-      if (img.hasAttribute('src')) img.removeAttribute('src')
-      img.classList.remove('is-loaded')
-      const queued = loadQueue.indexOf(img)
+    // 回收必须与挂载成对：
+    // - <img>：删 src/srcset（只删 src 而留下 srcset，浏览器仍会按候选集重新拉取）
+    // - <canvas>：位图置零（把 width 归 0）→ 浏览器立刻释放这块纹理，
+    //   否则解码纹理留在显存里不走 → 离屏卡片会一直占着显存。
+    const unloadImage = el => {
+      if (el.dataset.critical === 'true') return
+      el.dataset.mounted = 'false'
+      if (el.tagName === 'CANVAS') {
+        el.width = 0
+        el.height = 0
+      } else {
+        if (el.hasAttribute('srcset')) el.removeAttribute('srcset')
+        if (el.hasAttribute('sizes')) el.removeAttribute('sizes')
+        if (el.hasAttribute('src')) el.removeAttribute('src')
+      }
+      el.classList.remove('is-loaded')
+      const queued = loadQueue.indexOf(el)
       if (queued > -1) loadQueue.splice(queued, 1)
     }
 
@@ -487,27 +517,37 @@ export default function HomeTiltWall({
       const ratio = card.aspectRatio || 1.333
       item.style.aspectRatio = String(ratio)
 
-      const img = document.createElement('img')
-      img.alt = card.title || 'Circle of Life'
-      img.decoding = 'async'
-      img.draggable = false
-      img.dataset.src = card.src
-      if (card.srcSet) img.dataset.srcset = card.srcSet
-      if (card.sizes) img.dataset.sizes = card.sizes
-
       // 首屏不空窗：前几列立即挂载且不回收
       const immediate = isSetA && colIndex < IMMEDIATE_COLUMNS
+
+      // 首屏那几张用 <img>（大 LCP 候选 + 精确命中页面 preload），
+      // 其余用 <canvas>（不进 LCP 候选）
+      const el = document.createElement(immediate ? 'img' : 'canvas')
       if (immediate) {
-        img.dataset.critical = 'true'
-        mountImage(img)
+        el.alt = card.title || 'Circle of Life'
+        el.decoding = 'async'
+        el.draggable = false
+      } else {
+        el.className = 'cl-home-tilt-canvas'
+        el.setAttribute('role', 'img')
+        el.setAttribute('aria-label', card.title || 'Circle of Life')
+      }
+      el.dataset.src = card.src
+      if (card.srcSet) el.dataset.srcset = card.srcSet
+      if (card.sizes) el.dataset.sizes = card.sizes
+
+      if (immediate) {
+        el.dataset.critical = 'true'
         // 只有与页面 preload 对应的那一张拿最高优先级，其余按默认排队
+        // （必须在挂载**之前**设好：fetchPriority 在请求发出时读取）
         if (isSetA && colIndex === 0 && cardIdx === 0) {
-          img.setAttribute('fetchpriority', 'high')
+          el.setAttribute('fetchpriority', 'high')
         }
+        mountImage(el)
       }
 
-      memoryLifecycleObserver.observe(img)
-      item.appendChild(img)
+      memoryLifecycleObserver.observe(el)
+      item.appendChild(el)
       return item
     }
 

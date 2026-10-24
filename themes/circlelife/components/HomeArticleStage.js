@@ -1,5 +1,6 @@
 import SmartLink from '@/components/SmartLink'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import CanvasImage from './CanvasImage'
 import {
   RULER_MIN_GAP,
   computeRulerPositions,
@@ -203,6 +204,8 @@ export default function HomeArticleStage({ articles = [] }) {
   if (!count) return null
 
   const rangeLabel = formatMonthRange(list.map(a => a.publishDay))
+  // 下一篇：提前加载它的图版 → 换篇时图像已就绪，不闪空白
+  const nextIndex = Math.min(activeIndex + 1, list.length - 1)
 
   return (
     <section
@@ -236,22 +239,16 @@ export default function HomeArticleStage({ articles = [] }) {
                 }}>
                 {article.cover?.src ? (
                   <div className='cl-home-article-plate-frame'>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <CanvasImage
+                      className='cl-home-article-plate-img'
                       src={article.cover.src}
                       srcSet={article.cover.srcSet || undefined}
                       sizes={article.cover.sizes || undefined}
-                      alt=''
-                      loading='lazy'
-                      fetchPriority='low'
-                      decoding='async'
-                      // Notion 自带的封面裁剪焦点（0=顶 0.5=中 1=底）：
-                      // 页面封面回落时按它取景；用独立「首页封面」时为居中（3:4 成品图）
-                      style={{
-                        objectPosition: `50% ${
-                          (article.cover.pos ?? 0.5) * 100
-                        }%`
-                      }}
+                      /* Notion 自带的封面裁剪焦点（0=顶 0.5=中 1=底）：
+                         页面封面回落时按它取景；用独立「首页封面」时为居中（3:4 成品图） */
+                      position={`50% ${(article.cover.pos ?? 0.5) * 100}%`}
+                      /* 当前篇与下一篇提前加载 → 换篇时图像已就绪，不闪空白 */
+                      eager={index === activeIndex || index === nextIndex}
                     />
                   </div>
                 ) : (

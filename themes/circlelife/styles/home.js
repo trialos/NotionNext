@@ -266,6 +266,10 @@ export const homeStyle = `
         background-color: color-mix(in srgb, var(--cl-border, #e5e0d8) 35%, var(--cl-surface, #fff));
       }
 
+      /* 卡片是 canvas（不是 <img>）：canvas 的像素不进入 LCP 候选，
+         照片墙深处那些更大的卡片就不会把首页 LCP 顶到十几秒。
+         裁剪由 drawCover 按 object-fit:cover 完成（见 CanvasImage.js）。 */
+      #theme-circlelife .cl-home-tilt-item canvas,
       #theme-circlelife .cl-home-tilt-item img {
         position: absolute;
         top: 0;
@@ -279,6 +283,7 @@ export const homeStyle = `
         transition: opacity 0.4s ease-out;
       }
 
+      #theme-circlelife .cl-home-tilt-item canvas.is-loaded,
       #theme-circlelife .cl-home-tilt-item img.is-loaded {
         opacity: 1;
       }
@@ -739,7 +744,9 @@ export const homeStyle = `
         display: block;
         width: 100%;
         aspect-ratio: 4 / 5;
-        object-fit: cover;
+        /* 桌面端这张封面同样用 canvas：滚到影集段时它会进视口，
+           <img> 就会成为 LCP 候选（见 CanvasImage.js 的说明）。
+           裁剪由 canvas 按 object-fit:cover 完成。 */
         z-index: 1;
       }
       /* 焦点封面置顶：新封面解码完成前，下层旧封面托底（无空白帧） */
@@ -791,7 +798,11 @@ export const homeStyle = `
           inset: 0;
           width: 100%;
           height: 100%;
-          object-fit: cover;
+          /* 封面是 canvas（不是 <img>）：canvas 的像素不进入 LCP 候选，
+             滚到影集段时不会再把 LCP 顶到十几秒（见 CanvasImage.js 的说明）。
+             裁剪由 canvas 按 object-fit:cover 完成，位图按源图尺寸分配 →
+             显存与原来的 <img> 解码纹理同口径。 */
+          display: block;
           opacity: 1;
           /* iOS 关键：全屏图的淡入必须走合成器。
              不提升图层的话，WebKit 会在淡入的每一帧重画整张舞台

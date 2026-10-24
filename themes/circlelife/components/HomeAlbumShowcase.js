@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import CanvasImage from './CanvasImage'
 import {
   ALBUM_FOCUS_MIN_MS,
   computeFocusProgress,
@@ -258,6 +259,8 @@ export default function HomeAlbumShowcase({ albums = [] }) {
   if (!albums.length) return null
 
   const active = albums[activeIndex] || albums[0]
+  // 下一档：提前加载它，滚过去时照片已就绪（消除「先看到上一档垫底」的空窗）
+  const nextIndex = Math.min(activeIndex + 1, albums.length - 1)
 
   return (
     <section
@@ -277,8 +280,7 @@ export default function HomeAlbumShowcase({ albums = [] }) {
         <div className='cl-home-album-stage' ref={stageRef}>
           {albums.map((album, index) =>
             album.cover?.src ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
+              <CanvasImage
                 key={album.id}
                 className={`cl-home-album-cover ${
                   index === activeIndex ? 'is-active' : ''
@@ -298,10 +300,11 @@ export default function HomeAlbumShowcase({ albums = [] }) {
                 src={album.cover.src}
                 srcSet={album.cover.srcSet || undefined}
                 sizes={album.cover.sizes || undefined}
-                alt=''
-                loading='lazy'
-                fetchPriority='low'
-                decoding='async'
+                /* 当前档与**下一档**都提前加载：影集段在页面最底部，
+                   等滚到才发请求会看到「上一档垫底」的旧照片（用户可感知的
+                   空窗）。提前一档 → 滚过去时照片已就绪，溶解即时完成。 */
+                eager={index === activeIndex || index === nextIndex}
+                position='center'
               />
             ) : null
           )}
@@ -389,11 +392,11 @@ export default function HomeAlbumShowcase({ albums = [] }) {
 
           <figure className='cl-home-album-figure'>
             {/* 全部封面叠在同一个网格单元里：焦点切换时不改 src（不闪白），
-                旧封面留在下层，新封面解码完成前由它托底。 */}
-            {albums.map(album =>
+                旧封面留在下层，新封面解码完成前由它托底。
+                桌面端这张也会在滚到影集段时成为 LCP 候选 → 同样用 canvas。 */}
+            {albums.map((album, index) =>
               album.cover?.src ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <CanvasImage
                   key={album.id}
                   className={`cl-home-album-img ${
                     album.id === active?.id ? 'is-active' : ''
@@ -401,10 +404,10 @@ export default function HomeAlbumShowcase({ albums = [] }) {
                   src={album.cover.src}
                   srcSet={album.cover.srcSet || undefined}
                   sizes={album.cover.sizes || undefined}
-                  alt={album.id === active?.id ? album.name : ''}
-                  loading='lazy'
-                  fetchPriority='low'
-                  decoding='async'
+                  /* canvas 没有 alt → 用 role="img" + aria-label 保留语义 */
+                  ariaLabel={album.id === active?.id ? album.name : undefined}
+                  eager={index === activeIndex || index === nextIndex}
+                  position='center'
                 />
               ) : null
             )}
