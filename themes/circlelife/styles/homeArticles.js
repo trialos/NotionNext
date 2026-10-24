@@ -47,6 +47,14 @@ export const homeArticlesStyle = `
   #theme-circlelife .cl-home-articles-top {
     display: flex;
     justify-content: flex-end;
+    /* 栅格行序**显式绑定**（三块各占一行，不靠自动放置）。
+       原因：移动端撤掉这个出口时用 display:none —— 而 display:none 的元素
+       **不再是 grid item**，自动放置会重排 → stage 被挪进第一行(auto)，
+       而 stage 的子元素全是 position:absolute → 该行高度算成 0 →
+       stage.clientHeight=0 → 图版高度预算失效、被 Math.max(90,…) 兜成
+       90px（实测图版塌成 w=90/h=120 的小方块）。
+       显式 grid-row 让行序与「谁在不在场」解耦。 */
+    grid-row: 1;
     /* 章节退场时面板整体上移，这个出口会从固定导航胶囊底下穿过 →
        退场即淡出，不留「半截字压在胶囊上」的瞬间。 */
     transition: opacity 0.22s var(--cl-ease);
@@ -75,6 +83,7 @@ export const homeArticlesStyle = `
   #theme-circlelife .cl-home-articles-stage {
     position: relative;
     min-height: 0;
+    grid-row: 2;
   }
   #theme-circlelife .cl-home-article {
     position: absolute;
@@ -222,6 +231,7 @@ export const homeArticlesStyle = `
     gap: 1rem;
     /* 满内容宽（与影集段 body 同宽）→ 两段的横向骨架一致 */
     width: 100%;
+    grid-row: 3;
   }
   #theme-circlelife .cl-home-articles-ruler-scroll {
     flex: 1 1 auto;
@@ -322,12 +332,18 @@ export const homeArticlesStyle = `
       max-width: none;
     }
     /* 图版宽度随「可用高度」动态伸缩：宽 = (可用高度) × 3/4，
-       再用 min(100%, …) 兜住屏幕宽 —— 高的手机铺满，矮的窗口自动收，
+       再用 min(100vw, …) 兜住屏幕宽 —— 高的手机铺满，矮的窗口自动收，
        但比例恒为 3:4（与桌面是同一个构图）。
        --plate-w 由 JS 按「文字块实际高度」算好后写入（纯 CSS 的 svh 公式
-       算不准：标题行数、摘要行数都会变）。这里只是 JS 算不出来时的兜底。 */
+       算不准：标题行数、摘要行数都会变）。这里只是 JS 算不出来时的兜底。
+       满屏出血：宽度取视口宽（不是内容列宽），负外边距抵消面板左右内边距
+       → 图片贴到屏幕两边；高度按 3:4 自然派生。文字块仍留 16px 内边距。 */
     #theme-circlelife .cl-home-article-plate {
-      width: var(--plate-w, min(100%, calc((100svh - 21rem) * 0.75)));
+      width: var(--plate-w, min(100vw, calc((100svh - 21rem) * 0.75)));
+      margin-inline: calc(-1 * var(--cl-wide-pad));
+      /* 图版比视口窄时（矮屏装不满宽）居中，而不是贴左缘留一条空白 ——
+         宽度够满时（margin box 正好等于列宽）居中不产生位移，照样出血到屏幕两边。 */
+      justify-self: center;
     }
     #theme-circlelife .cl-home-article-meta {
       margin-bottom: 0.9rem;
@@ -339,8 +355,14 @@ export const homeArticlesStyle = `
       font-size: 0.95rem;
       -webkit-line-clamp: 3;
     }
+    /* 手机上点标题即进文章 → 「继续阅读」撤下（桌面端保留）。
+       图版**不做成链接**：满屏的大图点击区太大、容易误触；跳转入口只有标题。 */
     #theme-circlelife .cl-home-article-cta {
-      margin-top: 1rem;
+      display: none;
+    }
+    /* 手机上不重复导航胶囊里已有的「文章」入口 → 段内出口撤下 */
+    #theme-circlelife .cl-home-articles-top {
+      display: none;
     }
     #theme-circlelife .cl-home-articles-panel {
       padding-bottom: 0.85rem;
@@ -380,7 +402,7 @@ export const homeArticlesStyle = `
       padding-bottom: 0.6rem;
     }
     #theme-circlelife .cl-home-article-plate {
-      width: var(--plate-w, min(100%, calc((100svh - 18rem) * 0.75)));
+      width: var(--plate-w, min(100vw, calc((100svh - 18rem) * 0.75)));
     }
     #theme-circlelife .cl-home-article-title {
       font-size: 1.5rem;

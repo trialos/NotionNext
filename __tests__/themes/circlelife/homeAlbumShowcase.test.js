@@ -613,7 +613,7 @@ describe('circlelife 首页精选影集段', () => {
       )
     })
 
-    test('移动端 CTA 钉在照片右下角（随照片进出，桌面自动不出现）', () => {
+    test('移动端 CTA 放在影集名下面（随照片进出，桌面自动不出现）', () => {
       // CTA 在照片舞台内：舞台是 sticky 的 100vh 照片层
       expect(showcaseSource).toContain("className='cl-home-album-cta'")
       const stageIdx = showcaseSource.indexOf("className='cl-home-album-stage'")
@@ -628,14 +628,19 @@ describe('circlelife 首页精选影集段', () => {
       expect(showcaseSource).toContain(
         "<div className='cl-home-album-scrim' aria-hidden='true' />"
       )
-      // 样式：右下角 + 高于封面叠层 + 固定浅色（照片底部最暗处）
+      // 样式：纵坐标由焦点线推导（名字中心恒在 44vh）+ 靠左与名字对齐
+      // （原为右下角，实测与回顶键重叠 → 改到标题下面）
       const cta = mobileStyle.match(
         /\.cl-home-album-cta \{([\s\S]*?)\n\s{8}\}/
       )
       expect(cta).not.toBeNull()
       expect(cta[1]).toContain('position: absolute')
-      expect(cta[1]).toContain('right: var(--cl-wide-pad)')
-      expect(cta[1]).toContain('bottom: calc(env(safe-area-inset-bottom, 0px) + 1.75rem)')
+      expect(cta[1]).toContain('left: var(--cl-wide-pad)')
+      expect(cta[1]).toContain('right: auto')
+      expect(cta[1]).toContain('bottom: auto')
+      expect(cta[1]).toContain('var(--cl-home-album-focus-line)')
+      expect(cta[1]).not.toContain('right: var(--cl-wide-pad)')
+      expect(cta[1]).not.toContain('bottom: calc(env(safe-area-inset-bottom')
       expect(cta[1]).toContain('z-index: 3')
       expect(cta[1]).toContain('var(--cl-home-album-ink)')
       expect(cta[1]).toContain('text-shadow: var(--cl-wall-halo)')
@@ -1110,6 +1115,28 @@ describe('circlelife 首页精选影集段', () => {
       expect(pagesIndexSource).toContain('featuredPages')
       expect(pagesIndexSource).toContain('restPages')
       expect(pagesIndexSource).toContain('[...featuredPages, ...restPages]')
+    })
+  })
+
+  describe('移动端 CTA 移位（2026-10 末定稿）', () => {
+    test('移动端「进入影集 →」放在影集名下面，不再钉照片右下角', () => {
+      // 右下角实测与回顶键重叠（CTA x=342–424 / y=905–928，回顶键 x=380–422 / y=886–928）
+      expect(mobileStyle).toMatch(
+        /\.cl-home-album-cta \{[^}]*left: var\(--cl-wide-pad\);/
+      )
+      expect(mobileStyle).toMatch(/\.cl-home-album-cta \{[^}]*right: auto;/)
+      expect(mobileStyle).toMatch(/\.cl-home-album-cta \{[^}]*bottom: auto;/)
+      // 纵坐标由焦点线推导（名字中心恒在 44vh），不写死数值
+      expect(mobileStyle).toContain('var(--cl-home-album-focus-line)')
+      expect(mobileStyle).not.toMatch(
+        /\.cl-home-album-cta \{[^}]*bottom: calc\(env\(safe-area-inset-bottom/
+      )
+    })
+
+    test('桌面的 CTA 规则不受影响（右下角那条仍在本段之外的基线规则里）', () => {
+      // 桌面端舞台 display:none → 这颗根本不出现，位置规则保持原样
+      expect(albumStyle).toContain('.cl-home-album-stage')
+      expect(albumStyle).toMatch(/\.cl-home-album-stage \{[^}]*display: none;/)
     })
   })
 })

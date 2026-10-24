@@ -894,13 +894,20 @@ export const homeStyle = `
           /* 照片明暗不定 → 靠描边咬出轮廓（与标题同一套光晕） */
           text-shadow: var(--cl-wall-halo);
         }
-        /* 移动端 CTA：钉在照片右下角。
-           舞台是 sticky 的 100vh 照片层 → 钉住时就是屏幕右下角，
-           退场时随照片一起走；桌面上舞台 display:none → 这颗自动不出现。 */
+        /* 移动端 CTA：放在**影集名下面**（不再钉在照片右下角）。
+           右下角实测与回顶键重叠（CTA x=342–424 / y=905–928，
+           回顶键 x=380–422 / y=886–928）→ 经常点不到。
+           名字中心恒在焦点线（--cl-home-album-focus-line = 44vh），
+           名字半高 = 字号/2（line-height:1）→ 下面这一格正好落位。 */
         #theme-circlelife .cl-home-album-cta {
           position: absolute;
-          right: var(--cl-wide-pad);
-          bottom: calc(env(safe-area-inset-bottom, 0px) + 1.75rem);
+          left: var(--cl-wide-pad);
+          right: auto;
+          top: calc(
+            var(--cl-home-album-focus-line) +
+              clamp(0.875rem, 4.25vw, 1.25rem) + 0.6rem
+          );
+          bottom: auto;
           z-index: 3; /* 高于封面叠层（0/1/2） */
           display: inline-flex;
           align-items: center;

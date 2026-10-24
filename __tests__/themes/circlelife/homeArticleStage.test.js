@@ -538,4 +538,86 @@ describe('circlelife 首页精选文章章', () => {
       expect(notionConfigSource).toContain("featured:")
     })
   })
+
+  describe('移动端收敛（2026-10 末定稿）', () => {
+    /** 取移动端媒体查询块（max-width: 1023px）里的正文 */
+    const mobileBlock = () => {
+      const start = homeArticlesStyle.indexOf('@media (max-width: 1023px) {')
+      expect(start).toBeGreaterThan(-1)
+      return homeArticlesStyle.slice(start, start + 4000)
+    }
+
+    test('移动端撤掉段内出口与「继续阅读」CTA（桌面端保留）', () => {
+      const block = mobileBlock()
+      expect(block).toMatch(/\.cl-home-articles-top \{[^}]*display: none;/)
+      expect(block).toMatch(/\.cl-home-article-cta \{[^}]*display: none;/)
+    })
+
+    test('移动端图版满屏出血：宽度取 100vw + 负外边距抵消内边距', () => {
+      const block = mobileBlock()
+      expect(block).toMatch(
+        /\.cl-home-article-plate \{[^}]*width: var\(--plate-w, min\(100vw/
+      )
+      expect(block).toMatch(
+        /\.cl-home-article-plate \{[^}]*margin-inline: calc\(-1 \* var\(--cl-wide-pad\)\);/
+      )
+      // 比例仍是 3:4（盒子上的 aspect-ratio 没动）
+      expect(homeArticlesStyle).toMatch(
+        /\.cl-home-article-plate-frame \{[^}]*aspect-ratio: 3 \/ 4;/
+      )
+    })
+
+    test('矮屏图版装不满宽时居中（不贴左缘留空白）', () => {
+      // 375×667 实测：高度预算把图版压到 322px（视口 375）→ 贴左缘会右侧
+      // 空出 53px，不对称。justify-self: center 让它居中；
+      // 宽度够满时（margin box = 列宽）居中不产生位移，照样出血到屏幕两边。
+      expect(mobileBlock()).toMatch(
+        /\.cl-home-article-plate \{[^}]*justify-self: center;/
+      )
+    })
+
+    test('满宽基准用视口宽（不是内容列宽），高度预算不变', () => {
+      expect(stageSource).toContain(
+        'const containerW = document.documentElement.clientWidth'
+      )
+      // 高度预算仍在 → 矮屏自动收，不顶出视口
+      expect(stageSource).toContain('(avail - gap - bodyH) * 0.75')
+    })
+
+    test('图版不得被包成链接（满屏大图点击区太大、易误触）', () => {
+      // 图版仍是纯 <figure>，跳转入口只有标题
+      expect(stageSource).toContain("className='cl-home-article-plate'")
+      expect(stageSource).not.toMatch(
+        /cl-home-article-plate[\s\S]{0,400}SmartLink/
+      )
+      // 标题仍是链接（移动端唯一的跳转入口）
+      expect(stageSource).toMatch(
+        /<h2 className='cl-home-article-title'>\s*<SmartLink/
+      )
+    })
+
+    test('面板三块显式绑定栅格行（撤掉一块不打乱行序）', () => {
+      // ⚠️ display:none 的元素**不再是 grid item** → 面板的自动放置会重排：
+      // stage 被挪进第一行(auto)，而 stage 的子元素全是 position:absolute →
+      // 该行高度算成 0 → stage.clientHeight=0 → 图版高度预算失效、
+      // 被 Math.max(90,…) 兜成 90px（实测 w=90/h=120 的小方块）。
+      // 显式 grid-row 让行序与「谁在不在场」解耦。
+      expect(homeArticlesStyle).toMatch(
+        /\.cl-home-articles-top \{[^}]*grid-row: 1;/
+      )
+      expect(homeArticlesStyle).toMatch(
+        /\.cl-home-articles-stage \{[^}]*grid-row: 2;/
+      )
+      expect(homeArticlesStyle).toMatch(
+        /\.cl-home-articles-ruler \{[^}]*grid-row: 3;/
+      )
+    })
+
+    test('stage 没有高度时不把图版兜成 90px 小方块', () => {
+      // 布局塌了也宁可按视口宽满屏，也不要给一张邮票大的图
+      expect(stageSource).toContain(
+        'avail > 0 ? (avail - gap - bodyH) * 0.75 : containerW'
+      )
+    })
+  })
 })

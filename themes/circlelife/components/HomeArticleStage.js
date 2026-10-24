@@ -94,16 +94,19 @@ export default function HomeArticleStage({ articles = [] }) {
       return
     }
     const avail = stage.clientHeight
-    const containerW = stage.clientWidth
+    // 满宽基准用**视口宽**（不是内容列宽）→ 图版能出血到屏幕两边；
+    // 高度预算（avail − gap − bodyH）× 0.75 不变 → 矮屏仍自动收，不顶出视口。
+    const containerW = document.documentElement.clientWidth
     const gap = 16
     plates.forEach((plate, i) => {
       const body = bodies[i]
       if (!body) return
       const bodyH = body.getBoundingClientRect().height
-      const ideal = Math.min(
-        containerW,
-        Math.max(90, (avail - gap - bodyH) * 0.75)
-      )
+      // stage 没有高度 = 布局塌了（不该发生，见 homeArticles.js 的 grid-row
+      // 注释）。此时**不要**用 90px 的最小值兜底 —— 那会把图版缩成一张邮票
+      // （实测 w=90/h=120）；宁可按视口宽满屏，也不要给一个小方块。
+      const budget = avail > 0 ? (avail - gap - bodyH) * 0.75 : containerW
+      const ideal = Math.min(containerW, Math.max(90, budget))
       // 向下取整：四舍五入会让内容比可用高度多出 1px，
       // 结果是「继续阅读」的下沿正好压到时间轴上沿（实测差 1px）。
       plate.style.setProperty('--plate-w', `${Math.floor(ideal)}px`)
