@@ -268,8 +268,9 @@ export const homeStyle = `
 
       /* 卡片是 canvas（不是 <img>）：canvas 的像素不进入 LCP 候选，
          照片墙深处那些更大的卡片就不会把首页 LCP 顶到十几秒。
-         裁剪由 drawCover 按 object-fit:cover 完成（见 CanvasImage.js）。 */
-      #theme-circlelife .cl-home-tilt-item canvas,
+         裁剪由 drawCover 按 object-fit:cover 完成（见 CanvasImage.js）。
+         ⚠️ canvas 上**不能**留 object-fit：位图已经被 drawCover 裁过一道，
+         浏览器再按 cover 裁一次 = 第二刀（照片边缘被切掉）。 */
       #theme-circlelife .cl-home-tilt-item img {
         position: absolute;
         top: 0;
@@ -278,6 +279,17 @@ export const homeStyle = `
         height: 100%;
         object-fit: cover;
         object-position: center;
+        border-radius: 0 !important;
+        opacity: 0;
+        transition: opacity 0.4s ease-out;
+      }
+
+      #theme-circlelife .cl-home-tilt-item canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
         border-radius: 0 !important;
         opacity: 0;
         transition: opacity 0.4s ease-out;

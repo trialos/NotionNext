@@ -29,8 +29,10 @@ const Index = props => {
   const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
   // 首屏 LCP：只预加载首图一张。主题布局内的 Head 在本项目 SSR 阶段不生效，
   // 因此放在页面级 Head；图片本身由 LayoutIndex 渲染，这里不重复下载。
-  // 必须同时给出 imagesrcset/imagesizes：否则浏览器按 sizes 选中 512 档，
-  // 却已被预加载了 1024 档，会白下载两份
+  // ⚠️ **不要**给 imagesrcset/imagesizes：Notion 代理在 srcset 选档路径下对同一个
+  // URL 返回「预裁切小图」，而照片墙首图走的是直连 → 预加载与实际请求会落在两个
+  // 不同 URL 上（白下载一份，且预加载的还是被裁过的图）。直连路径下 href 就是
+  // 照片墙首图用的同一个 URL → 精确命中。
   const heroLcp = props.homeCoverImages?.[0]
   return (
     <>
@@ -40,8 +42,6 @@ const Index = props => {
             rel='preload'
             as='image'
             href={heroLcp.src}
-            imageSrcSet={heroLcp.srcSet || undefined}
-            imageSizes={heroLcp.sizes || undefined}
             fetchPriority='high'
           />
         </Head>

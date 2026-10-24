@@ -3,8 +3,8 @@
 import { siteConfig } from '@/lib/config'
 import { useEffect, useRef, useMemo } from 'react'
 import CONFIG from '../config'
-import { buildImageSources } from './imageSrcset'
-import { loadIntoCanvas } from './CanvasImage'
+import { buildImageSources, buildSizedSource, computeTargetPixelWidth } from './imageSrcset'
+import { loadIntoCanvas, releaseCanvas } from './CanvasImage'
 import {
   computeTiltProgress,
   computeTiltTravel,
@@ -275,33 +275,28 @@ export default function HomeTiltWall({
       if (el.tagName === 'CANVAS') {
         loadIntoCanvas(el, {
           src,
-          srcSet: el.dataset.srcset,
-          sizes: el.dataset.sizes,
-          fetchPriority: el.dataset.fetchpriority,
+          targetPx: Number(el.dataset.targetpx) || undefined,
           position: 'center',
           onReady: () => markLoaded(el)
         })
         return
       }
-      // srcset 必须先写：sizes 与候选集齐备后浏览器才会按 DPR 选档
-      if (el.dataset.srcset) {
-        el.srcset = el.dataset.srcset
-        if (el.dataset.sizes) el.sizes = el.dataset.sizes
-      }
+      // ⚠️ 不用 srcset/sizes：Notion 代理在 srcset 选档路径下返回「预裁切小图」
+      // （同一 URL 直连才是未裁切原图）→ 见 imageSrcset.js 的说明。
+      // 档位在创建卡片时就按「列宽 × DPR」算好，写进了 src 的 width 参数。
       el.src = src
       decodeImage(el)
     }
 
     // 回收必须与挂载成对：
-    // - <img>：删 src/srcset（只删 src 而留下 srcset，浏览器仍会按候选集重新拉取）
-    // - <canvas>：位图置零（把 width 归 0）→ 浏览器立刻释放这块纹理，
+    // - <img>：删 src（浏览器才会真正丢弃解码纹理）
+    // - <canvas>：断开观察器 + 位图置零（把 width 归 0）→ 浏览器立刻释放这块纹理，
     //   否则解码纹理留在显存里不走 → 离屏卡片会一直占着显存。
     const unloadImage = el => {
       if (el.dataset.critical === 'true') return
       el.dataset.mounted = 'false'
       if (el.tagName === 'CANVAS') {
-        el.width = 0
-        el.height = 0
+        releaseCanvas(el)
       } else {
         if (el.hasAttribute('srcset')) el.removeAttribute('srcset')
         if (el.hasAttribute('sizes')) el.removeAttribute('sizes')
@@ -350,6 +345,11 @@ export default function HomeTiltWall({
     )
 
     let columns = []
+    /**
+     * 卡片显示宽（= 列宽，.cl-home-tilt-item 是 width:100%）——
+     * 取图档位按「列宽 × DPR」算。不在这里量 DOM：卡片创建时还没入列。
+     */
+    let cardCssWidth = 300
 
     // 依据视口宽度构建充裕的列数（移动端 3 列，桌面端 5 列，大屏 6 列），确保多轴视野饱满展开
     const buildColumns = () => {
@@ -380,6 +380,7 @@ export default function HomeTiltWall({
       rotated.appendChild(probe)
       const colWidth = probe.offsetWidth || 300
       probe.remove()
+      cardCssWidth = colWidth
 
       const colGap = winW <= 767 ? 12 : winW <= 1024 ? 18 : 24
 
@@ -532,15 +533,24 @@ export default function HomeTiltWall({
         el.setAttribute('role', 'img')
         el.setAttribute('aria-label', card.title || 'Circle of Life')
       }
-      el.dataset.src = card.src
-      if (card.srcSet) el.dataset.srcset = card.srcSet
-      if (card.sizes) el.dataset.sizes = card.sizes
+
+      // 与页面 preload 对应的那一张（首图）：**必须用与 preload 完全相同的 URL**
+      // → 保留 card.src 原样（它就是 preload 的 href），否则会白下载两份。
+      const isPreloadTarget = isSetA && colIndex === 0 && cardIdx === 0
+      // 其余卡片：按「列宽 × DPR」选 Notion 的 width 档位，直连取原图
+      // （不走 srcset：Notion 代理在 srcset 路径下返回预裁切小图）
+      const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1
+      const targetPx = computeTargetPixelWidth(cardCssWidth, dpr)
+      el.dataset.src = isPreloadTarget
+        ? card.src
+        : buildSizedSource(card.src, targetPx)
+      el.dataset.targetpx = String(targetPx)
 
       if (immediate) {
         el.dataset.critical = 'true'
         // 只有与页面 preload 对应的那一张拿最高优先级，其余按默认排队
         // （必须在挂载**之前**设好：fetchPriority 在请求发出时读取）
-        if (isSetA && colIndex === 0 && cardIdx === 0) {
+        if (isPreloadTarget) {
           el.setAttribute('fetchpriority', 'high')
         }
         mountImage(el)
