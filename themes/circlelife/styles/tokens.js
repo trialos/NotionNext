@@ -148,7 +148,6 @@ export const tokenStyle = `
            图版在桌面与移动端同为 3:4，只是宽度不同 → 同一张图在两端
            是同一个构图（换比例会让主体在手机与电脑上被切得不一样）。 */
         --cl-home-article-plate: min(clamp(240px, 33vw, 480px), 54svh); /* 桌面图版宽（与影集封面同宽；再受窗口高度约束） */
-        --cl-home-article-plate-sm: 242px; /* 移动端图版宽（比例仍 3:4） */
         --cl-home-article-measure: 620px; /* 摘要测量宽（文字栏贴右边缘） */
         --cl-home-article-title: 54px; /* 标题字号（1440 基准；实际用 clamp） */
         --cl-home-article-focus: 45%; /* 视口焦点线（判定当前篇） */
