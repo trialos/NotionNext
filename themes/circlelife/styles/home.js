@@ -457,8 +457,10 @@ export const homeStyle = `
 
       #theme-circlelife .cl-home-album {
         /* 推进区间驱动：段体与滚轴活动范围的高度由它算出来。
-           它只决定「滚多少像素推进一辑」，与取景框高度解耦。 */
-        --cl-home-album-step: 7vh;
+           它只决定「滚多少像素推进一辑」，与取景框高度解耦。
+           19vh = 与移动端同值：换挡窗口 = 0.75 × 行程 → 每辑约 94px 的
+           滚动距离（换挡窗口改跟右栏面板走之后，见下文 measure()）。 */
+        --cl-home-album-step: 19vh;
         /* 取景框高度：框里只画当前影集名，框高决定换挡位置（两端同构） */
         --cl-home-album-window: 42vh;
         /* 焦点推进的总行程 = (条目数 - 1) × 间距
@@ -636,18 +638,19 @@ export const homeStyle = `
         transform: scaleY(1);
       }
 
-      /* 右侧 sticky 面板
-         轨道：文案栏吃剩余宽度，封面列按 JS 量出来的 --cl-home-album-cover-w 走。
-         封面宽 = (视口高 − 面板顶距) × 0.8 → 高 = 宽 ÷ 0.8 = 视口高 − 顶距
-         → 封面底边正好落在视口底 → 面板底边 = 视口底 → 段尾不留白、Footer 紧接。
-         22rem 是 JS 未跑（SSR 首帧）时的兜底，接近原尺寸，无首屏跳变。 */
+      /* 右侧 sticky 面板 —— **沉到视口底**（不是把封面拉高）
+         ⚠️ sticky 的 bottom 只「拦」不「拉」：元素的自然位置若已在视口底
+         之上，约束不生效 → 必须先让自然位置落到栅格行底（align-self: end），
+         bottom: 0 才拉得住（行高由左列轨道 100vh + 行程 决定）。
+         面板底边 = 视口底 → 段底抵达视口底的同一刻面板释放、Footer 紧接
+         → 段尾零白带；封面保持 4:5 自然尺寸（不被拉成竖长条）。 */
       #theme-circlelife .cl-home-album-panel {
         position: sticky;
-        top: calc(var(--cl-nav-band) + 2.5rem);
-        align-self: start;
+        top: auto;
+        bottom: 0;
+        align-self: end;
         display: grid;
-        grid-template-columns:
-          minmax(0, 1fr) var(--cl-home-album-cover-w, 22rem);
+        grid-template-columns: minmax(240px, 30rem) minmax(0, 1fr);
         gap: clamp(1.5rem, 3vw, 3rem);
         align-items: start;
       }
@@ -715,13 +718,11 @@ export const homeStyle = `
 
       /* 封面图：全部封面叠在同一网格单元（焦点切换不改 src → 不闪白），
          定长 4/5 盒 + cover → 零 CLS
-         4:5 的比例挂在 img 上（width:100% + aspect-ratio），
-         盒子填满轨道 → 封面高 = 轨道宽 ÷ 0.8 = 视口高 − 面板顶距 → 底边落在视口底 */
+         4:5 的比例挂在 img 上（width:100% + aspect-ratio），盒子随轨道宽自适应 */
       #theme-circlelife .cl-home-album-figure {
         position: relative;
         display: grid;
         grid-template-columns: minmax(0, 1fr);
-        width: 100%;
         margin: 0;
         border-radius: var(--cl-media-radius);
         background: var(--cl-paper-2);

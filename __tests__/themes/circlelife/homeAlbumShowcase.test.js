@@ -294,11 +294,22 @@ describe('circlelife 首页精选影集段', () => {
       expect(albumStyle).not.toContain('--cl-vermilion')
     })
 
-    test('面板用纯 CSS sticky 钉住，位置走 --cl-nav-band', () => {
+    test('面板用纯 CSS sticky 钉住，底边落在视口底', () => {
       expect(albumStyle).toMatch(
         /\.cl-home-album-panel \{[^}]*position: sticky;/
       )
-      expect(albumStyle).toContain('var(--cl-nav-band)')
+      // 钉在**底**（不是顶）：面板底边 = 视口底 → 段尾零白带，Footer 紧接
+      expect(albumStyle).toMatch(
+        /\.cl-home-album-panel \{[^}]*bottom: 0;/
+      )
+      // ⚠️ sticky 的 bottom 只拦不拉 → 必须先让自然位置落到栅格行底
+      expect(albumStyle).toMatch(
+        /\.cl-home-album-panel \{[^}]*align-self: end;/
+      )
+      // 顶距不再由 nav-band 决定（顶距是「视口高 − 面板高」，随内容走）
+      expect(albumStyle).not.toMatch(
+        /\.cl-home-album-panel \{[^}]*top: calc\(var\(--cl-nav-band\)/
+      )
     })
 
     test('入场动效是纯 CSS 关键帧且只动 opacity', () => {
@@ -786,24 +797,51 @@ describe('circlelife 首页精选影集段', () => {
       expect(showcaseSource).toContain("mq.addEventListener?.('change'")
     })
 
-    test('封面宽度由 JS 量测写入 --cl-home-album-cover-w（底边落在视口底 → 段尾不留白）', () => {
-      // 封面宽 = (视口高 − 面板顶距) × 0.8 → 高 = 视口高 − 顶距 → 底边落在视口底
-      expect(showcaseSource).toContain('--cl-home-album-cover-w')
-      // 文案栏保底：封面再大也不能把文案挤没
-      expect(showcaseSource).toContain('ALBUM_COPY_MIN_W')
-      // 量测只发生在 measure()（mount / resize / 字体就绪 / 断点切换），不在滚动路径
-      expect(showcaseSource).toContain('panel.clientWidth')
-      // 轨道：文案栏吃剩余，封面列按量出来的宽
-      expect(albumStyle).toMatch(
-        /grid-template-columns:\s*minmax\(0, 1fr\) var\(--cl-home-album-cover-w, 22rem\);/
+    test('右栏沉到视口底（封面保持自然 4:5，段尾不留白）', () => {
+      // ⚠️ sticky 的 bottom 只「拦」不「拉」：必须先让自然位置落到栅格行底
+      //    （align-self: end），bottom: 0 才拉得住 → 面板底边 = 视口底
+      const panel = albumStyle.match(
+        /\.cl-home-album-panel \{([\s\S]*?)\n\s{6}\}/
       )
-      // 4:5 的比例挂在 img 上（盒子填满轨道 → 高 = 宽 ÷ 0.8）
+      expect(panel[1]).toContain('align-self: end')
+      expect(panel[1]).toContain('top: auto')
+      expect(panel[1]).toContain('bottom: 0')
+      // 面板栅格回到「文案栏定宽 + 封面吃剩余」→ 封面 = 轨道宽的 4:5 自然尺寸
       expect(albumStyle).toMatch(
-        /\.cl-home-album-figure \{[^}]*width: 100%;/
+        /\.cl-home-album-panel \{[^}]*grid-template-columns:\s*minmax\(240px, 30rem\) minmax\(0, 1fr\);/
       )
+      // 上一轮的「把封面拉高」机制整体撤回（它把封面拉成了竖长条）
+      expect(albumStyle).not.toContain('--cl-home-album-cover-w')
+      expect(showcaseSource).not.toContain('--cl-home-album-cover-w')
+      expect(showcaseSource).not.toContain('ALBUM_COPY_MIN_W')
+      // 4:5 的比例挂在 img 上（盒子随轨道宽自适应）
       expect(albumStyle).toMatch(
         /\.cl-home-album-img \{[^}]*aspect-ratio: 4 \/ 5;/
       )
+    })
+
+    test('换挡窗口跟右栏面板走（两端同公式 = 0.75 × 行程）', () => {
+      // 桌面端：面板底边钉在视口底 → 段底抵到视口底时释放
+      expect(showcaseSource).toContain('bodyBottom - window.innerHeight')
+      // 移动端：照片舞台 top 钉住、100vh 高 → 舞台底边触到段底时释放
+      expect(showcaseSource).toContain('bodyBottom - primaryTop - primaryH')
+      // 桌面端的主元件 = 右栏面板（不是取景框）
+      expect(showcaseSource).toContain(
+        'isMobile ? stageRef.current : panelRef.current'
+      )
+      // 尾段驻留 1/4 不变
+      expect(showcaseSource).toContain('computeSweepWindow(bodyTop, releaseAt, 0.25)')
+    })
+
+    test('行程加长到与移动端同值（step 19vh）—— 保住每辑约 94px 的换挡距离', () => {
+      // 桌面基值（.cl-home-album 的第一条规则）必须是 19vh，与移动端同值
+      const base = albumStyle.match(
+        /#theme-circlelife \.cl-home-album \{([\s\S]*?)\n\s{6}\}/
+      )
+      expect(base[1]).toContain('--cl-home-album-step: 19vh;')
+      // 移动端媒体查询里同样是 19vh（两端同值）
+      expect(albumStyle).toContain('--cl-home-album-step: 19vh;')
+      expect(albumStyle).not.toContain('--cl-home-album-step: 7vh;')
     })
 
     test('不做 hover 预选（会与换挡打架），改为键盘聚焦接管', () => {
@@ -856,15 +894,17 @@ describe('circlelife 首页精选影集段', () => {
   describe('R5：进入 / 退出时机（钉住区间 + 尾部驻留）', () => {
     test('推进区间：起点 = 段体顶，终点 = 主元件释放点往前留 1/4 驻留', () => {
       expect(showcaseSource).toContain('computeSweepWindow')
-      // 移动端主元件 = 照片舞台（满屏即钉住）；桌面端 = 左列裁切窗口
+      // 移动端主元件 = 照片舞台（满屏即钉住）；桌面端 = 右栏面板（底边钉在视口底）
       expect(showcaseSource).toContain('stageRef')
       expect(showcaseSource).toContain(
-        'isMobile ? stageRef.current : viewportRef.current'
+        'isMobile ? stageRef.current : panelRef.current'
       )
-      // 起点 = 段体顶（移动端 = 照片满屏；桌面端 = 段头滚出视口）
+      // 起点 = 段体顶（移动端 = 照片满屏；桌面端 = 段体顶进视口）
       expect(showcaseSource).toContain('computeSweepWindow(bodyTop, releaseAt, 0.25)')
       // 终点 = 主元件释放点：包含块下沿把它顶出来
       expect(showcaseSource).toContain('releaseAt')
+      // 桌面端：段底抵到视口底（面板底边钉在视口底）；移动端：舞台底边触到段底
+      expect(showcaseSource).toContain('bodyBottom - window.innerHeight')
       expect(showcaseSource).toContain('bodyBottom - primaryTop - primaryH')
       // 布局高度用 offsetHeight（架构库「测量单位陷阱」）
       expect(showcaseSource).toContain('primary.offsetHeight')

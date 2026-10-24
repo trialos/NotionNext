@@ -6,12 +6,6 @@ import {
 } from './homeAlbumFocus'
 
 /**
- * 桌面端右栏的「文案栏」最小宽（≈11rem）：
- * 封面再大也不能把文案挤没 —— 4:5 封面撑到视口底时，宽度不够就让给文案栏。
- */
-const ALBUM_COPY_MIN_W = 176
-
-/**
  * 首页精选影集段 (HomeAlbumShowcase)
  *
  * 形态参考 thereach.travel 的 Destination Discoverer 段：
@@ -44,8 +38,10 @@ export default function HomeAlbumShowcase({ albums = [] }) {
   const stageRef = useRef(null)
   // 取景框：桌面 display:contents（透明通道），移动端 = 真正的窗口
   const viewportRef = useRef(null)
-  // 右侧 sticky 面板（桌面）：封面高度按「视口高 − 面板顶距」量出来，
-  // 让封面的底边正好落在视口底 → 段尾不留白，Footer 紧接
+  // 右侧 sticky 面板（桌面）：**底边钉在视口底**（align-self:end + bottom:0）
+  // → 面板底边 = 视口底 → 段底抵达视口底的那一刻面板释放、Footer 紧接，
+  // 段尾不留白；封面保持 4:5 自然尺寸（不被拉成竖长条）。
+  // 换挡窗口以它的释放点为准（见 measure()）。
   const panelRef = useRef(null)
   // 上一档焦点：溶解时旧封面要在新封面下面垫底（不透明），所以要记住「谁是上一档」
   const prevActiveRef = useRef(0)
@@ -131,41 +127,29 @@ export default function HomeAlbumShowcase({ albums = [] }) {
       const bodyBottom = bodyRect.bottom + window.scrollY
 
       // 主 sticky 元件：移动端 = 照片舞台（满屏即钉住），
-      // 桌面端 = 左列取景框（到焦点线即钉住）。
+      // 桌面端 = 右栏面板（底边钉在视口底）。
       // 推进区间：
       //   起点 = 段体顶 —— 移动端是照片满屏那一刻，
-      //           桌面端是段头滚出视口那一刻（这一段「真正到位」才换）
+      //           桌面端是段体顶进视口那一刻（这一段「真正到位」才换）
       //   终点 = 主元件被释放的位置往前留 1/4 驻留
       //           （否则最后一张刚切上来画面就开始退场）
-      const primary = isMobile ? stageRef.current : viewportRef.current
+      //
+      // 释放点 = **段底抵到视口底的那一刻**：
+      //   桌面端：右栏面板 bottom 钉住 → 面板底边在视口底 → 段底追上时释放
+      //   移动端：照片舞台 top 钉住、高 100vh → 舞台底边触到段底时释放
+      // 两端换挡窗口因此都是「0.75 × 行程」（行程 = 段体超出视口的高度）。
+      const primary = isMobile ? stageRef.current : panelRef.current
       const primaryTop = primary
         ? parseFloat(getComputedStyle(primary).top) || 0
         : 0
       // 布局像素（架构库「测量单位陷阱」：布局高度判断一律用 offsetHeight）
       const primaryH = primary ? primary.offsetHeight : 0
-      const releaseAt = bodyBottom - primaryTop - primaryH
+      const releaseAt = isMobile
+        ? bodyBottom - primaryTop - primaryH
+        : bodyBottom - window.innerHeight
       const win = computeSweepWindow(bodyTop, releaseAt, 0.25)
       sweepStart = win.start
       sweepLength = win.length
-
-      // 封面宽度（桌面）：让 4:5 封面的**底边落在视口底** ——
-      //   面板顶距 = nav-band + 2.5rem（sticky top）→ 封面高 = 视口高 − 顶距，
-      //   宽按 4:5 反推（高 × 0.8）。面板底边与视口底重合 → 段底抵达视口底的
-      //   那一刻面板正好释放、Footer 紧接，段尾不再留一段白。
-      //   右栏宽度不够时退让给文案栏（保底 ALBUM_COPY_MIN_W），宁可留白不溢出。
-      //   量测只发生在这里（mount / resize / 字体就绪 / 断点切换），滚动路径零读取。
-      const panel = panelRef.current
-      if (isMobile || !panel) {
-        if (panel) panel.style.removeProperty('--cl-home-album-cover-w')
-      } else {
-        const panelStyle = getComputedStyle(panel)
-        const panelTop = parseFloat(panelStyle.top) || 0
-        const colGap = parseFloat(panelStyle.columnGap) || 0
-        const desired = (window.innerHeight - panelTop) * 0.8
-        const avail = panel.clientWidth - colGap - ALBUM_COPY_MIN_W
-        const coverW = Math.max(120, Math.min(desired, avail))
-        panel.style.setProperty('--cl-home-album-cover-w', `${Math.floor(coverW)}px`)
-      }
 
       // 几何变了 → 进度重算，当前档直接落位（不播过渡）
       scrollY = window.scrollY || 0
