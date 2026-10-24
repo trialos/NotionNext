@@ -239,7 +239,12 @@ export async function getStaticProps(req) {
     .sort(byDateDesc)
     .slice(0, homeArticleCount)
   props.homeArticles = featuredPosts.map(p => {
-    const coverSrc = p.pageCover || p.pageCoverThumbnail || ''
+    // 首页图版的图源：优先「首页封面」（3:4 成品图，构图完全可控、与文章页横幅彻底解耦），
+    // 没有则回落页面封面（并按 Notion 自带的裁剪焦点定位）。
+    const fromHome = Boolean(p.homeCover)
+    const coverSrc = fromHome
+      ? p.homeCover
+      : p.pageCover || p.pageCoverThumbnail || ''
     // 图版只有 420px 宽 → 1024 档足够；不要 2048 档（651KB，纯浪费）
     const sources = buildImageSources(coverSrc, {
       sizes: '(max-width: 1023px) 242px, 420px',
@@ -255,7 +260,15 @@ export async function getStaticProps(req) {
       publishDate: p.publishDate || 0,
       // undefined 不能被 JSON 序列化（会直接让 build 挂在 prerender 阶段）
       readTime: p.readTime || 0,
-      cover: { src: sources.src, srcSet: sources.srcSet, sizes: sources.sizes }
+      cover: {
+        src: sources.src,
+        srcSet: sources.srcSet,
+        sizes: sources.sizes,
+        // Notion 自带的封面裁剪焦点（0=顶 0.5=中 1=底）。
+        // 用了独立的「首页封面」时不适用 —— 那是 3:4 成品图，居中即可。
+        pos: fromHome ? 0.5 : (p.pageCoverPosition ?? 0.5),
+        fromHome
+      }
     }
   })
 

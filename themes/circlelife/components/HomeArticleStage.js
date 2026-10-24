@@ -242,6 +242,13 @@ export default function HomeArticleStage({ articles = [] }) {
                       loading='lazy'
                       fetchPriority='low'
                       decoding='async'
+                      // Notion 自带的封面裁剪焦点（0=顶 0.5=中 1=底）：
+                      // 页面封面回落时按它取景；用独立「首页封面」时为居中（3:4 成品图）
+                      style={{
+                        objectPosition: `50% ${
+                          (article.cover.pos ?? 0.5) * 100
+                        }%`
+                      }}
                     />
                   </div>
                 ) : (

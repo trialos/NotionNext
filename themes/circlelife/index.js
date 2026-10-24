@@ -403,6 +403,14 @@ const LayoutSlug = props => {
                   className='cl-article-cover-img'
                   fetchPriority='high'
                   decoding='async'
+                  // Notion 自带的封面裁剪焦点（0=顶 0.5=中 1=底）：
+                  // 横幅是 3:1 长条，同一张图在这里的取景与首页 3:4 图版完全不同 ——
+                  // 此前站点写死居中，导致「在 Notion 里拖了头图却没反应」。
+                  style={{
+                    objectPosition: `50% ${
+                      (post.pageCoverPosition ?? 0.5) * 100
+                    }%`
+                  }}
                 />
                 {/* 顶部极轻压暗：仅全屏形态。卡片回退形态封面小且不浮导航，不加此层 */}
                 {!ARTICLE_CARD ? (
