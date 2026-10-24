@@ -553,6 +553,12 @@ export const homeStyle = `
       #theme-circlelife .cl-home-album-stage {
         display: none;
       }
+      /* 移动端 CTA 住在取景框里，而取景框在桌面是可见的 → 桌面必须显式藏掉它，
+         桌面自己的入口是右栏面板里的 .cl-home-album-enter（「进入影集 →」）。
+         （CTA 以前挂在照片舞台里，桌面靠舞台 display:none 自动隐身。） */
+      #theme-circlelife .cl-home-album-cta {
+        display: none;
+      }
       #theme-circlelife .cl-home-album-item {
         position: relative;
         display: flex;
@@ -897,15 +903,16 @@ export const homeStyle = `
         /* 移动端 CTA：放在**影集名下面**（不再钉在照片右下角）。
            右下角实测与回顶键重叠（CTA x=342–424 / y=905–928，
            回顶键 x=380–422 / y=886–928）→ 经常点不到。
-           名字中心恒在焦点线（--cl-home-album-focus-line = 44vh），
-           名字半高 = 字号/2（line-height:1）→ 下面这一格正好落位。 */
+           ⚠️ 定位基准是**取景框**（.cl-home-album-viewport），不是照片舞台：
+           辑名在取景框里垂直居中 → 名字中心 = 取景框的 50%，
+           名字半高 = 字号/2（line-height:1）→ 下面这一格正好落位。
+           与辑名同框 → 取景框 sticky 拉入/释放时两者一起动，永远不分离。 */
         #theme-circlelife .cl-home-album-cta {
           position: absolute;
           left: var(--cl-wide-pad);
           right: auto;
           top: calc(
-            var(--cl-home-album-focus-line) +
-              clamp(0.875rem, 4.25vw, 1.25rem) + 0.6rem
+            50% + clamp(0.875rem, 4.25vw, 1.25rem) + 0.6rem
           );
           bottom: auto;
           z-index: 3; /* 高于封面叠层（0/1/2） */

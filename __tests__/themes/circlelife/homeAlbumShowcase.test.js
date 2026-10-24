@@ -613,13 +613,23 @@ describe('circlelife 首页精选影集段', () => {
       )
     })
 
-    test('移动端 CTA 放在影集名下面（随照片进出，桌面自动不出现）', () => {
-      // CTA 在照片舞台内：舞台是 sticky 的 100vh 照片层
+    test('移动端 CTA 与影集名同框（住在取景框里，桌面显式藏掉）', () => {
+      // CTA 必须与辑名待在**同一个 sticky 框**（.cl-home-album-viewport）里。
+      // ⚠️ 以前 CTA 挂在照片舞台（.cl-home-album-stage）上 —— 那是另一个
+      // sticky 坐标系：取景框的 sticky 有「拉入」与「释放」两段，辑名在
+      // 钉住之前/释放之后会上下移动，而舞台那层的坐标纹丝不动 →
+      // CTA 与辑名分离（真踩过：还没钉住时 CTA 叠在辑名上）。
       expect(showcaseSource).toContain("className='cl-home-album-cta'")
-      const stageIdx = showcaseSource.indexOf("className='cl-home-album-stage'")
+      const viewportIdx = showcaseSource.indexOf(
+        "className='cl-home-album-viewport'"
+      )
       const ctaIdx = showcaseSource.indexOf("className='cl-home-album-cta'")
-      expect(stageIdx).toBeGreaterThan(-1)
-      expect(ctaIdx).toBeGreaterThan(stageIdx)
+      expect(viewportIdx).toBeGreaterThan(-1)
+      expect(ctaIdx).toBeGreaterThan(viewportIdx)
+      // 仍在舞台里 = 还没挪进取景框
+      const stageIdx = showcaseSource.indexOf("className='cl-home-album-stage'")
+      const stageEnd = showcaseSource.indexOf('</div>', stageIdx)
+      expect(ctaIdx).toBeGreaterThan(stageEnd)
       // 舞台不再整体 aria-hidden（CTA 要留在无障碍树里），
       // 装饰性的遮罩自己退出无障碍树
       expect(showcaseSource).not.toContain(
@@ -628,8 +638,12 @@ describe('circlelife 首页精选影集段', () => {
       expect(showcaseSource).toContain(
         "<div className='cl-home-album-scrim' aria-hidden='true' />"
       )
-      // 样式：纵坐标由焦点线推导（名字中心恒在 44vh）+ 靠左与名字对齐
-      // （原为右下角，实测与回顶键重叠 → 改到标题下面）
+      // 桌面：取景框是可见的 → CTA 必须显式 display:none（桌面自己的入口
+      // 是右栏面板里的 .cl-home-album-enter）
+      expect(albumStyle).toMatch(
+        /\.cl-home-album-cta \{\s*display: none;/
+      )
+      // 样式：纵坐标相对**取景框**（50% = 辑名中心）+ 名字半高 + 间距
       const cta = mobileStyle.match(
         /\.cl-home-album-cta \{([\s\S]*?)\n\s{8}\}/
       )
@@ -638,7 +652,9 @@ describe('circlelife 首页精选影集段', () => {
       expect(cta[1]).toContain('left: var(--cl-wide-pad)')
       expect(cta[1]).toContain('right: auto')
       expect(cta[1]).toContain('bottom: auto')
-      expect(cta[1]).toContain('var(--cl-home-album-focus-line)')
+      expect(cta[1]).toContain('50%')
+      // 不再按焦点线绝对定位（那会与移动的辑名分离）
+      expect(cta[1]).not.toContain('var(--cl-home-album-focus-line)')
       expect(cta[1]).not.toContain('right: var(--cl-wide-pad)')
       expect(cta[1]).not.toContain('bottom: calc(env(safe-area-inset-bottom')
       expect(cta[1]).toContain('z-index: 3')
@@ -1126,17 +1142,36 @@ describe('circlelife 首页精选影集段', () => {
       )
       expect(mobileStyle).toMatch(/\.cl-home-album-cta \{[^}]*right: auto;/)
       expect(mobileStyle).toMatch(/\.cl-home-album-cta \{[^}]*bottom: auto;/)
-      // 纵坐标由焦点线推导（名字中心恒在 44vh），不写死数值
-      expect(mobileStyle).toContain('var(--cl-home-album-focus-line)')
+      // 纵坐标相对**取景框**（50% = 辑名中心）→ 与辑名同框、永远不分离
+      expect(mobileStyle).toMatch(/\.cl-home-album-cta \{[^}]*top: calc\(\s*50%/)
       expect(mobileStyle).not.toMatch(
         /\.cl-home-album-cta \{[^}]*bottom: calc\(env\(safe-area-inset-bottom/
       )
+      // ⚠️ 不能再按焦点线绝对定位：那套坐标挂在照片舞台上，
+      // 与会上下移动的辑名不在同一个 sticky 坐标系里（真踩过）
+      expect(mobileStyle).not.toMatch(
+        /\.cl-home-album-cta \{[^}]*var\(--cl-home-album-focus-line\)/
+      )
     })
 
-    test('桌面的 CTA 规则不受影响（右下角那条仍在本段之外的基线规则里）', () => {
-      // 桌面端舞台 display:none → 这颗根本不出现，位置规则保持原样
-      expect(albumStyle).toContain('.cl-home-album-stage')
-      expect(albumStyle).toMatch(/\.cl-home-album-stage \{[^}]*display: none;/)
+    test('CTA 与影集名在同一个 sticky 框里（取景框），不是照片舞台', () => {
+      // 两个 sticky 坐标系分离 → 名字动、CTA 不动 → 叠上去 / 离很远
+      const viewportIdx = showcaseSource.indexOf(
+        "className='cl-home-album-viewport'"
+      )
+      const ctaIdx = showcaseSource.indexOf("className='cl-home-album-cta'")
+      expect(viewportIdx).toBeGreaterThan(-1)
+      expect(ctaIdx).toBeGreaterThan(viewportIdx)
+      // 取景框是 sticky 的定位上下文 → 绝对定位的 CTA 以它为基准
+      expect(albumStyle).toMatch(
+        /\.cl-home-album-viewport \{[^}]*position: sticky;/
+      )
+    })
+
+    test('桌面端 CTA 显式藏掉（它现在住在可见的取景框里）', () => {
+      expect(albumStyle).toMatch(/\.cl-home-album-cta \{\s*display: none;/)
+      // 桌面自己的入口仍是右栏面板里的那颗
+      expect(albumStyle).toContain('.cl-home-album-enter')
     })
   })
 })

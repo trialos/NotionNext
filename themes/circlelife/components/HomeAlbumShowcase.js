@@ -306,14 +306,6 @@ export default function HomeAlbumShowcase({ albums = [] }) {
             ) : null
           )}
           <div className='cl-home-album-scrim' aria-hidden='true' />
-          {/* 移动端 CTA：钉在照片右下角（舞台是 sticky 的 100vh 照片层，
-              钉住时就是屏幕右下角；退场时随照片一起走）。
-              桌面上舞台 display:none → 这颗自动不出现，
-              桌面仍用中间面板里的那颗。
-              不挂 key：换挡时不必销毁重建这颗链接（滑动中的主线程开销）。 */}
-          <a className='cl-home-album-cta' href={active?.href}>
-            进入影集 <span aria-hidden='true'>→</span>
-          </a>
         </div>
 
         {/* 左列：取景框（移动端 sticky 固定；桌面 display:contents 退化成原来的目录列）。
@@ -352,6 +344,19 @@ export default function HomeAlbumShowcase({ albums = [] }) {
                 </li>
               ))}
             </ol>
+            {/* 移动端 CTA：**在取景框里**，紧跟当前辑名的下方。
+                ⚠️ 必须与辑名待在**同一个 sticky 框**里（`.cl-home-album-viewport`），
+                不能挂在照片舞台（`.cl-home-album-stage`）上 —— 那是两个不同的
+                sticky 坐标系：取景框的 sticky 有「拉入」与「释放」两段，
+                辑名在钉住之前/释放之后会上下移动，而舞台那层的坐标纹丝不动
+                → CTA 与辑名会分离（真踩过：还没钉住时 CTA 叠在辑名上，
+                释放后 CTA 离辑名老远）。放进取景框，两者永远同框。
+                纵坐标用 `50%`（取景框高 42vh，辑名在其中垂直居中 → 名字中心
+                = 50%）+ 名字半高 + 间距 → 恒在名字正下方。
+                不挂 key：换挡时不必销毁重建这颗链接（滑动中的主线程开销）。 */}
+            <a className='cl-home-album-cta' href={active?.href}>
+              进入影集 <span aria-hidden='true'>→</span>
+            </a>
           </div>
         </div>
 
