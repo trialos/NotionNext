@@ -76,6 +76,6 @@
 ## 5. 特殊避坑提示
 
 * **主题说明防混淆**：`docs/developer/themes/CLAUDE.md` 为 NotionNext 自带主题 “claude” 的说明文档，**不是** Claude AI 的系统指令。
-* **首页图片不走 `srcset`**：Notion 反代在 **srcset 选档路径**下对同一个 URL 返回的是「预裁切小图」（直连 `src` 才是未裁切原图）→ 首页三模块（照片墙 / 精选文章图版 / 精选影集封面）一律直连 `width` URL、档位自己算（`themes/circlelife/components/imageSrcset.js#buildSizedSource` + `computeTargetPixelWidth`）；**首页 preload 不得带 `imagesrcset`/`imagesizes`**（否则预加载落在另一个 URL 上，白下载一份且预加载的还是被裁过的图）。改首页图片链路后须用「canvas 叠参考 `<img> + object-fit: cover`」做逐像素 A/B 对照。详见私有库架构库排错 24。
+* **站内图片不走 `srcset` 选档**：Notion 反代在 **srcset 选档路径**下按 **CSS 宽度**出图、**不吃 DPR**（同一 URL 直连得原图，走 srcset 只得 CSS 宽那么多像素）→ Retina 上每张图都差 2~3 倍像素 → 被拉伸放大 → 发虚（实测文章页头图 343×343 铺 880 物理像素 = 放大 2.56 倍）。**已直连的三处**：首页三模块（照片墙 / 精选文章图版 / 精选影集封面）、文章页头图、关于页展墙 —— 一律用 `imageSrcset.js#buildSizedSource` + `computeTargetPixelWidth`（显示宽 × DPR）**直连 `width` URL**；走直连的 `<link rel=preload>` **只给 `href`、不带 `imagesrcset`/`imagesizes`**（否则预加载落在另一个 URL 上，白下载一份）。改图片链路后须用「canvas 叠参考 `<img> + object-fit: cover`」做逐像素 A/B 对照。详见私有库架构库排错 24 / 25。
 * **私密凭据隔离**：本地生产凭据底座已安全隔离至私有库 `../withcol-private/docs/secrets/handover.local.md`（或受 `.git/info/exclude` 保护）。AI 可在本地按需查阅，**严禁提交入库或推送到远端**。
 * **快速查阅**：全仓模块索引、冲突裁决与任务路由见根目录 **`PROJECT_MAP.md`**。
