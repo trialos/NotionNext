@@ -531,6 +531,18 @@ describe('circlelife 首页精选文章章', () => {
       expect(pagesIndexSource).not.toContain('widths: [1024, 2048]')
     })
 
+    test('图版的 sizes 必须跟实际渲染宽度一致（满屏出血后是 100vw）', () => {
+      // ⚠️ 图版已改成满屏出血（宽度 = 视口宽），sizes 还写旧的 242px 会让
+      // 浏览器按 242×DPR 选档 → DPR2 的 iPhone 只拿到 512 档却被拉伸到
+      // 880 物理像素 → 图版发虚。sizes 描述与渲染尺寸必须同步。
+      expect(pagesIndexSource).toContain(
+        "sizes: '(max-width: 1023px) 100vw, 420px'"
+      )
+      expect(pagesIndexSource).not.toContain(
+        "sizes: '(max-width: 1023px) 242px, 420px'"
+      )
+    })
+
     test('Notion「精选」勾选链路仍然完整（列名映射 + 白名单）', () => {
       const siteDataSource = readFile('lib', 'db', 'SiteDataApi.js')
       const notionConfigSource = readFile('conf', 'notion.config.js')

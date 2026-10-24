@@ -246,8 +246,11 @@ export async function getStaticProps(req) {
       ? p.homeCover
       : p.pageCover || p.pageCoverThumbnail || ''
     // 图版只有 420px 宽 → 1024 档足够；不要 2048 档（651KB，纯浪费）
+    // ⚠️ sizes 的移动端档必须是**实际渲染宽度**：图版已改成满屏出血（100vw，
+    // 不是内容列宽）。写旧的 242px 会让浏览器按 242×DPR 选档 —— DPR2 的
+    // iPhone 只拿到 512 档，却被拉伸到 880 物理像素 → 图版发虚（真踩过）。
     const sources = buildImageSources(coverSrc, {
-      sizes: '(max-width: 1023px) 242px, 420px',
+      sizes: '(max-width: 1023px) 100vw, 420px',
       widths: [512, 1024]
     })
     return {
