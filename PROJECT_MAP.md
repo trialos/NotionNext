@@ -83,12 +83,12 @@ flowchart TD
   * **主主题的 loader 必须用可静态识别的 `import()`**（`primaryThemeLayouts`，每个布局一条字面量 import）。`next/dynamic` 只有在 loader 里的 `import()` 能被 babel 静态识别时才会生成 `loadableGenerated`，客户端水合才能同步 require 该 chunk；用模板字面量 `import(\`@/themes/${x}\`)` 则是 context import，插件识别不了 → 主题 chunk 不进 script 列表 → 水合时组件还处在 loading 态 → **整棵树 hydration 不匹配** → 新旧两棵树并存、页面高度翻倍再回落 → **CLS 直接到 1.0**。其余主题（`?theme=` 切换）仍走 context import，代价是切换时一次闪烁，属可接受的边缘场景
 * `components/NotionPage.js`：Notion 正文渲染。承担**正文标题层级修正**——react-notion-x 给 Notion 标题统一 +1 偏移（假定 Notion 页面标题是 h1），而本站文章标题本身已是 `h1`；正文缺 Notion h1 时首个正文标题会变成 `<h3>`，形成 h1 → h3 的层级跳跃（`heading-order` 失分）。修法是在正文根节点挂 `notionRootRef`，缺 `.notion-h1` 时把 `.notion-h2/h3/h4` 降级为 `H2/H3/H4`，**只换标签、保留 class 与 `data-id`**（样式与目录锚点不受影响）
 * `pages/archive/index.js`：归档页数据入口；按月分组，circlelife 下会裁剪 pageProps 与 `archivePosts` 白名单字段
-* `themes/circlelife/components/ArchiveIndex.js`、`archiveFilter.js`、`BlogListArchive.js`：归档筛选索引、分类/标签聚合纯函数、时间线条目
+* `themes/circlelife/components/ArchiveIndex.js`、`archiveFilter.js`、`BlogListArchive.js`：归档筛选索引、分类/标签聚合纯函数、时间线条目。手机端标签索引**默认收成窄条**（默认态由 CSS 承担，JS 只挂 `.is-expanded` 变体）；展开/收起**只由两个按钮驱动**，切分类/选标签不重置该状态 —— 契约测试在 `__tests__/themes/circlelife/archiveTagIndex.test.js`
 * `themes/circlelife/components/navConfig.js`：Notion 菜单行序归一化；首页固定最前，不再左右翼重排
 * `themes/circlelife/styles/archive.js`：归档宽屏/筛选/时间线样式；宽屏容器 token 在 `styles/tokens.js`
 * `themes/circlelife/styles/article.js`：文章页全屏壳（全出血封面 + 宽容器 + TOC 细轨）、封面遮罩溶解与顶部压暗、正文排版体系；排版参数 token 在 `styles/tokens.js` 的 `--cl-prose-*` / `--cl-article-*`（溶解曲线是 `--cl-article-cover-mask`，深浅两套停靠点）
 * `themes/circlelife/components/imageSrcset.js`：Notion 反代取图档位与 srcSet 候选集（默认 512/1024 两档，可用 `widths` 覆盖；全出血封面用 `[1024, 2048]` + `sizes=100vw`）
-* `themes/circlelife/components/HomeAlbumShowcase.js`：首页「精选影集」段 —— Notion「精选」勾选优先、不够用最新影集补齐（`CIRCLELIFE_HOME_ALBUM_COUNT` / `CIRCLELIFE_HOME_ALBUM_SHOWCASE` 开关）。左列取景框**只画当前影集的名字**，滚动不位移任何东西、换挡交叉淡入 240ms。**iPhone 上不卡的硬约束**：窗口禁用 `mask-image`、过渡禁用 `font-weight`、全屏封面只画两张 —— 机制与实测见私有库 `circlelife-THEME-ARCH.md` §1.2；纯函数在同目录 `homeAlbumFocus.js`，契约测试在 `__tests__/themes/circlelife/homeAlbumShowcase.test.js`
+* `themes/circlelife/components/HomeAlbumShowcase.js`：首页「精选影集」段 —— Notion「精选」勾选优先、不够用最新影集补齐（`CIRCLELIFE_HOME_ALBUM_COUNT` / `CIRCLELIFE_HOME_ALBUM_SHOWCASE` 开关）。左列取景框**只画当前影集的名字**，滚动不位移任何东西、换挡交叉淡入 240ms。桌面右栏封面是**视口高驱动的 4:5 大封面**（宽度兜底写在 CSS 的 `--cl-home-album-cover-w`，JS 只在右栏放不下时收窄、保住文案列 176px），右栏底边钉在视口底、段尾零白带。**iPhone 上不卡的硬约束**：窗口禁用 `mask-image`、过渡禁用 `font-weight`、全屏封面只画两张 —— 机制与实测见私有库 `circlelife-THEME-ARCH.md` §1.2；纯函数在同目录 `homeAlbumFocus.js`，契约测试在 `__tests__/themes/circlelife/homeAlbumShowcase.test.js`
 * `docs/design/`：官方设计规范中心（`xuhome/` 为备用主题规范；主站专属纸感设计体系已迁移至私有库 `withcol-private/docs/design-system/`）
 * `docs/developer/themes/`：开源主题架构与实现手册（包含 `CLAUDE.md`, `HEO.md` 等；Circlelife 核心架构推演已迁移至私有库 `withcol-private/docs/architecture/`）
 * `pages/`：Next.js 路由入口、SSG/ISR 页面生命周期
