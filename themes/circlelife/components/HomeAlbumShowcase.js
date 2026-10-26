@@ -31,6 +31,12 @@ import {
  * - 入场动效为纯 CSS 关键帧，fill-mode: both —— 无 hydration 不匹配
  */
 
+/**
+ * 桌面端右栏的「文案栏」最小宽（≈11rem）：
+ * 封面再大也不能把文案挤没 —— 封面撑到视口底时，宽度不够就让给文案栏。
+ */
+const ALBUM_COPY_MIN_W = 176
+
 export default function HomeAlbumShowcase({ albums = [] }) {
   const [activeIndex, setActiveIndex] = useState(0)
   const sectionRef = useRef(null)
@@ -41,9 +47,13 @@ export default function HomeAlbumShowcase({ albums = [] }) {
   const viewportRef = useRef(null)
   // 右侧 sticky 面板（桌面）：**底边钉在视口底**（align-self:end + bottom:0）
   // → 面板底边 = 视口底 → 段底抵达视口底的那一刻面板释放、Footer 紧接，
-  // 段尾不留白；封面保持 4:5 自然尺寸（不被拉成竖长条）。
+  // 段尾不留白；封面撑到视口底但**保持 4:5 比例**（不被拉成竖长条），
+  // 宽度由 CSS 的视口高公式给出（见 styles/home.js）。
   // 换挡窗口以它的释放点为准（见 measure()）。
   const panelRef = useRef(null)
+  // 封面盒（桌面）：measure() 用它读回 CSS 算出的「视口高驱动」封面宽，
+  // 右栏空间不够时据此收窄（见 ALBUM_COPY_MIN_W）。
+  const figureRef = useRef(null)
   // 上一档焦点：溶解时旧封面要在新封面下面垫底（不透明），所以要记住「谁是上一档」
   const prevActiveRef = useRef(0)
   const prevActiveIndex = prevActiveRef.current
@@ -151,6 +161,31 @@ export default function HomeAlbumShowcase({ albums = [] }) {
       const win = computeSweepWindow(bodyTop, releaseAt, 0.25)
       sweepStart = win.start
       sweepLength = win.length
+
+      // 封面宽度（桌面）：面板的封面列宽由 **CSS 的视口高公式**给出
+      // （calc((100svh − nav-band − 2.5rem) × 0.8) → 封面高 = 视口高 − 顶距，
+      // 4:5 反推宽度；兜底值写在 CSS 里 → SSR 首帧即满高封面，无首帧位移）。
+      // 这里只做一件事：**右栏宽度不够时把封面收窄**，保住文案列的最小宽
+      // （否则文案被压到 0 行）。
+      // ⚠️ 不能用 getComputedStyle(panel).top 反推顶距：面板是「底边钉在视口底」
+      //    （top: auto），顶距是由封面高度自然得出的；desired 直接读回 CSS
+      //    已经算好的宽度即可，不在 JS 里复刻导航带数学。
+      // 量测点：mount / resize（去抖）/ 字体就绪 / 断点切换 —— 滚动路径零读取。
+      const panel = panelRef.current
+      const figure = figureRef.current
+      if (isMobile || !panel || !figure) {
+        if (panel) panel.style.removeProperty('--cl-home-album-cover-w')
+      } else {
+        // 先摘掉上一次的收窄值 → 读回的宽度就是 CSS 的「视口高驱动」满高封面宽
+        panel.style.removeProperty('--cl-home-album-cover-w')
+        const desired = figure.clientWidth
+        const colGap = parseFloat(getComputedStyle(panel).columnGap) || 0
+        const avail = panel.clientWidth - colGap - ALBUM_COPY_MIN_W
+        if (desired > avail) {
+          const coverW = Math.max(120, Math.floor(avail))
+          panel.style.setProperty('--cl-home-album-cover-w', `${coverW}px`)
+        }
+      }
 
       // 几何变了 → 进度重算，当前档直接落位（不播过渡）
       scrollY = window.scrollY || 0
@@ -390,7 +425,7 @@ export default function HomeAlbumShowcase({ albums = [] }) {
             </a>
           </div>
 
-          <figure className='cl-home-album-figure'>
+          <figure className='cl-home-album-figure' ref={figureRef}>
             {/* 全部封面叠在同一个网格单元里：焦点切换时不改 src（不闪白），
                 旧封面留在下层，新封面解码完成前由它托底。
                 桌面端这张也会在滚到影集段时成为 LCP 候选 → 同样用 canvas。 */}

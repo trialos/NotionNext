@@ -661,19 +661,32 @@ export const homeStyle = `
         transform: scaleY(1);
       }
 
-      /* 右侧 sticky 面板 —— **沉到视口底**（不是把封面拉高）
+      /* 右侧 sticky 面板 —— **底边钉在视口底**，封面**撑到视口底**
          ⚠️ sticky 的 bottom 只「拦」不「拉」：元素的自然位置若已在视口底
          之上，约束不生效 → 必须先让自然位置落到栅格行底（align-self: end），
          bottom: 0 才拉得住（行高由左列轨道 100vh + 行程 决定）。
          面板底边 = 视口底 → 段底抵达视口底的同一刻面板释放、Footer 紧接
-         → 段尾零白带；封面保持 4:5 自然尺寸（不被拉成竖长条）。 */
+         → 段尾零白带。
+
+         封面列宽 = **视口高驱动**：封面高 = 视口高 − 面板顶距（导航带 + 2.5rem），
+         4:5 反推宽度 → (100svh − nav-band − 2.5rem) × 0.8。
+         为什么不是「吃面板剩余空间」：那会让封面尺寸变成剩余空间的副产品 ——
+         文案列固定吃 480px 时，窄桌面（1280）只剩 209px，塌成小邮票。
+         视口高驱动 → 任何窗口都是大封面，且封面底边仍在视口底（白带恒为 0）。
+         兜底值写在 CSS 里 → SSR 首帧即满高封面（无首帧位移）；
+         JS 只在右栏宽度不够时写 --cl-home-album-cover-w 收窄（文案列保底 176px）。 */
       #theme-circlelife .cl-home-album-panel {
         position: sticky;
         top: auto;
         bottom: 0;
         align-self: end;
         display: grid;
-        grid-template-columns: minmax(240px, 30rem) minmax(0, 1fr);
+        grid-template-columns:
+          minmax(0, 1fr)
+          var(
+            --cl-home-album-cover-w,
+            calc((100svh - var(--cl-nav-band) - 2.5rem) * 0.8)
+          );
         gap: clamp(1.5rem, 3vw, 3rem);
         align-items: start;
       }
@@ -741,7 +754,8 @@ export const homeStyle = `
 
       /* 封面图：全部封面叠在同一网格单元（焦点切换不改 src → 不闪白），
          定长 4/5 盒 + cover → 零 CLS
-         4:5 的比例挂在 img 上（width:100% + aspect-ratio），盒子随轨道宽自适应 */
+         4:5 的比例挂在 img 上（width:100% + aspect-ratio），
+         盒子宽度 = 面板的封面列（视口高驱动，见上） */
       #theme-circlelife .cl-home-album-figure {
         position: relative;
         display: grid;
@@ -764,6 +778,16 @@ export const homeStyle = `
       /* 焦点封面置顶：新封面解码完成前，下层旧封面托底（无空白帧） */
       #theme-circlelife .cl-home-album-img.is-active {
         z-index: 2;
+      }
+
+      /* 1024–1279px（宽屏单列）：左列目录只放一个辑名，26rem 太奢侈 ——
+         它把右栏挤窄 → 封面被迫收窄 → 段尾冒白带。
+         这里把左列收到 18rem，右栏多出的宽度让封面保持满高（辑名左对齐，
+         位置不受列宽影响）。≥1280px 段体栅格不变。 */
+      @media (min-width: 1024px) and (max-width: 1279px) {
+        #theme-circlelife .cl-home-album-body {
+          grid-template-columns: minmax(180px, 18rem) minmax(0, 1fr);
+        }
       }
 
       /* ≤1023px：移动端新形态 —— 封面照片满幅铺底 + 左列「密码锁」裁切窗口 */

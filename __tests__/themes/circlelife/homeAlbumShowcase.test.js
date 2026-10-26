@@ -306,7 +306,8 @@ describe('circlelife 首页精选影集段', () => {
       expect(albumStyle).toMatch(
         /\.cl-home-album-panel \{[^}]*align-self: end;/
       )
-      // 顶距不再由 nav-band 决定（顶距是「视口高 − 面板高」，随内容走）
+      // 顶距由封面高度自然得出（不是 top: calc(...)）—— 同时钉顶与钉底会让
+      // sticky 的约束互相打架
       expect(albumStyle).not.toMatch(
         /\.cl-home-album-panel \{[^}]*top: calc\(var\(--cl-nav-band\)/
       )
@@ -818,7 +819,7 @@ describe('circlelife 首页精选影集段', () => {
       expect(showcaseSource).toContain("mq.addEventListener?.('change'")
     })
 
-    test('右栏沉到视口底（封面保持自然 4:5，段尾不留白）', () => {
+    test('右栏封面撑到视口底（视口高驱动，段尾不留白）', () => {
       // ⚠️ sticky 的 bottom 只「拦」不「拉」：必须先让自然位置落到栅格行底
       //    （align-self: end），bottom: 0 才拉得住 → 面板底边 = 视口底
       const panel = albumStyle.match(
@@ -827,18 +828,55 @@ describe('circlelife 首页精选影集段', () => {
       expect(panel[1]).toContain('align-self: end')
       expect(panel[1]).toContain('top: auto')
       expect(panel[1]).toContain('bottom: 0')
-      // 面板栅格回到「文案栏定宽 + 封面吃剩余」→ 封面 = 轨道宽的 4:5 自然尺寸
+      // 封面列宽 = **视口高驱动**（不是吃剩余空间）：
+      // 封面高 = 视口高 − 面板顶距 → 4:5 反推宽度 → 面板重新变高，
+      // 文案回到页面上部；封面底边仍在视口底 → 段尾零白带。
+      expect(albumStyle).toContain('--cl-home-album-cover-w')
+      expect(albumStyle).toContain('calc((100svh - var(--cl-nav-band) - 2.5rem) * 0.8)')
+      // 文案列吃剩余（可压缩），封面列宽度确定
       expect(albumStyle).toMatch(
-        /\.cl-home-album-panel \{[^}]*grid-template-columns:\s*minmax\(240px, 30rem\) minmax\(0, 1fr\);/
+        /\.cl-home-album-panel \{[^}]*grid-template-columns:[\s\S]*?minmax\(0, 1fr\)[\s\S]*?\}/
       )
-      // 上一轮的「把封面拉高」机制整体撤回（它把封面拉成了竖长条）
-      expect(albumStyle).not.toContain('--cl-home-album-cover-w')
-      expect(showcaseSource).not.toContain('--cl-home-album-cover-w')
-      expect(showcaseSource).not.toContain('ALBUM_COPY_MIN_W')
-      // 4:5 的比例挂在 img 上（盒子随轨道宽自适应）
+      // 4:5 的比例挂在 img 上（封面盒随面板列宽自适应）
       expect(albumStyle).toMatch(
         /\.cl-home-album-img \{[^}]*aspect-ratio: 4 \/ 5;/
       )
+    })
+
+    test('封面宽的兜底公式必须跟着导航带走（不得写死像素）', () => {
+      // 导航带高度会变（--cl-nav-band）→ 封面高度必须跟着动，
+      // 否则导航一变封面就与视口底错位、白带冒出来
+      expect(albumStyle).toContain(
+        'calc((100svh - var(--cl-nav-band) - 2.5rem) * 0.8)'
+      )
+      expect(albumStyle).toContain('100svh')
+      expect(albumStyle).toContain('var(--cl-nav-band)')
+      // 不得把顶距写死成像素
+      expect(albumStyle).not.toContain('calc((100svh - 100px')
+    })
+
+    test('窄桌面（1024–1279px）左列目录收窄，把宽度让给封面', () => {
+      // 左列只放一个辑名，26rem 太奢侈 → 挤窄右栏 → 封面被压成小卡片
+      expect(albumStyle).toMatch(
+        /@media \(min-width: 1024px\) and \(max-width: 1279px\)/
+      )
+      expect(albumStyle).toMatch(
+        /\.cl-home-album-body \{[^}]*grid-template-columns: minmax\(180px, 18rem\) minmax\(0, 1fr\);/
+      )
+    })
+
+    test('封面宽收窄逻辑在组件里（空间不够时让给文案栏）', () => {
+      // 封面列宽由 CSS 兜底给出；JS 只在右栏放不下时收窄，
+      // 文案列保底 ALBUM_COPY_MIN_W
+      expect(showcaseSource).toContain('ALBUM_COPY_MIN_W')
+      expect(showcaseSource).toContain(
+        "panel.style.setProperty('--cl-home-album-cover-w'"
+      )
+      expect(showcaseSource).toContain(
+        "panel.style.removeProperty('--cl-home-album-cover-w')"
+      )
+      // 移动端要清掉这个变量（面板本就 display:none）
+      expect(showcaseSource).toContain('isMobile || !panel || !figure')
     })
 
     test('换挡窗口跟右栏面板走（两端同公式 = 0.75 × 行程）', () => {
