@@ -52,10 +52,10 @@ export default function ArchiveIndex({
   activeCategoryName,
   activeTagName,
   archiveRange,
-  collapsed,
+  expanded = false,
   onCategoryChange,
   onTagChange,
-  onToggleCollapsed,
+  onToggleExpanded,
   children
 }) {
   const activeScope =
@@ -68,27 +68,35 @@ export default function ArchiveIndex({
     ? '全部标签'
     : `全部「${activeCategoryName || '未分类'}」文章`
   const tags = activeScope?.tags || []
-  const collapsedValue = activeTagName ? `#${activeTagName}` : allRowLabel
+  const barValue = activeTagName ? `#${activeTagName}` : allRowLabel
   const hasTag = activeTagKey !== ARCHIVE_ALL
   const expandRef = useRef(null)
   const collapseRef = useRef(null)
-  const previousCollapsed = useRef(collapsed)
+  const panelRef = useRef(null)
+  const barRef = useRef(null)
+  const previousExpanded = useRef(expanded)
 
   useEffect(() => {
-    if (previousCollapsed.current === collapsed) return
-    previousCollapsed.current = collapsed
+    if (previousExpanded.current === expanded) return
+    previousExpanded.current = expanded
     if (
       typeof window === 'undefined' ||
       !window.matchMedia('(max-width: 767px)').matches
     ) {
       return
     }
-    if (collapsed) {
-      expandRef.current?.focus({ preventScroll: true })
-    } else {
+    // 只有焦点本就落在「即将被隐藏的控件」上时才搬运：
+    // 点分类轨道时焦点在组件外，不能抢；载入时也不该抢焦点。
+    const active = document.activeElement
+    const focusInside =
+      panelRef.current?.contains(active) || barRef.current?.contains(active)
+    if (!focusInside) return
+    if (expanded) {
       collapseRef.current?.focus({ preventScroll: true })
+    } else {
+      expandRef.current?.focus({ preventScroll: true })
     }
-  }, [collapsed])
+  }, [expanded])
 
   return (
     <>
@@ -102,22 +110,22 @@ export default function ArchiveIndex({
       <div className='cl-archive-body'>
         <aside className='cl-archive-rail'>
           <section
-            className={`cl-archive-tagindex${collapsed ? ' is-collapsed' : ''}`}
+            className={`cl-archive-tagindex${expanded ? ' is-expanded' : ''}`}
             aria-label='标签索引'
           >
-            <div className='cl-archive-tagbar'>
+            <div className='cl-archive-tagbar' ref={barRef}>
               <div className='cl-archive-tagbar__inner'>
                 <span className='cl-archive-tagbar__label'>标签索引</span>
                 <span className='cl-archive-tagbar__value'>
-                  {collapsedValue}
+                  {barValue}
                 </span>
                 <span className='cl-archive-tagbar__actions'>
                   <button
                     ref={expandRef}
                     type='button'
-                    aria-expanded={false}
+                    aria-expanded={expanded}
                     aria-controls={TAG_PANEL_ID}
-                    onClick={onToggleCollapsed}
+                    onClick={onToggleExpanded}
                   >
                     展开
                   </button>
@@ -134,16 +142,20 @@ export default function ArchiveIndex({
               </div>
             </div>
 
-            <div className='cl-archive-tagindex__panel' id={TAG_PANEL_ID}>
+            <div
+              className='cl-archive-tagindex__panel'
+              id={TAG_PANEL_ID}
+              ref={panelRef}
+            >
               <div className='cl-archive-tagindex__head'>
                 <h2 className='cl-archive-tagindex__title'>{title}</h2>
                 <button
                   ref={collapseRef}
                   type='button'
                   className='cl-archive-tagindex__collapse'
-                  aria-expanded={!collapsed}
+                  aria-expanded={expanded}
                   aria-controls={TAG_PANEL_ID}
-                  onClick={onToggleCollapsed}
+                  onClick={onToggleExpanded}
                 >
                   收起
                 </button>

@@ -629,7 +629,9 @@ const LayoutArchive = props => {
   const { archivePosts } = props
   const [activeCategoryKey, setActiveCategoryKey] = useState(ARCHIVE_ALL)
   const [activeTagKey, setActiveTagKey] = useState(ARCHIVE_ALL)
-  const [tagIndexCollapsed, setTagIndexCollapsed] = useState(false)
+  // 展开态而非收缩态：手机端（<768px）默认由 CSS 呈「窄条」，
+  // 显式点「展开」才挂 .is-expanded 铺开面板；桌面不受影响。
+  const [tagIndexExpanded, setTagIndexExpanded] = useState(false)
 
   const facets = useMemo(
     () => buildArchiveFacets(archivePosts),
@@ -680,15 +682,16 @@ const LayoutArchive = props => {
       ? ''
       : activeScope?.tags.find(tag => tag.key === activeTagKey)?.name || ''
 
+  // 展开 / 收起只由「展开」「收起」两个按钮驱动：
+  // 切分类、选标签、清除筛选都不再重置展开态 —— 用户的显式选择在各分类之间保持
+  // （2026-10 博主要求：默认收缩，用户点开就展开、点收就收起，一路保持）。
   const handleCategoryChange = key => {
     setActiveCategoryKey(key)
     setActiveTagKey(ARCHIVE_ALL)
-    setTagIndexCollapsed(false)
   }
 
   const handleTagChange = key => {
     setActiveTagKey(key)
-    setTagIndexCollapsed(key !== ARCHIVE_ALL)
   }
 
   const hasPosts = facets.totalCount > 0
@@ -745,10 +748,10 @@ const LayoutArchive = props => {
           activeCategoryName={activeCategoryName}
           activeTagName={activeTagName}
           archiveRange={archiveRange}
-          collapsed={tagIndexCollapsed}
+          expanded={tagIndexExpanded}
           onCategoryChange={handleCategoryChange}
           onTagChange={handleTagChange}
-          onToggleCollapsed={() => setTagIndexCollapsed(value => !value)}>
+          onToggleExpanded={() => setTagIndexExpanded(value => !value)}>
           {stage}
         </ArchiveIndex>
       ) : (

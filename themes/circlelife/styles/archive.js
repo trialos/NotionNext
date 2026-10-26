@@ -433,13 +433,21 @@ export const archiveStyle = `
       }
 
       @media (max-width: 767px) {
-        #theme-circlelife .cl-archive-tagindex.is-collapsed
-          .cl-archive-tagindex__panel {
+        /* 手机默认：标签索引收成窄条（面板隐藏、窄条显示）。
+           博主 2026-10 要求「手机端默认收缩」；显式展开时才由 JS 挂 .is-expanded，
+           服务端与客户端输出一致，不存在 hydration 不匹配。 */
+        #theme-circlelife .cl-archive-tagindex .cl-archive-tagindex__panel {
           display: none;
         }
-        #theme-circlelife .cl-archive-tagindex.is-collapsed
-          .cl-archive-tagbar {
+        #theme-circlelife .cl-archive-tagindex .cl-archive-tagbar {
           display: block;
+        }
+        #theme-circlelife .cl-archive-tagindex.is-expanded
+          .cl-archive-tagindex__panel {
+          display: block;
+        }
+        #theme-circlelife .cl-archive-tagindex.is-expanded .cl-archive-tagbar {
+          display: none;
         }
         #theme-circlelife .cl-archive-tagindex__collapse {
           display: inline-flex;
