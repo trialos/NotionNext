@@ -6,6 +6,7 @@ import {
   buildSizedSource,
   computeTargetPixelWidth
 } from './imageSrcset'
+import { shouldWallOwnWheel } from './wheelOwnership'
 
 // 优雅的保底卡片（无内容时呈现，避免白屏）
 const FALLBACK_CARDS = [
@@ -505,6 +506,10 @@ export default function InfiniteAboutGrid({ cards = [], summary = '', title = ''
     }
 
     const onWheel = e => {
+      // 指针落在浮层内的原生滚动容器（顶栏全屏菜单 / 搜索结果）时，
+      // 交还浏览器原生滚动，展墙不得吞掉滚轮
+      if (!shouldWallOwnWheel(e.target, stage)) return
+
       e.preventDefault()
       // 序言态下向下滚轮轻微下拨即可收起幕布，并带入画廊
       if (isHeroOpen) {

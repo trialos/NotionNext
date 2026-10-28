@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { shouldWallOwnWheel } from './wheelOwnership'
 
 /**
  * 影集无限瀑布流展墙 (AlbumInfiniteWall)
@@ -592,6 +593,13 @@ export default function AlbumInfiniteWall({
     }
 
     const onWheel = e => {
+      // 灯箱开启时展墙不接管滚轮，避免关闭后照片墙跳位
+      if (isPausedRef.current) return
+
+      // 指针落在浮层内的原生滚动容器（影集目录 / 顶栏全屏菜单 / 搜索结果）时，
+      // 交还浏览器原生滚动，展墙不得吞掉滚轮
+      if (!shouldWallOwnWheel(e.target, stage)) return
+
       e.preventDefault()
 
       if (isHeroOpen) {

@@ -85,6 +85,7 @@ flowchart TD
 * `pages/archive/index.js`：归档页数据入口；按月分组，circlelife 下会裁剪 pageProps 与 `archivePosts` 白名单字段
 * `themes/circlelife/components/ArchiveIndex.js`、`archiveFilter.js`、`BlogListArchive.js`：归档筛选索引、分类/标签聚合纯函数、时间线条目。手机端标签索引**默认收成窄条**（默认态由 CSS 承担，JS 只挂 `.is-expanded` 变体）；展开/收起**只由两个按钮驱动**，切分类/选标签不重置该状态 —— 契约测试在 `__tests__/themes/circlelife/archiveTagIndex.test.js`
 * `themes/circlelife/components/navConfig.js`：Notion 菜单行序归一化；首页固定最前，不再左右翼重排
+* `themes/circlelife/components/wheelOwnership.js`：`shouldWallOwnWheel(target, stage)` —— 自研虚拟滚动展墙（`AlbumInfiniteWall.js` 影集画廊 / `InfiniteAboutGrid.js` 关于展墙）的**滚轮归属判定**。展墙在 `window` 上注册非 passive 的 `wheel` 监听并 `preventDefault()`，会取消浏览器「滚轮作用于最近原生滚动祖先」的默认行为 → **页面上每一个滚轮事件都被吞掉**，浮层内的原生滚动容器（影集目录列表、顶栏全屏菜单、搜索结果）随之滚不动。规则：指针落在原生滚动容器（`overflow-y: auto|scroll|overlay`）内 → 展墙不接管，交还浏览器原生滚动；其余（展墙自身、顶栏导航胶囊等不含滚动容器的浮层）→ 展墙照常接管。回溯 DOM 必须**停在 `body`/`html` 之前**（`html { overflow-x: hidden }` 会让 `overflow-y` 计算成 `auto`，误判根滚动容器会让展墙彻底失去滚轮）。契约测试在 `__tests__/themes/circlelife/wheelOwnership.test.js`
 * `themes/circlelife/styles/archive.js`：归档宽屏/筛选/时间线样式；宽屏容器 token 在 `styles/tokens.js`
 * `themes/circlelife/styles/article.js`：文章页全屏壳（全出血封面 + 宽容器 + TOC 细轨）、封面遮罩溶解与顶部压暗、正文排版体系；排版参数 token 在 `styles/tokens.js` 的 `--cl-prose-*` / `--cl-article-*`（溶解曲线是 `--cl-article-cover-mask`，深浅两套停靠点）
 * `themes/circlelife/components/imageSrcset.js`：Notion 反代取图档位与 srcSet 候选集（默认 512/1024 两档，可用 `widths` 覆盖；全出血封面用 `[1024, 2048]` + `sizes=100vw`）
