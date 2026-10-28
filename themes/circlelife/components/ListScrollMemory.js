@@ -1,47 +1,106 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
+import { normalizePath } from './articleBackHref'
 
 /**
- * 列表滚动位置记忆（返回文章时恢复）
+ * 文章返回位置记忆
  *
- * 上半部是纯函数核心（可单测），下半部是挂在 LayoutBase 的组件：
- * 1. 捕获阶段记录「点同源链接时的 scrollY → 目标页」，覆盖时间线/归档/
- *    分类/标签/首页抽牌全部入口，列表组件零侵入
- * 2. ArticleBack 设置一次性「返回意图」后，落页恢复到记录位置
- *    （无记录则回顶）；普通导航不设意图，永不触发恢复
+ * 1. 捕获阶段记录「点同源链接离开当前页」时的来源、目标与 scrollY
+ *    （cl-departure，单条，后一次覆盖前一次，TTL 60s）
+ * 2. 文章页挂载时读取这条记录，把「本次来源 + 位置」写进按文章的快照
+ * 3. ArticleBack 点返回时写一次性 intent（href + y）；落页消费 intent，
+ *    只在目标页恢复到离开时的位置；普通导航不设 intent，永不触发恢复
  *
- * 结构：cl-list-scroll = { [destPath]: { y, ts } }，LRU 上限 8 条；
- * cl-back-restore = 返回意图标记。
+ * 结构：cl-departure = { from, to, y, ts }；cl-back-restore = { href, y, ts }。
  */
-export const SCROLL_MAP_KEY = 'cl-list-scroll'
+
+export const DEPARTURE_KEY = 'cl-departure'
 export const BACK_INTENT_KEY = 'cl-back-restore'
-export const SCROLL_MAP_LIMIT = 8
+export const DEPARTURE_TTL = 60000
+export const INTENT_TTL = 60000
 
-export function readScrollMap(json) {
-  if (!json) return {}
+function cleanY(value) {
+  const y = Number(value)
+  return Number.isFinite(y) && y > 0 ? Math.round(y) : 0
+}
+
+function isInternalPath(value) {
+  return (
+    typeof value === 'string' &&
+    value.startsWith('/') &&
+    !value.startsWith('//')
+  )
+}
+
+function readJson(raw) {
+  if (!raw) return null
   try {
-    const obj = JSON.parse(json)
-    if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return {}
-    return obj
+    const value = JSON.parse(raw)
+    return value && typeof value === 'object' ? value : null
   } catch (_) {
-    return {}
+    return null
   }
 }
 
-export function updateScrollMap(map, dest, y, ts, limit = SCROLL_MAP_LIMIT) {
-  if (!dest || !Number.isFinite(y)) return map
-  const next = { ...map, [dest]: { y: Math.round(y), ts } }
-  const entries = Object.entries(next)
-  if (entries.length > limit) {
-    entries.sort((a, b) => (a[1].ts || 0) - (b[1].ts || 0))
-    for (let i = 0; i < entries.length - limit; i++) delete next[entries[i][0]]
-  }
-  return next
+function isFresh(ts, now, ttl) {
+  const stamp = Number(ts)
+  return Number.isFinite(stamp) && stamp <= now + 1000 && now - stamp <= ttl
 }
 
-export function pickScroll(map, dest) {
-  const hit = dest ? map[dest] : null
-  return hit && Number.isFinite(hit.y) ? hit.y : null
+export function makeDeparture({ from, to, y, ts } = {}) {
+  if (typeof from !== 'string' || typeof to !== 'string') return null
+  if (!from || !to) return null
+  const fromPath = normalizePath(from)
+  const toPath = normalizePath(to)
+  if (!isInternalPath(fromPath) || !isInternalPath(toPath)) return null
+  if (fromPath === toPath) return null
+  const stamp = Number(ts)
+  return {
+    from: fromPath,
+    to: toPath,
+    y: cleanY(y),
+    ts: Number.isFinite(stamp) ? stamp : Date.now()
+  }
+}
+
+export function readDeparture(
+  json,
+  currentPath,
+  now = Date.now(),
+  ttl = DEPARTURE_TTL
+) {
+  const value = readJson(json)
+  if (!value) return null
+  if (!isFresh(value.ts, now, ttl)) return null
+  const record = makeDeparture(value)
+  if (!record) return null
+  if (normalizePath(currentPath) !== record.to) return null
+  return record
+}
+
+export function makeIntent({ href, y, ts } = {}) {
+  if (!isInternalPath(href)) return null
+  const stamp = Number(ts)
+  return {
+    href: normalizePath(href),
+    y: cleanY(y),
+    ts: Number.isFinite(stamp) ? stamp : Date.now()
+  }
+}
+
+export function matchIntent(
+  json,
+  currentPath,
+  now = Date.now(),
+  ttl = INTENT_TTL
+) {
+  const value = readJson(json)
+  if (!value) return null
+  if (!isFresh(value.ts, now, ttl)) return null
+  const intent = makeIntent(value)
+  if (!intent) return null
+  if (normalizePath(currentPath) !== intent.href) return null
+  return intent.y
 }
 
 function safeGet(key) {
@@ -58,35 +117,42 @@ function safeSet(key, value) {
   } catch (_) {}
 }
 
-export function rememberScroll(dest, y) {
-  if (typeof sessionStorage === 'undefined') return
-  const map = updateScrollMap(
-    readScrollMap(safeGet(SCROLL_MAP_KEY)),
-    dest,
-    y,
-    Date.now()
-  )
-  safeSet(SCROLL_MAP_KEY, JSON.stringify(map))
-}
-
-export function peekScroll(dest) {
-  if (typeof sessionStorage === 'undefined') return null
-  return pickScroll(readScrollMap(safeGet(SCROLL_MAP_KEY)), dest)
-}
-
-export function setBackIntent() {
-  if (typeof sessionStorage === 'undefined') return
-  safeSet(BACK_INTENT_KEY, String(Date.now()))
-}
-
-export function consumeBackIntent() {
-  if (typeof sessionStorage === 'undefined') return false
-  const v = safeGet(BACK_INTENT_KEY)
-  if (!v) return false
+function safeRemove(key) {
   try {
-    sessionStorage.removeItem(BACK_INTENT_KEY)
+    sessionStorage.removeItem(key)
   } catch (_) {}
-  return true
+}
+
+export function recordDeparture(from, to, y) {
+  if (typeof sessionStorage === 'undefined') return
+  const record = makeDeparture({ from, to, y, ts: Date.now() })
+  if (!record) return
+  safeSet(DEPARTURE_KEY, JSON.stringify(record))
+}
+
+export function readDepartureRecord(currentPath) {
+  if (typeof sessionStorage === 'undefined') return null
+  return readDeparture(safeGet(DEPARTURE_KEY), currentPath)
+}
+
+export function clearDeparture() {
+  if (typeof sessionStorage === 'undefined') return
+  safeRemove(DEPARTURE_KEY)
+}
+
+export function setBackIntent(href, y) {
+  if (typeof sessionStorage === 'undefined') return
+  const intent = makeIntent({ href, y, ts: Date.now() })
+  if (!intent) return
+  safeSet(BACK_INTENT_KEY, JSON.stringify(intent))
+}
+
+export function consumeBackIntent(currentPath) {
+  if (typeof sessionStorage === 'undefined') return null
+  const raw = safeGet(BACK_INTENT_KEY)
+  if (!raw) return null
+  safeRemove(BACK_INTENT_KEY)
+  return matchIntent(raw, currentPath)
 }
 
 const REALIGN_DELAYS = [400, 900]
@@ -97,12 +163,14 @@ export default function ListScrollMemory() {
 
   useEffect(() => {
     if (typeof document === 'undefined') return undefined
+    // 旧版路径级滚动地图：只清理，不再读写
+    safeRemove('cl-list-scroll')
     const onClick = e => {
       if (e.defaultPrevented) return
       if (e.button != null && e.button !== 0) return
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
       const a = e.target?.closest?.('a[href]')
-      if (!a || a.target === '_blank') return
+      if (!a || a.target === '_blank' || a.hasAttribute('download')) return
       let u
       try {
         u = new URL(a.href, window.location.origin)
@@ -110,10 +178,10 @@ export default function ListScrollMemory() {
         return
       }
       if (u.origin !== window.location.origin) return
-      // 按「当前页」路径记账：返回到哪一页就按哪一页查找；
-      // 记目标页路径会让恢复查找永远落空
-      rememberScroll(
+      if (u.protocol !== 'http:' && u.protocol !== 'https:') return
+      recordDeparture(
         window.location.pathname + window.location.search,
+        u.pathname + u.search,
         window.scrollY || 0
       )
     }
@@ -123,13 +191,13 @@ export default function ListScrollMemory() {
   }, [])
 
   useEffect(() => {
-    const path = (router.asPath || '').split('#')[0]
-    if (!path || path === '/album' || path.startsWith('/album?')) {
+    const currentPath = normalizePath(router.asPath || '')
+    const y = consumeBackIntent(currentPath)
+    if (y == null) return undefined
+    // 影集页的滚动由影集自身管理，但返回意图必须在这里消费掉
+    if (currentPath === '/album' || currentPath.startsWith('/album?')) {
       return undefined
     }
-    if (!consumeBackIntent()) return undefined
-    const recorded = peekScroll(path)
-    const y = recorded == null ? 0 : recorded
 
     let cancelled = false
     let interacted = false

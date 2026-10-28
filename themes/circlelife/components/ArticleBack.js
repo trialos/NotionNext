@@ -1,21 +1,28 @@
 import { useRouter } from 'next/router'
 import { useEffect, useRef } from 'react'
-import { resolveArticleBackHref } from './articleBackHref'
-import { setBackIntent } from './ListScrollMemory'
+import { resolveArticleBack } from './articleBackHref'
+import {
+  clearDeparture,
+  readDepartureRecord,
+  setBackIntent
+} from './ListScrollMemory'
 
 /**
- * 文章返回：回到进文前页面（不受目录 # 历史影响）
+ * 文章返回：回到这一次进入文章前的页面，并恢复离开时的滚动位置
  */
 export default function ArticleBack({ className = '', postId = '' }) {
   const router = useRouter()
-  const targetRef = useRef('/')
+  const targetRef = useRef({ href: '/', y: 0 })
 
   useEffect(() => {
     if (typeof window === 'undefined') return
     const key = postId ? `cl-article-from:${postId}` : 'cl-article-from'
-    let stored = ''
+    const currentPath = window.location.pathname + window.location.search
+    const departure = readDepartureRecord(currentPath)
+
+    let storedRaw = ''
     try {
-      stored = sessionStorage.getItem(key) || ''
+      storedRaw = sessionStorage.getItem(key) || ''
     } catch (_) {}
 
     let lastList = ''
@@ -23,38 +30,39 @@ export default function ArticleBack({ className = '', postId = '' }) {
       lastList = sessionStorage.getItem('cl-list-last') || ''
     } catch (_) {}
 
-    const href = resolveArticleBackHref({
-      currentPath: window.location.pathname + window.location.search,
-      stored,
-      lastList
+    const next = resolveArticleBack({
+      departure,
+      storedRaw,
+      lastList,
+      currentPath
     })
 
-    if (!stored && href && href !== '/') {
+    if (next.fresh) {
+      // 本次到达有明确来源：刷新本篇快照，再消费这条一次性离开记录
       try {
-        sessionStorage.setItem(key, href)
+        sessionStorage.setItem(
+          key,
+          JSON.stringify({ href: next.href, y: next.y, ts: Date.now() })
+        )
       } catch (_) {}
-    }
-    // 首次且无 stored：把解析结果写入，避免刷新丢 referrer
-    if (!stored) {
-      try {
-        sessionStorage.setItem(key, href || '/')
-      } catch (_) {}
+      clearDeparture()
     }
 
-    targetRef.current = href || '/'
+    targetRef.current = { href: next.href, y: next.y }
   }, [postId, router.asPath])
 
   const go = () => {
-    // 定位交给 ListScrollMemory：有记录恢复原位，无记录回顶
-    setBackIntent()
-    router.push(targetRef.current || '/', undefined, { scroll: false })
+    const target = targetRef.current || { href: '/', y: 0 }
+    setBackIntent(target.href, target.y)
+    router.push(target.href || '/', undefined, { scroll: false })
   }
 
   return (
     <button
       type='button'
       className={`cl-article-back ${className}`.trim()}
-      onClick={go}>
+      onClick={go}
+    >
       ← 返回
     </button>
   )
