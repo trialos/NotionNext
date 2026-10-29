@@ -22,8 +22,9 @@ export const headerStyle = `
          全屏文章页（cl-is-article）除外：封面全出血直铺视口顶，导航浮于图上；
          无封面文章的避让由文章壳 --no-cover 规则自持。
          归档页（cl-is-archive）同样自持顶部间距：它的刊头要与影集页落在
-         同一条基线（--cl-mast-top），不能在这里再叠一层通用避让 */
-      #theme-circlelife:not(.cl-is-home):not(.cl-is-album):not(.cl-is-about):not(.cl-is-article):not(.cl-is-archive) #container-inner {
+         同一条基线（--cl-mast-top），不能在这里再叠一层通用避让。
+         音乐三页（cl-is-music）与归档同理：刊头基线全站统一，顶部间距由模块自持 */
+      #theme-circlelife:not(.cl-is-home):not(.cl-is-album):not(.cl-is-about):not(.cl-is-article):not(.cl-is-archive):not(.cl-is-music) #container-inner {
         padding-top: max(4.5rem, calc(env(safe-area-inset-top, 0px) + 4rem));
       }
 

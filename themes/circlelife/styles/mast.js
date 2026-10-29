@@ -45,11 +45,37 @@ export const mastStyle = `
     text-wrap: balance;
   }
 
-  /* 竖线强调色：两页各一，按设计文档刻意不合并 */
+  /* 竖线强调色：三页各一，按设计文档刻意不合并 */
   #theme-circlelife .cl-page-mast--archive {
     --cl-mast-rule: var(--cl-gold);
   }
   #theme-circlelife .cl-page-mast--album {
     --cl-mast-rule: var(--cl-vermilion, #b93a2b);
+  }
+  #theme-circlelife .cl-page-mast--music {
+    --cl-mast-rule: var(--cl-music);
+  }
+
+  /* 刊头右侧计数位（音乐展架用）：不传 aside 的现有刊头 DOM 里没有这个节点。
+     绝对定位挂在 inner 上，避免改动 cl-page-mast-inner 的列方向影响其他页 */
+  #theme-circlelife .cl-page-mast-inner {
+    position: relative;
+  }
+  #theme-circlelife .cl-page-mast-aside {
+    display: none;
+  }
+  @media (min-width: 768px) {
+    #theme-circlelife .cl-page-mast-aside {
+      display: block;
+      position: absolute;
+      right: 0;
+      bottom: 0.2rem;
+      font-family: var(--cl-font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      line-height: 1;
+      color: var(--cl-faint);
+      white-space: nowrap;
+    }
   }
 `

@@ -46,8 +46,9 @@ const customJestConfig = {
   ],
   
   // Transform files
+  // mjs：scripts/music/*.mjs 同步脚本要能被单测直接 import
   transform: {
-    '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }]
+    '^.+\\.(js|jsx|mjs|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }]
   },
   
   // Transform ignore patterns
@@ -57,7 +58,7 @@ const customJestConfig = {
   ],
   
   // Module file extensions
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'mjs', 'jsx', 'json', 'node'],
   
   // Coverage configuration
   collectCoverage: false,

@@ -103,7 +103,7 @@ export default function AlbumDeckNav({
                 setIsOpen(false)
                 onBack?.()
               }}
-              aria-label='返回影集展架总览'
+              aria-label='返回影集总览'
               className='cl-album-deck-popover-back'>
               <span>返回展架</span>
             </button>

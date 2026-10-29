@@ -9,6 +9,7 @@ import {
   toSitemapDateString
 } from '@/lib/sitemap-utils'
 import { extractLangId, extractLangPrefix } from '@/lib/utils/pageId'
+import { isMusicType, sitePathOf } from '@/lib/music/paths'
 import { getServerSideSitemap } from 'next-sitemap'
 
 export const getServerSideProps = async ctx => {
@@ -69,6 +70,16 @@ function generateLocalesSitemap(link, allPages, locale) {
       loc: buildSitemapLoc({
         baseUrl: normalizedLink,
         locale: normalizedLocale,
+        slug: 'music'
+      }),
+      lastmod: dateNow,
+      changefreq: 'daily',
+      priority: '0.7'
+    },
+    {
+      loc: buildSitemapLoc({
+        baseUrl: normalizedLink,
+        locale: normalizedLocale,
         slug: 'category'
       }),
       lastmod: dateNow,
@@ -116,7 +127,8 @@ function generateLocalesSitemap(link, allPages, locale) {
         const loc = buildSitemapLoc({
           baseUrl: normalizedLink,
           locale: normalizedLocale,
-          slug: post?.slug
+          // 音乐行进自己的 /music/* 路径，登记裸 slug 会指向一个不该存在的文章路由
+          slug: isMusicType(post.type) ? sitePathOf(post) : post?.slug
         })
         if (!loc) return null
 

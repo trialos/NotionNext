@@ -94,8 +94,12 @@ describe('circlelife 刊头统一（归档 / 影集）', () => {
       })
     })
 
-    test('归档页已退出 #container-inner 的通用导航避让（否则会叠出 72px）', () => {
-      expect(headerStyle).toContain(':not(.cl-is-archive) #container-inner')
+    test('归档与音乐页都退出了 #container-inner 的通用导航避让（否则会叠出 72px）', () => {
+      // 这两页的顶部间距由模块自持（刊头基线统一走 --cl-mast-top），
+      // 通用避让再加一层就会让刊头跳位
+      expect(headerStyle).toMatch(
+        /:not\(\.cl-is-archive\):not\(\.cl-is-music\)\s*#container-inner/
+      )
     })
   })
 
@@ -164,7 +168,7 @@ describe('circlelife 刊头统一（归档 / 影集）', () => {
 
     test('两页刊头文案不变', () => {
       const shelf = readThemeFile('components', 'AlbumShelfStack.js')
-      expect(shelf).toContain('ARCHIVE · 影集展架')
+      expect(shelf).toContain('ARCHIVE · 影集')
       expect(shelf).toContain('全部影集')
       const index = readThemeFile('index.js')
       expect(index).toContain('ARCHIVE · 时间线与脉络')

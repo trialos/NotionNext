@@ -143,7 +143,7 @@ export default function AlbumShelfStack({ decks = [], onOpen }) {
         {/* 刊头与归档页同构（同一 PageMast 组件 + 同一份 mast.js 排版），
             仅竖线强调色不同：归档暖金 / 影集朱砂 */}
         <PageMast
-          eyebrow='ARCHIVE · 影集展架'
+          eyebrow='ARCHIVE · 影集'
           title='全部影集'
           className='cl-page-mast--section cl-page-mast--album'
         />

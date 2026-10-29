@@ -48,6 +48,11 @@ import { PostMeta } from './components/PostMeta'
 import SearchInput from './components/SearchInput'
 import { SideBar } from './components/SideBar'
 import PageMast from './components/PageMast'
+import MusicCover from './components/music/MusicCover'
+import MusicShelf from './components/music/MusicShelf'
+import NoteHead from './components/music/NoteHead'
+import NcmLink from './components/music/NcmLink'
+import TrackList from './components/music/TrackList'
 import TlPageHero from './components/TlPageHero'
 import CONFIG from './config'
 import { buildSizedSource, computeTargetPixelWidth } from './components/imageSrcset'
@@ -82,14 +87,22 @@ const LayoutBase = props => {
         router.asPath.split('?')[0].replace(/\/$/, '') === '')) &&
     !router?.query?.s
 
-  const archivePath =
+  const cleanPath =
     (typeof router?.asPath === 'string'
       ? router.asPath.split('?')[0].replace(/\/$/, '')
       : '') || ''
   const isArchivePage =
     router?.pathname === '/archive' ||
-    archivePath === '/archive' ||
-    /^\/[a-z]{2}(?:-[A-Z]{2})?\/archive$/.test(archivePath)
+    cleanPath === '/archive' ||
+    /^\/[a-z]{2}(?:-[A-Z]{2})?\/archive$/.test(cleanPath)
+
+  // 音乐三个页面都走宽屏外壳；手记页会带 post（只为正文渲染与 SEO），
+  // 因此 isArticlePage 必须排除音乐路由，否则会吃进文章封面全出血与目录侧栏
+  const isMusicPage =
+    (typeof router?.pathname === 'string' &&
+      (router.pathname === '/music' || router.pathname.startsWith('/music/'))) ||
+    cleanPath === '/music' ||
+    /^\/[a-z]{2}(?:-[A-Z]{2})?\/music(?:\/|$)/.test(cleanPath)
 
   const LAYOUT_VERTICAL =
     post && siteConfig('CIRCLELIFE_ARTICLE_LAYOUT_VERTICAL', false, CONFIG)
@@ -104,13 +117,15 @@ const LayoutBase = props => {
   // 文章页全屏化（默认）：与影集/归档/关于同构的 wide 外壳，封面全出血、宽容器内自立双栏
   // CIRCLELIFE_ARTICLE_CARD=true 时回退旧卡片窄栏形态（含 LayoutBase 侧栏目录）
   const ARTICLE_CARD = siteConfig('CIRCLELIFE_ARTICLE_CARD', false, CONFIG)
-  const isArticlePage = Boolean(post) && !isAlbumPage && !isAboutPage
+  const isArticlePage =
+    Boolean(post) && !isAlbumPage && !isAboutPage && !isMusicPage
   const wide =
     fullWidth ||
     isAlbumPage ||
     isAboutPage ||
     isHomePage ||
     isArchivePage ||
+    isMusicPage ||
     (isArticlePage && !ARTICLE_CARD)
   // 与 SideBar 的渲染条件对齐：无目录的页面不预留侧栏槽，避免内容被空槽挤偏
   const hasDesktopToc = Boolean(post?.toc && post.toc.length > 2)
@@ -149,7 +164,7 @@ const LayoutBase = props => {
     </Head>
     <div
       id='theme-circlelife'
-      className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth${isAlbumPage ? ' cl-is-album' : ''}${isAboutPage ? ' cl-is-about' : ''}${isHomePage ? ' cl-is-home' : ''}${isArchivePage ? ' cl-is-archive' : ''}${isArticlePage && !ARTICLE_CARD ? ' cl-is-article' : ''}${isArticlePage && ARTICLE_CARD ? ' cl-article-card-mode' : ''}${showSidebar ? ' cl-has-sidebar' : ''}`}>
+      className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth${isAlbumPage ? ' cl-is-album' : ''}${isAboutPage ? ' cl-is-about' : ''}${isHomePage ? ' cl-is-home' : ''}${isArchivePage ? ' cl-is-archive' : ''}${isMusicPage ? ' cl-is-music' : ''}${isArticlePage && !ARTICLE_CARD ? ' cl-is-article' : ''}${isArticlePage && ARTICLE_CARD ? ' cl-article-card-mode' : ''}${showSidebar ? ' cl-has-sidebar' : ''}`}>
       <Style />
 
       {/* 跳过链接：键盘用户按一次 Tab 即可直达正文，视觉上常态隐藏 */}
@@ -163,7 +178,12 @@ const LayoutBase = props => {
         <div
           id='container-wrapper'
           className={`relative mx-auto flex justify-center ${
-            isAlbumPage || isAboutPage || isHomePage || isArchivePage || (isArticlePage && !ARTICLE_CARD)
+            isAlbumPage ||
+            isAboutPage ||
+            isHomePage ||
+            isArchivePage ||
+            isMusicPage ||
+            (isArticlePage && !ARTICLE_CARD)
               ? 'max-w-none w-full flex-col items-stretch px-0 py-0'
               : `px-4 py-8 md:px-6 ${LAYOUT_SIDEBAR_REVERSE ? 'md:flex-row-reverse' : ''} ${
                   LAYOUT_VERTICAL
@@ -173,7 +193,7 @@ const LayoutBase = props => {
                       : 'max-w-3xl flex-col items-start'
                 }`
           }`}>
-          <div
+          <main
             id='main-content'
             tabIndex={-1}
             className={`min-w-0 flex-1 ${
@@ -194,7 +214,7 @@ const LayoutBase = props => {
               {props.slotTop}
               {children}
             </div>
-          </div>
+          </main>
 
           {showSidebar && (
             <div className='w-full flex-shrink-0 md:w-64 md:sticky cl-sidebar-sticky'>
@@ -555,6 +575,162 @@ const LayoutAlbum = props => {
   )
 }
 
+/**
+ * 展架 A：唱片墙（专辑与单曲手记混排）
+ */
+const LayoutMusic = props => {
+  const shelf = props.musicShelf || {
+    items: [],
+    annual: []
+  }
+  return (
+    <div className='cl-music-page w-full'>
+      <MusicShelf items={shelf.items} annual={shelf.annual} />
+    </div>
+  )
+}
+
+/**
+ * 专辑页 D2：大封面 hero + 专辑手记条 + 带单曲封面的曲目表
+ */
+const LayoutMusicAlbum = props => {
+  const music = props.music
+  if (!music) return null
+  const { album, tracks, tracksStatus, tracksError, notes } = music
+  const listLabel = music.listLabel || '曲目'
+  const leadNote = notes?.[0]
+  const metaLine = [
+    album.artist,
+    album.year || '',
+    album.trackCount ? `${album.trackCount} 首` : '',
+    album.noteCount ? `${album.noteCount} 篇手记` : ''
+  ]
+    .filter(Boolean)
+    .join(' · ')
+
+  return (
+    <div className='cl-music-page cl-music-album w-full'>
+      <section className='cl-music-hero'>
+        <div className='cl-music-hero-cover'>
+          <MusicCover
+            src={album.cover}
+            seed={album.id}
+            title={album.title}
+            alt={`${album.title} — 专辑封面`}
+            priority
+          />
+        </div>
+        <div className='cl-music-hero-main'>
+          <p className='cl-music-kicker'>
+            {[album.entryType || '专辑', album.year || '']
+              .filter(Boolean)
+              .join(' · ')}
+          </p>
+          <h1 className='cl-music-title'>{album.title}</h1>
+          {metaLine ? <p className='cl-music-meta'>{metaLine}</p> : null}
+          {album.summary ? <p className='cl-music-desc'>{album.summary}</p> : null}
+          {album.description && album.description !== album.summary ? (
+            <p className='cl-music-album-desc'>{album.description}</p>
+          ) : null}
+          <div className='cl-music-facts'>
+            {album.label ? <span>唱片公司：{album.label}</span> : null}
+            {album.language ? <span>语言：{album.language}</span> : null}
+          </div>
+          <div className='cl-music-actions'>
+            <NcmLink
+              href={album.neteaseUrl}
+              label={album.title}
+              kind={album.entryType === '专辑' ? '专辑' : '歌单'}
+            />
+          </div>
+        </div>
+      </section>
+
+      {leadNote ? (
+        <div className='cl-music-note-strip'>
+          <span className='cl-music-kicker'>专辑手记</span>
+          <div className='cl-music-note-strip-main'>
+            <h2 className='cl-music-note-strip-title'>
+              <SmartLink href={leadNote.href}>{leadNote.title}</SmartLink>
+            </h2>
+            {leadNote.summary ? (
+              <p className='cl-music-note-strip-text'>{leadNote.summary}</p>
+            ) : null}
+          </div>
+          <SmartLink href={leadNote.href} className='cl-music-note-strip-cta'>
+            阅读 →
+          </SmartLink>
+        </div>
+      ) : null}
+
+      <div className='cl-music-track-section'>
+        <TrackList
+          tracks={tracks}
+          status={tracksStatus}
+          error={tracksError}
+          albumTitle={album.title}
+          total={music.total}
+          truncated={music.truncated}
+          listLabel={listLabel}
+        />
+      </div>
+
+      {/* 页脚一行：左返回展架、右同步时间。看完最后一首正好顺手往回走 */}
+      <div className='cl-music-foot'>
+        <SmartLink href='/music' className='cl-music-back'>
+          ← 唱片
+        </SmartLink>
+        {tracksStatus === 'ok' && music.syncedAt ? (
+          <span className='cl-music-synced'>
+            {listLabel}同步于 {String(music.syncedAt).slice(0, 10)}
+          </span>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+/**
+ * 手记页：歌/专上下文 + Notion 正文；正文之外的字段都来自行属性与快照，
+ * 专辑即使下架也仍能渲染
+ */
+const LayoutMusicNote = props => {
+  const { note, post } = props
+  if (!note) return null
+  const { context } = note
+
+  return (
+    <div className='cl-music-page cl-music-note w-full'>
+      <div className='cl-music-note-wrap'>
+        <div className='cl-music-note-top'>
+          <SmartLink href={context.backHref}>
+            ← {context.albumHref ? '返回专辑' : '唱片'}
+          </SmartLink>
+          <span>{note.note.date || ''}</span>
+        </div>
+
+        <NoteHead note={note.note} context={context} />
+
+        <h1 className='cl-music-note-title'>{note.note.title}</h1>
+        {note.note.summary ? (
+          <p className='cl-music-note-sub'>{note.note.summary}</p>
+        ) : null}
+
+        <article id='article-wrapper' className='cl-prose-wrap'>
+          {post ? <NotionPage post={post} /> : null}
+        </article>
+
+        <div className='cl-music-note-bottom'>
+          <SmartLink href={context.backHref}>
+            ← {context.albumHref ? '回到专辑' : '回到唱片'}
+          </SmartLink>
+          <NcmLink href={context.neteaseUrl} label={context.songTitle} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const Layout404 = props => {
   const router = useRouter()
   useEffect(() => {
@@ -825,6 +1001,9 @@ export {
   LayoutAlbum,
   LayoutAbout,
   LayoutIndex,
+  LayoutMusic,
+  LayoutMusicAlbum,
+  LayoutMusicNote,
   LayoutPostList,
   LayoutSearch,
   LayoutSlug,

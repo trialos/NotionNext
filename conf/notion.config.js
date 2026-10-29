@@ -41,6 +41,28 @@ module.exports = {
     date: process.env.NEXT_PUBLIC_NOTION_PROPERTY_DATE || 'date',
     tags: process.env.NEXT_PUBLIC_NOTION_PROPERTY_TAGS || 'tags',
     icon: process.env.NEXT_PUBLIC_NOTION_PROPERTY_ICON || 'icon',
+    // —— 音乐展架（Notion 列名 → 代码英文键；列不存在时该键自然缺省）——
+    // 「已下架」用反向复选框而不是「可用」：getPageProperties 的别名复制只在真值时生效，
+    // 未勾选的 false 不会被复制，正向标记无法区分「没这列」与「已下架」。
+    musicArtist: '艺人',
+    musicCoverUrl: '封面URL',
+    musicCoverOverride: '自定义封面',
+    musicReleaseDate: '发行日期',
+    musicLabel: '唱片公司',
+    musicLanguage: '语言',
+    musicTrackCount: '曲目数',
+    musicShelfOrder: '展架排序',
+    musicEntryType: '条目类型', // 专辑 / 歌单 / 年度歌单；空值按「专辑」处理，老行不用回填
+    musicNcmAlbumId: '网易云专辑ID',
+    musicNcmSongId: '网易云歌曲ID',
+    musicNcmEncryptedId: '网易云加密ID',
+    musicNeteaseUrl: '网易云链接',
+    musicDelisted: '已下架',
+    musicLastSynced: '同步时间',
+    musicSyncHash: '同步哈希',
+    musicNoteKind: '手记对象',
+    musicNoteAlbumTitle: '关联专辑名',
+    musicNoteSongTitle: '关联歌曲名',
     ext: process.env.NEXT_PUBLIC_NOTION_PROPERTY_EXT || 'ext' // 扩展字段，存放json-string，用于复杂业务
   },
   NOTION_ACTIVE_USER: process.env.NOTION_ACTIVE_USER || '',

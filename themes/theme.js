@@ -201,6 +201,19 @@ const primaryThemeLayouts = {
   LayoutAlbum: dynamic(() => import('@/themes/circlelife').then(m => m.LayoutAlbum), {
     ssr: true
   }),
+  // 音乐三页必须同样是静态 import()：走 context import 会丢掉 loadableGenerated，
+  // 客户端水合时主题 chunk 还没到 → 整棵树 hydration 不匹配（见上方 CLS 1.0 说明）
+  LayoutMusic: dynamic(() => import('@/themes/circlelife').then(m => m.LayoutMusic), {
+    ssr: true
+  }),
+  LayoutMusicAlbum: dynamic(
+    () => import('@/themes/circlelife').then(m => m.LayoutMusicAlbum),
+    { ssr: true }
+  ),
+  LayoutMusicNote: dynamic(
+    () => import('@/themes/circlelife').then(m => m.LayoutMusicNote),
+    { ssr: true }
+  ),
   LayoutAbout: dynamic(() => import('@/themes/circlelife').then(m => m.LayoutAbout), {
     ssr: true
   }),

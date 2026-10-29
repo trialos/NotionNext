@@ -23,6 +23,9 @@ export const tokenStyle = `
         --cl-gold: #c4a47c;
         --cl-gold-ink: #ffffff;
         --cl-gold-shadow: rgba(196, 164, 124, 0.4);
+        /* 音乐展架强调色（墨蓝）：与影集朱砂、归档暖金并列为第三个模块色。
+           深色模式必须换浅色（见下方 .dark）：#2e4a5a 在 #14110e 暗底上会糊成一片 */
+        --cl-music: #2e4a5a;
         --cl-radius: 10px;
         --cl-radius-sm: 6px;
         --cl-shadow-sm: none;
@@ -181,6 +184,8 @@ export const tokenStyle = `
         --cl-accent-press: #c98a26;
         --cl-accent-soft: #3a2e18;
         --cl-accent-ink: #14110e;
+        /* 墨蓝在暗底上提亮为雾蓝，保持与浅色模式同级的「这是音乐模块」辨识度 */
+        --cl-music: #8fa9b8;
         /* 深色模式的目标色是近黑 #14110e，照片要跨越的亮度差远大于浅色模式。
            若沿用浅色的长溶解（45%），照片中下段会被整片压黑 —— 读作"照片被切断"，
            而且照片的可用范围被吃掉一大半。故深色单独给一版短溶解：

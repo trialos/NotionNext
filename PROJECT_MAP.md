@@ -51,11 +51,13 @@ flowchart TD
     Type -->|通用工程与底层逻辑| RouteCore[核心底层工程任务]
     Type -->|Notion / 内容生成| RouteMCP[内容与 MCP 任务]
     Type -->|双语翻译运维| RouteTrans[翻译工具链任务]
+    Type -->|音乐展架运营| RouteMusic[音乐展架 /music 任务]
 
     RouteMain --> ReadMain["1. AGENTS.md<br>2. withcol-private/docs/design-system/circlelife-DESIGN.md<br>3. withcol-private/docs/architecture/circlelife-THEME-ARCH.md<br>4. themes/circlelife/"]
     RouteCore --> ReadCore["1. AGENTS.md<br>2. docs/developer/MAINTENANCE_PHILOSOPHY.zh-CN.md<br>3. 关联代码与测试用例"]
     RouteMCP --> ReadMCP["1. AGENTS.md<br>2. docs/developer/NOTIONNEXT_CONTENT_MCP.md<br>3. tools/notionnext-content-mcp/server.js"]
     RouteTrans --> ReadTrans["1. AGENTS.md<br>2. scripts/translate/README.md<br>3. scripts/translate/glossary.json"]
+    RouteMusic --> ReadMusic["1. AGENTS.md<br>2. withcol-private/docs/architecture/circlelife-MUSIC-SHELF.md<br>3. lib/music/ 与 scripts/music/"]
 ```
 
 ### 1. 主站 circlelife UI 与业务功能改造
@@ -74,11 +76,19 @@ flowchart TD
 * **按需查阅**：`scripts/translate/README.md`、`scripts/translate/glossary.json`。
 * **交付要求**：先跑 `--dry-run` 或诊断模式验证。
 
+### 5. 音乐展架运营（/music）
+* **按需查阅**：`withcol-private/docs/architecture/circlelife-MUSIC-SHELF.md`（运行手册）、`lib/music/`、`scripts/music/`。
+* **交付要求**：站点只读 Notion，网易云取数只在本地脚本；改数据先 `yarn music:add --dry-run` 看差异，写完 `yarn music:doctor` 体检。凭据只在 `.env.local`。
+
 ---
 
 ## 四、 核心代码目录速查
 
 * `themes/circlelife/`：主站当前运行的核心主题实现目录
+* `lib/music/`：音乐展架的**站点侧**纯数据层 —— `contract.json`（站点与脚本共用的契约）、`paths.js`（列 → 字段的解析与路由）、`data.js`（展架/条目/手记的组装与**手动排序**）、`tracks.js`（曲目 JSON 的读取与校验）、`loaders.js`、`notes.js`、`images.js`
+* `scripts/music/`：音乐展架的**本地同步脚本** —— `cli.mjs`（`yarn music:*` 命令）、`ncm.mjs`（网易云取数）、`normalize.mjs`（清洗与哈希）、`plan.mjs`（机器列/种子列归属与写入计划）、`notion.mjs`（官方 API 客户端）
+* `pages/music/`：`/music` 展架、`/music/album/[album]` 条目页、`/music/note/[note]` 手记页
+* `themes/circlelife/components/music/`：音乐模块组件（展架 `MusicShelf` / 卡片 `AlbumCard` `SingleCard` / 条目页 `TrackList` / 手记头 `NoteHead` / `MusicCover` `NcmLink`）；样式在 `themes/circlelife/styles/music.js`（视觉规范见私有库 `circlelife-DESIGN.md` §2.2i）
 * `themes/theme.js`：**全站共享**的主题动态布局装载层。布局 `next/dynamic` 组件一律走**模块级注册表**（模块求值期预建，渲染期只查表）——在渲染期才 `dynamic()` 会让部分页面的静态产物落成骨架屏（详见私有库 `circlelife-THEME-ARCH.md` 排错 14）。`blog.config.js` 是 CommonJS，具名导入恒为 undefined，取值走 `BLOG.*`
   * **主主题的 loader 必须用可静态识别的 `import()`**（`primaryThemeLayouts`，每个布局一条字面量 import）。`next/dynamic` 只有在 loader 里的 `import()` 能被 babel 静态识别时才会生成 `loadableGenerated`，客户端水合才能同步 require 该 chunk；用模板字面量 `import(\`@/themes/${x}\`)` 则是 context import，插件识别不了 → 主题 chunk 不进 script 列表 → 水合时组件还处在 loading 态 → **整棵树 hydration 不匹配** → 新旧两棵树并存、页面高度翻倍再回落 → **CLS 直接到 1.0**。其余主题（`?theme=` 切换）仍走 context import，代价是切换时一次闪烁，属可接受的边缘场景
 * `components/NotionPage.js`：Notion 正文渲染。承担**正文标题层级修正**——react-notion-x 给 Notion 标题统一 +1 偏移（假定 Notion 页面标题是 h1），而本站文章标题本身已是 `h1`；正文缺 Notion h1 时首个正文标题会变成 `<h3>`，形成 h1 → h3 的层级跳跃（`heading-order` 失分）。修法是在正文根节点挂 `notionRootRef`，缺 `.notion-h1` 时把 `.notion-h2/h3/h4` 降级为 `H2/H3/H4`，**只换标签、保留 class 与 `data-id`**（样式与目录锚点不受影响）

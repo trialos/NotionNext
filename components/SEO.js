@@ -545,6 +545,48 @@ export const getSEOMeta = (props, router, locale) => {
         slug: 'album',
         type: 'website'
       }
+    case '/music':
+      // 展架页签：MUSIC_TITLE 覆盖，未配置时给「我的音乐」（与刊头 h1 同源）
+      return {
+        title: `${titleOverride('MUSIC_TITLE', NOTION_CONFIG) || '我的音乐'} | ${siteInfo?.title}`,
+        description: `${siteInfo?.description}`,
+        image: `${siteInfo?.pageCover}`,
+        slug: 'music',
+        type: 'website'
+      }
+    case '/music/album/[album]': {
+      // 音乐三页都必须显式给 slug：走 default 分支会用裸 row.slug，
+      // 拼出 /<slug> 这种已被通用路由排除的路径 → canonical 指向 404
+      const album = props.music?.album || {}
+      // 标题里已经带上了名字就不再重复：同名专辑、以及「NotJabes的十二周年精选集」这类
+      // 创建者名嵌在标题里的歌单，拼成「… · NotJabes | 站点」都很难看
+      const artistPart =
+        album.artist && !String(album.title || '').includes(album.artist)
+          ? ` · ${album.artist}`
+          : ''
+      return {
+        title: `${album.title || '专辑'}${artistPart} | ${siteInfo?.title}`,
+        description:
+          album.summary || album.description || `${siteInfo?.description}`,
+        image: album.cover || `${siteInfo?.pageCover}`,
+        slug: `music/album/${router?.query?.album || ''}`,
+        type: 'website'
+      }
+    }
+    case '/music/note/[note]': {
+      const note = props.note?.note || {}
+      const context = props.note?.context || {}
+      return {
+        title: `${note.title || '音乐手记'} | ${siteInfo?.title}`,
+        description:
+          note.summary ||
+          [context.songTitle, context.albumTitle].filter(Boolean).join(' · ') ||
+          `${siteInfo?.description}`,
+        image: context.cover || `${siteInfo?.pageCover}`,
+        slug: `music/note/${router?.query?.note || ''}`,
+        type: 'article'
+      }
+    }
     default:
       const category = Array.isArray(post?.category)
         ? post?.category?.[0]
