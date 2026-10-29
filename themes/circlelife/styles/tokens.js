@@ -12,7 +12,12 @@ export const tokenStyle = `
         --cl-paper-3: #dbceb4;
         --cl-text: #20190f;
         --cl-muted: #57493a;
-        --cl-faint: #948574;
+        /* --cl-faint 是「弱一级」的信息色（页码、序号、表头、外链文字）。
+           浅色模式原值 #948574 对纸底只有 3.14:1 —— 12–13px 的正文级文字达不到
+           WCAG AA 的 4.5:1，全站（Lighthouse color-contrast）都因此挂。
+           提到 #786759：对 --cl-bg 4.76:1、对 --cl-surface 5.18:1，
+           仍明显弱于 --cl-muted（7.63:1），层次不塌。 */
+        --cl-faint: #786759;
         --cl-border: rgba(32, 25, 15, 0.11);
         --cl-border-strong: rgba(32, 25, 15, 0.2);
         --cl-accent: #b24a33;

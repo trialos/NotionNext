@@ -56,26 +56,6 @@ export const mastStyle = `
     --cl-mast-rule: var(--cl-music);
   }
 
-  /* 刊头右侧计数位（音乐展架用）：不传 aside 的现有刊头 DOM 里没有这个节点。
-     绝对定位挂在 inner 上，避免改动 cl-page-mast-inner 的列方向影响其他页 */
-  #theme-circlelife .cl-page-mast-inner {
-    position: relative;
-  }
-  #theme-circlelife .cl-page-mast-aside {
-    display: none;
-  }
-  @media (min-width: 768px) {
-    #theme-circlelife .cl-page-mast-aside {
-      display: block;
-      position: absolute;
-      right: 0;
-      bottom: 0.2rem;
-      font-family: var(--cl-font-mono);
-      font-size: 0.75rem;
-      letter-spacing: 0.08em;
-      line-height: 1;
-      color: var(--cl-faint);
-      white-space: nowrap;
-    }
-  }
+  /* 刊头右侧计数位已下线（音乐展架不再展示「N 张唱片 · M 篇手记」），
+     刊头结构随之简化：inner 不再需要定位上下文。 */
 `
