@@ -7,6 +7,7 @@ import {
   computeTargetPixelWidth
 } from './imageSrcset'
 import { shouldWallOwnWheel } from './wheelOwnership'
+import { resolveHeroCopy } from './heroCopy'
 
 // 优雅的保底卡片（无内容时呈现，避免白屏）
 const FALLBACK_CARDS = [
@@ -75,7 +76,12 @@ const FALLBACK_CARDS = [
   }
 ]
 
-export default function InfiniteAboutGrid({ cards = [], summary = '', title = '' }) {
+export default function InfiniteAboutGrid({
+  cards = [],
+  summary = '',
+  description = '',
+  title = ''
+}) {
   const { locale } = useGlobal()
   const containerRef = useRef(null)
   const stageRef = useRef(null)
@@ -85,7 +91,11 @@ export default function InfiniteAboutGrid({ cards = [], summary = '', title = ''
   const closeHeroRef = useRef(null)
   const openHeroRef = useRef(null)
 
-  const finalSummary = summary?.trim() || '时光的弧线 · 捕捉生活、人机协作与日常美学的独立光影。'
+  const { headline: finalSummary, lead: heroLead } = resolveHeroCopy({
+    summary,
+    description,
+    fallbackSummary: '时光的弧线 · 捕捉生活、人机协作与日常美学的独立光影。'
+  })
 
   // 严格忠实呈现 Notion 原生排版叙事顺序，与 SSR HTML 预加载形成 100% 同构匹配
   const displayCards = useMemo(() => {
@@ -652,6 +662,8 @@ export default function InfiniteAboutGrid({ cards = [], summary = '', title = ''
           <h1 className='cl-about-hero-summary'>
             {finalSummary}
           </h1>
+
+          {heroLead && <p className='cl-about-hero-lead'>{heroLead}</p>}
 
           {/* 纯粹极简文字指引（点击收起幕布） */}
           <button

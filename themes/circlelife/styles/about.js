@@ -301,7 +301,7 @@ export const aboutStyle = `
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 0 24px;
+    padding: 0 var(--cl-hero-gutter);
     text-align: center;
     box-sizing: border-box;
     transform: translate3d(0, 0, 0);
@@ -376,6 +376,24 @@ export const aboutStyle = `
   .dark .cl-about-hero-summary {
     color: rgba(255, 255, 255, 0.94);
     text-shadow: 0 2px 16px rgba(0, 0, 0, 0.45);
+  }
+
+  /* 序言长导语：正文级字号，不折叠、不内部滚动；宽度由 token 单点控制 */
+  .cl-about-hero-lead {
+    width: min(var(--cl-hero-lead-measure), calc(100vw - var(--cl-hero-gutter) * 2));
+    max-width: 100%;
+    margin: 1.1rem 0 0;
+    font-family: var(--cl-font-body);
+    font-size: var(--cl-prose-size);
+    font-weight: 400;
+    line-height: var(--cl-prose-leading);
+    color: var(--cl-muted);
+    text-align: center;
+    text-wrap: pretty;
+    overflow-wrap: break-word;
+    white-space: pre-line;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   /* 纯粹极简文字指引（可点击快速收起幕布进入画廊） */

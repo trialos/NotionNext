@@ -160,7 +160,7 @@ export default function AlbumStage({ pages }) {
             <strong>页面标题</strong> = 影集名（一页一辑）
           </li>
           <li>正文插入多张图（左右循环翻）</li>
-          <li>summary = 描述；图题勿与标题重复</li>
+          <li>summary = 短题眼；description = 长导语；图题勿与标题/导语重复</li>
         </ul>
       </div>
     )
@@ -187,6 +187,7 @@ export default function AlbumStage({ pages }) {
         photos={currentPhotos}
         albumName={currentDeck.name}
         albumSummary={currentPhotos[0]?.summary || ''}
+        albumDescription={currentDeck?.description || ''}
         albumDate={currentPhotos[0]?.date || ''}
         onBackToShelf={backToShelf}
         onPhotoClick={handlePhotoClick}

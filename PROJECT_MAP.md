@@ -32,7 +32,7 @@
 
 | 模块 / 主题 | 权威设计规范位置 | 核心范围与职责 | 适用任务类型 |
 | :--- | :--- | :--- | :--- |
-| **主站 Circle of Life 主题** | 1. **`withcol-private/docs/design-system/circlelife-DESIGN.md`**（本地自动探测）<br>2. `withcol-private/docs/architecture/circlelife-THEME-ARCH.md`<br>3. `themes/circlelife/styles/` | 当前成熟基准：纸感杂志风格、纸色 `#F5F0E4`、朱砂红 `#B24A33`、Newsreader / 思源宋体、1024px 导航、关于我 3D 摄影瀑布展墙与动态显存回收；归档页为 1800px 宽屏双栏 + 上下文分类/标签筛选；文章页为全屏纸面内页（42vh 全出血封面 + 88rem 宽壳 + ≥1280px TOC 细轨 + 2em 首行缩进正文 + 胶囊底边阅读进度），导航顺序取 Notion 菜单行序。支持随博主意图演进。 | 主站日常样式优化、文章页排版与头图、影集画廊交互打磨、首页倾斜照片墙、精选影集段与抽牌调整、关于我展墙与序言幕布维护、归档时间线/筛选、导航顺序 |
+| **主站 Circle of Life 主题** | 1. **`withcol-private/docs/design-system/circlelife-DESIGN.md`**（本地自动探测）<br>2. `withcol-private/docs/architecture/circlelife-THEME-ARCH.md`<br>3. `themes/circlelife/styles/` | 当前成熟基准：纸感杂志风格、纸色 `#F5F0E4`、朱砂红 `#B24A33`、Newsreader / 思源宋体、1024px 导航、关于我 3D 摄影瀑布展墙与动态显存回收；归档页为 1800px 宽屏双栏 + 上下文分类/标签筛选；文章页为全屏纸面内页（42vh 全出血封面 + 88rem 宽壳 + ≥1280px TOC 细轨 + 2em 首行缩进正文 + 胶囊底边阅读进度），导航顺序取 Notion 菜单行序。支持随博主意图演进。 | 主站日常样式优化、文章页排版与头图、影集画廊交互打磨、首页倾斜照片墙、精选影集段与抽牌调整、关于我展墙与序言幕布（summary 短题眼 / description 导语）维护、归档时间线/筛选、导航顺序 |
 | **XuHome 主题** | `docs/design/xuhome/DESIGN.md` | Neo-brutalist 风格规范、全套 Token（色彩、间距、圆角）、深浅模式对比度、200ms ease-out 控制台抽屉动画 | `xuhome` 主题样式重构、布局调整、组件新增 |
 | **全局色彩系统演进** | `docs/developer/THEME_COLOR_TOKEN_ROADMAP.zh-CN.md` | 主题色变量命名规范（`<THEME>_COLOR_*` 与 `--<theme>-color-*`）、语义色迁移标准与非目标 | 主题色彩配置扩展、调色板变量化改造 |
 | **主题控制台** | `docs/developer/THEME_CONSOLE_DESIGN.zh-CN.md` | 控制台交互约定、4 个浮动入口、深浅配色分组标准、最小配色暴露清单 | 主题控制台功能扩展、交互适配、移动端响应式 |
@@ -86,6 +86,7 @@ flowchart TD
 * `themes/circlelife/components/ArchiveIndex.js`、`archiveFilter.js`、`BlogListArchive.js`：归档筛选索引、分类/标签聚合纯函数、时间线条目。手机端标签索引**默认收成窄条**（默认态由 CSS 承担，JS 只挂 `.is-expanded` 变体）；展开/收起**只由两个按钮驱动**，切分类/选标签不重置该状态 —— 契约测试在 `__tests__/themes/circlelife/archiveTagIndex.test.js`
 * `themes/circlelife/components/navConfig.js`：Notion 菜单行序归一化；首页固定最前，不再左右翼重排
 * `themes/circlelife/components/wheelOwnership.js`：`shouldWallOwnWheel(target, stage)` —— 自研虚拟滚动展墙（`AlbumInfiniteWall.js` 影集画廊 / `InfiniteAboutGrid.js` 关于展墙）的**滚轮归属判定**。展墙在 `window` 上注册非 passive 的 `wheel` 监听并 `preventDefault()`，会取消浏览器「滚轮作用于最近原生滚动祖先」的默认行为 → **页面上每一个滚轮事件都被吞掉**，浮层内的原生滚动容器（影集目录列表、顶栏全屏菜单、搜索结果）随之滚不动。规则：指针落在原生滚动容器（`overflow-y: auto|scroll|overlay`）内 → 展墙不接管，交还浏览器原生滚动；其余（展墙自身、顶栏导航胶囊等不含滚动容器的浮层）→ 展墙照常接管。回溯 DOM 必须**停在 `body`/`html` 之前**（`html { overflow-x: hidden }` 会让 `overflow-y` 计算成 `auto`，误判根滚动容器会让展墙彻底失去滚轮）。契约测试在 `__tests__/themes/circlelife/wheelOwnership.test.js`
+* `themes/circlelife/components/heroCopy.js`：序言幕布文案判定 `resolveHeroCopy(summary, description, fallback)` —— `summary` 作短题眼、`description` 作导语，空/相同导语不渲染；关于页与影集画廊共用。契约测试在 `__tests__/themes/circlelife/heroCopy.test.js` 与 `__tests__/themes/circlelife/heroLead.test.js`
 * `themes/circlelife/styles/archive.js`：归档宽屏/筛选/时间线样式；宽屏容器 token 在 `styles/tokens.js`
 * `themes/circlelife/styles/article.js`：文章页全屏壳（全出血封面 + 宽容器 + TOC 细轨）、封面遮罩溶解与顶部压暗、正文排版体系；排版参数 token 在 `styles/tokens.js` 的 `--cl-prose-*` / `--cl-article-*`（溶解曲线是 `--cl-article-cover-mask`，深浅两套停靠点）
 * `themes/circlelife/components/imageSrcset.js`：Notion 反代取图档位与 srcSet 候选集（默认 512/1024 两档，可用 `widths` 覆盖；全出血封面用 `[1024, 2048]` + `sizes=100vw`）

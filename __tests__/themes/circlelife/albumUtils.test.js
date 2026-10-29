@@ -13,6 +13,8 @@ describe('buildAlbumDecks / expandPhotoPage', () => {
     type: 'Photo',
     status: 'Published',
     publishDate: 100,
+    summary: '下班喜欢路过独立纪念碑。',
+    description: '第一句导语。\n第二句导语。',
     images: [
       { id: '1', url: 'https://example.com/1.jpg', caption: 'a' },
       { id: '2', url: 'https://example.com/2.jpg', caption: '国外的日子' }
@@ -24,7 +26,53 @@ describe('buildAlbumDecks / expandPhotoPage', () => {
     expect(decks).toHaveLength(1)
     expect(decks[0].id).toBe('page-a')
     expect(decks[0].name).toBe('国外的日子')
+    expect(decks[0].description).toBe(base.description)
     expect(decks[0].photos).toHaveLength(2)
+  })
+
+  it('keeps summary short and stores description on the deck only', () => {
+    const cards = expandPhotoPage(base)
+    expect(cards[0].summary).toBe(base.summary)
+    expect(cards[0].description).toBeUndefined()
+
+    const decks = buildAlbumDecks([base])
+    expect(decks[0].description).toBe(base.description)
+  })
+
+  it('does not fall back to description when summary is empty', () => {
+    const page = {
+      ...base,
+      summary: '',
+      description: '只有长导语',
+      images: [{ id: '1', url: 'https://example.com/1.jpg' }]
+    }
+    const cards = expandPhotoPage(page)
+    expect(cards[0].summary).toBe('')
+
+    const decks = buildAlbumDecks([page])
+    expect(decks[0].description).toBe('只有长导语')
+  })
+
+  it('trims description and preserves its internal line breaks', () => {
+    const page = {
+      ...base,
+      summary: ' 短题眼 ',
+      description: '  第一句。\n第二句。  '
+    }
+    const decks = buildAlbumDecks([page])
+    expect(decks[0].description).toBe('第一句。\n第二句。')
+    expect(decks[0].photos[0].summary).toBe('短题眼')
+  })
+
+  it('dedupes caption equal to description even when summary is empty', () => {
+    const page = {
+      ...base,
+      summary: '',
+      description: '图注即导语',
+      images: [{ id: '1', url: 'https://example.com/1.jpg', caption: '图注即导语' }]
+    }
+    const cards = expandPhotoPage(page)
+    expect(cards[0].caption).toBe('')
   })
 
   it('skips non-Photo and non-Published', () => {

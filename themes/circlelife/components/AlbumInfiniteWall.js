@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { shouldWallOwnWheel } from './wheelOwnership'
+import { resolveHeroCopy } from './heroCopy'
 
 /**
  * 影集无限瀑布流展墙 (AlbumInfiniteWall)
@@ -12,6 +13,7 @@ export default function AlbumInfiniteWall({
   photos = [],
   albumName = '',
   albumSummary = '',
+  albumDescription = '',
   albumDate = '',
   onBackToShelf,
   onPhotoClick,
@@ -38,9 +40,13 @@ export default function AlbumInfiniteWall({
 
   isPausedRef.current = isPaused
 
-  const finalSummary =
-    albumSummary?.trim() ||
-    `捕捉光影、定格日常与独立视觉叙事 · 共 ${photos.length} 张照片。`
+  const { headline: finalSummary, lead: heroLead } = resolveHeroCopy({
+    summary: albumSummary || albumName,
+    description: albumDescription,
+    fallbackSummary: `捕捉光影、定格日常与独立视觉叙事 · 共 ${photos.length} 张照片。`
+  })
+  const showAlbumNameInBadge =
+    albumName && finalSummary.trim() !== albumName.trim()
 
   useEffect(() => {
     const container = containerRef.current
@@ -711,10 +717,14 @@ export default function AlbumInfiniteWall({
         <div className='cl-about-hero-inner'>
           <div className='cl-about-hero-badge'>
             <span className='cl-about-hero-badge-dot' aria-hidden='true' />
-            <span>影集 · {albumName || '画廊'}</span>
+            <span>
+              {showAlbumNameInBadge ? `影集 · ${albumName}` : '影集'}
+            </span>
           </div>
 
           <h1 className='cl-about-hero-summary'>{finalSummary}</h1>
+
+          {heroLead && <p className='cl-about-hero-lead'>{heroLead}</p>}
 
           <div className='cl-album-hero-meta'>
             <span>共 {photos.length} 张照片</span>

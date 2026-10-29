@@ -51,6 +51,7 @@ export default function LayoutAbout(props) {
         <InfiniteAboutGrid
           cards={props.aboutCards || []}
           summary={props.aboutSummary}
+          description={props.aboutDescription}
           title={props.aboutTitle}
         />
       </main>

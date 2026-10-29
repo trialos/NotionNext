@@ -258,6 +258,10 @@ export async function getStaticProps({ locale }) {
     singleAboutPage?.summary ||
     siteConfig('DESCRIPTION', BLOG.DESCRIPTION, props.NOTION_CONFIG) ||
     '时光的弧线 · 捕捉生活、人机协作与日常美学的独立光影。'
+  props.aboutDescription =
+    typeof singleAboutPage?.description === 'string'
+      ? singleAboutPage.description.trim()
+      : ''
   props.aboutTitle = singleAboutPage?.title || '关于我 · ABOUT'
   props.aboutCards = cards
   delete props.allPages

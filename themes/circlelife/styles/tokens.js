@@ -70,6 +70,8 @@ export const tokenStyle = `
         --cl-prose-code-size: 0.85em; /* 代码块字号 */
         --cl-prose-code-leading: 1.7; /* 代码块行高 */
         --cl-prose-measure: 60rem; /* 正文列测量宽（宽屏阅读，约 56 个中文字符/行） */
+        --cl-hero-lead-measure: 36rem; /* 序言导语测量宽：正文级字号下约 33 个中文字符/行 */
+        --cl-hero-gutter: 24px; /* 序言幕布左右留白：overlay padding 与导语宽度共用 */
         /* —— 全屏文章壳 token（--cl-article-*）：与影集/归档同构的宽页面 —— */
         --cl-article-shell: 88rem; /* 宽容器：轨 15rem + 距 3rem + 正文列（测量宽封顶） */
         --cl-article-rail: 15rem; /* TOC 细轨宽 */

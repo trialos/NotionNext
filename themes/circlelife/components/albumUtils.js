@@ -27,26 +27,28 @@ export function photoAlbumTag(p) {
   return ''
 }
 
-/** caption 与 title/summary 相同时不展示 */
-export function uniqueCaption(caption, title, summary) {
+/** caption 与 title/summary/description 相同时不展示 */
+export function uniqueCaption(caption, title, summary, description = '') {
   const c = (caption || '').trim()
   if (!c) return ''
   const t = (title || '').trim()
   const s = (summary || '').trim()
-  if (c === t || c === s) return ''
+  const d = (description || '').trim()
+  if (c === t || c === s || c === d) return ''
   return c
 }
 
 /**
  * 一条 Photo 页 → 多张可滑卡片
- * title = 页面标题；caption 去重；summary = 页面摘要
+ * title = 页面标题；caption 去重；summary = 页面短题眼；description = 长导语
  */
 export function expandPhotoPage(p) {
   if (!p) return []
   const author = resolveAuthor(p)
   const albumTag = photoAlbumTag(p)
   const pageTitle = (p.title || '').trim()
-  const pageSummary = (p.summary || p.description || '').trim()
+  const pageSummary = (p.summary || '').trim()
+  const pageDescription = firstString(p.description)
   const base = {
     pageId: p.id,
     href: p.href || '',
@@ -62,7 +64,12 @@ export function expandPhotoPage(p) {
   const imgs = Array.isArray(p.images) ? p.images.filter(i => i?.url) : []
   if (imgs.length) {
     return imgs.map((img, i) => {
-      const caption = uniqueCaption(img.caption || '', pageTitle, pageSummary)
+      const caption = uniqueCaption(
+        img.caption || '',
+        pageTitle,
+        pageSummary,
+        pageDescription
+      )
       return {
         ...base,
         id: `${p.id}-${img.id || i}`,
@@ -84,7 +91,13 @@ export function expandPhotoPage(p) {
       id: p.id,
       url: cover,
       cover,
-      caption: uniqueCaption(p.caption || '', pageTitle, pageSummary) || '',
+      caption:
+        uniqueCaption(
+          p.caption || '',
+          pageTitle,
+          pageSummary,
+          pageDescription
+        ) || '',
       indexInPage: 0,
       totalInPage: 1
     }
@@ -113,6 +126,7 @@ export function buildAlbumDecks(pages) {
     decks.push({
       id: p.id,
       name,
+      description: firstString(p.description),
       photos
     })
   }
