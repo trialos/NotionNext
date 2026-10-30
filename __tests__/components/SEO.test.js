@@ -20,6 +20,7 @@ const baseSiteConfig = {
   AUTHOR: 'Example Author',
   BACKGROUND_DARK: '#ffffff',
   BLOG_FAVICON: '/favicon.ico',
+  ENABLE_RSS: true,
   FONT_URL: '',
   KEYWORDS: 'notion,next',
   LANG: 'en-US',
@@ -120,6 +121,43 @@ describe('SEO structured data', () => {
     expect(meta.title).toBe('影集 | Example Blog')
     expect(meta.slug).toBe('album')
     expect(meta.type).toBe('website')
+  })
+})
+
+describe('SEO RSS discovery', () => {
+  it('exposes an RSS alternate link for readers and browsers', () => {
+    const { container } = renderSeo('')
+    const rssLink = container.querySelector(
+      'link[rel="alternate"][type="application/rss+xml"]'
+    )
+
+    expect(rssLink).toBeInTheDocument()
+    expect(rssLink.getAttribute('href')).toBe(
+      'https://example.com/rss/feed.xml'
+    )
+  })
+
+  it('omits the alternate link when RSS is disabled', () => {
+    siteConfig.mockImplementation((key, defaultVal) => {
+      if (key === 'ENABLE_RSS') return false
+      return Object.prototype.hasOwnProperty.call(baseSiteConfig, key)
+        ? baseSiteConfig[key]
+        : defaultVal
+    })
+
+    const { container } = render(
+      <SEO
+        siteInfo={{
+          title: 'Example Blog',
+          description: 'Example description',
+          link: 'https://example.com'
+        }}
+      />
+    )
+
+    expect(
+      container.querySelector('link[type="application/rss+xml"]')
+    ).not.toBeInTheDocument()
   })
 })
 
