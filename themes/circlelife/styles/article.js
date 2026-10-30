@@ -55,7 +55,7 @@ export const articleStyle = `
         padding: 0.34rem 0.45rem 0.34rem 0.75rem;
         margin-left: 0;
         border-left: 0;
-        font-size: 0.78rem;
+        font-size: var(--cl-article-micro);
         line-height: 1.45;
         color: var(--cl-muted);
         background: transparent;
@@ -75,12 +75,12 @@ export const articleStyle = `
         background: transparent;
       }
       #theme-circlelife .cl-toc-item--h1 {
-        font-size: 0.84rem;
+        font-size: calc(var(--cl-article-micro) + 0.0625rem);
         font-weight: 600;
         color: var(--cl-text);
       }
       #theme-circlelife .cl-toc-item--h2 {
-        font-size: 0.78rem;
+        font-size: var(--cl-article-micro);
         font-weight: 500;
         color: var(--cl-muted);
       }
@@ -94,7 +94,7 @@ export const articleStyle = `
         background: color-mix(in srgb, var(--cl-text) 28%, transparent);
       }
       #theme-circlelife .cl-toc-item--h3 {
-        font-size: 0.74rem;
+        font-size: var(--cl-article-micro);
         font-weight: 400;
         color: var(--cl-faint);
         opacity: 0.95;
@@ -281,7 +281,7 @@ export const articleStyle = `
         align-items: center;
         gap: 0.35rem 0.15rem;
         font-family: var(--cl-font-mono);
-        font-size: 0.72rem;
+        font-size: var(--cl-article-micro);
         letter-spacing: 0.04em;
         color: var(--cl-muted);
       }
@@ -292,7 +292,7 @@ export const articleStyle = `
       #theme-circlelife .cl-meta-category {
         margin-left: 0.15rem;
         font-family: var(--cl-font-body);
-        font-size: 0.72rem;
+        font-size: var(--cl-article-micro);
         letter-spacing: 0.02em;
         text-transform: none;
       }
@@ -527,22 +527,42 @@ export const articleStyle = `
         background: transparent;
         color: var(--cl-muted);
         font-family: var(--cl-font-mono);
-        font-size: 0.72rem;
+        font-size: var(--cl-article-micro);
         letter-spacing: 0.06em;
-        padding: 0.2rem 0;
+        padding: 0.35rem 0;
         cursor: pointer;
         transition: color 0.15s ease;
       }
       #theme-circlelife .cl-article-back:hover {
         color: var(--cl-accent);
       }
-      #theme-circlelife .cl-article-back--top {
+      #theme-circlelife .cl-article-top-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
         margin-bottom: 0.75rem;
       }
       #theme-circlelife .cl-article-back-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
         margin-top: 1.5rem;
         padding-top: 0.85rem;
         border-top: 1px solid var(--cl-border);
+      }
+      #theme-circlelife .cl-article-origin {
+        color: var(--cl-muted);
+        font-family: var(--cl-font-mono);
+        font-size: var(--cl-article-micro);
+        letter-spacing: 0.06em;
+        padding-block: 0.35rem;
+        text-decoration: none;
+        transition: color 0.15s ease;
+      }
+      #theme-circlelife .cl-article-origin:hover {
+        color: var(--cl-accent);
       }
       /* mobile/tablet TOC fab + drawer */
       #theme-circlelife .cl-toc-fab {
@@ -632,7 +652,7 @@ export const articleStyle = `
       }
       .cl-toc-drawer-title {
         font-family: var(--cl-font-mono, ui-monospace, monospace);
-        font-size: 0.72rem;
+        font-size: var(--cl-article-micro);
         letter-spacing: 0.12em;
         color: var(--cl-faint);
       }

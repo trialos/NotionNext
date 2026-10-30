@@ -169,13 +169,129 @@ export const commonStyle = `
 
 /* —— Footer —— */
       #theme-circlelife .cl-footer {
+        --cl-footer-mark-shift: 2px;
         border-top: 1px solid var(--cl-border);
         background: transparent;
         padding-top: 1.75rem;
-        padding-bottom: 1.75rem;
+        /* 底部安全区：页脚图标是 44px 触控目标，不能让 home indicator 吃掉下半截 */
+        padding-bottom: calc(1.75rem + env(safe-area-inset-bottom, 0px));
       }
-      #theme-circlelife .cl-footer .cl-lockup--row {
-        min-height: 1.75rem;
+      /* 页脚锁头中轴：弧标与两行文字块共用一条水平中心线。
+         实测文字字形并集中心比弧标盒心低约 2px，故弧标下移 2px；
+         只作用于页脚，抽屉品牌（compact）不受影响。 */
+      #theme-circlelife .cl-footer .cl-lockup-mark {
+        position: relative;
+        top: var(--cl-footer-mark-shift);
+        width: 2.25rem;
+        height: 2.25rem;
+      }
+      #theme-circlelife .cl-footer .cl-lockup-cn {
+        font-size: 1.15rem;
+      }
+      #theme-circlelife .cl-footer .cl-lockup-en {
+        font-size: 0.66rem;
+      }
+      #theme-circlelife .cl-footer-social {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.15rem;
+        margin-top: 0.75rem;
+      }
+      #theme-circlelife .cl-footer-social-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.75rem;
+        height: 2.75rem;
+        padding: 0;
+        border: 0;
+        border-radius: 9999px;
+        background: transparent;
+        color: var(--cl-faint);
+        text-decoration: none;
+        cursor: pointer;
+        transition: color 0.15s var(--cl-ease);
+      }
+      #theme-circlelife .cl-footer-social-btn:hover {
+        color: var(--cl-text);
+      }
+      #theme-circlelife .cl-footer-social-btn:focus-visible {
+        outline: 2px solid var(--cl-accent);
+        outline-offset: 2px;
+      }
+      #theme-circlelife .cl-footer-qr {
+        position: static;
+        display: inline-flex;
+      }
+      #theme-circlelife .cl-footer-qr-card {
+        position: absolute;
+        left: 50%;
+        bottom: calc(100% + 10px);
+        z-index: 20;
+        width: 200px;
+        max-width: calc(100vw - 2rem);
+        padding: 0.6rem;
+        border: 1px solid var(--cl-border);
+        border-radius: var(--cl-radius);
+        background: var(--cl-surface);
+        transform: translateX(-50%);
+        animation: clFooterQrIn 0.18s var(--cl-ease) both;
+      }
+      #theme-circlelife .cl-footer-qr-plate {
+        display: block;
+        padding: 0.5rem;
+        border-radius: var(--cl-radius-sm);
+        background: var(--cl-qr-plate-bg);
+      }
+      #theme-circlelife .cl-footer-qr-plate img {
+        display: block;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1;
+        object-fit: contain;
+      }
+      #theme-circlelife .cl-footer-qr-fallback {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        aspect-ratio: 1;
+        color: var(--cl-faint);
+        font-family: var(--cl-font-mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.06em;
+      }
+      #theme-circlelife .cl-footer-qr-caption {
+        display: block;
+        margin-top: 0.45rem;
+        color: var(--cl-faint);
+        font-family: var(--cl-font-mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-align: center;
+      }
+      /* 页脚进入视口时，回顶与移动目录药丸让位（与影集浮动胶囊避让同思路） */
+      #theme-circlelife.cl-footer-inview .cl-backtop.is-visible,
+      #theme-circlelife.cl-footer-inview .cl-toc-fab {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+      @keyframes clFooterQrIn {
+        from {
+          opacity: 0;
+          transform: translate(-50%, 6px);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, 0);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #theme-circlelife .cl-footer-qr-card {
+          animation: none;
+        }
       }
 
       /* 档案页脚式翻页：hairline 细线 + mono 三段式（与文章页「← 返回」同语言） */

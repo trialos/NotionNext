@@ -8,6 +8,8 @@ export const tokenStyle = `
         color-scheme: light;
         --cl-bg: #f5f0e4;
         --cl-surface: #fcfaf4;
+        /* 二维码静区：扫码需要绝对白底，深浅模式都不换（功能性例外） */
+        --cl-qr-plate-bg: #ffffff;
         --cl-paper-2: #eae1cf;
         --cl-paper-3: #dbceb4;
         --cl-text: #20190f;
@@ -88,6 +90,8 @@ export const tokenStyle = `
         --cl-article-cover-h: clamp(280px, 42vh, 480px); /* 全出血封面高 */
         --cl-article-cover-scrim-h: 22%; /* 封面顶部极轻压暗区高度：保证浅色头图上导航胶囊仍读得清 */
         --cl-article-cover-scrim: rgba(20, 16, 12, 0.26); /* 顶部压暗色（明暗模式同值；暗底上无可感影响） */
+        /* 文章页微字（PostMeta / 返回 / 微信原文 / TOC）：手机 12px；≥1024 13px */
+        --cl-article-micro: 0.75rem;
         /* 封面底边溶解：用遮罩让照片像素自己透明掉、露出封面容器（= 页面底色），
            而不是盖一层色纱。盖纱时那片区域是"照片+色纱"（读作一块黑边），
            遮罩时那片区域就是页面本身的底色（照片真正化进去，没有黑边实体）。
@@ -171,6 +175,13 @@ export const tokenStyle = `
           --cl-nav-height: 3.25rem;
           /* 刊头基准同步收窄（与影集页原值逐档等价） */
           --cl-mast-top: max(5.2rem, calc(env(safe-area-inset-top, 0px) + 4.5rem));
+        }
+      }
+
+      /* 文章微字桌面档：与音乐模块 micro 同值（0.8125rem = 13px） */
+      @media (min-width: 1024px) {
+        :root {
+          --cl-article-micro: 0.8125rem;
         }
       }
 

@@ -30,77 +30,43 @@ export function ArcMark({ size = 28, className = '' }) {
 }
 
 /**
- * @param {'stack'|'row'} layout stack=中文上英文下；row=弧标·中文·英文横排
- * @param {boolean} hideEn 只显示弧标+中文名（英文交给页脚等处）
+ * 品牌锁头：弧标 + 中文在上、英文在下。
+ * @param {boolean} compact 抽屉顶栏用的小号（弧标 26）；页脚用默认 32
+ * @param {boolean} hideEn 只显示弧标 + 中文名
  */
 export function BrandLockup({
   compact = false,
-  layout = 'stack',
   href = '/',
   className = '',
   hideEn = false
 }) {
-  const isRow = layout === 'row'
-  const mark = isRow ? (compact ? 22 : 26) : compact ? 26 : 32
+  const mark = compact ? 26 : 32
 
   const inner = (
-    <span
-      className={`cl-lockup inline-flex items-center ${
-        isRow ? 'cl-lockup--row gap-2' : 'gap-2.5'
-      } ${className}`}>
+    <span className={`cl-lockup inline-flex items-center gap-2.5 ${className}`}>
       <ArcMark size={mark} className='cl-lockup-mark' />
-      {isRow ? (
-        // row 变体：中文与英文**共用一条基线**（items-baseline）——
-        // 盒心对齐会让小号的等宽英文看着比中文低一截，基线对齐才是杂志排版。
-        // 弧标留在外层的 items-center 里单独居中。
-        <span className='cl-lockup-row-text inline-flex items-baseline gap-2.5 min-w-0'>
-          <span
-            className='cl-lockup-cn cl-lockup-cn--row font-medium tracking-[0.04em] text-[var(--cl-text)]'
-            style={{ fontFamily: 'var(--cl-font-display)' }}
-            translate='no'>
-            时光的弧线
-          </span>
-          {!hideEn && (
-            <>
-              <span className='cl-lockup-sep' aria-hidden='true'>
-                ·
-              </span>
-              <span
-                className='cl-lockup-en cl-lockup-en--row uppercase tracking-[0.14em] text-[var(--cl-muted)]'
-                style={{ fontFamily: 'var(--cl-font-mono)' }}
-                translate='no'>
-                Circle of Life
-              </span>
-            </>
-          )}
+      <span className='cl-lockup-text flex min-w-0 flex-col leading-none'>
+        <span
+          className='cl-lockup-cn font-medium tracking-[0.04em] text-[var(--cl-text)]'
+          style={{ fontFamily: 'var(--cl-font-display)' }}
+          translate='no'>
+          时光的弧线
         </span>
-      ) : (
-        <span className='cl-lockup-text flex min-w-0 flex-col leading-none'>
+        {!hideEn && (
           <span
-            className='cl-lockup-cn font-medium tracking-[0.04em] text-[var(--cl-text)]'
-            style={{ fontFamily: 'var(--cl-font-display)' }}
+            className='cl-lockup-en uppercase tracking-[0.16em] text-[var(--cl-muted)]'
+            style={{ fontFamily: 'var(--cl-font-mono)' }}
             translate='no'>
-            时光的弧线
+            Circle of Life
           </span>
-          {!hideEn && (
-            <span
-              className='cl-lockup-en uppercase tracking-[0.16em] text-[var(--cl-muted)]'
-              style={{ fontFamily: 'var(--cl-font-mono)' }}
-              translate='no'>
-              Circle of Life
-            </span>
-          )}
-        </span>
-      )}
+        )}
+      </span>
     </span>
   )
 
   if (!href) return inner
 
-  // 无障碍名直接取可见文字，不再用 aria-label 覆盖：
-  // 可见文字里分隔符「·」是 aria-hidden 的装饰件，用 aria-label 写全反而与可见标签
-  // 不一致（label-content-name-mismatch）。CN 与 EN 之间补一个空格，
-  // 让读屏得到「时光的弧线 Circle of Life」（flex 容器忽略纯空白文本节点，视觉不变）。
+  // 无障碍名直接取可见文字，不用 aria-label 覆盖（label-content-name-mismatch）。
   return (
     <SmartLink
       href={href}

@@ -19,7 +19,7 @@ import SmartLink from '@/components/SmartLink'
 import dynamic from 'next/dynamic'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import ArchiveIndex from './components/ArchiveIndex'
 import BlogListArchive from './components/BlogListArchive'
 import {
@@ -38,6 +38,7 @@ import BackToTop from './components/BackToTop'
 import Catalog from './components/Catalog'
 import { Footer } from './components/Footer'
 import { Header } from './components/Header'
+import { resolveWechatOrigin } from './components/wechatOrigin'
 import HomeTiltWall from './components/HomeTiltWall'
 import HomeAlbumShowcase from './components/HomeAlbumShowcase'
 import HomeArticleStage from './components/HomeArticleStage'
@@ -71,6 +72,8 @@ const LayoutBase = props => {
   const { children, post } = props
   const { fullWidth, locale } = useGlobal()
   const router = useRouter()
+  const themeRootRef = useRef(null)
+  const footerRef = useRef(null)
   const isAlbumPage =
     router?.pathname === '/album' ||
     (typeof router?.asPath === 'string' &&
@@ -148,6 +151,25 @@ const LayoutBase = props => {
     } catch (_) {}
   }, [router.asPath, post])
 
+  // 页脚进入视口时隐藏回顶与移动目录药丸（与影集浮动胶囊「触底避让」同思路）
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const root = themeRootRef.current
+    const footer = footerRef.current
+    if (!root || !footer) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        root.classList.toggle('cl-footer-inview', entry.isIntersecting)
+      },
+      { threshold: 0.15 }
+    )
+    observer.observe(footer)
+    return () => {
+      observer.disconnect()
+      root.classList.remove('cl-footer-inview')
+    }
+  }, [router.asPath, isAboutPage])
+
   return (
     <AlbumUIProvider>
     <Head>
@@ -164,6 +186,7 @@ const LayoutBase = props => {
     </Head>
     <div
       id='theme-circlelife'
+      ref={themeRootRef}
       className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth${isAlbumPage ? ' cl-is-album' : ''}${isAboutPage ? ' cl-is-about' : ''}${isHomePage ? ' cl-is-home' : ''}${isArchivePage ? ' cl-is-archive' : ''}${isMusicPage ? ' cl-is-music' : ''}${isArticlePage && !ARTICLE_CARD ? ' cl-is-article' : ''}${isArticlePage && ARTICLE_CARD ? ' cl-article-card-mode' : ''}${showSidebar ? ' cl-has-sidebar' : ''}`}>
       <Style />
 
@@ -230,7 +253,7 @@ const LayoutBase = props => {
         </div>
       </div>
 
-      {!isAboutPage && <Footer />}
+      {!isAboutPage && <Footer footerRef={footerRef} />}
 
       <BackToTop label={locale?.POST?.TOP || '返回顶部'} />
       <ListScrollMemory />
@@ -360,6 +383,7 @@ const LayoutSlug = props => {
   const waiting404 = siteConfig('POST_WAITING_TIME_FOR_404') * 1000
   // Notion Page 型页面（关于/往期整理等）用统一刊头；普通文章保持 hero+meta
   const isPage = post?.type === 'Page'
+  const wechatOrigin = resolveWechatOrigin(post)
   const ARTICLE_CARD = siteConfig('CIRCLELIFE_ARTICLE_CARD', false, CONFIG)
   /**
    * 头图取图档位：SSR 先给 1024 档（移动端够用），挂载后按「显示宽 × DPR」升级。
@@ -454,7 +478,18 @@ const LayoutSlug = props => {
 
             const body = (
               <>
-                <ArticleBack className='cl-article-back--top' postId={post?.id} />
+                <div className='cl-article-top-row'>
+                  <ArticleBack className='cl-article-back--top' postId={post?.id} />
+                  {wechatOrigin ? (
+                    <a
+                      className='cl-article-origin'
+                      href={wechatOrigin}
+                      target='_blank'
+                      rel='noopener noreferrer'>
+                      微信原文 <span aria-hidden='true'>↗</span>
+                    </a>
+                  ) : null}
+                </div>
                 {isPage ? (
                   <PageMast
                     title={post.title}
