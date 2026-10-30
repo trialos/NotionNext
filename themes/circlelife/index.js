@@ -610,6 +610,11 @@ const LayoutMusicAlbum = props => {
 
   return (
     <div className='cl-music-page cl-music-album w-full'>
+      <div className='cl-music-album-top'>
+        <SmartLink href='/music' className='cl-music-back'>
+          ← 唱片
+        </SmartLink>
+      </div>
       <section className='cl-music-hero'>
         <div className='cl-music-hero-cover'>
           <MusicCover
@@ -912,8 +917,9 @@ const LayoutArchive = props => {
   return (
     <div className='cl-archive-page w-full'>
       <TlPageHero
-        eyebrow='ARCHIVE · 时间线与脉络'
-        title='全部文章'
+        eyebrow='ARTICLE · 时间线与脉络'
+        title='心的轨迹'
+        description='文字于我是心的位置'
         className='cl-page-mast--section cl-page-mast--archive'
       />
       {hasPosts ? (

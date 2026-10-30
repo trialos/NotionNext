@@ -120,7 +120,30 @@ describe('circlelife 序言导语', () => {
     expect(albumMeta).toBeGreaterThan(albumLead)
   })
 
-  test('导语样式走正文 token，且不折叠/不内部滚动', () => {
+  test('关于页序言：衬线、左对齐、朱砂短规线，宽度仍走序言 token', () => {
+    const scoped = ruleOf(
+      aboutStyleSource,
+      '#theme-circlelife.cl-is-about .cl-about-hero-lead'
+    )
+    expect(scoped).not.toBeNull()
+    expect(scoped).toContain('font-family: var(--cl-font-display)')
+    expect(scoped).toContain('text-align: left')
+    expect(scoped).toContain('color: var(--cl-text)')
+    expect(scoped).toContain('width: fit-content')
+    expect(scoped).toContain('var(--cl-hero-lead-measure)')
+    expect(scoped).toContain('var(--cl-hero-gutter)')
+    expect(scoped).not.toMatch(/max-height|line-clamp|text-overflow/)
+    expect(scoped).not.toMatch(/overflow\s*:\s*(auto|scroll|hidden)/)
+
+    const rule = ruleOf(
+      aboutStyleSource,
+      '#theme-circlelife.cl-is-about .cl-about-hero-lead::before'
+    )
+    expect(rule).not.toBeNull()
+    expect(rule).toContain('background: var(--cl-accent)')
+  })
+
+  test('共享导语样式（影集画廊）走正文 token，且不折叠/不内部滚动', () => {
     const leadRule = ruleOf(aboutStyleSource, '.cl-about-hero-lead')
     expect(leadRule).not.toBeNull()
     expect(leadRule).toContain('font-family: var(--cl-font-body)')

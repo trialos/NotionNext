@@ -244,6 +244,14 @@ export const musicStyle = `
         color: var(--cl-music);
       }
 
+      /* 条目页顶部返回：与手记页顶部同一节奏（20px 后进 hero）。
+         设计规范曾要求返回链只在页脚出现一次，此处按博主定稿改为上下各一处，勿回退 */
+      #theme-circlelife .cl-music-album-top {
+        display: flex;
+        align-items: center;
+        margin-bottom: var(--cl-music-space-xl);
+      }
+
       /* —— 专辑页 D2：大封面 hero —— */
       #theme-circlelife .cl-music-hero {
         display: grid;
@@ -323,6 +331,9 @@ export const musicStyle = `
       }
       #theme-circlelife .cl-music-actions {
         margin-top: 14px;
+        /* 原型 .album-actions 的下边距（18/14）在实现时丢了：
+           外链本体只有 4px 触控内边距，没有这段会被读成曲目表头的一部分 */
+        margin-bottom: var(--cl-music-space-lg);
       }
       #theme-circlelife .cl-music-actions .cl-music-ncm {
         margin-left: 0;
@@ -374,6 +385,12 @@ export const musicStyle = `
         letter-spacing: 0.06em;
         color: var(--cl-music);
         white-space: nowrap;
+      }
+
+      /* 曲目区与上文（hero 外链 / 专辑手记条）的段距：
+         手记条与表头之间也靠它留白，两处同一个段距 token */
+      #theme-circlelife .cl-music-track-section {
+        margin-top: var(--cl-music-section-gap);
       }
 
       /* —— 曲目表：真 table（列头是 th，屏幕阅读器能读到列语境）——
@@ -474,19 +491,21 @@ export const musicStyle = `
         letter-spacing: 0.04em;
         color: var(--cl-faint);
       }
-      /* 条目页页脚：左「← 唱片」右「曲目同步于…」，与手记页页脚同构 */
+      /* 条目页页脚：左「← 唱片」右「曲目同步于…」。
+         页脚不再自带分隔线：上方曲目表尾、下方全站页脚各有一条 hairline，
+         中间再画一条只会叠成三段紧挨的横线；页脚文字居中于两条线之间 */
       #theme-circlelife .cl-music-foot {
         display: flex;
         align-items: baseline;
         justify-content: space-between;
         gap: var(--cl-music-space-sm);
         flex-wrap: wrap;
-        margin-top: 18px;
-        padding-top: 14px;
-        border-top: 1px solid var(--cl-border);
+        margin: var(--cl-music-section-gap) 0 var(--cl-music-space-2xl);
       }
       #theme-circlelife .cl-music-synced {
-        margin: var(--cl-music-space-md) 0 0;
+        /* 与「← 唱片」同在 baseline 对齐的 flex 行里：
+           块级时代的 margin-top 会把整行撑高，居中时两端的基线就不再齐 */
+        margin: 0;
         font-family: var(--cl-font-mono);
         font-size: var(--cl-music-micro);
         letter-spacing: 0.06em;

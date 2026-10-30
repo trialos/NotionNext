@@ -396,6 +396,29 @@ export const aboutStyle = `
     -webkit-user-select: none;
   }
 
+  /* 关于页序言：与影集画廊共用同一份 DOM，但关于页这段是写在扉页上的「序」——
+     衬线 + 左对齐诗行 + 朱砂短规线；宽度仍走 --cl-hero-lead-measure，
+     不折叠、不内部滚动，保持「序言是封面，不是阅读层」 */
+  #theme-circlelife.cl-is-about .cl-about-hero-lead {
+    width: fit-content;
+    max-width: min(var(--cl-hero-lead-measure), calc(100vw - var(--cl-hero-gutter) * 2));
+    margin: 1.7rem auto 0;
+    font-family: var(--cl-font-display);
+    font-size: clamp(1rem, 1.6vw, 1.25rem);
+    line-height: 2.05;
+    letter-spacing: 0.03em;
+    color: var(--cl-text);
+    text-align: left;
+  }
+  #theme-circlelife.cl-is-about .cl-about-hero-lead::before {
+    content: '';
+    display: block;
+    width: 2.25rem;
+    height: 1px;
+    margin: 0 auto 1.35rem;
+    background: var(--cl-accent);
+  }
+
   /* 纯粹极简文字指引（可点击快速收起幕布进入画廊） */
   .cl-about-hero-hint-text {
     margin-top: 36px;
@@ -450,7 +473,11 @@ export const aboutStyle = `
   .cl-about-prologue-btn {
     position: fixed;
     bottom: calc(28px + env(safe-area-inset-bottom, 0px));
-    right: calc(28px + env(safe-area-inset-right, 0px));
+    /* 底部居中：不碰 transform 的升降动画，用左右 0 + fit-content + 自动外边距居中 */
+    left: 0;
+    right: 0;
+    width: fit-content;
+    margin-inline: auto;
     z-index: 50;
     height: 36px;
     padding: 0 14px 0 10px;
@@ -519,7 +546,6 @@ export const aboutStyle = `
   @media (max-width: 767px) {
     .cl-about-prologue-btn {
       bottom: calc(20px + env(safe-area-inset-bottom, 16px));
-      right: calc(18px + env(safe-area-inset-right, 0px));
       height: 34px;
       padding: 0 12px 0 8px;
       font-size: 10px;

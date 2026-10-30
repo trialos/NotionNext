@@ -88,6 +88,34 @@ describe('音乐模块几何', () => {
     )
   })
 
+  test('曲目区与上文留出段距，外链不再贴着表头', () => {
+    const section = ruleBodyOf(
+      musicStyle,
+      '#theme-circlelife .cl-music-track-section'
+    )
+    expect(section).not.toBeNull()
+    expect(section).toContain('margin-top: var(--cl-music-section-gap)')
+    expect(
+      ruleBodyOf(musicStyle, '#theme-circlelife .cl-music-actions')
+    ).toContain('margin-bottom: var(--cl-music-space-lg)')
+  })
+
+  test('条目页顶部返回与手记页顶部同一节奏', () => {
+    const body = ruleBodyOf(musicStyle, '#theme-circlelife .cl-music-album-top')
+    expect(body).not.toBeNull()
+    expect(body).toContain('margin-bottom: var(--cl-music-space-xl)')
+  })
+
+  test('条目页页脚只留表尾与全站页脚两条线，行内基线齐平', () => {
+    const foot = ruleBodyOf(musicStyle, '#theme-circlelife .cl-music-foot')
+    expect(foot).not.toBeNull()
+    expect(foot).not.toContain('border-top')
+    expect(foot).not.toContain('padding-top')
+    const synced = ruleBodyOf(musicStyle, '#theme-circlelife .cl-music-synced')
+    expect(synced).not.toBeNull()
+    expect(synced).toContain('margin: 0;')
+  })
+
   test('模块内不出现低于 13px 的硬编码字号（小字只走 micro / body 两个 token）', () => {
     const hardCoded = [...musicStyle.matchAll(/font-size:\s*([0-9.]+)rem/g)]
       .map(m => Number(m[1]))
@@ -178,5 +206,11 @@ describe('接线完整', () => {
     expect(layoutMap).toContain("'/music': 'LayoutMusic'")
     expect(layoutMap).toContain("'/music/album/[album]': 'LayoutMusicAlbum'")
     expect(layoutMap).toContain("'/music/note/[note]': 'LayoutMusicNote'")
+  })
+
+  test('条目页上下各一处返回链接', () => {
+    const index = read('themes/circlelife/index.js')
+    expect(index).toContain("className='cl-music-album-top'")
+    expect((index.match(/className='cl-music-back'/g) || []).length).toBe(2)
   })
 })

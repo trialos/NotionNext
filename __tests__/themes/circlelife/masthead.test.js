@@ -166,13 +166,18 @@ describe('circlelife 刊头统一（归档 / 影集）', () => {
       expect(index).toContain('cl-page-mast--section cl-page-mast--archive')
     })
 
-    test('两页刊头文案不变', () => {
+    test('三页刊头：轨迹三题 + 各自的书签句', () => {
       const shelf = readThemeFile('components', 'AlbumShelfStack.js')
-      expect(shelf).toContain('ARCHIVE · 影集')
-      expect(shelf).toContain('全部影集')
+      expect(shelf).toContain('ALBUM · 影集')
+      expect(shelf).toContain('影的轨迹')
+      expect(shelf).toContain('影像于我是空间的书签')
       const index = readThemeFile('index.js')
-      expect(index).toContain('ARCHIVE · 时间线与脉络')
-      expect(index).toContain('全部文章')
+      expect(index).toContain('ARTICLE · 时间线与脉络')
+      expect(index).toContain('心的轨迹')
+      expect(index).toContain('文字于我是心的位置')
+      const music = readThemeFile('components', 'music', 'MusicShelf.js')
+      expect(music).toContain("title='声的轨迹'")
+      expect(music).toContain("description='声音于我是时间的书签。'")
     })
   })
 })

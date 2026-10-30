@@ -19,8 +19,8 @@ export default function MusicShelf({ items = [], annual = [] }) {
       <PageMast
         className='cl-page-mast--section cl-page-mast--music'
         eyebrow='MUSIC · 唱片'
-        title='我的音乐'
-        description='对我而言音乐是一种时间的标签，定位和回忆'
+        title='声的轨迹'
+        description='声音于我是时间的书签。'
       />
 
       {annual.length ? (
