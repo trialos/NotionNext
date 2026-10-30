@@ -74,7 +74,32 @@ describe('展架 A', () => {
     expect(singleLink.getAttribute('rel')).toContain('noopener')
   })
 
-  it('曲数与手记标记来自数据而不是文案拼装', () => {
+  it('没写正文的单曲只做展示卡：不可点、标签写「单曲」、网易云外链留在卡脚', () => {
+    const { container } = render(
+      <MusicShelf items={[{ ...singleItem, hasBody: false }]} />
+    )
+    const card = container.querySelector('.cl-music-card--single')
+    expect(card).toBeTruthy()
+    expect(card.querySelectorAll('a[href^="/music/"]')).toHaveLength(0)
+    expect(card.querySelector('.cl-music-card-title').textContent.trim()).toBe(
+      singleItem.title
+    )
+    expect(card.querySelector('.cl-music-kind').textContent).toBe('单曲')
+    const ncm = card.querySelector('.cl-music-ncm')
+    expect(ncm.getAttribute('href')).toBe(singleItem.neteaseUrl)
+    expect(ncm.getAttribute('target')).toBe('_blank')
+  })
+
+  it('写了正文的单曲才是可点的手记卡，标签写「单曲手记」', () => {
+    const { container } = render(
+      <MusicShelf items={[{ ...singleItem, hasBody: true }]} />
+    )
+    const card = container.querySelector('.cl-music-card--single')
+    expect(card.querySelectorAll('a[href^="/music/"]').length).toBeGreaterThan(0)
+    expect(card.querySelector('.cl-music-kind').textContent).toBe('单曲手记')
+  })
+
+  it('曲数、手记标记来自数据而不是文案拼装', () => {
     render(<MusicShelf items={[albumItem, singleItem]} />)
     expect(screen.getByText('10 首')).toBeTruthy()
     expect(screen.getByText('手记')).toBeTruthy()
