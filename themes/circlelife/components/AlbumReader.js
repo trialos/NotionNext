@@ -89,6 +89,9 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
 
   const stageRef = useRef(null)
   const imageRef = useRef(null)
+  const indexOverlayRef = useRef(null)
+  const indexTriggerRef = useRef(null)
+  const indexWasOpenRef = useRef(false)
   const thumbsOverlayRef = useRef(null)
   const mountedRef = useRef(true)
   const bootedRef = useRef(false)
@@ -291,6 +294,50 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
     albumUI.registerAlbumIndex(openIndex)
     return () => albumUI.registerAlbumIndex(null)
   }, [albumUI, openIndex])
+
+  // 目录抽屉焦点：打开落到关闭按钮，关闭归还底部「目录」触发器
+  useEffect(() => {
+    if (indexOpen) {
+      indexWasOpenRef.current = true
+      const id = requestAnimationFrame(() => {
+        const close = indexOverlayRef.current?.querySelector('.overlay-close')
+        if (close) close.focus({ preventScroll: true })
+      })
+      return () => cancelAnimationFrame(id)
+    }
+    if (indexWasOpenRef.current) {
+      indexWasOpenRef.current = false
+      indexTriggerRef.current?.focus({ preventScroll: true })
+    }
+    return undefined
+  }, [indexOpen])
+
+  const trapIndexFocus = useCallback(event => {
+    const overlay = indexOverlayRef.current
+    if (!overlay) return
+    const focusables = Array.from(
+      overlay.querySelectorAll(
+        "a[href], button:not([disabled]), [tabindex]:not([tabindex='-1'])"
+      )
+    ).filter(node => node.getClientRects().length > 0)
+    if (!focusables.length) {
+      event.preventDefault()
+      return
+    }
+    const first = focusables[0]
+    const last = focusables[focusables.length - 1]
+    const active = document.activeElement
+    if (!overlay.contains(active)) {
+      event.preventDefault()
+      first.focus({ preventScroll: true })
+    } else if (event.shiftKey && active === first) {
+      event.preventDefault()
+      last.focus({ preventScroll: true })
+    } else if (!event.shiftKey && active === last) {
+      event.preventDefault()
+      first.focus({ preventScroll: true })
+    }
+  }, [])
 
   const showChapter = useCallback(
     (targetIndex, { writeUrl = true } = {}) => {
@@ -542,6 +589,10 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
         else if (thumbsOpen) closeThumbs()
         return
       }
+      if (event.key === 'Tab' && indexOpen) {
+        trapIndexFocus(event)
+        return
+      }
       if (indexOpen || thumbsOpen || !ready) return
       if (event.key === 'ArrowRight') goNext()
       else if (event.key === 'ArrowLeft') goPrev()
@@ -555,7 +606,8 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
     goPrev,
     indexOpen,
     ready,
-    thumbsOpen
+    thumbsOpen,
+    trapIndexFocus
   ])
 
   const groups = useMemo(() => {
@@ -701,6 +753,7 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
               {!showThumbsChrome ? (
                 <button
                   type='button'
+                  ref={indexTriggerRef}
                   data-action='index'
                   aria-label='打开影集目录'
                   onClick={openIndex}
@@ -741,6 +794,7 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
 
           <section
             id='indexOverlay'
+            ref={indexOverlayRef}
             className={`overlay index-drawer ${
               indexOpen ? 'is-open' : ''
             } ${indexRising ? 'is-rising' : ''} ${

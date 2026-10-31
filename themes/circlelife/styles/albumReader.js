@@ -840,14 +840,10 @@ export const albumReaderStyle = `
     button.chapter-enter { margin-top: 32px; font-size: 10px; }
 
     #indexOverlay { width: min(44%, 620px); }
-    .overlay-head {
-      max-width: var(--cl-wide-max);
-      margin: 0 auto;
+    #indexOverlay .overlay-head {
       padding: calc(44px + env(safe-area-inset-top, 0px)) var(--cl-wide-pad) 18px;
     }
-    .index-list {
-      max-width: var(--cl-wide-max);
-      margin: 0 auto;
+    #indexOverlay .index-list {
       padding: 0 var(--cl-wide-pad);
     }
     .index-year { margin: 26px 0 6px; font-size: 10.5px; }
