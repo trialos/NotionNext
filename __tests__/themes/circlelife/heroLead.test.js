@@ -1,8 +1,9 @@
 /**
- * 序言导语契约测试
+ * 序言导语契约测试（关于页）
  *
- * 背景：关于页与影集序言共用 .cl-about-hero-summary。summary 必须继续做短题眼，
- * description 只做导语；导语不能折叠/内部滚动，宽度走 token。
+ * 关于页的 summary 做短题眼、description 做导语；导语不折叠/不内部滚动，
+ * 宽度走共享的 --cl-hero-* token。影集阅读器的题眼/小序由
+ * albumReaderData.test.js 单独覆盖。
  */
 import fs from 'fs'
 import path from 'path'
@@ -16,24 +17,6 @@ const aboutSource = readFile(
   'circlelife',
   'components',
   'InfiniteAboutGrid.js'
-)
-const albumSource = readFile(
-  'themes',
-  'circlelife',
-  'components',
-  'AlbumInfiniteWall.js'
-)
-const albumUtilsSource = readFile(
-  'themes',
-  'circlelife',
-  'components',
-  'albumUtils.js'
-)
-const albumStageSource = readFile(
-  'themes',
-  'circlelife',
-  'components',
-  'AlbumStage.js'
 )
 const layoutAboutSource = readFile(
   'themes',
@@ -71,35 +54,16 @@ describe('circlelife 序言导语', () => {
     )
   })
 
-  test('影集把 description 存在 deck 级并传给画廊', () => {
-    expect(albumUtilsSource).not.toContain('p.summary || p.description')
-    expect(albumUtilsSource).toContain('description: firstString(p.description)')
-    expect(albumStageSource).toContain(
-      "albumDescription={currentDeck?.description || ''}"
-    )
-  })
-
-  test('影集 summary 为空时用影集名，徽标不重复影集名', () => {
-    expect(albumSource).toContain('summary: albumSummary || albumName')
-    expect(albumSource).toContain('showAlbumNameInBadge')
-    expect(albumSource).toContain(
-      "{showAlbumNameInBadge ? `影集 · ${albumName}` : '影集'}"
-    )
-  })
-
   test('description 仍在客户端字段白名单里', () => {
     expect(siteDataApiSource).toMatch(
       /CLIENT_POST_SUMMARY_FIELDS[\s\S]*?'description'/
     )
   })
 
-  test('两个序言组件都在标题后条件渲染导语', () => {
+  test('关于页序言在标题后条件渲染，且提示在导语之后', () => {
     const lead = "{heroLead && <p className='cl-about-hero-lead'>{heroLead}</p>}"
-
     expect(aboutSource).toContain("import { resolveHeroCopy } from './heroCopy'")
-    expect(albumSource).toContain("import { resolveHeroCopy } from './heroCopy'")
     expect(aboutSource).toContain(lead)
-    expect(albumSource).toContain(lead)
 
     const aboutH1 = aboutSource.indexOf(
       "<h1 className='cl-about-hero-summary'>"
@@ -109,15 +73,6 @@ describe('circlelife 序言导语', () => {
     expect(aboutH1).toBeGreaterThan(-1)
     expect(aboutLead).toBeGreaterThan(aboutH1)
     expect(aboutHint).toBeGreaterThan(aboutLead)
-
-    const albumH1 = albumSource.indexOf(
-      "<h1 className='cl-about-hero-summary'>"
-    )
-    const albumLead = albumSource.indexOf(lead)
-    const albumMeta = albumSource.indexOf('cl-album-hero-meta')
-    expect(albumH1).toBeGreaterThan(-1)
-    expect(albumLead).toBeGreaterThan(albumH1)
-    expect(albumMeta).toBeGreaterThan(albumLead)
   })
 
   test('关于页序言：衬线、左对齐、朱砂短规线，宽度仍走序言 token', () => {
@@ -143,7 +98,7 @@ describe('circlelife 序言导语', () => {
     expect(rule).toContain('background: var(--cl-accent)')
   })
 
-  test('共享导语样式（影集画廊）走正文 token，且不折叠/不内部滚动', () => {
+  test('关于页导语走正文 token，且不折叠/不内部滚动', () => {
     const leadRule = ruleOf(aboutStyleSource, '.cl-about-hero-lead')
     expect(leadRule).not.toBeNull()
     expect(leadRule).toContain('font-family: var(--cl-font-body)')
@@ -169,8 +124,8 @@ describe('circlelife 序言导语', () => {
     expect(overlayRule).toContain('padding: 0 var(--cl-hero-gutter)')
   })
 
-  test('about.js 在 album.js 之后注入，共享类两页都生效', () => {
-    const albumAt = styleSource.indexOf('${albumStyle}')
+  test('about.js 在 albumReader.js 之后注入', () => {
+    const albumAt = styleSource.indexOf('${albumReaderStyle}')
     const aboutAt = styleSource.indexOf('${aboutStyle}')
     expect(albumAt).toBeGreaterThan(-1)
     expect(aboutAt).toBeGreaterThan(albumAt)

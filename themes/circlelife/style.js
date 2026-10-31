@@ -3,7 +3,7 @@ import CONFIG from './config'
 import { themeConsoleStyle } from '@/lib/themeConsoleStyle'
 
 import { aboutStyle } from './styles/about'
-import { albumStyle } from './styles/album'
+import { albumReaderStyle } from './styles/albumReader'
 import { archiveStyle } from './styles/archive'
 import { articleStyle } from './styles/article'
 import { commonStyle } from './styles/common'
@@ -31,7 +31,7 @@ ${homeStyle}
 ${homeArticlesStyle}
 ${archiveStyle}
 ${articleStyle}
-${albumStyle}
+${albumReaderStyle}
 ${musicStyle}
 ${aboutStyle}
       ${themeConsoleStyle('circlelife', CONFIG)}

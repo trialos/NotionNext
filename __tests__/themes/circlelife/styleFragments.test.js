@@ -262,3 +262,64 @@ describe('circlelife 头图渐变与阅读进度条契约', () => {
     expect(stops[stops.length - 1].pos).toBe(100)
   })
 })
+
+/* ==========================================================================
+   影集画廊高度链契约
+   ------------------------------------------------------------------------
+   背景：画廊全屏态靠一条「祖先高度逐层 100%」的 CSS 链撑满视口。原先中间层
+   按标签名匹配；6bf9ea09 把 <div id="main-content"> 改成 <main> 后链断掉，
+   .cl-album-page 只拿到 0 高父级的 100% → 展墙 / 序言层全塌成 0，页面只剩
+   顶栏和影集目录胶囊。DOM 包层与 CSS 选择器必须成对断言，避免再静默失配。
+   ========================================================================== */
+describe('circlelife 影集阅读器高度链与深色纸面', () => {
+  const { albumReaderStyle } = require('../../../themes/circlelife/styles/albumReader')
+  const themeIndexSource = fs.readFileSync(
+    path.join(themeDir, 'index.js'),
+    'utf8'
+  )
+
+  test('高度链按 id 覆盖 #main-content，不依赖中间层标签名', () => {
+    expect(themeIndexSource).toMatch(/<main\b[^>]*id=['"]main-content['"]/)
+
+    const start = albumReaderStyle.indexOf(
+      '#theme-circlelife.cl-is-album > #container-inner'
+    )
+    expect(start).toBeGreaterThan(-1)
+    const openBrace = albumReaderStyle.indexOf('{', start)
+    const selectors = albumReaderStyle.slice(start, openBrace)
+
+    expect(selectors).toMatch(/#main-content\s*,/)
+    expect(selectors).toMatch(/#main-content\s*>\s*\*/)
+    expect(selectors).toMatch(/\.cl-album-reader-page/)
+    expect(selectors).toMatch(/\.cl-album-reader(?:\s*,|\s*$)/)
+    expect(selectors).not.toMatch(/#container-wrapper\s*>\s*div/)
+
+    const rule = albumReaderStyle.slice(
+      openBrace,
+      albumReaderStyle.indexOf('}', openBrace) + 1
+    )
+    expect(rule).toMatch(/height:\s*100%\s*!important/)
+    expect(rule).toMatch(/min-height:\s*0/)
+  })
+
+  test('影集页只留右上角菜单，站点头导航与页脚隐藏', () => {
+    expect(albumReaderStyle).toMatch(
+      /#theme-circlelife\.cl-is-album \.cl-floating-header\s*\{[^}]*display:\s*none/
+    )
+    expect(albumReaderStyle).toMatch(
+      /#theme-circlelife\.cl-is-album \.cl-footer\s*\{[^}]*display:\s*none/
+    )
+    expect(albumReaderStyle).toMatch(
+      /#theme-circlelife\.cl-is-album \.cl-floating-desktop-menu-btn\s*\{[^}]*display:\s*inline-flex\s*!important/
+    )
+  })
+
+  test('深色模式影集纸面是米灰，不是黑底', () => {
+    const start = albumReaderStyle.indexOf('.dark #theme-circlelife.cl-is-album')
+    expect(start).toBeGreaterThan(-1)
+    const block = albumReaderStyle.slice(start, start + 900)
+    expect(block).toContain('--cl-bg: #b9b0a0')
+    expect(block).toContain('--cl-text: #241f18')
+    expect(block).toContain('--cl-muted: #463c30')
+  })
+})

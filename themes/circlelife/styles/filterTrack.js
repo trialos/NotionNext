@@ -1,16 +1,14 @@
 /**
- * Circle of Life — filterTrack：全站分类轨道样式唯一真源（归档分类栏 / 影集标签栏共用）
+ * Circle of Life — filterTrack：分类轨道样式唯一真源
  *
- * 背景：归档页（.cl-archive-cats，styles/archive.js）与影集页（.cl-album-stack-tags，
- * styles/album.js）此前各写各的分类栏，形态与逻辑都不一样（衬线轨道 vs 圆角胶囊、
- * 计数贴右上角 vs 行内小字、有无底部细横线、有无右端时间跨度）。博主要求两页
- * 「逻辑一样、计数在标签右上角」——两份实现必然继续漂移，故收敛到本片段。
+ * 影集页旧书架退役后，分类轨道只由归档页使用（ArchiveIndex）。
+ * 样式保留独立片段，避免归档页再把分类栏写回页面样式。
  *
  * 计数贴右上角的关键是这两个属性，改动时不要动：
  *   .cl-cat-track__item  { align-items: flex-start }  ← 计数与标题顶对齐
  *   .cl-cat-track__count { margin-top: 0.02rem }       ← 计数再抬一点点
  *
- * 竖线/文字颜色一律走 --cl-accent（朱砂），两页一致；不引入页面专属变体。
+ * 竖线/文字颜色一律走 --cl-accent（朱砂），不引入页面专属变体。
  */
 export const filterTrackStyle = `
   /* —— 全站分类轨道（归档 / 影集共用）—— */

@@ -3,9 +3,8 @@
  *
  * 关键约束：滚动路径上零布局读取。
  *
- * 影集页的 STACK 模式（AlbumShelfStack）在每帧对每个条目调用
- * getBoundingClientRect()（6~14 次/帧的强制布局读取）。本段改为
- * 「测量一次 + 纯数值比较」：段的几何在 mount / resize / 字体就绪后各测一次，
+ * 滚动时不做逐项 getBoundingClientRect()，只测量一次段几何，
+ * 之后用纯数值比较：段的几何在 mount / resize / 字体就绪后各测一次，
  * 滚动时只读 window.scrollY。
  *
  * R14 形态：左列是一只「取景框」——固定高度，框里只画当前影集的名字。

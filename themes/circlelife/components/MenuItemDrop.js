@@ -31,12 +31,12 @@ export const MenuItemDrop = ({ link, onNavigate, index = 0 }) => {
     const path = (router?.asPath || '').split('?')[0].replace(/\/$/, '')
     const onAlbum = path === '/album'
     if (onAlbum) {
-      // 已在影集页：画廊 → 书架；书架保持
-      const goShelf = albumUI?.goShelf
-      if (goShelf) {
+      // 已在影集页：打开目录抽屉，不再重进路由
+      const openAlbumIndex = albumUI?.openAlbumIndex
+      if (openAlbumIndex) {
         e.preventDefault()
         e.stopPropagation?.()
-        goShelf()
+        openAlbumIndex()
         onNavigate?.()
         return true
       }

@@ -29,8 +29,9 @@ import {
 } from './components/archiveFilter'
 import { BlogListPage } from './components/BlogListPage'
 import { BlogListScroll } from './components/BlogListScroll'
-import AlbumStage from './components/AlbumStage'
-import { buildAlbumDecks } from './components/albumUtils'
+import AlbumReader from './components/AlbumReader'
+import { isAlbumPath } from './components/albumRoute'
+import { normalizeNavLinks, linkTitle } from './components/navConfig'
 import LayoutAbout from './components/LayoutAbout'
 import { AlbumUIProvider } from './components/albumContext'
 import ArticleBack from './components/ArticleBack'
@@ -181,7 +182,7 @@ const LayoutBase = props => {
       />
       <link
         rel='stylesheet'
-        href='https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;600&family=JetBrains+Mono:wght@500&family=Newsreader:wght@500&family=Noto+Serif+SC:wght@500;700&display=swap'
+        href='https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Newsreader:wght@500;600&family=Noto+Serif+SC:wght@500;600;700&display=swap'
       />
     </Head>
     <div
@@ -578,36 +579,36 @@ const LayoutSlug = props => {
  */
 
 /**
- * 影集：卡片舞台
+ * 影集：阅读器（章页 / 单张 / 目录抽屉 / 缩略）
  */
 const LayoutAlbum = props => {
-  const decks = useMemo(
-    () => buildAlbumDecks(props.photos || []),
-    [props.photos]
-  )
-  const firstDeck = decks[0]
-  const lcpCover =
-    firstDeck?.photos?.[0]?.cover ||
-    firstDeck?.photos?.[0]?.url ||
-    ''
+  const navLinks = useMemo(() => {
+    const list = []
+    if (props.customNav) list.push(...props.customNav)
+    if (siteConfig('CUSTOM_MENU')) list.push(...(props.customMenu || []))
+    const seen = new Set()
+    return [
+      { id: 'cl-album-home', title: '首页', name: '首页', href: '/' },
+      ...normalizeNavLinks(list).all
+    ]
+      .filter(link => {
+        // 目录抽屉本身就是影集总索引，不再重复挂「影集」入口
+        if (isAlbumPath(link?.href)) return false
+        const key = link?.href || link?.title || link?.name
+        if (!key || seen.has(key)) return false
+        seen.add(key)
+        return true
+      })
+      .sort((a, b) => {
+        // 目录抽屉底部固定顺序：首页、文章、音乐、关于；其余保持原序
+        const rank = { 首页: 0, 文章: 1, 音乐: 2, 关于: 3 }
+        const ra = rank[linkTitle(a)] ?? 99
+        const rb = rank[linkTitle(b)] ?? 99
+        return ra - rb
+      })
+  }, [props.customNav, props.customMenu])
 
-  return (
-    <>
-      {lcpCover && (
-        <Head>
-          <link
-            rel='preload'
-            as='image'
-            href={lcpCover}
-            fetchPriority='high'
-          />
-        </Head>
-      )}
-      <div className='cl-album-page w-full'>
-        <AlbumStage pages={props.photos || []} />
-      </div>
-    </>
-  )
+  return <AlbumReader pages={props.photos || []} navLinks={navLinks} />
 }
 
 /**

@@ -1,39 +1,13 @@
-/**
- * @jest-environment node
- */
-import {
-  buildAlbumHref,
-  findDeckIndexById,
-  isAlbumPath,
-  parseAlbumQuery
-} from '@/themes/circlelife/components/albumRoute'
+import { isAlbumPath } from '@/themes/circlelife/components/albumRoute'
 
 describe('albumRoute', () => {
-  it('parseAlbumQuery defaults to shelf', () => {
-    expect(parseAlbumQuery({})).toEqual({ view: 'shelf', deck: '' })
-    expect(parseAlbumQuery({ view: 'gallery', deck: 'abc' })).toEqual({
-      view: 'gallery',
-      deck: 'abc'
-    })
-  })
-
-  it('buildAlbumHref', () => {
-    expect(buildAlbumHref({ view: 'shelf' })).toBe('/album')
-    expect(buildAlbumHref({ view: 'gallery', deckId: 'id 1' })).toBe(
-      '/album?view=gallery&deck=id%201'
-    )
-  })
-
-  it('findDeckIndexById', () => {
-    const decks = [{ id: 'a' }, { id: 'b' }]
-    expect(findDeckIndexById(decks, 'b')).toBe(1)
-    expect(findDeckIndexById(decks, 'nope')).toBe(-1)
-  })
-
-  it('isAlbumPath', () => {
+  it('isAlbumPath 只命中 /album 路径', () => {
     expect(isAlbumPath('/album')).toBe(true)
     expect(isAlbumPath('/album/')).toBe(true)
     expect(isAlbumPath('/album?view=gallery')).toBe(true)
+    expect(isAlbumPath('https://example.com/album?deck=abc')).toBe(true)
     expect(isAlbumPath('/about')).toBe(false)
+    expect(isAlbumPath('')).toBe(false)
+    expect(isAlbumPath(null)).toBe(false)
   })
 })
