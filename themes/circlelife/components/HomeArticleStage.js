@@ -2,8 +2,7 @@ import SmartLink from '@/components/SmartLink'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import HomeArticleCover, { clearCoverCache } from './HomeArticleCover'
 import {
-  RULER_MIN_GAP,
-  computeRulerPositions,
+  computeRulerFraction,
   formatMonthRange,
   formatRulerDay
 } from './homeArticleFocus'
@@ -14,35 +13,26 @@ import {
  * 形态：**一窗一屏，原生横向滑动**
  * - 100svh 面板 + 一条原生横向滚动轨道；一屏一篇，`scroll-snap-stop: always`
  *   一次手势最多换一篇。滚动/惯性/吸附全部由浏览器接管，JS 不在拖拽路径里。
- * - 文章 DOM/文字/链接/图版/日期尺全部保留；日期尺是可点击的时间轴，
- *   当前篇高亮，桌面有上一张/下一张，键盘左右/Home/End。
+ * - 文章 DOM/文字/链接/图版/日期尺全部保留；日期尺是等距可点击的时间轴，
+ *   左新右旧，当前篇高亮，桌面有上一张/下一张，键盘左右/Home/End。
  * - 图版继续走 HomeArticleCover 的 canvas 槽位：1024 档，只绘制当前篇与
  *   左右邻篇，再外侧预取/释放；不逐帧绘制，也不做滚动驱动 transform。
  * - 活动篇由 IntersectionObserver 判定；不在 scroll 回调里 setState/写布局。
  *
  * 性能契约：
  * - 零新增依赖、零常驻 RAF、无 wheel/touch 劫持、无 scroll 路径布局读取
- * - 日期尺位置、图版宽度只在 mount / resize / fonts / load 时重算
+ * - 刻度等距、无需量测；图版宽度只在 mount / resize / fonts / load 时重算
  * - 滚动路径只有浏览器原生滚动；JS 只在活动篇变化时更新状态/覆盖图
  */
 
-const ARTICLE_INDEX_KEY = 'cl-home-article-index'
-
-const samePositions = (a, b) => {
-  if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) {
-    return false
-  }
-  for (let i = 0; i < a.length; i++) {
-    if (Math.abs(a[i] - b[i]) > 0.0001) return false
-  }
-  return true
-}
+const ARTICLE_INDEX_KEY = 'cl-home-article-index-v2'
 
 export default function HomeArticleStage({ articles = [] }) {
-  // 展示顺序：由旧到新 —— 往下滚/往右滑 = 时间往前走，时间尺从左到右。
+  // 展示顺序 = 数据顺序（新→旧）：第一屏最新，时间尺左新右旧。
+  // 数据层 pages/index.js 已按 publishDate 降序取最新 N 篇，这里不再反向。
   const list = useMemo(() => {
-    const src = Array.isArray(articles) ? articles.filter(Boolean) : []
-    return [...src].reverse()
+    const src = Array.isArray(articles) ? articles : []
+    return src.filter(Boolean)
   }, [articles])
   const count = list.length
   const listKey = useMemo(
@@ -51,10 +41,8 @@ export default function HomeArticleStage({ articles = [] }) {
   )
 
   const [activeIndex, setActiveIndex] = useState(0)
-  const [positions, setPositions] = useState([])
   const sectionRef = useRef(null)
   const railRef = useRef(null)
-  const axisRef = useRef(null)
   const coverRefs = useRef([])
   const activeRef = useRef(0)
   const railWidthRef = useRef(0)
@@ -62,17 +50,9 @@ export default function HomeArticleStage({ articles = [] }) {
   const didWriteRef = useRef(false)
   activeRef.current = activeIndex
 
-  // 日期尺位置 + 移动端图版宽度：只在布局节点变化时算；不进入滚动路径
+  // 移动端图版宽度：只在布局节点变化时算；不进入滚动路径。
+  // 日期尺等距，不需要量轴宽。
   const layout = useCallback(() => {
-    const axis = axisRef.current
-    if (axis) {
-      const next = computeRulerPositions(
-        list.map(a => a.publishDay),
-        { width: axis.clientWidth, minGap: RULER_MIN_GAP }
-      )
-      setPositions(prev => (samePositions(prev, next) ? prev : next))
-    }
-
     const rail = railRef.current
     if (!rail || typeof window === 'undefined') return
     const railW = rail.clientWidth
@@ -90,21 +70,24 @@ export default function HomeArticleStage({ articles = [] }) {
     const avail = rail.clientHeight
     const containerW = document.documentElement.clientWidth
 
-    slides.forEach(slide => {
+    // 用 list 的索引遍历：列表变化时 layout 必须重跑（依赖 [list]）
+    for (let index = 0; index < list.length; index++) {
+      const slide = slides[index]
+      if (!slide) continue
       const plate = slide.querySelector('.cl-home-article-plate')
-      if (!plate) return
+      if (!plate) continue
       if (!narrow) {
         plate.style.removeProperty('--plate-w')
-        return
+        continue
       }
       const body = slide.querySelector('.cl-home-article-body')
-      if (!body) return
+      if (!body) continue
       const bodyH = body.getBoundingClientRect().height
       // 高度优先：矮屏宁可图版不满宽，也不让文字被时间轴压住
       const budget = avail > 0 ? (avail - 16 - bodyH) * 0.75 : containerW
       const ideal = Math.min(containerW, Math.max(90, budget))
       plate.style.setProperty('--plate-w', `${Math.floor(ideal)}px`)
-    })
+    }
   }, [list])
 
   useEffect(() => {
@@ -389,14 +372,15 @@ export default function HomeArticleStage({ articles = [] }) {
           </button>
 
           <nav className='cl-home-articles-ruler' aria-label='精选文章时间轴'>
-            <div className='cl-home-articles-ruler-axis' ref={axisRef}>
+            <div className='cl-home-articles-ruler-axis'>
               {list.map((article, index) => {
-                const x = (positions[index] ?? 0) * 100
-                // 端点刻度显式标记：游标也是轴的子元素，靠 :last-child 会选错
+                const x = computeRulerFraction(index, count) * 100
+                // 端点刻度显式标记：游标也是轴的子元素，靠 :last-child 会选错。
+                // 单篇时两端都不挂，让刻度停在轴中点而不是贴左。
                 const edge =
-                  index === 0
+                  count > 1 && index === 0
                     ? ' is-first'
-                    : index === list.length - 1
+                    : count > 1 && index === count - 1
                       ? ' is-last'
                       : ''
                 return (
@@ -418,7 +402,7 @@ export default function HomeArticleStage({ articles = [] }) {
               <span
                 className='cl-home-articles-cursor'
                 style={{
-                  '--cursor-x': `${(positions[activeIndex] ?? 0) * 100}%`
+                  '--cursor-x': `${computeRulerFraction(activeIndex, count) * 100}%`
                 }}
                 aria-hidden='true'>
                 <i />

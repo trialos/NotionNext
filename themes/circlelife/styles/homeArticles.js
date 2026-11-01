@@ -6,7 +6,7 @@
  *   一屏一篇，`scroll-snap-stop: always` 一次手势最多换一篇。
  * - 滚动、惯性、吸附全部交给浏览器；JS 不监听 wheel/touch、不写 transform。
  * - 图左文右（镜像影集段的文左图右）；图版 3:4；移动端图版满屏出血。
- * - 底部日期尺是可点击的时间轴：真实日距、当前篇高亮、桌面上一张/下一张。
+ * - 底部日期尺是可点击的等距时间轴（左新右旧），当前篇高亮、桌面上一张/下一张。
  * - 图版 canvas 仍走 1024 档；位图生命周期由 HomeArticleCover 管理。
  */
 export const homeArticlesStyle = `
@@ -228,6 +228,10 @@ export const homeArticlesStyle = `
     gap: 1rem;
     min-width: 0;
     width: 100%;
+    /* 轴只做示意，不铺满宽页脚；auto margin 吸收剩余空间并居中，
+       上一张/下一张仍贴页脚两边 */
+    max-width: 30rem;
+    margin-inline: auto;
   }
   #theme-circlelife .cl-home-articles-ruler-axis {
     position: relative;

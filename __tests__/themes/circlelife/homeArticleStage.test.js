@@ -2,7 +2,7 @@
  * 首页精选文章章（原生横向滑动）契约测试
  *
  * 守住：
- * 1. 日期尺真实日距 / 同日错开 / 非法日期降级
+ * 1. 展示顺序新→旧 / 日期尺等距 / 非法输入降级
  * 2. 精选数据链路与 512/1024 取图
  * 3. 原生横向 scroll-snap：无 sticky 行程、无逐帧 scrub、无 wheel/touch 劫持
  * 4. 日期点击 / 上一张/下一张 / 键盘 / 活动篇 aria
@@ -17,11 +17,9 @@ const readFile = (...parts) =>
   fs.readFileSync(path.join(rootDir, ...parts), 'utf8')
 
 const {
-  RULER_MIN_GAP,
-  computeRulerPositions,
+  computeRulerFraction,
   formatMonthRange,
-  formatRulerDay,
-  parsePublishDay
+  formatRulerDay
 } = require('../../../themes/circlelife/components/homeArticleFocus')
 const {
   isFeaturedEntry
@@ -65,95 +63,35 @@ const STYLE_FRAGMENTS = [
 ]
 
 describe('circlelife 首页精选文章章（原生横向滑动）', () => {
-  describe('刻度位置（纯函数 · 真实日距比例）', () => {
-    test('RULER_MIN_GAP 存在且为正（同日刻度靠它错开）', () => {
-      expect(RULER_MIN_GAP).toBeGreaterThan(0)
-    })
-
-    test('空数组 / 非数组 → 空结果', () => {
-      expect(computeRulerPositions([])).toEqual([])
-      expect(computeRulerPositions(null)).toEqual([])
-      expect(computeRulerPositions(undefined)).toEqual([])
-    })
-
-    test('单条 → 落在轴中点', () => {
-      const pos = computeRulerPositions(['2026-10-22'], { width: 1000 })
-      expect(pos).toHaveLength(1)
-      expect(pos[0]).toBeCloseTo(0.5, 5)
-    })
-
-    test('按真实日距比例分布（不是等距装饰）', () => {
-      const pos = computeRulerPositions(
-        ['2026-10-22', '2026-10-15', '2026-10-11'],
-        { width: 1000 }
+  describe('等距刻度（纯函数 · 新→旧）', () => {
+    test('6 篇等距：0 → 1，顺序递增', () => {
+      const xs = Array.from({ length: 6 }, (_, i) =>
+        computeRulerFraction(i, 6)
       )
-      expect(pos[0]).toBeCloseTo(1, 5)
-      expect(pos[1]).toBeCloseTo(4 / 11, 4)
-      expect(pos[2]).toBeCloseTo(0, 5)
-    })
-
-    test('同日两篇 → relax pass 保证相邻间距 ≥ minGap', () => {
-      const pos = computeRulerPositions(
-        ['2026-10-09', '2026-10-09'],
-        { width: 1000, minGap: 56 }
-      )
-      expect(Math.abs(pos[1] - pos[0]) * 1000).toBeGreaterThanOrEqual(55.999)
-    })
-
-    test('全部同一比例 / 非法日期 / 非法宽度都不产生 NaN，且夹在 [0,1]', () => {
-      const allSame = computeRulerPositions(
-        ['2026-10-09', '2026-10-09', '2026-10-09'],
-        { width: 900, minGap: 56 }
-      )
-      allSame.forEach(p => expect(Number.isFinite(p)).toBe(true))
-      for (let i = 1; i < allSame.length; i++) {
-        expect((allSame[i] - allSame[i - 1]) * 900).toBeGreaterThanOrEqual(55.999)
-      }
-
-      const invalid = computeRulerPositions(
-        ['2026-10-22', 'not-a-date', '2026-10-11'],
-        { width: 1000 }
-      )
-      invalid.forEach(p => {
-        expect(Number.isFinite(p)).toBe(true)
-        expect(p).toBeGreaterThanOrEqual(0)
-        expect(p).toBeLessThanOrEqual(1)
+      expect(xs[0]).toBe(0)
+      expect(xs[5]).toBe(1)
+      xs.forEach((x, i) => {
+        expect(x).toBeCloseTo(i / 5, 6)
+        if (i > 0) expect(x).toBeGreaterThan(xs[i - 1])
       })
-
-      const noWidth = computeRulerPositions(['2026-10-22', '2026-10-11'], {
-        width: 0
-      })
-      noWidth.forEach(p => expect(Number.isFinite(p)).toBe(true))
     })
 
-    test('输入顺序由旧到新 → 左旧右新，不倒挂', () => {
-      const pos = computeRulerPositions(
-        [
-          '2026-10-15',
-          '2026-10-18',
-          '2026-10-20',
-          '2026-10-26',
-          '2026-10-27',
-          '2026-10-28'
-        ],
-        { width: 358, minGap: RULER_MIN_GAP }
-      )
-      expect(pos[0]).toBeCloseTo(0, 5)
-      expect(pos[pos.length - 1]).toBeCloseTo(1, 5)
-      for (let i = 1; i < pos.length; i++) {
-        expect(pos[i]).toBeGreaterThanOrEqual(pos[i - 1])
-      }
+    test('单篇 / 空集合 / 非数字 count → 轴中点 0.5', () => {
+      expect(computeRulerFraction(0, 1)).toBe(0.5)
+      expect(computeRulerFraction(0, 0)).toBe(0.5)
+      expect(computeRulerFraction(0, NaN)).toBe(0.5)
+    })
+
+    test('越界与非法 index 夹在 [0,1]，不产生 NaN', () => {
+      expect(computeRulerFraction(-5, 6)).toBe(0)
+      expect(computeRulerFraction(99, 6)).toBe(1)
+      expect(computeRulerFraction(NaN, 6)).toBe(0)
+      expect(computeRulerFraction(0, 2)).toBe(0)
+      expect(computeRulerFraction(1, 2)).toBe(1)
     })
   })
 
   describe('日期格式（不补零）', () => {
-    test('publishDay 解析不补零', () => {
-      expect(parsePublishDay('2026-10-9')).toBe(Date.UTC(2026, 9, 9))
-      expect(parsePublishDay('2026-10-09')).toBe(Date.UTC(2026, 9, 9))
-      expect(parsePublishDay('2026/10/09')).toBeNull()
-      expect(parsePublishDay('2026-13-45')).toBeNull()
-    })
-
     test('日期标签与月份跨度', () => {
       expect(formatRulerDay('2026-10-9')).toBe('10·09')
       expect(formatRulerDay('bad')).toBe('')
@@ -194,6 +132,17 @@ describe('circlelife 首页精选文章章（原生横向滑动）', () => {
       expect(homeArticlesStyle).toContain('overscroll-behavior-x: contain')
     })
 
+    test('第一屏最新：不再反向；日期尺等距且不量轴', () => {
+      expect(stageSource).not.toContain('.reverse(')
+      expect(stageSource).not.toContain('computeRulerPositions')
+      expect(stageSource).not.toContain('RULER_MIN_GAP')
+      expect(stageSource).not.toContain('axisRef')
+      expect(stageSource).not.toContain('setPositions(')
+      expect(stageSource).toContain('computeRulerFraction')
+      expect(focusSource).not.toContain('parsePublishDay')
+      expect(focusSource).not.toContain('computeRulerPositions')
+    })
+
     test('没有 sticky 轨道 / 行程 / 逐帧 scrub 状态机', () => {
       expect(homeArticlesStyle).not.toContain('position: sticky')
       expect(homeArticlesStyle).not.toContain('--cl-home-article-sweep')
@@ -224,6 +173,18 @@ describe('circlelife 首页精选文章章（原生横向滑动）', () => {
       )
     })
 
+    test('日期尺桌面限宽居中，不铺满宽页脚', () => {
+      expect(homeArticlesStyle).toMatch(
+        /\.cl-home-articles-ruler \{[^}]*max-width: 30rem;/
+      )
+      expect(homeArticlesStyle).toMatch(
+        /\.cl-home-articles-ruler \{[^}]*margin-inline: auto;/
+      )
+      expect(homeArticlesStyle).toMatch(
+        /\.cl-home-articles-ruler \{[^}]*width: 100%;/
+      )
+    })
+
     test('日期尺可点击 + 上一张/下一张 + 键盘 + 状态广播', () => {
       expect(stageSource).toContain('cl-home-articles-tick')
       expect(stageSource).toContain('onClick={() => goTo(index)}')
@@ -237,7 +198,7 @@ describe('circlelife 首页精选文章章（原生横向滑动）', () => {
       expect(stageSource).toContain('aria-roledescription')
       expect(stageSource).toContain("aria-current={index === activeIndex")
       expect(stageSource).toContain('sessionStorage')
-      expect(stageSource).toContain("'cl-home-article-index'")
+      expect(stageSource).toContain("'cl-home-article-index-v2'")
       expect(stageSource).toContain('cl-home-article-active')
     })
 
@@ -417,6 +378,8 @@ describe('circlelife 首页精选文章章（原生横向滑动）', () => {
         pagesIndexSource.indexOf('props.homeArticles =')
       )
       expect(block).toContain('.filter(isFeaturedEntry)')
+      expect(block).toContain('.sort(byDateDesc)')
+      expect(block).toContain('.slice(0, homeArticleCount)')
       expect(pagesIndexSource).toContain('widths: [512, 1024]')
       expect(pagesIndexSource).not.toContain('widths: [1024, 2048]')
       expect(pagesIndexSource).toContain(
