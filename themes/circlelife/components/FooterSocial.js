@@ -34,6 +34,11 @@ export function FooterSocial() {
       icon: 'github',
       label: 'GitHub',
       href: normalizeLink(siteConfig('CONTACT_GITHUB', ''))
+    },
+    {
+      icon: 'steam',
+      label: 'Steam',
+      href: normalizeLink(siteConfig('CONTACT_STEAM', ''))
     }
   ].filter(channel => channel.href)
 

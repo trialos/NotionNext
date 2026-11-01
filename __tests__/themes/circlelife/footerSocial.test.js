@@ -27,11 +27,12 @@ describe('circlelife 页脚社交通道', () => {
     expect(screen.queryAllByRole('link')).toHaveLength(0)
   })
 
-  test('小红书 / 网易云 / GitHub 渲染为安全外链，空值隐藏', () => {
+  test('小红书 / 网易云 / GitHub / Steam 渲染为安全外链，空值隐藏', () => {
     applyConfig({
       CONTACT_XIAOHONGSHU: 'https://www.xiaohongshu.com/user/profile/abc',
       CONTACT_NETEASE: '  https://music.163.com/#/user/home?id=42  ',
-      CONTACT_GITHUB: 'https://github.com/trialos'
+      CONTACT_GITHUB: 'https://github.com/trialos',
+      CONTACT_STEAM: 'https://steamcommunity.com/id/urlnull/'
     })
     render(<FooterSocial />)
 
@@ -54,6 +55,14 @@ describe('circlelife 页脚社交通道', () => {
     expect(github).toHaveAttribute('href', 'https://github.com/trialos')
     expect(github).toHaveAttribute('target', '_blank')
     expect(github).toHaveAttribute('rel', 'noopener noreferrer')
+
+    const steam = screen.getByRole('link', { name: 'Steam' })
+    expect(steam).toHaveAttribute(
+      'href',
+      'https://steamcommunity.com/id/urlnull/'
+    )
+    expect(steam).toHaveAttribute('target', '_blank')
+    expect(steam).toHaveAttribute('rel', 'noopener noreferrer')
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
   })
 
@@ -122,12 +131,13 @@ describe('circlelife 页脚社交通道', () => {
     expect(screen.getByText('二维码加载失败')).toBeInTheDocument()
   })
 
-  test('图标顺序保持 微信 → 小红书 → 网易云 → GitHub', () => {
+  test('图标顺序保持 微信 → 小红书 → 网易云 → GitHub → Steam', () => {
     applyConfig({
       CONTACT_WECHAT_QR: '/images/wechat-public-qr.png',
       CONTACT_XIAOHONGSHU: 'https://www.xiaohongshu.com/user/profile/abc',
       CONTACT_NETEASE: 'https://music.163.com/#/user/home?id=42',
-      CONTACT_GITHUB: 'https://github.com/trialos'
+      CONTACT_GITHUB: 'https://github.com/trialos',
+      CONTACT_STEAM: 'https://steamcommunity.com/id/urlnull/'
     })
     render(<FooterSocial />)
 
@@ -139,7 +149,8 @@ describe('circlelife 页脚社交通道', () => {
       '微信公众号二维码',
       '小红书',
       '网易云音乐',
-      'GitHub'
+      'GitHub',
+      'Steam'
     ])
   })
 })
