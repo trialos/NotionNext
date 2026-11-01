@@ -23,6 +23,7 @@ const originalConnection = Object.getOwnPropertyDescriptor(
 )
 
 let mediaState
+let mediaQueries
 let playMock
 let pauseMock
 let loadMock
@@ -38,20 +39,33 @@ function renderReel(onStateChange = jest.fn()) {
 
 beforeEach(() => {
   mediaState = { reduced: false, mobile: false }
-  window.matchMedia = jest.fn(query => ({
-    matches: query.includes('prefers-reduced-motion')
-      ? mediaState.reduced
-      : query === REEL_MOBILE_QUERY
-        ? mediaState.mobile
-        : false,
-    media: query,
-    onchange: null,
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    dispatchEvent: jest.fn()
-  }))
+  mediaQueries = new Map()
+  window.matchMedia = jest.fn(query => {
+    if (!mediaQueries.has(query)) {
+      const listeners = new Set()
+      mediaQueries.set(query, {
+        media: query,
+        get matches() {
+          if (query.includes('prefers-reduced-motion')) {
+            return mediaState.reduced
+          }
+          return query === REEL_MOBILE_QUERY ? mediaState.mobile : false
+        },
+        onchange: null,
+        listeners,
+        addEventListener: jest.fn((type, callback) => {
+          if (type === 'change') listeners.add(callback)
+        }),
+        removeEventListener: jest.fn((type, callback) => {
+          if (type === 'change') listeners.delete(callback)
+        }),
+        addListener: jest.fn(callback => listeners.add(callback)),
+        removeListener: jest.fn(callback => listeners.delete(callback)),
+        dispatchEvent: jest.fn()
+      })
+    }
+    return mediaQueries.get(query)
+  })
   Object.defineProperty(navigator, 'connection', {
     configurable: true,
     value: { saveData: false, effectiveType: '4g', downlink: 10 }
@@ -241,5 +255,60 @@ describe('AboutReelMedia', () => {
 
     expect(pauseMock).toHaveBeenCalled()
     expect(onStateChange).toHaveBeenCalledWith('idle')
+  })
+
+  test('restarts from zero when the hero reopens', async () => {
+    const { container, ref } = renderReel()
+    const video = container.querySelector('video')
+
+    await waitFor(() => expect(playMock).toHaveBeenCalledTimes(1))
+    act(() => {
+      video.currentTime = 6
+    })
+    act(() => {
+      ref.current.setActive(false)
+    })
+    act(() => {
+      ref.current.setActive(true)
+    })
+
+    await waitFor(() => expect(playMock).toHaveBeenCalledTimes(2))
+    expect(video.currentTime).toBe(0)
+  })
+
+  test('offers play when a playing video is paused externally', async () => {
+    const { container, onStateChange } = renderReel()
+    const video = container.querySelector('video')
+
+    await waitFor(() => expect(playMock).toHaveBeenCalled())
+    act(() => {
+      video.dispatchEvent(new Event('playing'))
+    })
+    act(() => {
+      video.dispatchEvent(new Event('pause'))
+    })
+
+    await waitFor(() => expect(onStateChange).toHaveBeenCalledWith('paused'))
+  })
+
+  test('switches the source when crossing the mobile breakpoint', async () => {
+    const { container } = renderReel()
+    const video = container.querySelector('video')
+
+    await waitFor(() => expect(playMock).toHaveBeenCalled())
+    expect(video.getAttribute('src')).toContain('reel-desktop-v3.mp4')
+
+    mediaState.mobile = true
+    act(() => {
+      mediaQueries
+        .get(REEL_MOBILE_QUERY)
+        .listeners.forEach(callback =>
+          callback({ matches: true, media: REEL_MOBILE_QUERY })
+        )
+    })
+
+    await waitFor(() =>
+      expect(video.getAttribute('src')).toContain('reel-mobile-v3.mp4')
+    )
   })
 })

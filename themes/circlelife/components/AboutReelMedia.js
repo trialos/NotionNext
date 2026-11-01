@@ -108,23 +108,24 @@ function useAboutReel({ reel, videoRef, onStateChange }) {
     [cancelIdle, load, reel?.enabled, report, videoRef]
   )
 
-  const schedule = useCallback(() => {
-    cancelIdle()
-    const reason = policyReason()
-    if (reason) {
-      report(reason)
-      return
-    }
-    const run = () => {
-      idleRef.current = null
-      if (!activeRef.current) return
-      const nextReason = policyReason()
-      if (nextReason) {
-        report(nextReason)
+  const schedule = useCallback(
+    ({ restart = false } = {}) => {
+      cancelIdle()
+      const reason = policyReason()
+      if (reason) {
+        report(reason)
         return
       }
-      play()
-    }
+      const run = () => {
+        idleRef.current = null
+        if (!activeRef.current) return
+        const nextReason = policyReason()
+        if (nextReason) {
+          report(nextReason)
+          return
+        }
+        play({ restart })
+      }
     if (typeof window !== 'undefined' && window.requestIdleCallback) {
       idleRef.current = {
         type: 'idle',
@@ -146,7 +147,7 @@ function useAboutReel({ reel, videoRef, onStateChange }) {
         return
       }
       if (userStartedRef.current) play({ restart: true })
-      else schedule()
+      else schedule({ restart: true })
     },
     [cancelIdle, play, report, schedule, videoRef]
   )
@@ -162,7 +163,7 @@ function useAboutReel({ reel, videoRef, onStateChange }) {
 
     const onPlaying = () => report('playing')
     const onPause = () => {
-      if (statusRef.current === 'playing') report('idle')
+      if (statusRef.current === 'playing') report('paused')
     }
     const onError = () => report('error')
     const onVisibility = () => {
@@ -184,6 +185,18 @@ function useAboutReel({ reel, videoRef, onStateChange }) {
         report('reduced')
       }
     }
+    const mobile = window.matchMedia(REEL_MOBILE_QUERY)
+    const onSourceChange = () => {
+      if (!loadedRef.current) return
+      const nextSrc = pickReelSrc(reel, mobile.matches)
+      if (!nextSrc || video.getAttribute('src') === nextSrc) return
+      const wasPlaying =
+        !video.paused && activeRef.current && statusRef.current === 'playing'
+      video.src = nextSrc
+      video.muted = true
+      video.load()
+      if (wasPlaying) play({ restart: true })
+    }
 
     video.addEventListener('playing', onPlaying)
     video.addEventListener('pause', onPause)
@@ -191,6 +204,8 @@ function useAboutReel({ reel, videoRef, onStateChange }) {
     document.addEventListener('visibilitychange', onVisibility)
     if (motion.addEventListener) motion.addEventListener('change', onMotion)
     else motion.addListener(onMotion)
+    if (mobile.addEventListener) mobile.addEventListener('change', onSourceChange)
+    else mobile.addListener(onSourceChange)
 
     activeRef.current = true
     schedule()
@@ -205,6 +220,11 @@ function useAboutReel({ reel, videoRef, onStateChange }) {
         motion.removeEventListener('change', onMotion)
       } else {
         motion.removeListener(onMotion)
+      }
+      if (mobile.removeEventListener) {
+        mobile.removeEventListener('change', onSourceChange)
+      } else {
+        mobile.removeListener(onSourceChange)
       }
     }
   }, [cancelIdle, play, report, schedule, videoRef])

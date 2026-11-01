@@ -106,7 +106,8 @@ export default function InfiniteAboutGrid({
       state === 'blocked' ||
         state === 'reduced' ||
         state === 'save-data' ||
-        state === 'slow'
+        state === 'slow' ||
+        state === 'paused'
     )
   }, [])
 
@@ -642,7 +643,7 @@ export default function InfiniteAboutGrid({
       window.dispatchEvent(new Event('cl-virtual-scroll'))
       document.body.classList.remove('cursor-grabbing')
     }
-  }, [displayCards])
+  }, [displayCards, reel?.enabled])
 
   const handleCloseHero = e => {
     e?.stopPropagation()
