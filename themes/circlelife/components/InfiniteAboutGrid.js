@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useGlobal } from '@/lib/global'
 import {
   buildSizedSource,
@@ -8,6 +8,7 @@ import {
 } from './imageSrcset'
 import { shouldWallOwnWheel } from './wheelOwnership'
 import { resolveHeroCopy } from './heroCopy'
+import AboutReelMedia from './AboutReelMedia'
 
 // 优雅的保底卡片（无内容时呈现，避免白屏）
 const FALLBACK_CARDS = [
@@ -80,7 +81,8 @@ export default function InfiniteAboutGrid({
   cards = [],
   summary = '',
   description = '',
-  title = ''
+  title = '',
+  reel = null
 }) {
   const { locale } = useGlobal()
   const containerRef = useRef(null)
@@ -90,12 +92,23 @@ export default function InfiniteAboutGrid({
   const prologueBtnRef = useRef(null)
   const closeHeroRef = useRef(null)
   const openHeroRef = useRef(null)
+  const reelRef = useRef(null)
+  const [reelNeedsPlay, setReelNeedsPlay] = useState(false)
 
   const { headline: finalSummary, lead: heroLead } = resolveHeroCopy({
     summary,
     description,
     fallbackSummary: '时光的弧线 · 捕捉生活、人机协作与日常美学的独立光影。'
   })
+
+  const handleReelState = useCallback(state => {
+    setReelNeedsPlay(
+      state === 'blocked' ||
+        state === 'reduced' ||
+        state === 'save-data' ||
+        state === 'slow'
+    )
+  }, [])
 
   // 严格忠实呈现 Notion 原生排版叙事顺序，与 SSR HTML 预加载形成 100% 同构匹配
   const displayCards = useMemo(() => {
@@ -161,6 +174,9 @@ export default function InfiniteAboutGrid({
         entries.forEach(entry => {
           const img = entry.target
           if (entry.isIntersecting) {
+            // 快闪序言打开时，展墙被 poster 完全遮住；此时不加载展墙图片，
+            // 把 LCP 留给 poster。关闭序言时再统一唤醒。
+            if (isHeroOpen && reel?.enabled) return
             const src = img.dataset.src
             if (src && img.getAttribute('src') !== src) {
               // ⚠️ 不用 srcset/sizes：Notion 代理在 srcset 选档路径下按 **CSS 宽度**
@@ -240,22 +256,24 @@ export default function InfiniteAboutGrid({
       const isCritical = isSetA && cardIdx < Math.max(2, cols)
       if (isCritical && card.src) {
         img.dataset.critical = 'true'
-        img.src = card.src
-        if (isSetA && cardIdx === 0) {
-          img.setAttribute('fetchpriority', 'high')
-        }
-        if (typeof img.decode === 'function') {
-          img
-            .decode()
-            .then(() => {
+        if (!reel?.enabled) {
+          img.src = card.src
+          if (isSetA && cardIdx === 0) {
+            img.setAttribute('fetchpriority', 'high')
+          }
+          if (typeof img.decode === 'function') {
+            img
+              .decode()
+              .then(() => {
+                if (!isDestroyed) img.classList.add('is-loaded')
+              })
+              .catch(() => {
+                if (!isDestroyed) img.classList.add('is-loaded')
+              })
+          } else {
+            img.onload = () => {
               if (!isDestroyed) img.classList.add('is-loaded')
-            })
-            .catch(() => {
-              if (!isDestroyed) img.classList.add('is-loaded')
-            })
-        } else {
-          img.onload = () => {
-            if (!isDestroyed) img.classList.add('is-loaded')
+            }
           }
         }
       }
@@ -380,6 +398,13 @@ export default function InfiniteAboutGrid({
       })
     }
 
+    const primeWallMedia = () => {
+      memoryLifecycleObserver.disconnect()
+      container.querySelectorAll('img[data-src]').forEach(img => {
+        memoryLifecycleObserver.observe(img)
+      })
+    }
+
     // 收起序言幕布，进入画廊自由探索
     const closeHero = () => {
       if (!isHeroOpen) return
@@ -393,6 +418,8 @@ export default function InfiniteAboutGrid({
       heroOverlayRef.current?.classList.add('is-closed')
       backdropRef.current?.classList.add('is-closed')
       prologueBtnRef.current?.classList.add('is-visible')
+      reelRef.current?.setActive(false)
+      if (reel?.enabled) primeWallMedia()
 
       // 联动全局导航栏 Header 收缩成极简单条（通过 requestAnimationFrame 延迟调度，消灭同步 Commit/Layout Long Task）
       if (typeof window !== 'undefined') {
@@ -415,6 +442,7 @@ export default function InfiniteAboutGrid({
       heroOverlayRef.current?.classList.remove('is-closed')
       backdropRef.current?.classList.remove('is-closed')
       prologueBtnRef.current?.classList.remove('is-visible')
+      reelRef.current?.setActive(true)
 
       // 联动全局导航栏 Header 展开复原（延迟到下一帧，消灭同步重绘）
       if (typeof window !== 'undefined') {
@@ -460,7 +488,13 @@ export default function InfiniteAboutGrid({
 
     // 事件处理：PointerEvents 统一收口鼠标与触控拖拽
     const onPointerDown = e => {
-      if (e.target && e.target.closest && e.target.closest('.cl-about-prologue-btn')) return
+      if (
+        e.target &&
+        e.target.closest &&
+        e.target.closest('.cl-about-prologue-btn, .cl-about-hero-actions')
+      ) {
+        return
+      }
       if (e.button != null && e.button !== 0) return
 
       isDragging = true
@@ -638,21 +672,31 @@ export default function InfiniteAboutGrid({
         className='absolute inset-0 h-full w-full cursor-grab overflow-hidden touch-none'
       />
 
-      {/* Hero 序言毛玻璃与暗膜滤镜过渡层 */}
+      {reel?.enabled && (
+        <AboutReelMedia
+          ref={reelRef}
+          reel={reel}
+          onStateChange={handleReelState}
+        />
+      )}
+
+      {/* Hero 序言暗膜与渐变过渡层 */}
       <div
         ref={backdropRef}
         onClick={handleCloseHero}
-        className='cl-about-hero-backdrop'
-        style={{
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)'
-        }}
+        className={
+          'cl-about-hero-backdrop' +
+          (reel?.enabled ? ' cl-about-hero-backdrop--reel' : '')
+        }
       />
 
       {/* Hero 序言杂志排版覆盖层 */}
       <div
         ref={heroOverlayRef}
-        className='cl-about-hero-overlay'>
+        className={
+          'cl-about-hero-overlay' +
+          (reel?.enabled ? ' cl-about-hero-overlay--reel' : '')
+        }>
         <div className='cl-about-hero-inner'>
           <div className='cl-about-hero-badge'>
             <span className='cl-about-hero-badge-dot' />
@@ -665,24 +709,60 @@ export default function InfiniteAboutGrid({
 
           {heroLead && <p className='cl-about-hero-lead'>{heroLead}</p>}
 
-          {/* 纯粹极简文字指引（点击收起幕布） */}
-          <button
-            type='button'
-            onClick={handleCloseHero}
-            className='cl-about-hero-hint-text'
-            aria-label='向下滑动探索'>
-            <span>向下滑动探索</span>
-            <svg
-              className='cl-about-hero-hint-arrow'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='1.5'
-              strokeLinecap='round'
-              strokeLinejoin='round'>
-              <polyline points='6 9 12 15 18 9' />
-            </svg>
-          </button>
+          {reel?.enabled ? (
+            <div
+              className='cl-about-hero-actions'
+              onPointerDown={e => e.stopPropagation()}>
+              {reelNeedsPlay && (
+                <button
+                  type='button'
+                  className='cl-about-hero-action'
+                  onClick={() => reelRef.current?.play()}>
+                  <svg
+                    viewBox='0 0 12 12'
+                    aria-hidden='true'>
+                    <path d='M3 1.5 10 6 3 10.5Z' fill='currentColor' />
+                  </svg>
+                  <span>播放快闪</span>
+                </button>
+              )}
+              <button
+                type='button'
+                onClick={handleCloseHero}
+                className='cl-about-hero-hint-text'
+                aria-label='向下滑动探索'>
+                <span>向下滑动探索</span>
+                <svg
+                  className='cl-about-hero-hint-arrow'
+                  viewBox='0 0 24 24'
+                  fill='none'
+                  stroke='currentColor'
+                  strokeWidth='1.5'
+                  strokeLinecap='round'
+                  strokeLinejoin='round'>
+                  <polyline points='6 9 12 15 18 9' />
+                </svg>
+              </button>
+            </div>
+          ) : (
+            <button
+              type='button'
+              onClick={handleCloseHero}
+              className='cl-about-hero-hint-text'
+              aria-label='向下滑动探索'>
+              <span>向下滑动探索</span>
+              <svg
+                className='cl-about-hero-hint-arrow'
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                strokeWidth='1.5'
+                strokeLinecap='round'
+                strokeLinejoin='round'>
+                <polyline points='6 9 12 15 18 9' />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
 

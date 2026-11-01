@@ -7,6 +7,7 @@ import { checkStrIsNotionId, checkStrIsUuid } from '@/lib/utils'
 import { idToUuid } from 'notion-utils'
 import { extractImagesFromBlockMap } from '@/themes/circlelife/components/extractPhotoImages'
 import { buildImageSources } from '@/themes/circlelife/components/imageSrcset'
+import { resolveAboutReel } from '@/themes/circlelife/components/aboutReel'
 import Head from 'next/head'
 import { DynamicLayout } from '@/themes/theme'
 
@@ -29,18 +30,50 @@ const ABOUT_IMAGE_SIZES =
 const AboutIndex = props => {
   const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
   const firstCard = props.aboutCards?.[0]
+  const reel = props.aboutReel
+  const hasReel = !!reel?.enabled
+  const hasMobilePoster = !!(
+    hasReel &&
+    reel.posterMobile &&
+    reel.posterMobile !== reel.poster
+  )
   return (
     <>
       <Head>
-        {/* 首屏 LCP：只预加载首图一张，**只给 href**（直连 width URL）。
-            候选集路径下 Notion 代理按 CSS 宽度出图、不吃 DPR（Retina 上发虚），
-            且带候选集会让预加载落在另一个 URL 上 → 白下载一份。 */}
-        {firstCard?.src && (
+        {/* 首屏 LCP：有快闪时预加载 poster（桌面/手机各一条，media 精确分流），
+            没有快闪时保留原来的展墙首图预加载。直连 URL 只给 href，不配 srcset。 */}
+        {hasReel && reel.poster && hasMobilePoster && (
+          <link
+            rel='preload'
+            as='image'
+            href={reel.poster}
+            media='(min-width: 768px)'
+            fetchpriority='high'
+          />
+        )}
+        {hasReel && reel.poster && !hasMobilePoster && (
+          <link
+            rel='preload'
+            as='image'
+            href={reel.poster}
+            fetchpriority='high'
+          />
+        )}
+        {hasReel && hasMobilePoster && (
+          <link
+            rel='preload'
+            as='image'
+            href={reel.posterMobile}
+            media='(max-width: 767px)'
+            fetchpriority='high'
+          />
+        )}
+        {!hasReel && firstCard?.src && (
           <link
             rel='preload'
             as='image'
             href={firstCard.src}
-            fetchPriority='high'
+            fetchpriority='high'
           />
         )}
       </Head>
@@ -264,6 +297,12 @@ export async function getStaticProps({ locale }) {
       : ''
   props.aboutTitle = singleAboutPage?.title || '关于我 · ABOUT'
   props.aboutCards = cards
+  props.aboutReel = resolveAboutReel({
+    desktop: siteConfig('ABOUT_REEL_DESKTOP', '', props.NOTION_CONFIG),
+    mobile: siteConfig('ABOUT_REEL_MOBILE', '', props.NOTION_CONFIG),
+    poster: siteConfig('ABOUT_REEL_POSTER', '', props.NOTION_CONFIG),
+    posterMobile: siteConfig('ABOUT_REEL_POSTER_MOBILE', '', props.NOTION_CONFIG)
+  })
   delete props.allPages
 
   return {

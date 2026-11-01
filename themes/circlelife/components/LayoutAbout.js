@@ -53,6 +53,7 @@ export default function LayoutAbout(props) {
           summary={props.aboutSummary}
           description={props.aboutDescription}
           title={props.aboutTitle}
+          reel={props.aboutReel}
         />
       </main>
     </>
