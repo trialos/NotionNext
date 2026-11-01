@@ -1,19 +1,16 @@
 /**
- * 首页精选文章章的纯逻辑（刻度位置 / 焦点判定 / 近三月窗口 / 精选判定）
+ * 首页精选文章章的纯逻辑（刻度位置 / 日期格式 / 精选判定）
  *
  * 与影集段的 homeAlbumFocus.js 同构：把易错的算术抽成纯函数，便于单测。
  *
  * 关键约束：
- * - 滚动路径零布局读取：刻度位置只在 mount / resize 时算一次；
- * - 不写任何 transform（iPhone 逐帧合成纪律）；
+ * - 刻度位置只在 mount / resize 时算一次；
+ * - 模块内不写任何 transform（iPhone 逐帧合成纪律）；
  * - publishDay 不补零（实测 '2026-10-9'），不能直接 new Date(str)。
  */
 
 /** 两刻度最小间距（px）—— 同日或过近的刻度靠它错开 */
 export const RULER_MIN_GAP = 56
-
-/** 视口焦点线（比例）：0.45 = 视口 45% 高度处 */
-export const FOCUS_LINE_RATIO = 0.45
 
 /**
  * 解析 publishDay → UTC 毫秒时间戳
@@ -71,7 +68,9 @@ export function computeRulerPositions(days, options = {}) {
   // 基准位置：真实日距比例。
   // 全部同日（或全部无日期）→ 全部落在同一点上，交给 relax pass 错开，
   // 这样「同日」在尺子上读起来仍是同一时刻，而不是被摊到两端。
-  const base = parsed.map(v => (span > 0 && v !== null ? (v - min) / span : 0.5))
+  const base = parsed.map(v =>
+    span > 0 && v !== null ? (v - min) / span : 0.5
+  )
 
   const w = Number(width)
   if (!Number.isFinite(w) || w <= 0) return base
@@ -81,9 +80,7 @@ export function computeRulerPositions(days, options = {}) {
 
   // relax：按位置升序处理，保证相邻间距 ≥ minGap（顺序无关：
   // DOM 里最新的排在最前，不能假设输入是升序）
-  const order = base
-    .map((b, i) => i)
-    .sort((a, b) => base[a] - base[b] || a - b)
+  const order = base.map((b, i) => i).sort((a, b) => base[a] - base[b] || a - b)
   for (let k = 1; k < order.length; k++) {
     const i = order[k]
     const prev = order[k - 1]
@@ -105,37 +102,6 @@ export function computeRulerPositions(days, options = {}) {
 }
 
 /**
- * 焦点线落在哪一篇（entries = [{ top, height }]，文档坐标）
- *
- * 边界（焦点线正好压在两篇之间）时取**索引较大**的那一篇，
- * 与向下滚动的方向一致。
- *
- * @param {{top:number,height:number}[]} entries
- * @param {number} focusY
- * @returns {number}
- */
-export function pickCurrentIndex(entries, focusY) {
-  if (!Array.isArray(entries) || !entries.length) return 0
-  const y = Number(focusY)
-  if (!Number.isFinite(y)) return 0
-
-  for (let i = 0; i < entries.length; i++) {
-    const top = Number(entries[i]?.top)
-    const height = Number(entries[i]?.height)
-    if (!Number.isFinite(top) || !Number.isFinite(height)) continue
-    if (y >= top && y < top + height) return i
-  }
-
-  // 落在缝隙里：取最后一个起点不超过 y 的
-  let prev = -1
-  for (let i = 0; i < entries.length; i++) {
-    const top = Number(entries[i]?.top)
-    if (Number.isFinite(top) && top <= y) prev = i
-  }
-  return prev >= 0 ? prev : 0
-}
-
-/**
  * 条目是否被标记为「精选」—— 与影集段共用同一份判定（影集与文章在
  * Notion 里是同一张表，靠 type 区分），此处转出便于文章章直接引用。
  */
@@ -143,7 +109,10 @@ export { isFeaturedEntry } from './homeAlbumFocus'
 
 /** 标尺上的日期标签：'2026-10-9' → '10·09' */
 export function formatRulerDay(day) {
-  const m = typeof day === 'string' ? day.trim().match(/^\d{4}-(\d{1,2})-(\d{1,2})$/) : null
+  const m =
+    typeof day === 'string'
+      ? day.trim().match(/^\d{4}-(\d{1,2})-(\d{1,2})$/)
+      : null
   if (!m) return ''
   const pad = n => String(n).padStart(2, '0')
   return `${pad(Number(m[1]))}·${pad(Number(m[2]))}`

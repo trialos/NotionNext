@@ -990,7 +990,8 @@ export const homeStyle = `
         }
       }
 
-      /* 回顶按钮：照片墙（Hero）与精选影集段内隐藏，进入文章列表后重新出现。
+      /* 回顶按钮：照片墙（Hero）/ 精选文章 / 精选影集三段内隐藏，离开后重新出现。
+         文章段会压在底部日期尺上，所以也走同一套状态类。
          状态类挂在 <html> 上，故选择器必须带上 #theme-circlelife：
          html.cl-x（0,1,1）+ #theme-circlelife（1,0,0）+ .cl-backtop.is-visible（0,2,0）
          = (1,3,1)，稳压 common.js 的 #theme-circlelife .cl-backtop.is-visible（1,2,0）。
@@ -998,6 +999,7 @@ export const homeStyle = `
          （visibility 0s linear 0.28s）→ 先淡出再隐藏，不突兀；
          visibility: hidden 同时保证不可 Tab 聚焦。 */
       html.cl-home-hero-active #theme-circlelife .cl-backtop.is-visible,
+      html.cl-home-article-active #theme-circlelife .cl-backtop.is-visible,
       html.cl-home-album-active #theme-circlelife .cl-backtop.is-visible {
         opacity: 0;
         visibility: hidden;

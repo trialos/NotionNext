@@ -163,9 +163,6 @@ export const tokenStyle = `
            是同一个构图（换比例会让主体在手机与电脑上被切得不一样）。 */
         --cl-home-article-plate: min(clamp(240px, 33vw, 480px), 54svh); /* 桌面图版宽（与影集封面同宽；再受窗口高度约束） */
         --cl-home-article-measure: 620px; /* 摘要测量宽（文字栏贴右边缘） */
-        --cl-home-article-title: 54px; /* 标题字号（1440 基准；实际用 clamp） */
-        --cl-home-article-focus: 45%; /* 视口焦点线（判定当前篇） */
-        --cl-home-article-switch: var(--cl-home-switch);
       }
 
       /* ≤1023px：胶囊内嵌 2.35rem 汉堡按钮，导航带随之变高。

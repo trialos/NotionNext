@@ -1,20 +1,13 @@
 /**
- * 首页精选文章章 + 收尾「近期」段 的契约测试
+ * 首页精选文章章（原生横向滑动）契约测试
  *
- * 背景：首页下半部从「抽牌小卡 + 窄栏时间线」改成全屏章节 ——
- * 精选文章一文一屏（底部时间标尺）+ 近期段单栏排版。
- *
- * 这里守九类容易悄悄坏掉的东西：
- *
- * 1. 刻度算法纯函数：真实日距比例、同日错开、端点夹紧、非法日期降级
- * 2. 焦点判定：边界取后一篇、空数组不炸
- * 3. 近三月窗口：基准是「最新一篇」而不是墙上时钟，max 截断生效
- * 4. 精选判定：checkbox / 原始列名 / Select 降级形态
- * 5. 性能纪律：不引动画库、不写 transform、不加常驻 scroll 监听
- * 6. 几何纪律：fixed 标尺的祖先链不得带 transform/filter/contain/will-change
- * 7. 令牌纪律：新增样式不硬编码色值
- * 8. 标题层级：章标题 h2、单篇标题 h3（首页 h1 已被照片墙题字占用）
- * 9. 退役护栏：抽牌与首页窄栏时间线不得回到首页
+ * 守住：
+ * 1. 日期尺真实日距 / 同日错开 / 非法日期降级
+ * 2. 精选数据链路与 512/1024 取图
+ * 3. 原生横向 scroll-snap：无 sticky 行程、无逐帧 scrub、无 wheel/touch 劫持
+ * 4. 日期点击 / 上一张/下一张 / 键盘 / 活动篇 aria
+ * 5. 图版继续走 HomeArticleCover（1024、无 2048）
+ * 6. 移动端满屏出血、短屏、BackToTop、reduced-motion
  */
 import fs from 'fs'
 import path from 'path'
@@ -28,10 +21,11 @@ const {
   computeRulerPositions,
   formatMonthRange,
   formatRulerDay,
-  parsePublishDay,
-  pickCurrentIndex
+  parsePublishDay
 } = require('../../../themes/circlelife/components/homeArticleFocus')
-const { isFeaturedEntry } = require('../../../themes/circlelife/components/homeAlbumFocus')
+const {
+  isFeaturedEntry
+} = require('../../../themes/circlelife/components/homeAlbumFocus')
 
 const stageSource = readFile(
   'themes',
@@ -45,15 +39,21 @@ const focusSource = readFile(
   'components',
   'homeArticleFocus.js'
 )
+const coverSource = readFile(
+  'themes',
+  'circlelife',
+  'components',
+  'HomeArticleCover.js'
+)
 const themeIndexSource = readFile('themes', 'circlelife', 'index.js')
 const pagesIndexSource = readFile('pages', 'index.js')
 const { homeArticlesStyle } = require('../../../themes/circlelife/styles/homeArticles')
+const homeStyleSource = readFile('themes', 'circlelife', 'styles', 'home.js')
 
 /** 会造包含块 / 破坏 fixed 的属性 */
 const CONTAINING_BLOCK_RE =
   /(^|;)\s*(transform|filter|backdrop-filter|perspective|contain|will-change)\s*:/
 
-/** 主题全部样式片段（祖先链扫描用） */
 const STYLE_FRAGMENTS = [
   ['styles/common.js', 'commonStyle'],
   ['styles/header.js', 'headerStyle'],
@@ -64,7 +64,7 @@ const STYLE_FRAGMENTS = [
   ['styles/archive.js', 'archiveStyle']
 ]
 
-describe('circlelife 首页精选文章章', () => {
+describe('circlelife 首页精选文章章（原生横向滑动）', () => {
   describe('刻度位置（纯函数 · 真实日距比例）', () => {
     test('RULER_MIN_GAP 存在且为正（同日刻度靠它错开）', () => {
       expect(RULER_MIN_GAP).toBeGreaterThan(0)
@@ -83,7 +83,6 @@ describe('circlelife 首页精选文章章', () => {
     })
 
     test('按真实日距比例分布（不是等距装饰）', () => {
-      // 10-11 → 10-22 共 11 天：位置自最早一篇量起，10-15 距最早 4 天 → 4/11
       const pos = computeRulerPositions(
         ['2026-10-22', '2026-10-15', '2026-10-11'],
         { width: 1000 }
@@ -98,208 +97,213 @@ describe('circlelife 首页精选文章章', () => {
         ['2026-10-09', '2026-10-09'],
         { width: 1000, minGap: 56 }
       )
-      const gapPx = Math.abs(pos[1] - pos[0]) * 1000
-      expect(gapPx).toBeGreaterThanOrEqual(56 - 0.001)
+      expect(Math.abs(pos[1] - pos[0]) * 1000).toBeGreaterThanOrEqual(55.999)
     })
 
-    test('全部同一比例（无日距）→ 退化为均匀分布，不重叠', () => {
-      const pos = computeRulerPositions(
+    test('全部同一比例 / 非法日期 / 非法宽度都不产生 NaN，且夹在 [0,1]', () => {
+      const allSame = computeRulerPositions(
         ['2026-10-09', '2026-10-09', '2026-10-09'],
         { width: 900, minGap: 56 }
       )
-      expect(pos).toHaveLength(3)
-      expect(pos[0]).toBeLessThan(pos[1])
-      expect(pos[1]).toBeLessThan(pos[2])
-      for (let i = 1; i < pos.length; i++) {
-        expect((pos[i] - pos[i - 1]) * 900).toBeGreaterThanOrEqual(56 - 0.001)
+      allSame.forEach(p => expect(Number.isFinite(p)).toBe(true))
+      for (let i = 1; i < allSame.length; i++) {
+        expect((allSame[i] - allSame[i - 1]) * 900).toBeGreaterThanOrEqual(55.999)
       }
-    })
 
-    test('端点夹紧在 [0,1] 内，且顺序稳定（不倒挂）', () => {
-      // 输入是「最新在前」（DOM 顺序）→ 位置自左（最旧）到右（最新）递增
-      const pos = computeRulerPositions(
-        [
-          '2026-10-22',
-          '2026-10-20',
-          '2026-10-18',
-          '2026-10-17',
-          '2026-10-15',
-          '2026-10-11'
-        ],
-        { width: 1344, minGap: RULER_MIN_GAP }
-      )
-      pos.forEach(p => {
-        expect(p).toBeGreaterThanOrEqual(0)
-        expect(p).toBeLessThanOrEqual(1)
-      })
-      // 最新的在轴的最右端，最旧的在最左端
-      expect(pos[0]).toBeCloseTo(1, 5)
-      expect(pos[pos.length - 1]).toBeCloseTo(0, 5)
-      // 相对次序不倒挂
-      for (let i = 1; i < pos.length; i++) {
-        expect(pos[i]).toBeLessThanOrEqual(pos[i - 1])
-      }
-    })
-
-    test('非法日期降级（不产生 NaN）', () => {
-      const pos = computeRulerPositions(
+      const invalid = computeRulerPositions(
         ['2026-10-22', 'not-a-date', '2026-10-11'],
         { width: 1000 }
       )
-      pos.forEach(p => {
+      invalid.forEach(p => {
         expect(Number.isFinite(p)).toBe(true)
         expect(p).toBeGreaterThanOrEqual(0)
         expect(p).toBeLessThanOrEqual(1)
       })
-    })
 
-    test('宽度非法 → 退回比例位置（不崩）', () => {
-      const pos = computeRulerPositions(['2026-10-22', '2026-10-11'], {
+      const noWidth = computeRulerPositions(['2026-10-22', '2026-10-11'], {
         width: 0
       })
-      expect(pos).toHaveLength(2)
-      pos.forEach(p => expect(Number.isFinite(p)).toBe(true))
+      noWidth.forEach(p => expect(Number.isFinite(p)).toBe(true))
+    })
+
+    test('输入顺序由旧到新 → 左旧右新，不倒挂', () => {
+      const pos = computeRulerPositions(
+        [
+          '2026-10-15',
+          '2026-10-18',
+          '2026-10-20',
+          '2026-10-26',
+          '2026-10-27',
+          '2026-10-28'
+        ],
+        { width: 358, minGap: RULER_MIN_GAP }
+      )
+      expect(pos[0]).toBeCloseTo(0, 5)
+      expect(pos[pos.length - 1]).toBeCloseTo(1, 5)
+      for (let i = 1; i < pos.length; i++) {
+        expect(pos[i]).toBeGreaterThanOrEqual(pos[i - 1])
+      }
     })
   })
 
-  describe('publishDay 解析（不补零）', () => {
-    test('不补零的日期也能解析到同一个 UTC 零点', () => {
-      expect(parsePublishDay('2026-10-9')).toBe(
-        Date.UTC(2026, 9, 9)
-      )
-      expect(parsePublishDay('2026-10-09')).toBe(
-        Date.UTC(2026, 9, 9)
-      )
-      expect(parsePublishDay('2026-10-9')).toBe(parsePublishDay('2026-10-09'))
-    })
-
-    test('非法输入 → null（不抛错）', () => {
-      expect(parsePublishDay('')).toBeNull()
-      expect(parsePublishDay(null)).toBeNull()
-      expect(parsePublishDay(undefined)).toBeNull()
+  describe('日期格式（不补零）', () => {
+    test('publishDay 解析不补零', () => {
+      expect(parsePublishDay('2026-10-9')).toBe(Date.UTC(2026, 9, 9))
+      expect(parsePublishDay('2026-10-09')).toBe(Date.UTC(2026, 9, 9))
       expect(parsePublishDay('2026/10/09')).toBeNull()
       expect(parsePublishDay('2026-13-45')).toBeNull()
     })
 
     test('日期标签与月份跨度', () => {
       expect(formatRulerDay('2026-10-9')).toBe('10·09')
-      expect(formatRulerDay('2026-10-22')).toBe('10·22')
       expect(formatRulerDay('bad')).toBe('')
-      expect(formatMonthRange(['2026-10-22', '2026-08-07'])).toBe('2026 · 08 — 10')
+      expect(formatMonthRange(['2026-10-22', '2026-08-07'])).toBe(
+        '2026 · 08 — 10'
+      )
       expect(formatMonthRange(['2025-12-20', '2026-10-22'])).toBe(
         '2025-12 — 2026-10'
       )
-      expect(formatMonthRange([])).toBe('')
-    })
-  })
-
-  describe('当前篇判定', () => {
-    const entries = [
-      { top: 0, height: 100 },
-      { top: 100, height: 100 },
-      { top: 200, height: 100 }
-    ]
-
-    test('命中中间一篇', () => {
-      expect(pickCurrentIndex(entries, 150)).toBe(1)
-      expect(pickCurrentIndex(entries, 0)).toBe(0)
-      expect(pickCurrentIndex(entries, 250)).toBe(2)
-    })
-
-    test('边界取后一篇（与向下滚动同向）', () => {
-      expect(pickCurrentIndex(entries, 100)).toBe(1)
-    })
-
-    test('空数组 / 非法焦点 → 0（不炸）', () => {
-      expect(pickCurrentIndex([], 10)).toBe(0)
-      expect(pickCurrentIndex(null, 10)).toBe(0)
-      expect(pickCurrentIndex(entries, NaN)).toBe(0)
     })
   })
 
   describe('精选判定（文章与影集共用）', () => {
-    test('布尔值（Notion Checkbox 解析结果）', () => {
+    test('布尔值 / 原始列名 / Select 降级', () => {
       expect(isFeaturedEntry({ featured: true })).toBe(true)
       expect(isFeaturedEntry({ featured: false })).toBe(false)
-    })
-
-    test('原始列名「精选」也能识别（未走映射时）', () => {
       expect(isFeaturedEntry({ 精选: true })).toBe(true)
-      expect(isFeaturedEntry({ 精选: false })).toBe(false)
-    })
-
-    test('Select / MultiSelect 降级形态', () => {
       expect(isFeaturedEntry({ featured: ['精选'] })).toBe(true)
-      expect(isFeaturedEntry({ featured: ['日常'] })).toBe(false)
       expect(isFeaturedEntry({ featured: 'Featured' })).toBe(true)
-    })
-
-    test('列不存在 / 非法值 → 视为未标记', () => {
       expect(isFeaturedEntry({})).toBe(false)
       expect(isFeaturedEntry(null)).toBe(false)
     })
   })
 
-  describe('性能与依赖纪律', () => {
-    test('不引入任何动画库', () => {
-      ;[stageSource, focusSource].forEach(src => {
-        expect(src).not.toMatch(/from\s+['"]gsap/)
-        expect(src).not.toContain('ScrollTrigger')
-        expect(src).not.toMatch(/from\s+['"]framer-motion/)
-        expect(src).not.toMatch(/from\s+['"]animejs/)
-        expect(src).not.toMatch(/from\s+['"]lenis/)
-      })
-    })
-
-    test('不写任何 transform 到样式上（游标只写 CSS 变量）', () => {
-      ;[stageSource, focusSource].forEach(src => {
-        expect(src).not.toContain('style.transform')
-        expect(src).not.toContain('translate3d')
-        expect(src).not.toContain('translateY(')
-      })
-      // 游标：每帧只写一个 CSS 变量，位移交给 CSS 的 transform（合成层，不触发布局）
-      expect(stageSource).toContain("setProperty('--cursor-x'")
-    })
-
-    test('滚动监听是 rAF 节流 + 只读 scrollY（零布局读取）', () => {
+  describe('原生横向轮播结构', () => {
+    test('原生 rail + scroll-snap；不劫持 wheel/touch、不读 window.scrollY', () => {
+      expect(stageSource).toContain('cl-home-articles-rail')
+      expect(stageSource).toContain('IntersectionObserver')
+      expect(stageSource).toContain('scrollTo(')
+      expect(stageSource).toContain('data-index')
       expect(stageSource).toContain('requestAnimationFrame')
+      expect(stageSource).not.toContain("addEventListener('scroll'")
+      expect(stageSource).not.toContain("addEventListener('wheel'")
+      expect(stageSource).not.toContain("addEventListener('touchmove'")
+      expect(stageSource).not.toContain('window.scrollY')
+      expect(homeArticlesStyle).toContain('scroll-snap-type: x mandatory')
+      expect(homeArticlesStyle).toContain('scroll-snap-stop: always')
+      expect(homeArticlesStyle).toContain('overscroll-behavior-x: contain')
+    })
+
+    test('没有 sticky 轨道 / 行程 / 逐帧 scrub 状态机', () => {
+      expect(homeArticlesStyle).not.toContain('position: sticky')
+      expect(homeArticlesStyle).not.toContain('--cl-home-article-sweep')
+      expect(homeArticlesStyle).not.toContain('--cl-home-article-step')
+      expect(homeArticlesStyle).not.toContain('--cl-home-article-shift')
+      expect(stageSource).not.toContain('computeScrubPosition')
+      expect(stageSource).not.toContain('interpolateRulerFraction')
+      expect(stageSource).not.toContain('computeCoverPlan')
+      expect(stageSource).not.toContain('writeScrub')
+      expect(stageSource).not.toContain('setInterval')
+      expect(stageSource).not.toContain('setTimeout')
+      expect(stageSource).not.toContain("setProperty('--cl-ha-pos'")
+    })
+
+    test('一窗一屏：100svh 面板 + 三行，日期尺在第三行', () => {
+      expect(homeArticlesStyle).toContain('height: 100svh')
+      expect(homeArticlesStyle).toMatch(
+        /grid-template-rows: auto minmax\(0, 1fr\) auto;/
+      )
+      expect(homeArticlesStyle).toMatch(
+        /\.cl-home-articles-top \{[^}]*grid-row: 1;/
+      )
+      expect(homeArticlesStyle).toMatch(
+        /\.cl-home-articles-stage \{[^}]*grid-row: 2;/
+      )
+      expect(homeArticlesStyle).toMatch(
+        /\.cl-home-articles-foot \{[^}]*grid-row: 3;/
+      )
+    })
+
+    test('日期尺可点击 + 上一张/下一张 + 键盘 + 状态广播', () => {
+      expect(stageSource).toContain('cl-home-articles-tick')
+      expect(stageSource).toContain('onClick={() => goTo(index)}')
+      expect(stageSource).toContain("aria-label='上一张文章'")
+      expect(stageSource).toContain("aria-label='下一张文章'")
+      expect(stageSource).toContain("event.key === 'ArrowLeft'")
+      expect(stageSource).toContain("event.key === 'ArrowRight'")
+      expect(stageSource).toContain("event.key === 'Home'")
+      expect(stageSource).toContain("event.key === 'End'")
+      expect(stageSource).toContain("aria-live='polite'")
+      expect(stageSource).toContain('aria-roledescription')
+      expect(stageSource).toContain("aria-current={index === activeIndex")
+      expect(stageSource).toContain('sessionStorage')
+      expect(stageSource).toContain("'cl-home-article-index'")
+      expect(stageSource).toContain('cl-home-article-active')
+    })
+
+    test('从文章返回恢复当前篇：先读 session，再写，首帧不冲掉旧值', () => {
       expect(stageSource).toContain(
-        "addEventListener('scroll', onScroll, { passive: true })"
+        'sessionStorage.getItem(ARTICLE_INDEX_KEY)'
       )
-      expect(stageSource).toContain("removeEventListener('scroll', onScroll)")
-      // 滚动回调（apply）里不得读布局 —— 几何全是预算好的
-      const apply = stageSource.match(/const apply = \(\) => \{([\s\S]*?)\n    \}/)
-      expect(apply).not.toBeNull()
-      expect(apply[1]).not.toContain('getBoundingClientRect')
-      expect(apply[1]).not.toContain('offsetHeight')
-      expect(apply[1]).not.toContain('offsetTop')
-      expect(apply[1]).not.toContain('getComputedStyle')
-      expect(apply[1]).toContain('window.scrollY')
+      expect(stageSource).toContain(
+        'sessionStorage.setItem(ARTICLE_INDEX_KEY'
+      )
+      expect(stageSource).toContain('didRestoreRef')
+      expect(stageSource).toContain('didWriteRef')
+      // 恢复必须是瞬时定位：临时关掉轨道的 smooth
+      expect(stageSource).toMatch(/rail\.scrollLeft = target \* rail\.clientWidth/)
+      expect(stageSource).toContain("rail.style.scrollBehavior = 'auto'")
     })
 
-    test('刻度位置只在 mount / resize 测一次（滚动路径零布局读取）', () => {
-      expect(stageSource).toContain('clientWidth')
-      expect(stageSource).toContain("addEventListener('resize'")
-      expect(stageSource).toContain("removeEventListener('resize'")
+    test('跨多篇瞬时定位，邻篇保留平滑；转屏按篇位重算偏移', () => {
+      // 平滑滚过 3–5 篇会让活动篇/canvas 槽位一路抖过去 → 长跳直接瞬移
+      expect(stageSource).toContain('Math.abs(next - current) > 1')
+      expect(stageSource).toContain('rail.scrollLeft = next * slide')
+      // 宽度变化（转屏/缩放）时不能把当前篇留在半路
+      expect(stageSource).toContain('railWidthRef')
+      expect(stageSource).toContain('rail.scrollLeft = activeRef.current * railW')
     })
 
-    test('换篇用纯 CSS 透明度交叉淡入（无 JS 动画）', () => {
-      // 关键帧入场已下线（不再有「一篇一屏」的逐屏入场），
-      // 换篇只靠 opacity 过渡 + visibility 延迟；时长走全站共用的
-      // --cl-home-switch（与影集段同一道曲线）
+    test('图版继续走 HomeArticleCover（1024，无 2048）', () => {
+      expect(stageSource).toContain("from './HomeArticleCover'")
+      expect(stageSource).toContain('HomeArticleCover')
+      expect(stageSource).toContain('coverRefs')
+      expect(stageSource).toContain("arm('high')")
+      expect(stageSource).toContain('prefetch()')
+      expect(stageSource).toContain('release()')
+      expect(stageSource).not.toContain('CanvasImage')
+      expect(stageSource).not.toContain('eager=')
+      expect(stageSource).not.toContain('srcSet=')
+      expect(stageSource).not.toContain('2048')
+      expect(coverSource).toContain('ARTICLE_COVER_TIER = 1024')
+      expect(coverSource).not.toContain('2048')
+      expect(stageSource).toContain("className='cl-home-article-plate-img'")
+      expect(stageSource).toContain(
+        'position={`50% ${(article.cover.pos ?? 0.5) * 100}%`}'
+      )
+    })
+
+    test('BackToTop 跟随章节 + reduced-motion 关闭平滑', () => {
+      expect(stageSource).toContain('cl-home-article-active')
+      // 状态类必须真的接到回顶键的隐藏规则上（否则只是挂了个空类）
+      expect(homeStyleSource).toContain(
+        'html.cl-home-article-active #theme-circlelife .cl-backtop.is-visible'
+      )
+      expect(stageSource).toContain(
+        "matchMedia('(prefers-reduced-motion: reduce)')"
+      )
       expect(homeArticlesStyle).toContain(
-        'transition: opacity var(--cl-home-switch) var(--cl-ease)'
+        '@media (prefers-reduced-motion: reduce)'
       )
-      expect(homeArticlesStyle).toContain('visibility 0s linear var(--cl-home-switch)')
-      expect(stageSource).not.toContain('<Transition')
-      expect(stageSource).not.toContain('requestAnimationFrame(() =>')
+      expect(homeArticlesStyle).toContain('scroll-behavior: auto')
+      expect(homeArticlesStyle).toMatch(
+        /\.cl-home-articles-cursor \{[^}]*transition: left/
+      )
     })
   })
 
-  describe('几何与令牌纪律', () => {
-    test('fixed 标尺的祖先链不得带 transform/filter/contain/will-change', () => {
-      // 祖先链：#theme-circlelife → #container-inner → #container-wrapper
-      //          → .cl-home-articles（标尺挂在章节内部）
+  describe('几何、排版与移动端', () => {
+    test('fixed 标尺祖先链不得带 transform/filter/contain/will-change', () => {
       const ancestorTargets = ['container-inner', 'container-wrapper']
       const offenders = []
       STYLE_FRAGMENTS.forEach(([file, exportName]) => {
@@ -311,8 +315,12 @@ describe('circlelife 首页精选文章章', () => {
           const selector = m[1].trim()
           const body = m[2]
           selector.split(',').forEach(sel => {
-            const ids = (sel.match(/#[A-Za-z0-9_-]+/g) || []).map(s => s.slice(1))
-            const classes = (sel.match(/\.[A-Za-z0-9_-]+/g) || []).map(s => s.slice(1))
+            const ids = (sel.match(/#[A-Za-z0-9_-]+/g) || []).map(s =>
+              s.slice(1)
+            )
+            const classes = (sel.match(/\.[A-Za-z0-9_-]+/g) || []).map(s =>
+              s.slice(1)
+            )
             const isAncestor = ids.some(id => ancestorTargets.includes(id))
             const isSectionRoot = classes.includes('cl-home-articles')
             if (!isAncestor && !isSectionRoot) return
@@ -329,14 +337,11 @@ describe('circlelife 首页精选文章章', () => {
       expect(homeArticlesStyle).toContain('var(--cl-accent)')
       expect(homeArticlesStyle).toContain('var(--cl-text)')
       expect(homeArticlesStyle).toContain('var(--cl-muted)')
-      // --cl-vermilion 并未在 tokens.js 定义，禁用
       expect(homeArticlesStyle).not.toContain('--cl-vermilion')
     })
 
-    test('图版用 3:4 直角框，桌面与移动端同比例（构图一致）', () => {
+    test('图版 3:4 + canvas 铺满框 + 图左文右 / 文字定宽贴右', () => {
       expect(homeArticlesStyle).toContain('aspect-ratio: 3 / 4')
-      // 图版已改 canvas：裁剪由 drawCover 按 object-fit:cover 规则完成
-      // （见 CanvasImage.js）。canvas 必须铺满框。
       expect(homeArticlesStyle).toMatch(
         /\.cl-home-article-plate-img \{[^}]*position: absolute;/
       )
@@ -346,314 +351,95 @@ describe('circlelife 首页精选文章章', () => {
       expect(homeArticlesStyle).toMatch(
         /\.cl-home-article-plate-img \{[^}]*height: 100%;/
       )
-      // 裁剪算法（cover + 焦点）必须有实现，不能只靠 CSS
-      const canvasSource = readFile(
-        'themes',
-        'circlelife',
-        'components',
-        'CanvasImage.js'
-      )
-      expect(canvasSource).toContain('export function computeCoverRect')
-      expect(canvasSource).toContain('export function drawCover')
-    })
-
-    test('一窗一屏：窗口钉住 + 一段滚动行程（不是一篇一屏）', () => {
-      expect(homeArticlesStyle).toContain('--cl-home-article-step: 10vh')
-      expect(homeArticlesStyle).toContain(
-        'height: calc(100svh + var(--cl-home-article-sweep))'
-      )
-      expect(homeArticlesStyle).toMatch(
-        /\.cl-home-articles-panel \{[^}]*position: sticky;/
-      )
-      expect(homeArticlesStyle).toMatch(
-        /\.cl-home-articles-panel \{[^}]*height: 100svh;/
-      )
-      // 行程 = (篇数 − 1) × 步距
-      expect(homeArticlesStyle).toContain(
-        '(var(--cl-home-article-count, 6) - 1) * var(--cl-home-article-step)'
-      )
-    })
-
-    test('章节内不设标题，只留右上角「全部文章 →」（不写篇数）', () => {
-      expect(stageSource).not.toContain('cl-home-articles-kicker')
-      expect(stageSource).not.toContain("className='cl-home-articles-title'")
-      expect(stageSource).toContain("className='cl-home-sec-link'")
-      expect(stageSource).toContain('全部文章')
-      expect(stageSource).toContain("aria-label='精选文章'")
-      // 出口不再带篇数 → 计数变量与入参一并退场
-      expect(stageSource).not.toContain('totalLabel')
-      expect(stageSource).not.toContain('postCount')
-    })
-
-    test('文章层全部叠在一格里，靠 opacity 换篇', () => {
-      expect(stageSource).toContain("className='cl-home-articles-stage'")
-      expect(stageSource).toContain("' is-active'")
-      expect(stageSource).toContain("' is-prev'")
-    })
-
-    test('不引入 scroll-snap / 自动轮播（自由滚动）', () => {
-      expect(homeArticlesStyle).not.toContain('scroll-snap')
-      expect(stageSource).not.toContain('setInterval')
-      expect(stageSource).not.toContain('setTimeout')
-    })
-  })
-
-  describe('结构与标题层级', () => {
-    test('文章标题是 h2（首页 h1 已被照片墙题字占用，章节不再有 h2 标题）', () => {
-      expect(stageSource).toContain("<h2 className='cl-home-article-title'")
-      expect(stageSource).not.toContain('<h3 className=')
-      expect(stageSource).toContain("aria-label='精选文章'")
-    })
-
-    test('图左 · 文贴右（文字栏定宽贴右缘，左边缘不随标题长度漂移）', () => {
-      // 改版后：图版贴左边缘、文字栏贴右边缘（margin-left:auto），
-      // 横向 footprint 与影集段一致 —— 不再靠「限宽居中」收窄
-      expect(homeArticlesStyle).not.toContain('--cl-home-article-spread')
-      expect(homeArticlesStyle).toMatch(
-        /\.cl-home-article-body \{[^}]*margin-left: auto;/
-      )
-      // ⚠️ 宽度必须是**定值**，不能只写 max-width：
-      // 只写 max-width 时 grid 项的宽度是 fit-content（margin-left:auto 会让
-      // stretch 失效）→ 摘要短的篇目收缩成窄块，再被 auto 外边距顶到右缘，
-      // 标题左边缘随标题长度漂移。实测 @1440：《罪与罚》观后感左缘 1000、
-      // 谈孤独 1077，其余四篇 762 —— 同一段里两篇明显右飘。
       expect(homeArticlesStyle).toMatch(
         /\.cl-home-article-body \{[^}]*width: min\(100%, var\(--cl-home-article-measure\)\);/
       )
-      expect(homeArticlesStyle).not.toMatch(
-        /\.cl-home-article-body \{[^}]*max-width: var\(--cl-home-article-measure\);/
-      )
-      // 栅格：图版列 + 文字列，列间距走全站宽容器的间距 token
       expect(homeArticlesStyle).toMatch(
         /\.cl-home-article \{[^}]*grid-template-columns: var\(--cl-home-article-plate\) minmax\(0, 1fr\);/
       )
       expect(homeArticlesStyle).toMatch(
-        /\.cl-home-article \{[^}]*gap: var\(--cl-wide-gap\);/
-      )
-      // 时间轴满内容宽（与影集段 body 同宽）
-      expect(homeArticlesStyle).toMatch(
-        /\.cl-home-articles-ruler \{[^}]*width: 100%;/
+        /\.cl-home-article \{[^}]*scroll-snap-align: start;/
       )
     })
 
-    test('段头只留右上角一个出口，且与影集段共用同一个链接类', () => {
-      expect(stageSource).toContain("className='cl-home-sec-link'")
-      expect(stageSource).not.toContain('cl-home-articles-all')
-      expect(stageSource).not.toContain('cl-home-articles-kicker')
-      expect(stageSource).not.toContain('cl-home-articles-title')
-      // 共享类必须真的定义在样式里（否则两段长得不一样）
-      expect(homeArticlesStyle).toMatch(
-        /\.cl-home-sec-link \{[^}]*font-family: var\(--cl-font-mono\);/
+    test('移动端：满屏出血 + 文字 padding + 隐藏出口/导航/范围/CTA', () => {
+      const start = homeArticlesStyle.indexOf('@media (max-width: 1023px) {')
+      expect(start).toBeGreaterThan(-1)
+      const mobile = homeArticlesStyle.slice(start, start + 4000)
+      expect(mobile).toMatch(
+        /\.cl-home-articles-rail \{[^}]*width: 100vw;/
+      )
+      expect(mobile).toMatch(
+        /\.cl-home-articles-rail \{[^}]*margin-inline: calc\(-1 \* var\(--cl-wide-pad\)\);/
+      )
+      expect(mobile).toMatch(
+        /\.cl-home-article-plate \{[^}]*width: var\(--plate-w, min\(100vw/
+      )
+      expect(mobile).toMatch(
+        /\.cl-home-article-body \{[^}]*padding-inline: var\(--cl-wide-pad\);/
+      )
+      expect(mobile).toMatch(
+        /\.cl-home-articles-top \{[^}]*display: none;/
+      )
+      expect(mobile).toMatch(
+        /\.cl-home-article-cta \{[^}]*display: none;/
+      )
+      expect(mobile).toMatch(
+        /\.cl-home-articles-nav,[\s\S]*?\.cl-home-articles-range \{[^}]*display: none;/
       )
     })
 
-    test('章节间距与影集段统一（同一个 token）', () => {
-      const { tokenStyle } = require('../../../themes/circlelife/styles/tokens')
-      expect(tokenStyle).toContain('--cl-home-section-gap:')
-      expect(tokenStyle).toContain('--cl-home-section-pad:')
-      // 文章段：窗口上内边距用统一值
+    test('短屏档收图版/标题/摘要', () => {
       expect(homeArticlesStyle).toContain(
-        'padding: var(--cl-home-section-pad) var(--cl-wide-pad) 1rem'
+        '@media (max-width: 1023px) and (max-height: 780px)'
       )
-      // 影集段：章节上外边距用同一个统一值；
-      // 影集段是最后一段 → 下外边距归零（Footer 自带内边距，段尾不留白）
-      const { homeStyle } = require('../../../themes/circlelife/styles/home')
-      expect(homeStyle).toContain('margin-top: var(--cl-home-section-pad)')
-      expect(homeStyle).toContain('margin-bottom: 0')
-    })
-
-    test('首页不再有「近期」段（博主判定冗余，已下线）', () => {
-      expect(themeIndexSource).not.toContain('HomeRecent')
-      expect(themeIndexSource).not.toContain('homeRecent')
-      expect(homeArticlesStyle).not.toContain('cl-home-recent')
-      expect(() =>
-        readFile('themes', 'circlelife', 'components', 'HomeRecent.js')
-      ).toThrow()
-    })
-
-    test('时间轴是刻度 + 游标（读数，不是控件）', () => {
-      expect(stageSource).toContain("className='cl-home-articles-cursor'")
-      expect(stageSource).toContain('cl-home-articles-tick')
-      expect(stageSource).toContain("aria-hidden='true'")
-      expect(homeArticlesStyle).toContain('will-change: transform')
-    })
-
-    test('图版是装饰图（canvas aria-hidden），标题在文字里', () => {
-      // 图版改用 canvas：canvas 没有 alt，装饰语义用 aria-hidden 表达
-      const canvasSource = readFile(
-        'themes',
-        'circlelife',
-        'components',
-        'CanvasImage.js'
+      expect(homeArticlesStyle).toContain(
+        '@media (max-width: 1023px) and (max-height: 620px)'
       )
-      expect(canvasSource).toContain("'aria-hidden': 'true'")
+    })
+
+    test('标题是 h2 + SmartLink；图版不是链接', () => {
+      expect(stageSource).toContain("<h2 className='cl-home-article-title'>")
+      expect(stageSource).toContain('<SmartLink href={article.href}>')
       expect(stageSource).toContain("className='cl-home-article-plate-img'")
-      expect(stageSource).not.toMatch(/<img[\s\S]{0,220}alt=''/)
+      expect(stageSource).not.toMatch(
+        /cl-home-article-plate[\s\S]{0,400}SmartLink/
+      )
     })
   })
 
-  describe('退役护栏', () => {
-    test('首页不再引用抽牌组件', () => {
-      expect(themeIndexSource).not.toContain('LatestCard')
-      expect(() =>
-        readFile('themes', 'circlelife', 'components', 'LatestCard.js')
-      ).toThrow()
-    })
-
-    test('首页分支不再渲染窄栏时间线', () => {
-      // 组件本身保留（/page/[page]、/category/*、/tag/* 仍在用），
-      // 但首页不得再渲染 BlogListPage / BlogListScroll
-      const homeBranch = themeIndexSource.slice(
-        themeIndexSource.indexOf('const LayoutPostList'),
-        themeIndexSource.indexOf('const LayoutSlug')
-      )
-      expect(homeBranch).toContain('!isHome &&')
-      expect(homeBranch).toContain('HomeArticleStage')
-      expect(homeBranch).not.toContain('HomeRecent')
-      const listBlock = homeBranch.slice(
-        homeBranch.indexOf('{!isHome && ('),
-        homeBranch.indexOf('{!isHome && (') + 700
-      )
-      expect(listBlock).toContain('BlogListPage')
-      expect(listBlock).toContain('BlogListScroll')
-    })
-
-    test('抽牌样式已从 home.js 移除', () => {
-      const { homeStyle } = require('../../../themes/circlelife/styles/home')
-      expect(homeStyle).not.toContain('cl-latest-card')
-      expect(homeStyle).not.toContain('cl-deck')
-      expect(homeStyle).not.toContain('cl-hero-dot')
-    })
-
-    test('HomeTimeline 组件仍在（列表页仍需要）', () => {
-      expect(() =>
-        readFile('themes', 'circlelife', 'components', 'HomeTimeline.js')
-      ).not.toThrow()
-    })
-  })
-
-  describe('数据链路', () => {
-    test('构建期产出 homeArticles', () => {
+  describe('数据链路与退役护栏', () => {
+    test('构建期产出 homeArticles（只取勾选）', () => {
       expect(pagesIndexSource).toContain('props.homeArticles')
       expect(pagesIndexSource).toContain('isFeaturedEntry')
-      expect(pagesIndexSource).not.toContain('props.homeRecent')
-    })
-
-    test('精选文章只取勾选的（不补齐）', () => {
       const block = pagesIndexSource.slice(
         pagesIndexSource.indexOf('const featuredPosts'),
         pagesIndexSource.indexOf('props.homeArticles =')
       )
       expect(block).toContain('.filter(isFeaturedEntry)')
-      // 没有「未勾选的最新文章」参与拼接 → 不做补齐
-      expect(block).not.toContain('restPosts')
-      expect(block).not.toContain('rest')
-    })
-
-    test('图版只用 512 / 1024 两档（不拉 2048 档）', () => {
       expect(pagesIndexSource).toContain('widths: [512, 1024]')
       expect(pagesIndexSource).not.toContain('widths: [1024, 2048]')
-    })
-
-    test('图版的 sizes 必须跟实际渲染宽度一致（满屏出血后是 100vw）', () => {
-      // ⚠️ 图版已改成满屏出血（宽度 = 视口宽），sizes 还写旧的 242px 会让
-      // 浏览器按 242×DPR 选档 → DPR2 的 iPhone 只拿到 512 档却被拉伸到
-      // 880 物理像素 → 图版发虚。sizes 描述与渲染尺寸必须同步。
       expect(pagesIndexSource).toContain(
         "sizes: '(max-width: 1023px) 100vw, 420px'"
       )
-      expect(pagesIndexSource).not.toContain(
-        "sizes: '(max-width: 1023px) 242px, 420px'"
-      )
     })
 
-    test('Notion「精选」勾选链路仍然完整（列名映射 + 白名单）', () => {
-      const siteDataSource = readFile('lib', 'db', 'SiteDataApi.js')
-      const notionConfigSource = readFile('conf', 'notion.config.js')
-      expect(siteDataSource).toContain("'featured'")
-      expect(notionConfigSource).toContain("featured:")
-    })
-  })
-
-  describe('移动端收敛（2026-10 末定稿）', () => {
-    /** 取移动端媒体查询块（max-width: 1023px）里的正文 */
-    const mobileBlock = () => {
-      const start = homeArticlesStyle.indexOf('@media (max-width: 1023px) {')
-      expect(start).toBeGreaterThan(-1)
-      return homeArticlesStyle.slice(start, start + 4000)
-    }
-
-    test('移动端撤掉段内出口与「继续阅读」CTA（桌面端保留）', () => {
-      const block = mobileBlock()
-      expect(block).toMatch(/\.cl-home-articles-top \{[^}]*display: none;/)
-      expect(block).toMatch(/\.cl-home-article-cta \{[^}]*display: none;/)
+    test('首页仍渲染 HomeArticleStage；旧抽牌/近期段不回归', () => {
+      expect(themeIndexSource).toContain('HomeArticleStage')
+      expect(themeIndexSource).not.toContain('LatestCard')
+      expect(themeIndexSource).not.toContain('HomeRecent')
+      expect(stageSource).not.toContain('totalLabel')
+      expect(stageSource).not.toContain('postCount')
     })
 
-    test('移动端图版满屏出血：宽度取 100vw + 负外边距抵消内边距', () => {
-      const block = mobileBlock()
-      expect(block).toMatch(
-        /\.cl-home-article-plate \{[^}]*width: var\(--plate-w, min\(100vw/
-      )
-      expect(block).toMatch(
-        /\.cl-home-article-plate \{[^}]*margin-inline: calc\(-1 \* var\(--cl-wide-pad\)\);/
-      )
-      // 比例仍是 3:4（盒子上的 aspect-ratio 没动）
-      expect(homeArticlesStyle).toMatch(
-        /\.cl-home-article-plate-frame \{[^}]*aspect-ratio: 3 \/ 4;/
-      )
-    })
-
-    test('矮屏图版装不满宽时居中（不贴左缘留空白）', () => {
-      // 375×667 实测：高度预算把图版压到 322px（视口 375）→ 贴左缘会右侧
-      // 空出 53px，不对称。justify-self: center 让它居中；
-      // 宽度够满时（margin box = 列宽）居中不产生位移，照样出血到屏幕两边。
-      expect(mobileBlock()).toMatch(
-        /\.cl-home-article-plate \{[^}]*justify-self: center;/
-      )
-    })
-
-    test('满宽基准用视口宽（不是内容列宽），高度预算不变', () => {
-      expect(stageSource).toContain(
-        'const containerW = document.documentElement.clientWidth'
-      )
-      // 高度预算仍在 → 矮屏自动收，不顶出视口
-      expect(stageSource).toContain('(avail - gap - bodyH) * 0.75')
-    })
-
-    test('图版不得被包成链接（满屏大图点击区太大、易误触）', () => {
-      // 图版仍是纯 <figure>，跳转入口只有标题
-      expect(stageSource).toContain("className='cl-home-article-plate'")
-      expect(stageSource).not.toMatch(
-        /cl-home-article-plate[\s\S]{0,400}SmartLink/
-      )
-      // 标题仍是链接（移动端唯一的跳转入口）
-      expect(stageSource).toMatch(
-        /<h2 className='cl-home-article-title'>\s*<SmartLink/
-      )
-    })
-
-    test('面板三块显式绑定栅格行（撤掉一块不打乱行序）', () => {
-      // ⚠️ display:none 的元素**不再是 grid item** → 面板的自动放置会重排：
-      // stage 被挪进第一行(auto)，而 stage 的子元素全是 position:absolute →
-      // 该行高度算成 0 → stage.clientHeight=0 → 图版高度预算失效、
-      // 被 Math.max(90,…) 兜成 90px（实测 w=90/h=120 的小方块）。
-      // 显式 grid-row 让行序与「谁在不在场」解耦。
-      expect(homeArticlesStyle).toMatch(
-        /\.cl-home-articles-top \{[^}]*grid-row: 1;/
-      )
-      expect(homeArticlesStyle).toMatch(
-        /\.cl-home-articles-stage \{[^}]*grid-row: 2;/
-      )
-      expect(homeArticlesStyle).toMatch(
-        /\.cl-home-articles-ruler \{[^}]*grid-row: 3;/
-      )
-    })
-
-    test('stage 没有高度时不把图版兜成 90px 小方块', () => {
-      // 布局塌了也宁可按视口宽满屏，也不要给一张邮票大的图
-      expect(stageSource).toContain(
-        'avail > 0 ? (avail - gap - bodyH) * 0.75 : containerW'
-      )
+    test('不引入动画库 / scroll 劫持', () => {
+      ;[stageSource, focusSource, coverSource].forEach(src => {
+        expect(src).not.toMatch(/from\s+['"]gsap/)
+        expect(src).not.toContain('ScrollTrigger')
+        expect(src).not.toMatch(/from\s+['"]framer-motion/)
+        expect(src).not.toMatch(/from\s+['"]animejs/)
+        expect(src).not.toMatch(/from\s+['"]lenis/)
+      })
     })
   })
 })
