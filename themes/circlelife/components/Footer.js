@@ -8,8 +8,8 @@ export const Footer = ({ footerRef }) => {
   return (
     <footer
       ref={footerRef}
-      className='cl-footer relative z-10 mt-auto w-full px-4 py-8 text-sm'>
-      <div className='mx-auto flex max-w-3xl flex-col items-center justify-center'>
+      className='cl-footer relative z-10 mt-auto w-full text-sm'>
+      <div className='cl-footer-inner'>
         <BrandLockup href='/' />
         <FooterSocial />
       </div>

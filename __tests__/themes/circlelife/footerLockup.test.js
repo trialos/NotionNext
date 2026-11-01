@@ -1,6 +1,7 @@
 /**
- * 页脚锁头契约：stack 版式（弧标 + 中文/英文两行），整块居中；
- * row 版式已删除，抽屉品牌（compact + hideEn）保持原样。
+ * 页脚锁头契约：stack 版式（弧标 + 中文/英文两行）；
+ * 页脚外层桌面为横向栏（锁头左 / 图标右），手机纵向左对齐。
+ * BrandLockup 的 row 版式已删除，抽屉品牌（compact + hideEn）保持原样。
  * 中轴微调只允许作用于页脚，且必须收敛到 footer 专属 CSS 变量。
  */
 import fs from 'fs'
@@ -20,7 +21,7 @@ describe('circlelife 页脚品牌锁头', () => {
   const indexSource = readThemeFile('index.js')
   const commonStyleSource = commonStyle
 
-  test('页脚使用 stack 锁头，并在下方挂社交通道', () => {
+  test('页脚使用 stack 锁头，并挂载社交通道（手机在下方）', () => {
     expect(footerSource).toMatch(/<BrandLockup\s+href='\/'\s*\/>/)
     expect(footerSource).toContain('<FooterSocial')
   })
@@ -79,5 +80,37 @@ describe('circlelife 页脚品牌锁头', () => {
     expect(indexSource).toContain('IntersectionObserver')
     expect(indexSource).toContain("classList.toggle('cl-footer-inview'")
     expect(footerSource).toContain('footerRef')
+  })
+
+  test('页脚为横向栏：宽屏容器，桌面 Logo 左 / 图标右，手机左对齐', () => {
+    expect(footerSource).toContain('cl-footer-inner')
+    expect(footerSource).not.toContain('max-w-3xl')
+    expect(commonStyleSource).toMatch(
+      /\.cl-footer-inner \{[^}]*max-width: var\(--cl-wide-max\);/
+    )
+    expect(commonStyleSource).toMatch(
+      /\.cl-footer-inner \{[^}]*padding-inline: var\(--cl-wide-pad\);/
+    )
+    expect(commonStyleSource).toMatch(
+      /@media \(min-width: 768px\) \{\s*#theme-circlelife \.cl-footer-inner \{[^}]*flex-direction: row;/
+    )
+    expect(commonStyleSource).toMatch(
+      /\.cl-footer-social \{[^}]*justify-content: flex-start;/
+    )
+    expect(commonStyleSource).toMatch(
+      /@media \(min-width: 768px\) \{\s*#theme-circlelife \.cl-footer-social \{[^}]*justify-content: flex-end;/
+    )
+  })
+
+  test('二维码卡片锚定图标组左侧，不再按组居中', () => {
+    expect(commonStyleSource).toMatch(
+      /\.cl-footer-qr-card \{[^}]*left: 0;/
+    )
+    expect(commonStyleSource).not.toMatch(/\.cl-footer-qr-card \{[^}]*translateX\(-50%\)/)
+    const keyframes =
+      commonStyleSource.match(/@keyframes clFooterQrIn \{[\s\S]*?\n      \}/)?.[0] ||
+      ''
+    expect(keyframes).toContain('translateY(6px)')
+    expect(keyframes).not.toContain('translate(-50%')
   })
 })

@@ -121,4 +121,25 @@ describe('circlelife 页脚社交通道', () => {
     fireEvent.error(screen.getByRole('img', { name: '微信公众号二维码' }))
     expect(screen.getByText('二维码加载失败')).toBeInTheDocument()
   })
+
+  test('图标顺序保持 微信 → 小红书 → 网易云 → GitHub', () => {
+    applyConfig({
+      CONTACT_WECHAT_QR: '/images/wechat-public-qr.png',
+      CONTACT_XIAOHONGSHU: 'https://www.xiaohongshu.com/user/profile/abc',
+      CONTACT_NETEASE: 'https://music.163.com/#/user/home?id=42',
+      CONTACT_GITHUB: 'https://github.com/trialos'
+    })
+    render(<FooterSocial />)
+
+    const group = screen.getByRole('group', { name: '关注与外部链接' })
+    const labels = Array.from(
+      group.querySelectorAll('.cl-footer-social-btn')
+    ).map(element => element.getAttribute('aria-label'))
+    expect(labels).toEqual([
+      '微信公众号二维码',
+      '小红书',
+      '网易云音乐',
+      'GitHub'
+    ])
+  })
 })

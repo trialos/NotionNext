@@ -176,6 +176,23 @@ export const commonStyle = `
         /* 底部安全区：页脚图标是 44px 触控目标，不能让 home indicator 吃掉下半截 */
         padding-bottom: calc(1.75rem + env(safe-area-inset-bottom, 0px));
       }
+      #theme-circlelife .cl-footer-inner {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        max-width: var(--cl-wide-max);
+        margin-inline: auto;
+        padding-inline: var(--cl-wide-pad);
+      }
+      @media (min-width: 768px) {
+        #theme-circlelife .cl-footer-inner {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+          gap: 2rem;
+        }
+      }
       /* 页脚锁头中轴：弧标与两行文字块共用一条水平中心线。
          实测文字字形并集中心比弧标盒心低约 2px，故弧标下移 2px；
          只作用于页脚，抽屉品牌（compact）不受影响。 */
@@ -195,9 +212,14 @@ export const commonStyle = `
         position: relative;
         display: flex;
         align-items: center;
-        justify-content: center;
+        justify-content: flex-start;
+        flex-wrap: wrap;
         gap: 0.15rem;
-        margin-top: 0.75rem;
+      }
+      @media (min-width: 768px) {
+        #theme-circlelife .cl-footer-social {
+          justify-content: flex-end;
+        }
       }
       #theme-circlelife .cl-footer-social-btn {
         display: inline-flex;
@@ -227,7 +249,7 @@ export const commonStyle = `
       }
       #theme-circlelife .cl-footer-qr-card {
         position: absolute;
-        left: 50%;
+        left: 0;
         bottom: calc(100% + 10px);
         z-index: 20;
         width: 200px;
@@ -236,7 +258,6 @@ export const commonStyle = `
         border: 1px solid var(--cl-border);
         border-radius: var(--cl-radius);
         background: var(--cl-surface);
-        transform: translateX(-50%);
         animation: clFooterQrIn 0.18s var(--cl-ease) both;
       }
       #theme-circlelife .cl-footer-qr-plate {
@@ -281,11 +302,11 @@ export const commonStyle = `
       @keyframes clFooterQrIn {
         from {
           opacity: 0;
-          transform: translate(-50%, 6px);
+          transform: translateY(6px);
         }
         to {
           opacity: 1;
-          transform: translate(-50%, 0);
+          transform: translateY(0);
         }
       }
       @media (prefers-reduced-motion: reduce) {
