@@ -5,7 +5,7 @@
  * CIRCLELIFE_HOME_ALBUM_COUNT 辑（默认 4），**不用最新影集补齐**。
  * 主封面 = 发布日期最新的一辑（pages/index.js 已按日期倒序截断）。
  *
- * 目录与文章共用同一张 Notion 表（靠 type 区分），精选判定对两者通用。
+ * 影集与文章共用同一张 Notion 表（靠 type 区分），精选判定对两者通用。
  */
 
 /**

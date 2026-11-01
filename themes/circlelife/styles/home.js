@@ -1,9 +1,9 @@
 /**
- * Circle of Life — home：Timeline + Cards
+ * Circle of Life — home
  *
- * 首页的「精选文章章」与收尾「近期」段已迁到 styles/homeArticles.js
- * （一文一屏 + 时间标尺 + 单栏排版），本片段只留列表页仍在用的
- * 时间线 / 卡片形态。抽牌（LatestCard）已随首页改版下线。
+ * 首页：倾斜照片墙（HomeTiltWall）+ 题字、精选影集（01 接触印相）；
+ * 列表页仍在用的时间线 / 卡片形态。精选文章章在 styles/homeArticles.js
+ * （一窗一屏 + 时间标尺）；抽牌（LatestCard）已随首页改版下线。
  */
 export const homeStyle = `
       /* —— Timeline —— */

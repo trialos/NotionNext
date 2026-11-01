@@ -15,6 +15,15 @@
  */
 import fs from 'fs'
 import path from 'path'
+import { TextDecoder, TextEncoder } from 'util'
+import { createElement } from 'react'
+
+// jest 的 node 环境不一定暴露 TextEncoder；react-dom/server 需要它
+if (typeof global.TextEncoder === 'undefined') {
+  global.TextEncoder = TextEncoder
+  global.TextDecoder = TextDecoder
+}
+const { renderToStaticMarkup } = require('react-dom/server')
 
 // notion-utils / notion-client 是 ESM 包，jest 的 transformIgnorePatterns 放行不了
 // （与既有测试套件一致的约束：不改动 jest.config.js）。
@@ -55,6 +64,8 @@ const {
   isFeaturedEntry
 } = require('../../../themes/circlelife/components/homeAlbumData')
 const { homeStyle } = require('../../../themes/circlelife/styles/home')
+const HomeAlbumShowcase =
+  require('../../../themes/circlelife/components/HomeAlbumShowcase').default
 
 const showcaseSource = readFile(
   'themes',
@@ -95,6 +106,9 @@ const albums = [
   { id: 'c', name: '重逢吴哥窟', count: 9, date: '2025-9-29', href: '/c' },
   { id: 'd', name: '巧合', count: 11, date: '2025-7-28', href: '/d' }
 ]
+
+const renderAlbums = list =>
+  renderToStaticMarkup(createElement(HomeAlbumShowcase, { albums: list }))
 
 describe('circlelife 首页精选影集段（01 接触印相）', () => {
   describe('buildAlbumView（纯数据拆分）', () => {
@@ -137,6 +151,57 @@ describe('circlelife 首页精选影集段（01 接触印相）', () => {
     })
   })
 
+  describe('渲染契约（0–4 辑 DOM）', () => {
+    test('0 辑不渲染', () => {
+      expect(renderAlbums([])).toBe('')
+    })
+
+    test('1 辑：主封面居中，无索引', () => {
+      const html = renderAlbums([albums[0]])
+      expect(html).toContain('data-count="1"')
+      expect(html).toContain('aria-label="精选影集"')
+      expect(html).toContain('cl-home-album-hero')
+      expect(html).toContain('崂山道士')
+      expect(html).not.toContain('<ol')
+      expect(html.match(/<a /g) || []).toHaveLength(1)
+      expect(html.match(/<h2/g) || []).toHaveLength(1)
+      expect(html).toMatch(/cl-home-album-count[^>]*>01/)
+    })
+
+    test('2 辑：1 行索引 + 2 个链接，序号从 02 起', () => {
+      const html = renderAlbums(albums.slice(0, 2))
+      expect(html).toContain('data-count="2"')
+      expect(html).toContain('<ol class="cl-home-album-index" start="2">')
+      expect(html.match(/<li>/g) || []).toHaveLength(1)
+      expect(html.match(/<a /g) || []).toHaveLength(2)
+      expect(html.match(/<h2/g) || []).toHaveLength(2)
+      expect(html).toContain('02')
+    })
+
+    test('4 辑：主封面 + 3 行索引，4 个链接，总数 43', () => {
+      const html = renderAlbums(albums)
+      expect(html).toContain('data-count="4"')
+      expect(html.match(/<li>/g) || []).toHaveLength(3)
+      expect(html.match(/<a /g) || []).toHaveLength(4)
+      expect(html.match(/<h2/g) || []).toHaveLength(4)
+      ;['崂山道士', '在思绪中漂泊', '重逢吴哥窟', '巧合'].forEach(name => {
+        expect(html).toContain(name)
+      })
+      expect(html).toContain('43')
+      expect(html.indexOf('崂山道士')).toBeLessThan(
+        html.indexOf('在思绪中漂泊')
+      )
+    })
+
+    test('装饰件不出声、无 summary、标题层级 h1→h2', () => {
+      const html = renderAlbums(albums)
+      expect(html).toContain('aria-hidden="true"')
+      expect(html).not.toContain('summary')
+      expect(html).not.toContain('<h1')
+      expect(html).not.toContain('<h3')
+    })
+  })
+
   describe('精选判定（兼容 Checkbox 与 Select 降级形态）', () => {
     test('布尔值（Notion Checkbox 解析结果）', () => {
       expect(isFeaturedEntry({ featured: true })).toBe(true)
@@ -173,10 +238,12 @@ describe('circlelife 首页精选影集段（01 接触印相）', () => {
       )
     })
 
-    test('上限沿用 CIRCLELIFE_HOME_ALBUM_COUNT，默认 4', () => {
+    test('上限沿用 CIRCLELIFE_HOME_ALBUM_COUNT，硬上限 4', () => {
+      expect(pagesIndexSource).toContain('HOME_ALBUM_LIMIT = 4')
       expect(pagesIndexSource).toContain('CIRCLELIFE_HOME_ALBUM_COUNT')
+      expect(pagesIndexSource).toMatch(/Math\.min\(\s*HOME_ALBUM_LIMIT,/)
       expect(pagesIndexSource).toMatch(
-        /siteConfig\('CIRCLELIFE_HOME_ALBUM_COUNT', 4/
+        /siteConfig\(\s*'CIRCLELIFE_HOME_ALBUM_COUNT',\s*HOME_ALBUM_LIMIT/
       )
       expect(themeConfigSource).toMatch(/CIRCLELIFE_HOME_ALBUM_COUNT:\s*4/)
       expect(themeConfigSource).toContain('CIRCLELIFE_HOME_ALBUM_SHOWCASE')
@@ -189,10 +256,19 @@ describe('circlelife 首页精选影集段（01 接触印相）', () => {
       expect(showcaseSource).toContain('if (!albums.length) return null')
     })
 
-    test('首页负载仍是精简的 homeAlbums（封面 + 摘要），不下发正文图数组', () => {
+    test('homeAlbums 只下发封面 + 张数/日期，不下发正文图数组/摘要', () => {
       expect(pagesIndexSource).not.toContain('props.photoDecks')
       expect(pagesIndexSource).toContain('props.homeAlbums')
-      expect(pagesIndexSource).toContain('buildImageSources')
+      const albumBlock = pagesIndexSource.slice(
+        pagesIndexSource.indexOf('const homeAlbums = []'),
+        pagesIndexSource.indexOf('props.homeAlbums = homeAlbums')
+      )
+      expect(albumBlock).toContain(
+        'cover: { src: buildSizedSource(cover.url, 1024) }'
+      )
+      expect(albumBlock).not.toContain('summary')
+      expect(albumBlock).not.toContain('srcSet')
+      expect(albumBlock).not.toContain('featured:')
       expect(pagesIndexSource).not.toMatch(/images\s*:\s*images/)
     })
   })

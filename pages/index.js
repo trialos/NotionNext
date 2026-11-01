@@ -8,7 +8,7 @@ import {
 } from '@/lib/db/SiteDataApi'
 import { loadPhotoImages, resolveHomeCoverImages } from '@/lib/db/notion/photoImages'
 import { formatNotionBlock } from '@/lib/db/notion/getPostBlocks'
-import { buildImageSources } from '@/themes/circlelife/components/imageSrcset'
+import { buildImageSources, buildSizedSource } from '@/themes/circlelife/components/imageSrcset'
 import { isFeaturedAlbum, isFeaturedEntry } from '@/themes/circlelife/components/homeAlbumData'
 import { generateRobotsTxt } from '@/lib/utils/robots.txt'
 import { generateRss, shouldGenerateRssForLocale } from '@/lib/utils/rss'
@@ -19,6 +19,9 @@ import { generateRedirectJson } from '@/lib/utils/redirect'
 import { checkDataFromAlgolia } from '@/lib/plugins/algolia'
 import pLimit from 'p-limit'
 import { adapterNotionBlockMap } from '@/lib/utils/notion.util'
+
+/** 首页影集段的设计上限：1–4 辑；配置只能往下收，避免 5+ 辑进入未设计的版面 */
+const HOME_ALBUM_LIMIT = 4
 
 /**
  * 首页布局
@@ -156,14 +159,21 @@ export async function getStaticProps(req) {
   }
   props.latestPosts = cleanPostSummaries(props.latestPosts)
   // 首页「精选影集」段：只显示 Notion「精选」勾选的影集，最多取
-  // CIRCLELIFE_HOME_ALBUM_COUNT 辑（默认 4）；**不用最新影集补齐**。
-  // 只下发封面与摘要，不再下发全部正文图 URL —— 旧实现把 6 辑 67 张图的
-  // URL 塞进首页 pageProps 却无人消费，白付约 17 KB（占整包 24%）。
-  const homeAlbumCount = Math.max(
-    1,
-    Number(
-      siteConfig('CIRCLELIFE_HOME_ALBUM_COUNT', 4, props?.NOTION_CONFIG)
-    ) || 4
+  // CIRCLELIFE_HOME_ALBUM_COUNT 辑（默认 4）；配置只能往下收，硬上限 4
+  // （1–4 辑的版面已设计）。**不用最新影集补齐**。
+  // 只下发封面 + 张数/日期，不再下发正文图 URL 或无人消费的 summary。
+  const homeAlbumCount = Math.min(
+    HOME_ALBUM_LIMIT,
+    Math.max(
+      1,
+      Number(
+        siteConfig(
+          'CIRCLELIFE_HOME_ALBUM_COUNT',
+          HOME_ALBUM_LIMIT,
+          props?.NOTION_CONFIG
+        )
+      ) || HOME_ALBUM_LIMIT
+    )
   )
   const filmBatch = Math.max(
     1,
@@ -195,23 +205,13 @@ export async function getStaticProps(req) {
         const images = (await loadPhotoImages(p)).filter(im => im?.url)
         const cover = images[0]
         if (!cover) return null
-        const sources = buildImageSources(cover.url, {
-          sizes: '(max-width: 1023px) 92vw, 620px'
-        })
         return {
           id: p.id,
           name: p.title,
           href: `/album?view=gallery&deck=${p.id}`,
-          summary: p.summary || '',
           date: p.publishDay || '',
           count: images.length,
-          featured: isFeaturedAlbum(p),
-          cover: {
-            url: cover.url,
-            src: sources.src,
-            srcSet: sources.srcSet,
-            sizes: sources.sizes
-          }
+          cover: { src: buildSizedSource(cover.url, 1024) }
         }
       })
     )
