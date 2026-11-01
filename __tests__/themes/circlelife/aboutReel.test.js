@@ -1,6 +1,8 @@
 import {
   REEL_MOBILE_QUERY,
+  isReelFallbackState,
   pickReelSrc,
+  reelFallbackReason,
   resolveAboutReel,
   sanitizeMediaUrl,
   shouldAutoplayReel
@@ -105,5 +107,25 @@ describe('aboutReel autoplay policy', () => {
     // Chrome 的 downlink 估计值波动很大（实测 4g 也会报 0.45），
     // 不作为自动播放门禁；慢网只认 effectiveType 与 Save-Data。
     expect(shouldAutoplayReel({ hasSource: true, downlink: 1 })).toBe(true)
+  })
+})
+
+describe('aboutReel fallback reasons', () => {
+  test('maps every play-button state to a visible reason', () => {
+    expect(reelFallbackReason('reduced')).toBe('浏览器已要求减少动态效果')
+    expect(reelFallbackReason('save-data')).toBe('已开启省流模式')
+    expect(reelFallbackReason('slow')).toBe('当前网络较慢')
+    expect(reelFallbackReason('blocked')).toBe('浏览器阻止了自动播放')
+    expect(reelFallbackReason('paused')).toBe('播放已暂停')
+    for (const state of ['reduced', 'save-data', 'slow', 'blocked', 'paused']) {
+      expect(isReelFallbackState(state)).toBe(true)
+    }
+  })
+
+  test('stays quiet while the reel is idle, loading or playing', () => {
+    for (const state of ['idle', 'loading', 'playing', 'error', '', null, undefined]) {
+      expect(isReelFallbackState(state)).toBe(false)
+      expect(reelFallbackReason(state)).toBe('')
+    }
   })
 })

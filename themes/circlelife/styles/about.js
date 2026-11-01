@@ -759,6 +759,21 @@ export const aboutStyle = `
     opacity: 0.8;
   }
 
+  .cl-about-hero-action-group {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .cl-about-hero-action-reason {
+    font-family: var(--cl-font-mono);
+    font-size: 11px;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
+    color: rgba(247, 245, 240, 0.62);
+  }
+
   @media (min-width: 768px) {
     .cl-about-hero-overlay--reel {
       padding-right: clamp(40px, 6vw, 96px);

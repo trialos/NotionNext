@@ -8,6 +8,7 @@ import {
 } from './imageSrcset'
 import { shouldWallOwnWheel } from './wheelOwnership'
 import { resolveHeroCopy } from './heroCopy'
+import { reelFallbackReason } from './aboutReel'
 import AboutReelMedia from './AboutReelMedia'
 
 // 优雅的保底卡片（无内容时呈现，避免白屏）
@@ -93,7 +94,9 @@ export default function InfiniteAboutGrid({
   const closeHeroRef = useRef(null)
   const openHeroRef = useRef(null)
   const reelRef = useRef(null)
-  const [reelNeedsPlay, setReelNeedsPlay] = useState(false)
+  const [reelState, setReelState] = useState('idle')
+  const reelReason = reelFallbackReason(reelState)
+  const reelNeedsPlay = !!reelReason
 
   const { headline: finalSummary, lead: heroLead } = resolveHeroCopy({
     summary,
@@ -102,13 +105,7 @@ export default function InfiniteAboutGrid({
   })
 
   const handleReelState = useCallback(state => {
-    setReelNeedsPlay(
-      state === 'blocked' ||
-        state === 'reduced' ||
-        state === 'save-data' ||
-        state === 'slow' ||
-        state === 'paused'
-    )
+    setReelState(state)
   }, [])
 
   // 严格忠实呈现 Notion 原生排版叙事顺序，与 SSR HTML 预加载形成 100% 同构匹配
@@ -715,17 +712,26 @@ export default function InfiniteAboutGrid({
               className='cl-about-hero-actions'
               onPointerDown={e => e.stopPropagation()}>
               {reelNeedsPlay && (
-                <button
-                  type='button'
-                  className='cl-about-hero-action'
-                  onClick={() => reelRef.current?.play()}>
-                  <svg
-                    viewBox='0 0 12 12'
-                    aria-hidden='true'>
-                    <path d='M3 1.5 10 6 3 10.5Z' fill='currentColor' />
-                  </svg>
-                  <span>播放快闪</span>
-                </button>
+                <div className='cl-about-hero-action-group'>
+                  <button
+                    type='button'
+                    className='cl-about-hero-action'
+                    aria-describedby='cl-about-reel-reason'
+                    onClick={() => reelRef.current?.play()}>
+                    <svg
+                      viewBox='0 0 12 12'
+                      aria-hidden='true'>
+                      <path d='M3 1.5 10 6 3 10.5Z' fill='currentColor' />
+                    </svg>
+                    <span>播放快闪</span>
+                  </button>
+                  <span
+                    id='cl-about-reel-reason'
+                    className='cl-about-hero-action-reason'
+                    role='status'>
+                    {reelReason}
+                  </span>
+                </div>
               )}
               <button
                 type='button'

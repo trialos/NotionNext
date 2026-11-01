@@ -100,6 +100,17 @@ describe('About reel wall integration', () => {
     expect(inlineSource).not.toContain('B 站')
   })
 
+  test('shows the fallback reason next to the play button', () => {
+    expect(inlineSource).toContain('reelFallbackReason')
+    expect(inlineSource).toContain('cl-about-hero-action-group')
+    expect(inlineSource).toContain('cl-about-hero-action-reason')
+    expect(inlineSource).toContain(
+      "aria-describedby='cl-about-reel-reason'"
+    )
+    expect(inlineSource).toContain("role='status'")
+    expect(styleSource).toContain('.cl-about-hero-action-reason')
+  })
+
   test('uses dedicated reel modifiers and stops action taps from dragging the wall', () => {
     expect(inlineSource).toContain('cl-about-hero-actions')
     expect(inlineSource).toContain('cl-about-hero-overlay--reel')
