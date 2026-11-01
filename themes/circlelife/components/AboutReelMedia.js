@@ -61,7 +61,7 @@ function useAboutReel({ reel, videoRef, onStateChange }) {
       reducedMotion,
       saveData: !!connection.saveData,
       effectiveType: connection.effectiveType,
-      downlink: connection.downlink
+      connectionType: connection.type
     })
     if (allowed) return ''
     if (reducedMotion) return 'reduced'

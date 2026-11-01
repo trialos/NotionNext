@@ -94,18 +94,47 @@ describe('aboutReel autoplay policy', () => {
     expect(shouldAutoplayReel({ hasSource: true, saveData: true })).toBe(false)
   })
 
-  test('blocks slow connections', () => {
+  test('gates slow estimates only on cellular connections', () => {
     expect(
-      shouldAutoplayReel({ hasSource: true, effectiveType: 'slow-2g' })
+      shouldAutoplayReel({
+        hasSource: true,
+        effectiveType: '3g',
+        connectionType: 'cellular'
+      })
     ).toBe(false)
-    expect(shouldAutoplayReel({ hasSource: true, effectiveType: '2g' })).toBe(
-      false
-    )
-    expect(shouldAutoplayReel({ hasSource: true, effectiveType: '3g' })).toBe(
-      false
-    )
+    expect(
+      shouldAutoplayReel({
+        hasSource: true,
+        effectiveType: '2g',
+        connectionType: 'cellular'
+      })
+    ).toBe(false)
+    expect(
+      shouldAutoplayReel({
+        hasSource: true,
+        effectiveType: 'slow-2g',
+        connectionType: 'cellular'
+      })
+    ).toBe(false)
+    expect(
+      shouldAutoplayReel({
+        hasSource: true,
+        effectiveType: '4g',
+        connectionType: 'cellular'
+      })
+    ).toBe(true)
+    // 桌面 Wi-Fi/以太网/未知连接会被 Chrome 误报 3g，不能因此拦自动播放
+    for (const connectionType of ['wifi', 'ethernet', 'unknown', '']) {
+      expect(
+        shouldAutoplayReel({
+          hasSource: true,
+          effectiveType: '3g',
+          connectionType
+        })
+      ).toBe(true)
+    }
     // Chrome 的 downlink 估计值波动很大（实测 4g 也会报 0.45），
-    // 不作为自动播放门禁；慢网只认 effectiveType 与 Save-Data。
+    // 不作为自动播放门禁；慢网只认蜂窝 effectiveType 与 Save-Data。
     expect(shouldAutoplayReel({ hasSource: true, downlink: 1 })).toBe(true)
   })
 })
@@ -114,7 +143,7 @@ describe('aboutReel fallback reasons', () => {
   test('maps every play-button state to a visible reason', () => {
     expect(reelFallbackReason('reduced')).toBe('浏览器已要求减少动态效果')
     expect(reelFallbackReason('save-data')).toBe('已开启省流模式')
-    expect(reelFallbackReason('slow')).toBe('当前网络较慢')
+    expect(reelFallbackReason('slow')).toBe('移动网络较慢')
     expect(reelFallbackReason('blocked')).toBe('浏览器阻止了自动播放')
     expect(reelFallbackReason('paused')).toBe('播放已暂停')
     for (const state of ['reduced', 'save-data', 'slow', 'blocked', 'paused']) {

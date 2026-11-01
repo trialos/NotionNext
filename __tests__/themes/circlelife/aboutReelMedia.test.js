@@ -191,15 +191,31 @@ describe('AboutReelMedia', () => {
     expect(playMock).not.toHaveBeenCalled()
   })
 
-  test('does not autoplay on a slow connection', async () => {
+  test('does not autoplay on a slow cellular connection', async () => {
     Object.defineProperty(navigator, 'connection', {
       configurable: true,
-      value: { saveData: false, effectiveType: '3g', downlink: 0.8 }
+      value: {
+        saveData: false,
+        effectiveType: '3g',
+        type: 'cellular',
+        downlink: 0.8
+      }
     })
     const { onStateChange } = renderReel()
 
     await waitFor(() => expect(onStateChange).toHaveBeenCalledWith('slow'))
     expect(playMock).not.toHaveBeenCalled()
+  })
+
+  test('ignores a 3g estimate on Wi-Fi', async () => {
+    Object.defineProperty(navigator, 'connection', {
+      configurable: true,
+      value: { saveData: false, effectiveType: '3g', type: 'wifi' }
+    })
+    const { onStateChange } = renderReel()
+
+    await waitFor(() => expect(playMock).toHaveBeenCalled())
+    expect(onStateChange).not.toHaveBeenCalledWith('slow')
   })
 
   test('allows an explicit user play after the autoplay decision', async () => {

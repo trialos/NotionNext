@@ -147,6 +147,7 @@ describe('AboutReelMedia runtime contract', () => {
     expect(mediaSource).toContain('prefers-reduced-motion')
     expect(mediaSource).toContain('saveData')
     expect(mediaSource).toContain('effectiveType')
+    expect(mediaSource).toContain('connectionType')
     expect(mediaSource).toContain('visibilitychange')
     expect(mediaSource).toContain('NotAllowedError')
     expect(mediaSource).toContain("'blocked'")

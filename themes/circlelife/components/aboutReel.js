@@ -38,17 +38,23 @@ export function shouldAutoplayReel({
   hasSource = false,
   reducedMotion = false,
   saveData = false,
-  effectiveType = ''
+  effectiveType = '',
+  connectionType = ''
 } = {}) {
   if (!hasSource || reducedMotion || saveData) return false
-  if (['slow-2g', '2g', '3g'].includes(effectiveType)) return false
+  // effectiveType 是 Chrome 的网络质量估计（会漂移/误报 3g），只对蜂窝网络生效；
+  // Wi-Fi、以太网、未知连接一律不按它拦自动播放。
+  const isCellular = String(connectionType).toLowerCase() === 'cellular'
+  if (isCellular && ['slow-2g', '2g', '3g'].includes(effectiveType)) {
+    return false
+  }
   return true
 }
 
 const REEL_FALLBACK_REASONS = {
   reduced: '浏览器已要求减少动态效果',
   'save-data': '已开启省流模式',
-  slow: '当前网络较慢',
+  slow: '移动网络较慢',
   blocked: '浏览器阻止了自动播放',
   paused: '播放已暂停'
 }
