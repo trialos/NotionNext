@@ -9,7 +9,7 @@ import {
 import { loadPhotoImages, resolveHomeCoverImages } from '@/lib/db/notion/photoImages'
 import { formatNotionBlock } from '@/lib/db/notion/getPostBlocks'
 import { buildImageSources } from '@/themes/circlelife/components/imageSrcset'
-import { isFeaturedAlbum, isFeaturedEntry } from '@/themes/circlelife/components/homeAlbumFocus'
+import { isFeaturedAlbum, isFeaturedEntry } from '@/themes/circlelife/components/homeAlbumData'
 import { generateRobotsTxt } from '@/lib/utils/robots.txt'
 import { generateRss, shouldGenerateRssForLocale } from '@/lib/utils/rss'
 import { generateSitemapXml } from '@/lib/utils/sitemap.xml'
@@ -155,7 +155,8 @@ export async function getStaticProps(req) {
     props.posts = cleanPostSummaries(props.posts)
   }
   props.latestPosts = cleanPostSummaries(props.latestPosts)
-  // 首页「精选影集」段：Notion「精选」勾选的优先，不足用最新影集补齐。
+  // 首页「精选影集」段：只显示 Notion「精选」勾选的影集，最多取
+  // CIRCLELIFE_HOME_ALBUM_COUNT 辑（默认 4）；**不用最新影集补齐**。
   // 只下发封面与摘要，不再下发全部正文图 URL —— 旧实现把 6 辑 67 张图的
   // URL 塞进首页 pageProps 却无人消费，白付约 17 KB（占整包 24%）。
   const homeAlbumCount = Math.max(
@@ -182,12 +183,10 @@ export async function getStaticProps(req) {
         p.status === 'Published'
     )
   )
-  const featuredPages = allPhotoPages.filter(isFeaturedAlbum).sort(byDateDesc)
-  const restPages = allPhotoPages.filter(p => !isFeaturedAlbum(p)).sort(byDateDesc)
-  const orderedPhotoPages = [...featuredPages, ...restPages].slice(
-    0,
-    homeAlbumCount
-  )
+  const orderedPhotoPages = allPhotoPages
+    .filter(isFeaturedAlbum)
+    .sort(byDateDesc)
+    .slice(0, homeAlbumCount)
   const homeAlbums = []
   for (let i = 0; i < orderedPhotoPages.length; i += filmBatch) {
     const slice = orderedPhotoPages.slice(i, i + filmBatch)

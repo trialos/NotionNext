@@ -25,7 +25,7 @@ const {
 } = require('../../../themes/circlelife/components/homeArticleFocus')
 const {
   isFeaturedEntry
-} = require('../../../themes/circlelife/components/homeAlbumFocus')
+} = require('../../../themes/circlelife/components/homeAlbumData')
 
 const stageSource = readFile(
   'themes',

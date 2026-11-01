@@ -1,7 +1,8 @@
 /**
  * 首页精选文章章的纯逻辑（刻度位置 / 日期格式 / 精选判定）
  *
- * 与影集段的 homeAlbumFocus.js 同构：把易错的算术抽成纯函数，便于单测。
+ * 与影集段共用 Notion「精选」判定（homeAlbumData.js）；
+ * 本文件只放文章章自己的刻度 / 日期纯函数。
  *
  * 关键约束：
  * - 刻度位置只在 mount / resize 时算一次；
@@ -105,7 +106,7 @@ export function computeRulerPositions(days, options = {}) {
  * 条目是否被标记为「精选」—— 与影集段共用同一份判定（影集与文章在
  * Notion 里是同一张表，靠 type 区分），此处转出便于文章章直接引用。
  */
-export { isFeaturedEntry } from './homeAlbumFocus'
+export { isFeaturedEntry } from './homeAlbumData'
 
 /** 标尺上的日期标签：'2026-10-9' → '10·09' */
 export function formatRulerDay(day) {
