@@ -178,6 +178,14 @@ describe('circlelife 首页精选影集段（01 接触印相）', () => {
       expect(html).toContain('02')
     })
 
+    test('3 辑：2 行索引 + 3 个链接', () => {
+      const html = renderAlbums(albums.slice(0, 3))
+      expect(html).toContain('data-count="3"')
+      expect(html.match(/<li>/g) || []).toHaveLength(2)
+      expect(html.match(/<a /g) || []).toHaveLength(3)
+      expect(html.match(/<h2/g) || []).toHaveLength(3)
+    })
+
     test('4 辑：主封面 + 3 行索引，4 个链接，总数 43', () => {
       const html = renderAlbums(albums)
       expect(html).toContain('data-count="4"')
