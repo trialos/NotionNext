@@ -137,6 +137,15 @@ describe('About reel wall integration', () => {
     expect(styleSource).toContain('visibility: visible;')
   })
 
+  test('reserves bottom clearance for the iOS Safari toolbar', () => {
+    expect(styleSource).toContain(
+      'calc(56px + env(safe-area-inset-bottom, 0px))'
+    )
+    expect(styleSource).toContain(
+      '#theme-circlelife.cl-is-about .cl-about-hero-overlay--reel'
+    )
+  })
+
   test('uses dedicated reel modifiers and stops action taps from dragging the wall', () => {
     expect(inlineSource).toContain('cl-about-hero-actions')
     expect(inlineSource).toContain('cl-about-hero-overlay--reel')

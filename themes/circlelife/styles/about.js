@@ -555,10 +555,15 @@ export const aboutStyle = `
 
   @media (max-width: 767px) {
     .cl-about-prologue-btn {
-      bottom: calc(20px + env(safe-area-inset-bottom, 16px));
+      bottom: calc(56px + env(safe-area-inset-bottom, 0px));
       height: 34px;
       padding: 0 12px 0 8px;
       font-size: 10px;
+    }
+
+    /* iOS Safari 底部工具栏会覆盖视口底部；至少留 56px，避免按钮被截 */
+    #theme-circlelife.cl-is-about .cl-about-hero-overlay--reel {
+      padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
     }
   }
 
