@@ -138,6 +138,17 @@ export default function InfiniteAboutGrid({
     let ambientDrift = 0
     let isHeroOpen = true
 
+    const syncHeroOpen = () => {
+      heroOverlayRef.current?.classList.remove('is-closed')
+      backdropRef.current?.classList.remove('is-closed')
+      prologueBtnRef.current?.classList.remove('is-visible')
+      reelRef.current?.setActive(true)
+    }
+
+    // 同一路由再次进入时组件不会卸载，effect 会重建展墙但不会重放初态；
+    // 必须把 DOM 同步回「序言打开」，否则内部 isHeroOpen=true 与 DOM is-closed 脱节。
+    syncHeroOpen()
+
     // 指针拖拽与滑动状态
     let isDragging = false
     const drag = {
@@ -431,16 +442,10 @@ export default function InfiniteAboutGrid({
 
     // 唤出序言幕布（原位缓缓降落，零重载，背景恢复缓慢流动）
     const openHero = () => {
-      if (isHeroOpen) return
       isHeroOpen = true
-
-      // 不对 scroll.current 做任何回退，保留当前瀑布流位置，恢复呼吸流动
+      // 不清空 scroll：重开时保留瀑布流位置，避免背景跳跃
       ambientDrift = 0
-
-      heroOverlayRef.current?.classList.remove('is-closed')
-      backdropRef.current?.classList.remove('is-closed')
-      prologueBtnRef.current?.classList.remove('is-visible')
-      reelRef.current?.setActive(true)
+      syncHeroOpen()
 
       // 联动全局导航栏 Header 展开复原（延迟到下一帧，消灭同步重绘）
       if (typeof window !== 'undefined') {

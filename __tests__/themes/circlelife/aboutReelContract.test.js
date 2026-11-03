@@ -122,6 +122,16 @@ describe('About reel wall integration', () => {
     expect(styleSource).toContain('.cl-about-hero-action-reason')
   })
 
+  test('re-syncs the prologue DOM when the wall effect rebuilds', () => {
+    expect(inlineSource).toContain('const syncHeroOpen = () =>')
+    expect(
+      (inlineSource.match(/syncHeroOpen\(\)/g) || []).length
+    ).toBeGreaterThanOrEqual(2)
+    expect(styleSource).toContain(
+      '.cl-about-hero-overlay:not(.is-closed) ~ .cl-about-prologue-btn'
+    )
+  })
+
   test('uses dedicated reel modifiers and stops action taps from dragging the wall', () => {
     expect(inlineSource).toContain('cl-about-hero-actions')
     expect(inlineSource).toContain('cl-about-hero-overlay--reel')

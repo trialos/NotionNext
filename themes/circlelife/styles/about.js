@@ -523,6 +523,13 @@ export const aboutStyle = `
     transform: translateY(0);
   }
 
+  /* 幕布打开时，无论状态类是否残留，都不允许「序言」胶囊盖住底部操作区 */
+  .cl-about-hero-overlay:not(.is-closed) ~ .cl-about-prologue-btn {
+    opacity: 0;
+    pointer-events: none !important;
+    transform: translateY(10px);
+  }
+
   .cl-about-prologue-btn:hover {
     opacity: 1;
     color: var(--cl-vermilion, #b93a2b);
