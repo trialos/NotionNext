@@ -501,6 +501,7 @@ export const aboutStyle = `
     touch-action: manipulation !important;
     opacity: 0;
     pointer-events: none;
+    visibility: hidden;
     transform: translateY(10px);
     transition:
       opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1),
@@ -520,6 +521,7 @@ export const aboutStyle = `
   .cl-about-prologue-btn.is-visible {
     opacity: 0.92;
     pointer-events: auto !important;
+    visibility: visible;
     transform: translateY(0);
   }
 
@@ -527,6 +529,7 @@ export const aboutStyle = `
   .cl-about-hero-overlay:not(.is-closed) ~ .cl-about-prologue-btn {
     opacity: 0;
     pointer-events: none !important;
+    visibility: hidden;
     transform: translateY(10px);
   }
 

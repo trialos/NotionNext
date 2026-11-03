@@ -123,13 +123,18 @@ describe('About reel wall integration', () => {
   })
 
   test('re-syncs the prologue DOM when the wall effect rebuilds', () => {
-    expect(inlineSource).toContain('const syncHeroOpen = () =>')
+    expect(inlineSource).toContain(
+      'const syncHeroOpen = ({ activateReel = false } = {}) =>'
+    )
     expect(
-      (inlineSource.match(/syncHeroOpen\(\)/g) || []).length
+      (inlineSource.match(/syncHeroOpen\(/g) || []).length
     ).toBeGreaterThanOrEqual(2)
+    expect(inlineSource).toContain('if (isHeroOpen && !overlayClosed) return')
     expect(styleSource).toContain(
       '.cl-about-hero-overlay:not(.is-closed) ~ .cl-about-prologue-btn'
     )
+    expect(styleSource).toContain('visibility: hidden;')
+    expect(styleSource).toContain('visibility: visible;')
   })
 
   test('uses dedicated reel modifiers and stops action taps from dragging the wall', () => {

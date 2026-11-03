@@ -138,11 +138,12 @@ export default function InfiniteAboutGrid({
     let ambientDrift = 0
     let isHeroOpen = true
 
-    const syncHeroOpen = () => {
+    const syncHeroOpen = ({ activateReel = false } = {}) => {
+      const wasClosed = heroOverlayRef.current?.classList.contains('is-closed')
       heroOverlayRef.current?.classList.remove('is-closed')
       backdropRef.current?.classList.remove('is-closed')
       prologueBtnRef.current?.classList.remove('is-visible')
-      reelRef.current?.setActive(true)
+      if (activateReel || wasClosed) reelRef.current?.setActive(true)
     }
 
     // 同一路由再次进入时组件不会卸载，effect 会重建展墙但不会重放初态；
@@ -442,10 +443,13 @@ export default function InfiniteAboutGrid({
 
     // 唤出序言幕布（原位缓缓降落，零重载，背景恢复缓慢流动）
     const openHero = () => {
+      const overlayClosed =
+        heroOverlayRef.current?.classList.contains('is-closed')
+      if (isHeroOpen && !overlayClosed) return
       isHeroOpen = true
       // 不清空 scroll：重开时保留瀑布流位置，避免背景跳跃
       ambientDrift = 0
-      syncHeroOpen()
+      syncHeroOpen({ activateReel: true })
 
       // 联动全局导航栏 Header 展开复原（延迟到下一帧，消灭同步重绘）
       if (typeof window !== 'undefined') {
