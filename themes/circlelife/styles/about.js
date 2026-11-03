@@ -759,6 +759,33 @@ export const aboutStyle = `
     opacity: 0.8;
   }
 
+  #theme-circlelife a.cl-about-hero-action--bilibili {
+    min-height: 44px;
+    padding: 0 14px;
+    border: 1px solid rgba(247, 245, 240, 0.55);
+    border-radius: 999px;
+    background: rgba(8, 8, 8, 0.28);
+    font-family: var(--cl-font-mono);
+    font-size: 12px;
+    text-decoration: none;
+    text-transform: none;
+    letter-spacing: 0.04em;
+    color: rgba(247, 245, 240, 0.96);
+  }
+
+  #theme-circlelife a.cl-about-hero-action--bilibili:hover {
+    border-color: rgba(247, 245, 240, 0.8);
+    background: rgba(8, 8, 8, 0.42);
+    color: #fff;
+  }
+
+  .cl-about-hero-action-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px;
+  }
+
   .cl-about-hero-action-group {
     display: inline-flex;
     flex-wrap: wrap;

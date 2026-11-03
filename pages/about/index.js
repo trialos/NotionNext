@@ -301,7 +301,12 @@ export async function getStaticProps({ locale }) {
     desktop: siteConfig('ABOUT_REEL_DESKTOP', '', props.NOTION_CONFIG),
     mobile: siteConfig('ABOUT_REEL_MOBILE', '', props.NOTION_CONFIG),
     poster: siteConfig('ABOUT_REEL_POSTER', '', props.NOTION_CONFIG),
-    posterMobile: siteConfig('ABOUT_REEL_POSTER_MOBILE', '', props.NOTION_CONFIG)
+    posterMobile: siteConfig(
+      'ABOUT_REEL_POSTER_MOBILE',
+      '',
+      props.NOTION_CONFIG
+    ),
+    bilibili: siteConfig('ABOUT_REEL_BILIBILI', '', props.NOTION_CONFIG)
   })
   delete props.allPages
 

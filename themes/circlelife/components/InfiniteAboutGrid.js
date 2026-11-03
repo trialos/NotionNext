@@ -733,23 +733,47 @@ export default function InfiniteAboutGrid({
                   </span>
                 </div>
               )}
-              <button
-                type='button'
-                onClick={handleCloseHero}
-                className='cl-about-hero-hint-text'
-                aria-label='向下滑动探索'>
-                <span>向下滑动探索</span>
-                <svg
-                  className='cl-about-hero-hint-arrow'
-                  viewBox='0 0 24 24'
-                  fill='none'
-                  stroke='currentColor'
-                  strokeWidth='1.5'
-                  strokeLinecap='round'
-                  strokeLinejoin='round'>
-                  <polyline points='6 9 12 15 18 9' />
-                </svg>
-              </button>
+              <div className='cl-about-hero-action-links'>
+                {reel?.bilibili && (
+                  <a
+                    className='cl-about-hero-action cl-about-hero-action--bilibili'
+                    href={reel.bilibili}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    aria-label='在 B 站观看完整版（新窗口）'>
+                    <span>B 站完整版</span>
+                    <svg
+                      viewBox='0 0 12 12'
+                      aria-hidden='true'>
+                      <path
+                        d='M3.5 8.5 8.5 3.5M4.5 3.5h4v4'
+                        fill='none'
+                        stroke='currentColor'
+                        strokeWidth='1.2'
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                      />
+                    </svg>
+                  </a>
+                )}
+                <button
+                  type='button'
+                  onClick={handleCloseHero}
+                  className='cl-about-hero-hint-text'
+                  aria-label='向下滑动探索'>
+                  <span>向下滑动探索</span>
+                  <svg
+                    className='cl-about-hero-hint-arrow'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                    strokeWidth='1.5'
+                    strokeLinecap='round'
+                    strokeLinejoin='round'>
+                    <polyline points='6 9 12 15 18 9' />
+                  </svg>
+                </button>
+              </div>
             </div>
           ) : (
             <button

@@ -33,7 +33,7 @@ const reelSource = readFile(
 const styleSource = readFile('themes', 'circlelife', 'styles', 'about.js')
 
 describe('About reel data wiring', () => {
-  test('resolves the four R2 URLs from Notion CONFIG', () => {
+  test('resolves the R2 URLs and the optional full-video link', () => {
     expect(pageSource).toContain('resolveAboutReel')
     for (const key of [
       'ABOUT_REEL_DESKTOP',
@@ -43,8 +43,7 @@ describe('About reel data wiring', () => {
     ]) {
       expect(pageSource).toContain(key)
     }
-    expect(pageSource).not.toContain('ABOUT_REEL_BILIBILI')
-    expect(pageSource).not.toContain('bilibili')
+    expect(pageSource).toContain('ABOUT_REEL_BILIBILI')
   })
 
   test('preloads the matching poster and keeps the wall-card fallback', () => {
@@ -84,7 +83,7 @@ describe('About reel wall integration', () => {
     expect(inlineSource).toContain('if (reel?.enabled) primeWallMedia()')
   })
 
-  test('keeps the hint after the lead and offers only a play fallback', () => {
+  test('keeps the hint after the lead and offers the play fallback', () => {
     const h1At = inlineSource.indexOf(
       "<h1 className='cl-about-hero-summary'>"
     )
@@ -96,8 +95,20 @@ describe('About reel wall integration', () => {
     expect(leadAt).toBeGreaterThan(h1At)
     expect(hintAt).toBeGreaterThan(leadAt)
     expect(inlineSource).toContain('播放快闪')
-    expect(inlineSource).not.toContain('bilibili')
-    expect(inlineSource).not.toContain('B 站')
+  })
+
+  test('renders an optional Bilibili full-video button', () => {
+    expect(pageSource).toContain('ABOUT_REEL_BILIBILI')
+    expect(inlineSource).toContain('reel?.bilibili')
+    expect(inlineSource).toContain('cl-about-hero-action--bilibili')
+    expect(inlineSource).toContain('cl-about-hero-action-links')
+    expect(inlineSource).toContain("target='_blank'")
+    expect(inlineSource).toContain("rel='noopener noreferrer'")
+    expect(inlineSource).toContain('在 B 站观看完整版（新窗口）')
+    expect(styleSource).toContain('.cl-about-hero-action--bilibili')
+    expect(styleSource).toContain(
+      '#theme-circlelife a.cl-about-hero-action--bilibili'
+    )
   })
 
   test('shows the fallback reason next to the play button', () => {

@@ -4,6 +4,7 @@ import {
   pickReelSrc,
   reelFallbackReason,
   resolveAboutReel,
+  sanitizeExternalUrl,
   sanitizeMediaUrl,
   shouldAutoplayReel
 } from '@/themes/circlelife/components/aboutReel'
@@ -12,6 +13,7 @@ const DESKTOP = 'https://media.withcol.com/about/reel-desktop-v3.mp4'
 const MOBILE = 'https://media.withcol.com/about/reel-mobile-v3.mp4'
 const POSTER = 'https://media.withcol.com/about/reel-poster-desktop-v3.webp'
 const POSTER_MOBILE = 'https://media.withcol.com/about/reel-poster-mobile-v3.webp'
+const BILIBILI = 'https://www.bilibili.com/video/BV1hT4F6QEy8/'
 
 describe('aboutReel URL resolution', () => {
   test('accepts https and site-relative media URLs', () => {
@@ -64,6 +66,22 @@ describe('aboutReel URL resolution', () => {
     expect(
       resolveAboutReel({ poster: POSTER, posterMobile: POSTER_MOBILE }).enabled
     ).toBe(false)
+  })
+
+  test('accepts only https for the full-video link', () => {
+    expect(sanitizeExternalUrl(BILIBILI)).toBe(BILIBILI)
+    expect(sanitizeExternalUrl('http://www.bilibili.com/video/BV1')).toBe('')
+    expect(sanitizeExternalUrl('javascript:alert(1)')).toBe('')
+    expect(sanitizeExternalUrl('/about')).toBe('')
+    expect(sanitizeExternalUrl('')).toBe('')
+  })
+
+  test('carries the Bilibili link without changing reel enablement', () => {
+    const reel = resolveAboutReel({ desktop: DESKTOP, bilibili: BILIBILI })
+    expect(reel.enabled).toBe(true)
+    expect(reel.bilibili).toBe(BILIBILI)
+    expect(resolveAboutReel({ bilibili: BILIBILI }).enabled).toBe(false)
+    expect(resolveAboutReel({ desktop: DESKTOP }).bilibili).toBe('')
   })
 
   test('picks the source for the viewport', () => {

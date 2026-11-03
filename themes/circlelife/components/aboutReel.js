@@ -10,11 +10,18 @@ export function sanitizeMediaUrl(value) {
   return ''
 }
 
+export function sanitizeExternalUrl(value) {
+  const url = typeof value === 'string' ? value.trim() : ''
+  if (!url || INVALID_URL_CHARS.test(url)) return ''
+  return url.startsWith('https://') ? url : ''
+}
+
 export function resolveAboutReel({
   desktop,
   mobile,
   poster,
-  posterMobile
+  posterMobile,
+  bilibili
 } = {}) {
   const safeDesktop = sanitizeMediaUrl(desktop)
   const safeMobile = sanitizeMediaUrl(mobile) || safeDesktop
@@ -25,7 +32,8 @@ export function resolveAboutReel({
     desktop: safeDesktop || safeMobile,
     mobile: safeMobile || safeDesktop,
     poster: safePoster,
-    posterMobile: safePosterMobile
+    posterMobile: safePosterMobile,
+    bilibili: sanitizeExternalUrl(bilibili)
   }
 }
 
