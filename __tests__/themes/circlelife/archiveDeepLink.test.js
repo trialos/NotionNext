@@ -179,6 +179,21 @@ describe('LayoutArchive 深链接线契约', () => {
     expect(themeSource).toContain('if (unchanged) return')
   })
 
+  test('裸 /archive 首次挂载恢复标签页记忆；显式选择写入，全部清除', () => {
+    expect(themeSource).toContain(
+      "const hasUrlFilter = queryCategory !== '' || queryTag !== ''"
+    )
+    expect(themeSource).toContain('!memoryAppliedRef.current')
+    expect(themeSource).toContain('readArchiveMemory(storage)')
+    expect(themeSource).toContain(
+      'writeArchiveMemory(isBrowser ? window.sessionStorage : null, query)'
+    )
+    // 记忆只影响裸 /archive 的首次挂载，不能覆盖 URL 深链
+    expect(themeSource.indexOf('readArchiveMemory(storage)')).toBeLessThan(
+      themeSource.indexOf('const { categoryKey, tagKey, cleaned, needsCleanup }')
+    )
+  })
+
   test('筛选 setter 只出现在声明、深链 effect、两个显式 handler —— 无隐式重置', () => {
     const count = needle => themeSource.split(needle).length - 1
     // 声明 1 + 深链 effect 1 + handleCategoryChange 1

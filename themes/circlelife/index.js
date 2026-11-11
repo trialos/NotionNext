@@ -32,6 +32,10 @@ import {
   readArchiveQuery,
   resolveArchiveSelection
 } from './components/archiveDeepLink'
+import {
+  readArchiveMemory,
+  writeArchiveMemory
+} from './components/archiveMemory'
 import { BlogListPage } from './components/BlogListPage'
 import { BlogListScroll } from './components/BlogListScroll'
 import AlbumReader from './components/AlbumReader'
@@ -839,6 +843,8 @@ const LayoutSearch = props => {
 const LayoutArchive = props => {
   const { archivePosts } = props
   const router = useRouter()
+  // 记忆只在裸 /archive 的首次挂载应用一次；同一页面实例内的后续导航不再套用
+  const memoryAppliedRef = useRef(false)
   const [activeCategoryKey, setActiveCategoryKey] = useState(ARCHIVE_ALL)
   const [activeTagKey, setActiveTagKey] = useState(ARCHIVE_ALL)
   // 展开态而非收缩态：手机端（<768px）默认由 CSS 呈「窄条」，
@@ -890,6 +896,34 @@ const LayoutArchive = props => {
 
   useEffect(() => {
     if (!router.isReady) return
+    const storage = isBrowser ? window.sessionStorage : null
+    const hasUrlFilter = queryCategory !== '' || queryTag !== ''
+
+    // URL 优先。记忆只在本次挂载「裸着进来」时应用一次；
+    // 深链挂载或同一实例内的后续导航都不会被记忆拉走。
+    if (!memoryAppliedRef.current) {
+      memoryAppliedRef.current = true
+      if (!hasUrlFilter) {
+        const remembered = readArchiveMemory(storage)
+        if (remembered) {
+          const selection = resolveArchiveSelection(facets, remembered)
+          const isEmpty =
+            selection.categoryKey === ARCHIVE_ALL &&
+            selection.tagKey === ARCHIVE_ALL
+          if (isEmpty) {
+            writeArchiveMemory(storage, null)
+          } else {
+            router.replace(
+              { pathname: router.pathname, query: selection.cleaned },
+              undefined,
+              { shallow: true, scroll: false }
+            )
+            return
+          }
+        }
+      }
+    }
+
     const { categoryKey, tagKey, cleaned, needsCleanup } =
       resolveArchiveSelection(facets, {
         category: queryCategory,
@@ -908,6 +942,8 @@ const LayoutArchive = props => {
 
   const syncArchiveQuery = (categoryKey, tagKey) => {
     const query = buildArchiveQuery(facets, categoryKey, tagKey)
+    // 显式选择才写记忆；「全部」= 清空记忆
+    writeArchiveMemory(isBrowser ? window.sessionStorage : null, query)
     const current = readArchiveQuery(router.query)
     const unchanged =
       (query.category || '') === current.categoryName &&
