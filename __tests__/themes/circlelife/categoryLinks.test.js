@@ -63,16 +63,23 @@ describe('/category 退役', () => {
   test('sitemap 生成器不再输出 /category/*', () => {
     const builder = readRepo('lib', 'utils', 'sitemap.xml.js')
     expect(builder).toContain('isCategorySlug')
+    expect(builder).toContain('dedupeSitemapUrls')
     expect(builder).not.toContain("slug: 'category'")
     expect(builder).toContain("slug: 'archive'")
 
     const dynamic = readRepo('pages', 'sitemap.xml.js')
     expect(dynamic).not.toContain("slug: 'category'")
     expect(dynamic).toContain('isCategorySlug')
+  })
 
-    // 未被引用的旧生成器也保持同一口径
-    const legacy = readRepo('lib', 'utils', 'sitemap.js')
-    expect(legacy).not.toContain('/category/')
-    expect(legacy).toContain('url: `${LINK}/archive`')
+  test('未引用的旧 sitemap 生成器已删除', () => {
+    expect(fs.existsSync(path.join(process.cwd(), 'lib/utils/sitemap.js'))).toBe(
+      false
+    )
+  })
+
+  test('布局映射不再包含分类路由', () => {
+    const map = readRepo('conf', 'layout-map.config.js')
+    expect(map).not.toContain('/category')
   })
 })
