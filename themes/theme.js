@@ -226,10 +226,6 @@ const primaryThemeLayouts = {
   LayoutTagIndex: dynamic(
     () => import('@/themes/circlelife').then(m => m.LayoutTagIndex),
     { ssr: true }
-  ),
-  LayoutCategoryIndex: dynamic(
-    () => import('@/themes/circlelife').then(m => m.LayoutCategoryIndex),
-    { ssr: true }
   )
 }
 

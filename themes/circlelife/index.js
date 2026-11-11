@@ -27,6 +27,11 @@ import {
   buildArchiveFacets,
   filterArchivePosts
 } from './components/archiveFilter'
+import {
+  buildArchiveQuery,
+  readArchiveQuery,
+  resolveArchiveKeys
+} from './components/archiveDeepLink'
 import { BlogListPage } from './components/BlogListPage'
 import { BlogListScroll } from './components/BlogListScroll'
 import AlbumReader from './components/AlbumReader'
@@ -278,9 +283,9 @@ const LayoutIndex = props => {
  * @returns
  */
 const LayoutPostList = props => {
-  const { category, tag, keyword } = props
+  const { tag, keyword } = props
   const router = useRouter()
-  // 刊头描述：在自定义菜单（含子菜单）里找与当前分类/标签同链接的行，取其 summary
+  // 刊头描述：在自定义菜单（含子菜单）里找与当前标签同链接的行，取其 summary
   const menuSummaryFor = path => {
     const rows = []
     ;(props.customMenu || []).forEach(m => {
@@ -297,31 +302,20 @@ const LayoutPostList = props => {
     const hit = rows.find(r => norm(r?.href) === norm(path))
     return hit?.summary || ''
   }
-  const categoryDesc = category
-    ? menuSummaryFor(`/category/${category}`)
-    : ''
   const tagDesc = tag ? menuSummaryFor(`/tag/${tag}`) : ''
   const useTimeline =
     siteConfig('CIRCLELIFE_HOME_TIMELINE', true, CONFIG) &&
-    !category &&
     !tag &&
     !keyword &&
     !router?.query?.s &&
     (router.pathname === '/' || router.pathname === '/page/[page]')
 
   // 首页与列表页分流：首页下半部已是全屏章节（精选文章一文一屏 + 近期单栏排版），
-  // 列表容器（窄栏时间线）只留给 /page/[page]、/category/*、/tag/* 等列表页。
+  // 列表容器（窄栏时间线）只留给 /page/[page]、/tag/* 等列表页。
   const isHome = router.pathname === '/'
 
   return (
     <>
-      {category ? (
-        <PageMast
-          eyebrow='分类'
-          title={category}
-          description={categoryDesc || undefined}
-        />
-      ) : null}
       {tag ? (
         <PageMast
           eyebrow='标签'
@@ -844,6 +838,7 @@ const LayoutSearch = props => {
  */
 const LayoutArchive = props => {
   const { archivePosts } = props
+  const router = useRouter()
   const [activeCategoryKey, setActiveCategoryKey] = useState(ARCHIVE_ALL)
   const [activeTagKey, setActiveTagKey] = useState(ARCHIVE_ALL)
   // 展开态而非收缩态：手机端（<768px）默认由 CSS 呈「窄条」，
@@ -885,6 +880,31 @@ const LayoutArchive = props => {
       ? `${archiveMonths[0]} — ${archiveMonths[archiveMonths.length - 1]}`
       : archiveMonths[0] || ''
 
+  // 深链入口：/archive?category=<名字>&tag=<名字>。
+  // 筛选事实仍由本地 state 承担（静态页首帧渲染全量，路由就绪后再切到筛选）；
+  // URL 只作入口与分享，唯一的写入时机是用户显式点轨道/标签。
+  const { categoryName: queryCategory, tagName: queryTag } = readArchiveQuery(
+    router.query
+  )
+
+  useEffect(() => {
+    if (!router.isReady) return
+    const { categoryKey, tagKey } = resolveArchiveKeys(facets, {
+      categoryName: queryCategory,
+      tagName: queryTag
+    })
+    setActiveCategoryKey(prev => (prev === categoryKey ? prev : categoryKey))
+    setActiveTagKey(prev => (prev === tagKey ? prev : tagKey))
+  }, [router.isReady, queryCategory, queryTag, facets])
+
+  const syncArchiveQuery = (categoryKey, tagKey) => {
+    const query = buildArchiveQuery(facets, categoryKey, tagKey)
+    router.replace({ pathname: router.pathname, query }, undefined, {
+      shallow: true,
+      scroll: false
+    })
+  }
+
   const activeCategory = facets.categories.find(
     category => category.key === activeCategoryKey
   )
@@ -902,13 +922,17 @@ const LayoutArchive = props => {
   // 展开 / 收起只由「展开」「收起」两个按钮驱动：
   // 切分类、选标签、清除筛选都不再重置展开态 —— 用户的显式选择在各分类之间保持
   // （2026-10 博主要求：默认收缩，用户点开就展开、点收就收起，一路保持）。
+  // activeCategoryKey / activeTagKey 的写入只有三处：上面的 URL 深链 effect、
+  // 下面两个显式操作；任何自动流程都不得改它们（AGENTS §4 默认态纪律）。
   const handleCategoryChange = key => {
     setActiveCategoryKey(key)
     setActiveTagKey(ARCHIVE_ALL)
+    syncArchiveQuery(key, ARCHIVE_ALL)
   }
 
   const handleTagChange = key => {
     setActiveTagKey(key)
+    syncArchiveQuery(activeCategoryKey, key)
   }
 
   const hasPosts = facets.totalCount > 0
@@ -980,33 +1004,6 @@ const LayoutArchive = props => {
 }
 
 /**
- * 分类列表
- * @param {*} props
- * @returns
- */
-const LayoutCategoryIndex = props => {
-  const { categoryOptions } = props
-  const { locale } = useGlobal()
-  return (
-    <>
-      <TlPageHero eyebrow='导航' title={locale?.COMMON?.CATEGORY || '分类'} />
-      <div id='category-list' className='flex flex-wrap'>
-        {categoryOptions?.map(category => (
-          <SmartLink
-            key={category.name}
-            href={`/category/${category.name}`}
-            className='cl-chip'>
-            <i className='fas fa-folder opacity-70' aria-hidden='true' />
-            {category.name}
-            <span className='text-[var(--cl-faint)]'>({category.count})</span>
-          </SmartLink>
-        ))}
-      </div>
-    </>
-  )
-}
-
-/**
  * 标签列表
  * @param {*} props
  * @returns
@@ -1039,7 +1036,6 @@ export {
   Layout404,
   LayoutArchive,
   LayoutBase,
-  LayoutCategoryIndex,
   LayoutAlbum,
   LayoutAbout,
   LayoutIndex,

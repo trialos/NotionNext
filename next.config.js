@@ -252,10 +252,29 @@ const nextConfig = {
   },
 
   // 默认将feed重定向至 /public/rss/feed.xml
+  // 分类页已退役：旧 /category/* 链接 308 到归档页的分类筛选视图
+  // （?category= 由 LayoutArchive 读取；具体规则在前，笼统规则在后）
   redirects: process.env.EXPORT
     ? undefined
     : () => {
       return [
+        // i18n 开启时 source 会按语言自动加前缀，去掉 locale:false 才能命中
+        // 默认语言的裸路径 /category/x 与 /zh-CN/category/x
+        {
+          source: '/category/:category/page/:page',
+          destination: '/archive?category=:category',
+          permanent: true
+        },
+        {
+          source: '/category/:category',
+          destination: '/archive?category=:category',
+          permanent: true
+        },
+        {
+          source: '/category',
+          destination: '/archive',
+          permanent: true
+        },
         {
           source: '/feed',
           destination: '/rss/feed.xml',

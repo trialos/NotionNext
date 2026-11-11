@@ -492,22 +492,6 @@ export const getSEOMeta = (props, router, locale) => {
         slug: 'page/' + page,
         type: 'website'
       }
-    case '/category/[category]':
-      return {
-        title: `${category} | ${locale.COMMON.CATEGORY} | ${siteInfo?.title}`,
-        description: `${siteInfo?.description}`,
-        slug: 'category/' + category,
-        image: `${siteInfo?.pageCover}`,
-        type: 'website'
-      }
-    case '/category/[category]/page/[page]':
-      return {
-        title: `${category} | ${locale.COMMON.CATEGORY} | ${siteInfo?.title}`,
-        description: `${siteInfo?.description}`,
-        slug: 'category/' + category,
-        image: `${siteInfo?.pageCover}`,
-        type: 'website'
-      }
     case '/tag/[tag]':
     case '/tag/[tag]/page/[page]':
       return {

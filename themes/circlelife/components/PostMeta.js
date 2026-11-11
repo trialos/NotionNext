@@ -42,7 +42,7 @@ export const PostMeta = props => {
     parts.push(
       <SmartLink
         key='cat'
-        href={`/category/${post.category}`}
+        href={`/archive?category=${encodeURIComponent(post.category)}`}
         className='cl-chip cl-chip--soft cl-meta-category'>
         {post.category}
       </SmartLink>

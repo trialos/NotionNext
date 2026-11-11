@@ -48,6 +48,11 @@ function generateLocalesSitemap(link, allPages, locale) {
   const normalizedLink = normalizeSitemapBaseUrl(link)
   const normalizedLocale = normalizeSitemapLocale(locale)
   const dateNow = toSitemapDateString(new Date())
+  // 分类页已退役：/category/* 不再登记（菜单行可能仍带着这些 slug）
+  const isCategorySlug = slug => {
+    const normalized = String(slug || '').replace(/^\/+/, '')
+    return normalized === 'category' || normalized.startsWith('category/')
+  }
 
   const defaultFields = [
     {
@@ -71,16 +76,6 @@ function generateLocalesSitemap(link, allPages, locale) {
         baseUrl: normalizedLink,
         locale: normalizedLocale,
         slug: 'music'
-      }),
-      lastmod: dateNow,
-      changefreq: 'daily',
-      priority: '0.7'
-    },
-    {
-      loc: buildSitemapLoc({
-        baseUrl: normalizedLink,
-        locale: normalizedLocale,
-        slug: 'category'
       }),
       lastmod: dateNow,
       changefreq: 'daily',
@@ -123,6 +118,7 @@ function generateLocalesSitemap(link, allPages, locale) {
       ?.filter(p => p.status === BLOG.NOTION_PROPERTY_NAME.status_publish)
       // 过滤掉外部链接(http开头)和锚点链接(#开头)
       ?.filter(p => p.slug && !p.slug.startsWith('http') && !p.slug.startsWith('#'))
+      ?.filter(p => !isCategorySlug(p.slug))
       ?.map(post => {
         const loc = buildSitemapLoc({
           baseUrl: normalizedLink,

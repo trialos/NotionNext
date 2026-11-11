@@ -29,7 +29,7 @@ const BlogItem = ({ post, variant = 'default' }) => {
           </h3>
           {post?.type !== 'Page' && post?.category && (
             <SmartLink
-              href={`/category/${post.category}`}
+              href={`/archive?category=${encodeURIComponent(post.category)}`}
               className='cl-chip cl-chip--soft'>
               {post.category}
             </SmartLink>
@@ -68,7 +68,8 @@ const BlogItem = ({ post, variant = 'default' }) => {
             {post?.category ? (
               <>
                 <span className='cl-dot'>·</span>
-                <SmartLink href={`/category/${post.category}`}>
+                <SmartLink
+                  href={`/archive?category=${encodeURIComponent(post.category)}`}>
                   {post.category}
                 </SmartLink>
               </>
