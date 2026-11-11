@@ -56,6 +56,7 @@ export interface NotionCategory {
   name: string
   count: number
   color?: string
+  description?: string
 }
 
 export interface NotionTag {

@@ -841,7 +841,7 @@ const LayoutSearch = props => {
  * @returns 按照日期将文章分组排序
  */
 const LayoutArchive = props => {
-  const { archivePosts } = props
+  const { archivePosts, categoryNotes } = props
   const router = useRouter()
   // 记忆只在裸 /archive 的首次挂载应用一次；同一页面实例内的后续导航不再套用
   const memoryAppliedRef = useRef(false)
@@ -969,6 +969,10 @@ const LayoutArchive = props => {
     activeTagKey === ARCHIVE_ALL
       ? ''
       : activeScope?.tags.find(tag => tag.key === activeTagKey)?.name || ''
+  const activeCategoryNote =
+    activeCategoryKey === ARCHIVE_ALL
+      ? ''
+      : categoryNotes?.[activeCategoryName] || ''
 
   // 展开 / 收起只由「展开」「收起」两个按钮驱动：
   // 切分类、选标签、清除筛选都不再重置展开态 —— 用户的显式选择在各分类之间保持
@@ -1039,6 +1043,7 @@ const LayoutArchive = props => {
           activeCategoryKey={activeCategoryKey}
           activeTagKey={activeTagKey}
           activeCategoryName={activeCategoryName}
+          activeCategoryNote={activeCategoryNote}
           activeTagName={activeTagName}
           archiveRange={archiveRange}
           expanded={tagIndexExpanded}

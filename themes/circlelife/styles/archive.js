@@ -20,6 +20,28 @@ export const archiveStyle = `
              形态与影集页标签栏完全一致，样式统一走 styles/filterTrack.js 的
              .cl-cat-track*（唯一真源），此处不再重复实现。 —— */
 
+      /* —— 分类注记（select 选项的 description）——
+             紧贴轨道下沿的说明行；朱砂竖线与轨道的当前项下划线同色。
+             只在选中具体分类时渲染（ArchiveIndex 控制），「全部」不出现。 */
+      #theme-circlelife .cl-archive-note {
+        margin: 0 0 1rem;
+        border-left: 2px solid var(--cl-accent);
+        padding-left: 0.65rem;
+        font-family: var(--cl-font-display);
+        font-size: 13px;
+        line-height: 1.7;
+        letter-spacing: 0.01em;
+        color: var(--cl-muted);
+        max-width: 30em;
+        text-wrap: balance;
+      }
+      @media (min-width: 1024px) {
+        #theme-circlelife .cl-archive-note {
+          font-size: 13.5px;
+          max-width: 34em;
+        }
+      }
+
       /* —— Filter body / tag rail —— */
       #theme-circlelife .cl-archive-body {
         display: grid;

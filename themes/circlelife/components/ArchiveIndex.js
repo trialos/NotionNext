@@ -50,6 +50,7 @@ export default function ArchiveIndex({
   activeCategoryKey,
   activeTagKey,
   activeCategoryName,
+  activeCategoryNote = '',
   activeTagName,
   archiveRange,
   expanded = false,
@@ -106,6 +107,11 @@ export default function ArchiveIndex({
         archiveRange={archiveRange}
         onCategoryChange={onCategoryChange}
       />
+
+      {/* 分类注记：select 选项的 description，紧贴轨道下沿；「全部」不渲染 */}
+      {activeCategoryNote ? (
+        <p className='cl-archive-note'>{activeCategoryNote}</p>
+      ) : null}
 
       <div className='cl-archive-body'>
         <aside className='cl-archive-rail'>

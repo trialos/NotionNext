@@ -64,6 +64,16 @@ export async function getStaticProps({ locale }) {
 
   props.posts = posts
 
+  // 分类注记：select 选项自带的 description（不是库里的 description 文本列）。
+  // 归档页只需要「分类名 → 注释」的轻量映射，不保留完整选项对象。
+  const categoryNotes = {}
+  ;(props.categoryOptions || []).forEach(category => {
+    const name = String(category?.name || '').trim()
+    const note = String(category?.description || '').trim()
+    if (name && note) categoryNotes[name] = note
+  })
+  props.categoryNotes = categoryNotes
+
   const theme = siteConfig('THEME', BLOG.THEME, props.NOTION_CONFIG)
   if (theme === 'circlelife') {
     // circlelife 的 LayoutArchive/BlogListArchive 只消费这些字段；
