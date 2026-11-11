@@ -24,7 +24,7 @@ export function resolveArchiveKeys(facets, { categoryName, tagName } = {}) {
   const tagKey = tagName
     ? facets?.scopes
         ?.get(categoryKey)
-        ?.tags.find(item => item.name === tagName)?.key || ARCHIVE_ALL
+        ?.tags?.find(item => item.name === tagName)?.key || ARCHIVE_ALL
     : ARCHIVE_ALL
   return { categoryKey, tagKey }
 }
@@ -39,9 +39,26 @@ export function buildArchiveQuery(facets, categoryKey, tagKey) {
       ? ''
       : facets?.scopes
           ?.get(categoryKey)
-          ?.tags.find(item => item.key === tagKey)?.name || ''
+          ?.tags?.find(item => item.key === tagKey)?.name || ''
   const query = {}
   if (categoryName) query.category = categoryName
   if (tagName) query.tag = tagName
   return query
+}
+
+/**
+ * 一次解析 URL：得到筛选 key，并把无法识别的参数标出来（交给调用方静默清理）。
+ * 无效分类/标签会回落 ARCHIVE_ALL，避免地址、筛选与状态条三者不一致。
+ */
+export function resolveArchiveSelection(facets, query) {
+  const { categoryName, tagName } = readArchiveQuery(query)
+  const { categoryKey, tagKey } = resolveArchiveKeys(facets, {
+    categoryName,
+    tagName
+  })
+  const cleaned = buildArchiveQuery(facets, categoryKey, tagKey)
+  const needsCleanup =
+    (categoryName !== '' && cleaned.category !== categoryName) ||
+    (tagName !== '' && cleaned.tag !== tagName)
+  return { categoryKey, tagKey, cleaned, needsCleanup }
 }

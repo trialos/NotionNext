@@ -29,7 +29,9 @@ describe('/category 退役', () => {
     expect(fs.existsSync(path.join(repo, 'pages/category'))).toBe(false)
   })
 
-  test('next.config：旧链接 308 到归档分类视图，具体规则在前', () => {
+  // EXPORT 模式下 next.config 不启用 redirects，重定向契约不适用
+  const redirectTest = process.env.EXPORT ? test.skip : test
+  redirectTest('next.config：旧链接 308 到归档分类视图，具体规则在前', () => {
     const config = require('../../../next.config.js')
     const rules = config.redirects()
     const paged = rules.find(

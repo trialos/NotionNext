@@ -30,7 +30,7 @@ import {
 import {
   buildArchiveQuery,
   readArchiveQuery,
-  resolveArchiveKeys
+  resolveArchiveSelection
 } from './components/archiveDeepLink'
 import { BlogListPage } from './components/BlogListPage'
 import { BlogListScroll } from './components/BlogListScroll'
@@ -881,25 +881,40 @@ const LayoutArchive = props => {
       : archiveMonths[0] || ''
 
   // 深链入口：/archive?category=<名字>&tag=<名字>。
-  // 筛选事实仍由本地 state 承担（静态页首帧渲染全量，路由就绪后再切到筛选）；
-  // URL 只作入口与分享，唯一的写入时机是用户显式点轨道/标签。
+  // 筛选事实仍由本地 state 承担（静态页首帧渲染全量，路由就绪后再切到筛选）。
+  // URL 的写入只有两处：用户显式点轨道/标签（push 进历史），
+  // 以及无法识别的参数被静默清理（replace，不产生历史）。
   const { categoryName: queryCategory, tagName: queryTag } = readArchiveQuery(
     router.query
   )
 
   useEffect(() => {
     if (!router.isReady) return
-    const { categoryKey, tagKey } = resolveArchiveKeys(facets, {
-      categoryName: queryCategory,
-      tagName: queryTag
-    })
+    const { categoryKey, tagKey, cleaned, needsCleanup } =
+      resolveArchiveSelection(facets, {
+        category: queryCategory,
+        tag: queryTag
+      })
     setActiveCategoryKey(prev => (prev === categoryKey ? prev : categoryKey))
     setActiveTagKey(prev => (prev === tagKey ? prev : tagKey))
-  }, [router.isReady, queryCategory, queryTag, facets])
+    // 旧分类名/失效标签：把 URL 清成实际生效的筛选，保持地址与状态条一致
+    if (needsCleanup) {
+      router.replace({ pathname: router.pathname, query: cleaned }, undefined, {
+        shallow: true,
+        scroll: false
+      })
+    }
+  }, [router.isReady, queryCategory, queryTag, facets, router])
 
   const syncArchiveQuery = (categoryKey, tagKey) => {
     const query = buildArchiveQuery(facets, categoryKey, tagKey)
-    router.replace({ pathname: router.pathname, query }, undefined, {
+    const current = readArchiveQuery(router.query)
+    const unchanged =
+      (query.category || '') === current.categoryName &&
+      (query.tag || '') === current.tagName
+    if (unchanged) return
+    // push：筛选切换进入历史，返回/前进可回到上一个筛选
+    router.push({ pathname: router.pathname, query }, undefined, {
       shallow: true,
       scroll: false
     })

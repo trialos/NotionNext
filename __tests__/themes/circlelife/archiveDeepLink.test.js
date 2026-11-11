@@ -4,7 +4,8 @@ import path from 'path'
 import {
   buildArchiveQuery,
   readArchiveQuery,
-  resolveArchiveKeys
+  resolveArchiveKeys,
+  resolveArchiveSelection
 } from '@/themes/circlelife/components/archiveDeepLink'
 import {
   ARCHIVE_ALL,
@@ -107,11 +108,51 @@ describe('归档深链：名字 ↔ 筛选 key 映射', () => {
   })
 })
 
+describe('归档深链：无效参数清理', () => {
+  test('有效参数不需要清理', () => {
+    const seeded = resolveArchiveSelection(facets, {
+      category: '字里行间',
+      tag: '思考'
+    })
+    expect(seeded).toEqual({
+      categoryKey: 'cat:字里行间',
+      tagKey: 'tag:思考',
+      cleaned: { category: '字里行间', tag: '思考' },
+      needsCleanup: false
+    })
+  })
+
+  test('旧分类名 → 回落全部，并标记清理', () => {
+    const stale = resolveArchiveSelection(facets, { category: '随笔' })
+    expect(stale.categoryKey).toBe(ARCHIVE_ALL)
+    expect(stale.needsCleanup).toBe(true)
+    expect(stale.cleaned).toEqual({})
+  })
+
+  test('失效标签 → 保留有效分类，只清理标签', () => {
+    const stale = resolveArchiveSelection(facets, {
+      category: '人机协作',
+      tag: '思考'
+    })
+    expect(stale.categoryKey).toBe('cat:人机协作')
+    expect(stale.tagKey).toBe(ARCHIVE_ALL)
+    expect(stale.needsCleanup).toBe(true)
+    expect(stale.cleaned).toEqual({ category: '人机协作' })
+  })
+
+  test('空值/数组参数视为未提供，不触发清理', () => {
+    expect(resolveArchiveSelection(facets, {}).needsCleanup).toBe(false)
+    expect(
+      resolveArchiveSelection(facets, { category: ['字里行间'] }).needsCleanup
+    ).toBe(false)
+  })
+})
+
 describe('LayoutArchive 深链接线契约', () => {
   test('URL 只在路由就绪后、经纯映射函数进入 state', () => {
     expect(themeSource).toContain('readArchiveQuery(')
     expect(themeSource).toContain('router.isReady')
-    expect(themeSource).toContain('resolveArchiveKeys(facets')
+    expect(themeSource).toContain('resolveArchiveSelection(facets')
     expect(themeSource).toContain(
       'setActiveCategoryKey(prev => (prev === categoryKey ? prev : categoryKey))'
     )
@@ -120,11 +161,22 @@ describe('LayoutArchive 深链接线契约', () => {
     )
   })
 
-  test('用户显式操作才写 URL：shallow + 不滚动', () => {
+  test('用户显式操作 push 进历史；无效参数用 replace 静默清理', () => {
     expect(themeSource).toContain('buildArchiveQuery(facets, categoryKey, tagKey)')
-    expect(themeSource).toContain("router.replace({ pathname: router.pathname, query }")
+    expect(themeSource).toContain(
+      'router.push({ pathname: router.pathname, query }'
+    )
+    expect(themeSource).toContain(
+      'router.replace({ pathname: router.pathname, query: cleaned }'
+    )
+    expect(themeSource).toContain('if (needsCleanup)')
     expect(themeSource).toContain('shallow: true')
     expect(themeSource).toContain('scroll: false')
+  })
+
+  test('重复点击当前筛选不写历史', () => {
+    expect(themeSource).toContain('const unchanged =')
+    expect(themeSource).toContain('if (unchanged) return')
   })
 
   test('筛选 setter 只出现在声明、深链 effect、两个显式 handler —— 无隐式重置', () => {

@@ -444,7 +444,7 @@ const getIsoTime = value => {
  * @param {*} router
  */
 export const getSEOMeta = (props, router, locale) => {
-  const { post, siteInfo, tag, category, page, NOTION_CONFIG } = props
+  const { post, siteInfo, tag, page, NOTION_CONFIG } = props
   const keyword = router?.query?.s
 
   const TITLE = siteConfig('TITLE')
