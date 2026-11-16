@@ -2,7 +2,8 @@ import {
   buildReaderAlbums,
   findReaderAlbumIndex,
   parseReaderQuery,
-  readerQuery
+  readerQuery,
+  splitIntroParagraphs
 } from '@/themes/circlelife/components/albumReaderData'
 
 const page = overrides => ({
@@ -26,10 +27,11 @@ const page = overrides => ({
 })
 
 describe('albumReaderData', () => {
-  test('summary 等于标题时，题眼回退到 description，避免目录重复标题', () => {
+  test('summary 与 title 相同时，题眼仍取 Summary，不再回退到 description', () => {
     const [album] = buildReaderAlbums([page()])
-    expect(album.summary).toBe('老派是一种方式，也是一种记忆。')
+    expect(album.summary).toBe('老派的方式')
     expect(album.intro).toBe('老派是一种方式，也是一种记忆。')
+    expect(album.introParagraphs).toEqual(['老派是一种方式，也是一种记忆。'])
     expect(album.title).toBe('老派的方式')
   })
 
@@ -39,6 +41,49 @@ describe('albumReaderData', () => {
     ])
     expect(album.summary).toBe('雨还没停。')
     expect(album.intro).toBe('九月的金边，雨还没停。')
+  })
+
+  test('Description 的多行文本保留在 intro，并切成 introParagraphs', () => {
+    const description =
+      '九月的金边，雨还没停。\n\n我们在河边坐了一下午。\n夜里才回去。'
+    const [album] = buildReaderAlbums([
+      page({ summary: '雨还没停。', description })
+    ])
+    expect(album.intro).toBe(description)
+    expect(album.introParagraphs).toEqual([
+      '九月的金边，雨还没停。',
+      '我们在河边坐了一下午。',
+      '夜里才回去。'
+    ])
+  })
+
+  test('没有 Description 时 introParagraphs 为空数组', () => {
+    const [album] = buildReaderAlbums([page({ description: '' })])
+    expect(album.intro).toBe('')
+    expect(album.introParagraphs).toEqual([])
+  })
+
+  describe('splitIntroParagraphs', () => {
+    test('按手动换行切段，收掉连续空行、CRLF 与首尾空白', () => {
+      expect(splitIntroParagraphs('\n第一段\n\n\n第二段\r\n第三段\n')).toEqual([
+        '第一段',
+        '第二段',
+        '第三段'
+      ])
+    })
+
+    test('空值、纯空白与非字符串返回空数组', () => {
+      expect(splitIntroParagraphs('')).toEqual([])
+      expect(splitIntroParagraphs('   \n\n ')).toEqual([])
+      expect(splitIntroParagraphs(null)).toEqual([])
+      expect(splitIntroParagraphs(undefined)).toEqual([])
+      expect(splitIntroParagraphs(42)).toEqual([])
+    })
+
+    test('单段不拆散，段内空格保留', () => {
+      expect(splitIntroParagraphs('  一句话  ')).toEqual(['一句话'])
+      expect(splitIntroParagraphs('前半 后半')).toEqual(['前半 后半'])
+    })
   })
 
   test('整理日期、张数、图注与取图档位', () => {

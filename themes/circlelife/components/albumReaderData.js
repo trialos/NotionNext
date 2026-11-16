@@ -13,6 +13,19 @@ function firstString(value) {
   return ''
 }
 
+/**
+ * 小序分段：Notion 里靠手动回车分段（\n / \r\n）。
+ * 连续空行与首尾空白一并收掉，只留下有内容的段落。
+ */
+export function splitIntroParagraphs(intro) {
+  if (!intro || typeof intro !== 'string') return []
+  return intro
+    .replace(/\r\n?/g, '\n')
+    .split(/\n+/)
+    .map(paragraph => paragraph.trim())
+    .filter(Boolean)
+}
+
 function uniqueCaption(caption, title, summary, description) {
   const c = firstString(caption)
   if (!c) return ''
@@ -49,7 +62,8 @@ function extractReaderPhotos(page) {
 }
 
 function dateParts(page) {
-  const raw = firstString(page?.publishDay) || firstString(page?.date?.start_date)
+  const raw =
+    firstString(page?.publishDay) || firstString(page?.date?.start_date)
   const match = raw.match(/(\d{4})[.\-/](\d{1,2})/)
   if (match) {
     return {
@@ -73,7 +87,7 @@ function dateParts(page) {
 
 /**
  * Photo 页 → 阅读器专辑模型。
- * 一页一辑：title / summary（题眼）/ description（小序）/ 正文图片（Caption 已去重）。
+ * 一页一辑：summary（目录题眼）/ description（章页小序）/ 正文图片（Caption 已去重）。
  */
 export function buildReaderAlbums(pages = []) {
   const list = (pages || []).filter(
@@ -93,22 +107,22 @@ export function buildReaderAlbums(pages = []) {
       index,
       src: buildSizedSource(photo.url, READER_IMAGE_WIDTH) || photo.url,
       fullSrc: photo.url,
-      thumbSrc:
-        buildSizedSource(photo.url, THUMB_IMAGE_WIDTH) || photo.url,
+      thumbSrc: buildSizedSource(photo.url, THUMB_IMAGE_WIDTH) || photo.url,
       ratio: Number(photo.aspectRatio) > 0 ? Number(photo.aspectRatio) : 0,
       caption: firstString(photo.caption)
     }))
     const { year, month } = dateParts(page)
     const title = firstString(page.title) || '未命名影集'
+    // 目录题眼只看 Summary；章页小序只看 Description，两者互不兜底
     const summary = firstString(page.summary)
     const intro = firstString(page.description)
-    // 站点旧数据里 summary 偶尔等于标题；此时把 description 当作题眼，避免目录重复标题
-    const tagline = summary && summary !== title ? summary : intro
+    const introParagraphs = splitIntroParagraphs(intro)
     albums.push({
       id: page.id,
       title,
-      summary: tagline,
+      summary,
       intro,
+      introParagraphs,
       year,
       month,
       count: photos.length,

@@ -34,6 +34,25 @@ function reducedMotion() {
   )
 }
 
+function ChapterIntro({ album }) {
+  const paragraphs = Array.isArray(album?.introParagraphs)
+    ? album.introParagraphs
+    : []
+  if (!paragraphs.length) return null
+  return (
+    <>
+      <span className='chapter-intro-rule' aria-hidden='true' />
+      <div className='chapter-intro'>
+        {paragraphs.map((paragraph, index) => (
+          <p key={`intro-${index}`} className='chapter-intro-body'>
+            {paragraph}
+          </p>
+        ))}
+      </div>
+    </>
+  )
+}
+
 function ChapterInner({ album, albumIndex, total, withEnter, onEnter }) {
   if (!album) return null
   return (
@@ -43,7 +62,7 @@ function ChapterInner({ album, albumIndex, total, withEnter, onEnter }) {
         ALBUM · {pad(albumIndex + 1)} / {pad(total)}
       </p>
       <h2 className='chapter-title'>{album.title}</h2>
-      {album.intro ? <p className='chapter-intro'>{album.intro}</p> : null}
+      <ChapterIntro album={album} />
       <p className='chapter-meta'>
         {album.month ? `${album.month} · ` : ''}
         {album.count} 张
@@ -159,11 +178,10 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
     (deckId, gallery) => {
       if (!router?.replace) return
       router
-        .replace(
-          { query: readerQuery(deckId, { gallery }) },
-          undefined,
-          { shallow: true, scroll: false }
-        )
+        .replace({ query: readerQuery(deckId, { gallery }) }, undefined, {
+          shallow: true,
+          scroll: false
+        })
         .catch(() => {})
     },
     [router]
@@ -202,7 +220,8 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
 
   // 章页在场时，从底部盖上（首屏或从阅读页回到章页）
   useEffect(() => {
-    if (!ready || !chapter || chapterRevealing || chapterCovering) return undefined
+    if (!ready || !chapter || chapterRevealing || chapterCovering)
+      return undefined
     const id = requestAnimationFrame(() => setChapterCovering(true))
     return () => cancelAnimationFrame(id)
   }, [ready, chapter, chapterRevealing, chapterCovering, albumIndex])
@@ -391,15 +410,18 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
     (targetIndex, direction) => {
       const target = albums[targetIndex]
       if (!target || !target.photos.length || transition || sliding) return
-      const incomingIndex =
-        direction === 'next' ? 0 : target.photos.length - 1
+      const incomingIndex = direction === 'next' ? 0 : target.photos.length - 1
       const incoming = target.photos[incomingIndex]
       if (!incoming) return
       const id = ++slideIdRef.current
       clearSlideTimers()
       setSliding(true)
       setFootDim(true)
-      setTransition({ albumIndex: targetIndex, covering: false, revealing: false })
+      setTransition({
+        albumIndex: targetIndex,
+        covering: false,
+        revealing: false
+      })
       preload(incoming)
       requestAnimationFrame(() => {
         if (id !== slideIdRef.current) return
@@ -428,7 +450,15 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
         }, hold)
       }, p1)
     },
-    [albums, clearSlideTimers, preload, scheduleSlide, sliding, syncUrl, transition]
+    [
+      albums,
+      clearSlideTimers,
+      preload,
+      scheduleSlide,
+      sliding,
+      syncUrl,
+      transition
+    ]
   )
 
   const goNext = useCallback(() => {
@@ -482,7 +512,8 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
       transitionTo(albumIndex - 1, 'prev')
       return
     }
-    showToast('已是第一辑的第一张')
+    // 第一辑没有上一辑可切：从第一张回到本辑章页，让序言可以回看
+    showChapter(albumIndex)
   }, [
     activeAlbum,
     albumIndex,
@@ -490,7 +521,7 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
     enterChapter,
     photoIndex,
     ready,
-    showToast,
+    showChapter,
     sliding,
     transition,
     transitionTo
@@ -580,7 +611,9 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
     const onKeyDown = event => {
       if (
         typeof document !== 'undefined' &&
-        document.querySelector('.cl-fullscreen-root.is-open, .cl-search-overlay')
+        document.querySelector(
+          '.cl-fullscreen-root.is-open, .cl-search-overlay'
+        )
       ) {
         return
       }
@@ -672,9 +705,7 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
                   ref={imageRef}
                   key={`${albumIndex}-${photoIndex}`}
                   src={activePhoto.src}
-                  alt={`${activeAlbum?.title || '影集'} · ${
-                    photoIndex + 1
-                  }`}
+                  alt={`${activeAlbum?.title || '影集'} · ${photoIndex + 1}`}
                   decoding='async'
                   loading='eager'
                   onLoad={event => {
@@ -730,7 +761,13 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
           <button
             type='button'
             className='tap-zone tap-prev'
-            aria-label={chapter ? '进入影集' : '上一张'}
+            aria-label={
+              chapter
+                ? '进入影集'
+                : albumIndex === 0 && photoIndex === 0
+                  ? '回到本辑序言'
+                  : '上一张'
+            }
             onClick={goPrev}
           />
           <button
@@ -836,7 +873,8 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
                       <span className='index-no'>{pad(index + 1)}</span>
                       <span className='index-main'>
                         <span className='index-title'>{album.title}</span>
-                        {album.summary ? (
+                        {/* 题眼只取 Summary；与标题重复时不再展示，避免目录出现两遍标题 */}
+                        {album.summary && album.summary !== album.title ? (
                           <span className='index-tagline'>{album.summary}</span>
                         ) : null}
                       </span>

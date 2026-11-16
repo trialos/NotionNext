@@ -347,15 +347,42 @@ export const albumReaderStyle = `
     color: var(--cl-text);
     text-wrap: balance;
   }
-  .chapter-intro {
-    max-width: 36rem;
+  /* 章页小序：Notion 手动换行已被切成段落，所有段落同一字号与字重。
+     宽度走 --cl-hero-lead-measure；fit-content 让短序言整体居中，长序言左对齐成列。
+     细线分隔标题区与序言，是整块唯一的装饰 */
+  .chapter-intro-rule {
+    display: block;
+    width: min(var(--cl-hero-lead-measure), 100%);
+    height: 1px;
     margin: 0 auto 14px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--cl-border-strong) 18%,
+      var(--cl-border-strong) 82%,
+      transparent
+    );
+  }
+  .chapter-intro {
+    width: fit-content;
+    max-width: min(var(--cl-hero-lead-measure), 100%);
+    margin: 0 auto 16px;
+    text-align: left;
     font-family: var(--cl-font-display);
-    font-size: 13px;
-    line-height: 1.75;
-    letter-spacing: 0.01em;
     color: var(--cl-muted);
-    text-wrap: balance;
+    text-wrap: pretty;
+    overflow-wrap: break-word;
+  }
+  .chapter-intro-body {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 400;
+    line-height: var(--cl-prose-leading);
+    letter-spacing: 0.01em;
+    text-indent: var(--cl-prose-indent);
+  }
+  .chapter-intro-body + .chapter-intro-body {
+    margin-top: 0.65em;
   }
   .chapter-meta {
     margin: 0;
@@ -830,11 +857,18 @@ export const albumReaderStyle = `
     .chapter-rule { width: 32px; margin-bottom: 22px; }
     .chapter-kicker { font-size: 10px; letter-spacing: 0.18em; }
     .chapter-title { font-size: clamp(2.6rem, 4.4vw, 4rem); }
+    .chapter-intro-rule {
+      margin-bottom: 16px;
+    }
     .chapter-intro {
-      max-width: 42rem;
-      margin: 0 auto 16px;
-      font-size: 17px;
-      line-height: 1.8;
+      margin: 0 auto 20px;
+    }
+    .chapter-intro-body {
+      font-size: 14.5px;
+      line-height: 1.9;
+    }
+    .chapter-intro-body + .chapter-intro-body {
+      margin-top: 0.7em;
     }
     .chapter-meta { font-size: 11px; }
     button.chapter-enter { margin-top: 32px; font-size: 10px; }
