@@ -208,7 +208,7 @@ export async function getStaticProps(req) {
         return {
           id: p.id,
           name: p.title,
-          href: `/album?view=gallery&deck=${p.id}`,
+          href: `/album?deck=${p.id}`,
           date: p.publishDay || '',
           count: images.length,
           cover: { src: buildSizedSource(cover.url, 1024) }

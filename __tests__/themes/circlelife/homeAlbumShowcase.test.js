@@ -84,6 +84,18 @@ const themeIndexSource = readFile('themes', 'circlelife', 'index.js')
 const themeConfigSource = readFile('themes', 'circlelife', 'config.js')
 const tokensSource = readFile('themes', 'circlelife', 'styles', 'tokens.js')
 const siteDataSource = readFile('lib', 'db', 'SiteDataApi.js')
+const albumReaderDataSource = readFile(
+  'themes',
+  'circlelife',
+  'components',
+  'albumReaderData.js'
+)
+const albumReaderSource = readFile(
+  'themes',
+  'circlelife',
+  'components',
+  'AlbumReader.js'
+)
 const notionConfigSource = readFile('conf', 'notion.config.js')
 
 /** 新增样式块（首页精选影集段）的 CSS 片段 */
@@ -278,6 +290,20 @@ describe('circlelife 首页精选影集段（01 接触印相）', () => {
       expect(albumBlock).not.toContain('srcSet')
       expect(albumBlock).not.toContain('featured:')
       expect(pagesIndexSource).not.toMatch(/images\s*:\s*images/)
+    })
+  })
+
+  describe('入口 URL', () => {
+    test('影集入口落到章页：首页与搜索索引都只带 deck，不带 view=gallery', () => {
+      expect(pagesIndexSource).toContain('href: `/album?deck=${p.id}`')
+      expect(siteDataSource).toContain('`/album?deck=${p.id}`')
+      expect(pagesIndexSource).not.toContain('view=gallery')
+      expect(siteDataSource).not.toContain('view=gallery')
+    })
+
+    test('阅读器与 URL 纯函数不再保留 gallery 兼容分支', () => {
+      expect(albumReaderDataSource).not.toContain('gallery')
+      expect(albumReaderSource).not.toContain('gallery')
     })
   })
 

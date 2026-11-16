@@ -3,6 +3,7 @@ import {
   findReaderAlbumIndex,
   parseReaderQuery,
   readerQuery,
+  resolveQueryDeckChange,
   splitIntroParagraphs
 } from '@/themes/circlelife/components/albumReaderData'
 
@@ -132,19 +133,69 @@ describe('albumReaderData', () => {
     expect(findReaderAlbumIndex(albums, 'missing')).toBe(-1)
   })
 
-  test('解析 deck / view，并生成只含专辑的 query', () => {
-    expect(parseReaderQuery({ deck: 'p1' })).toEqual({
-      deck: 'p1',
-      gallery: false
-    })
+  test('解析 deck，并生成只含专辑的 query；旧 view 参数被忽略', () => {
+    expect(parseReaderQuery({ deck: 'p1' })).toEqual({ deck: 'p1' })
     expect(parseReaderQuery({ deck: ['p1'], view: 'gallery' })).toEqual({
-      deck: 'p1',
-      gallery: true
+      deck: 'p1'
     })
     expect(readerQuery('p1')).toEqual({ deck: 'p1' })
-    expect(readerQuery('p1', { gallery: true })).toEqual({
-      deck: 'p1',
-      view: 'gallery'
-    })
+    expect(readerQuery('')).toEqual({})
+  })
+
+  test('同路由换辑只处理外部导航', () => {
+    // 真正的对外导航：query 变了，且不是刚写回的 deck
+    expect(
+      resolveQueryDeckChange({
+        queryDeck: 'b',
+        syncedDeck: 'a',
+        currentDeck: 'a',
+        lastQueryDeck: 'a'
+      })
+    ).toBe('b')
+    // query 没变化：不处理
+    expect(
+      resolveQueryDeckChange({
+        queryDeck: 'a',
+        syncedDeck: 'a',
+        currentDeck: 'a',
+        lastQueryDeck: 'a'
+      })
+    ).toBe('')
+    // 跨辑过渡期 query 还停在旧值：不能误判成外部导航
+    expect(
+      resolveQueryDeckChange({
+        queryDeck: 'a',
+        syncedDeck: 'b',
+        currentDeck: 'b',
+        lastQueryDeck: 'a'
+      })
+    ).toBe('')
+    // query 先更新、状态后更新：刚写回的 deck 不处理
+    expect(
+      resolveQueryDeckChange({
+        queryDeck: 'b',
+        syncedDeck: 'b',
+        currentDeck: 'a',
+        lastQueryDeck: 'a'
+      })
+    ).toBe('')
+    // 状态已在目标辑：不重复处理
+    expect(
+      resolveQueryDeckChange({
+        queryDeck: 'a',
+        syncedDeck: 'b',
+        currentDeck: 'a',
+        lastQueryDeck: 'b'
+      })
+    ).toBe('')
+    // 空 query：不处理
+    expect(
+      resolveQueryDeckChange({
+        queryDeck: '',
+        syncedDeck: 'a',
+        currentDeck: 'a',
+        lastQueryDeck: 'a'
+      })
+    ).toBe('')
   })
 })

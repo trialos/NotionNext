@@ -139,10 +139,9 @@ export function findReaderAlbumIndex(albums, id) {
 
 /**
  * 阅读器 URL 约定：
- *   /album?deck=<id>                  → 该辑章页（刷新回章页）
- *   /album?view=gallery&deck=<id>     → 首页进入，直接第一张
+ *   /album?deck=<id>                  → 该辑章页（首页 / 搜索进入，刷新回章页）
  *   /album                            → 最近一辑章页
- * 只在 URL 记 deck，不记单张照片。
+ * 只在 URL 记 deck，不记单张照片；旧链接的 view 参数会被忽略。
  */
 export function parseReaderQuery(query = {}) {
   const deckRaw = query?.deck
@@ -153,14 +152,32 @@ export function parseReaderQuery(query = {}) {
         ? String(deckRaw[0] || '')
         : ''
   return {
-    deck: deck.trim(),
-    gallery: query?.view === 'gallery'
+    deck: deck.trim()
   }
 }
 
-export function readerQuery(deckId, { gallery = false } = {}) {
+export function readerQuery(deckId) {
   const q = {}
   if (deckId) q.deck = String(deckId)
-  if (gallery) q.view = 'gallery'
   return q
+}
+
+/**
+ * 同路由换辑判定：/album 内只有一个阅读器实例，外部导航改 deck 时
+ * 需要主动切辑；阅读器自己 syncUrl 写回的 deck 不能重复触发。
+ * `lastQueryDeck` 是上一次观察到的 query：跨辑过渡期间 router.query
+ * 会短暂停留在旧值，必须用它与状态切换区分开。
+ * 返回需要切换到的 deck；空字符串表示无需处理。
+ */
+export function resolveQueryDeckChange({
+  queryDeck,
+  syncedDeck,
+  currentDeck,
+  lastQueryDeck
+}) {
+  if (!queryDeck) return ''
+  if (queryDeck === lastQueryDeck) return ''
+  if (queryDeck === syncedDeck) return ''
+  if (queryDeck === currentDeck) return ''
+  return queryDeck
 }

@@ -9,7 +9,8 @@ import {
   buildReaderAlbums,
   findReaderAlbumIndex,
   parseReaderQuery,
-  readerQuery
+  readerQuery,
+  resolveQueryDeckChange
 } from './albumReaderData'
 import { linkTitle } from './navConfig'
 
@@ -78,7 +79,7 @@ function ChapterInner({ album, albumIndex, total, withEnter, onEnter }) {
 
 /**
  * 影集阅读器：章页 / 单张 / 目录抽屉 / 当前辑缩略 / 跨辑纸面裁切
- * 一页一辑；URL 只记 deck（首页 view=gallery 直接第一张）。
+ * 一页一辑；URL 只记 deck（任何入口都先落章页，再进入照片）。
  */
 export default function AlbumReader({ pages = [], navLinks = [] }) {
   const router = useRouter()
@@ -114,6 +115,8 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
   const thumbsOverlayRef = useRef(null)
   const mountedRef = useRef(true)
   const bootedRef = useRef(false)
+  const syncedDeckRef = useRef('')
+  const lastQueryDeckRef = useRef('')
   const slideIdRef = useRef(0)
   const chapterTimerRef = useRef(null)
   const indexTimerRef = useRef(null)
@@ -175,10 +178,11 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
   }, [])
 
   const syncUrl = useCallback(
-    (deckId, gallery) => {
+    deckId => {
+      syncedDeckRef.current = deckId || ''
       if (!router?.replace) return
       router
-        .replace({ query: readerQuery(deckId, { gallery }) }, undefined, {
+        .replace({ query: readerQuery(deckId) }, undefined, {
           shallow: true,
           scroll: false
         })
@@ -187,33 +191,28 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
     [router]
   )
 
-  // 首屏：先等 router ready，再按 deck/view 决定章页还是第一张，避免闪现错误的辑
+  // 首屏：先等 router ready，再按 deck 决定该辑章页，避免闪现错误的辑
   useEffect(() => {
     if (!router.isReady || bootedRef.current) return
     bootedRef.current = true
-    const { deck, gallery } = parseReaderQuery(router.query)
+    const { deck } = parseReaderQuery(router.query)
+    syncedDeckRef.current = deck
     const target = findReaderAlbumIndex(albums, deck)
     if (target >= 0) {
       setAlbumIndex(target)
       setPhotoIndex(0)
-      if (gallery) {
-        // 首页「进入影集」的 view=gallery 只用于这一次直接落到第一张；
-        // URL 随后只保留 deck，刷新按约定回到该辑章页。
-        setChapter(false)
-        setChapterCovering(false)
-        setFootDim(false)
-        syncUrl(albums[target].id, false)
-      } else {
-        setChapter(true)
-        setChapterCovering(false)
-        setFootDim(true)
-      }
+      setChapter(true)
+      setChapterCovering(false)
+      setFootDim(true)
+      // 旧链接可能还带 view 参数：首屏统一规范为只含 deck
+      if (router.query?.view) syncUrl(albums[target].id)
     } else {
       setAlbumIndex(0)
       setPhotoIndex(0)
       setChapter(true)
       setChapterCovering(false)
       setFootDim(true)
+      if (router.query?.view) syncUrl('')
     }
     setReady(true)
   }, [router.isReady, router.query, albums, syncUrl])
@@ -370,7 +369,7 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
       setFootDim(true)
       setLoaded(false)
       setNaturalRatio(0)
-      if (writeUrl) syncUrl(target.id, false)
+      if (writeUrl) syncUrl(target.id)
       if (wasChapter) {
         setChapterCovering(true)
       } else {
@@ -380,6 +379,25 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
     },
     [albums, chapter, syncUrl]
   )
+
+  // 同路由换辑：搜索 / 浏览器前进后退会在 /album 内直接改 deck，
+  // 阅读器不会卸载，必须按新 deck 重新进入该辑章页。
+  useEffect(() => {
+    if (!bootedRef.current || !router.isReady) return
+    const { deck } = parseReaderQuery(router.query)
+    const nextDeck = resolveQueryDeckChange({
+      queryDeck: deck,
+      syncedDeck: syncedDeckRef.current,
+      currentDeck: albums[albumIndex]?.id || '',
+      lastQueryDeck: lastQueryDeckRef.current
+    })
+    lastQueryDeckRef.current = deck
+    if (!nextDeck) return
+    syncedDeckRef.current = nextDeck
+    const target = findReaderAlbumIndex(albums, nextDeck)
+    if (target < 0) return
+    showChapter(target, { writeUrl: false })
+  }, [router.isReady, router.query, albums, albumIndex, showChapter])
 
   const enterChapter = useCallback(() => {
     if (!chapter || chapterRevealing || transition) return
@@ -437,7 +455,7 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
         setPhotoIndex(incomingIndex)
         setLoaded(false)
         setNaturalRatio(0)
-        syncUrl(target.id, false)
+        syncUrl(target.id)
         scheduleSlide(() => {
           if (id !== slideIdRef.current) return
           setTransition(t => (t ? { ...t, revealing: true } : t))
