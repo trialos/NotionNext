@@ -308,4 +308,30 @@ describe('circlelife 归档页标签索引：手机端默认收缩', () => {
       expect(document.activeElement).toBe(document.body)
     })
   })
+
+  describe('标签集中排布（流式胶囊）', () => {
+    test('CSS：标签容器为自动换行的流式布局', () => {
+      const flat = flatCss(archiveStyle)
+      expect(flat).toContain(
+        '#theme-circlelife .cl-archive-tagcloud { display: flex; flex-wrap: wrap;'
+      )
+    })
+
+    test('旧的一行一个目录式类名退役', () => {
+      expect(archiveStyle).not.toContain('cl-archive-tagrow')
+      expect(archiveStyle).not.toContain('cl-archive-taggrid')
+    })
+
+    test('标签渲染为胶囊：全部置顶、标签带计数', () => {
+      const { container } = render(<ArchiveHarness />)
+      const chips = container.querySelectorAll('.cl-archive-chip')
+      expect(chips.length).toBeGreaterThan(0)
+      const all = container.querySelector('.cl-archive-chip--all')
+      expect(all).not.toBeNull()
+      expect(all.textContent).toContain('全部标签')
+      const tag = screen.getByRole('button', { name: /#思考/ })
+      expect(tag.className).toContain('cl-archive-chip')
+      expect(tag.querySelector('.cl-archive-chip__count')).not.toBeNull()
+    })
+  })
 })

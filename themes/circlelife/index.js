@@ -36,6 +36,7 @@ import {
   readArchiveMemory,
   writeArchiveMemory
 } from './components/archiveMemory'
+import { paginateArchiveMonths } from './components/archivePagination'
 import { BlogListPage } from './components/BlogListPage'
 import { BlogListScroll } from './components/BlogListScroll'
 import AlbumReader from './components/AlbumReader'
@@ -835,6 +836,9 @@ const LayoutSearch = props => {
   )
 }
 
+/** 归档每页展示的月份数：按整月切分，月份边界不拆 */
+const ARCHIVE_MONTHS_PER_PAGE = 4
+
 /**
  * 归档列表
  * @param {*} props
@@ -850,6 +854,8 @@ const LayoutArchive = props => {
   // 展开态而非收缩态：手机端（<768px）默认由 CSS 呈「窄条」，
   // 显式点「展开」才挂 .is-expanded 铺开面板；桌面不受影响。
   const [tagIndexExpanded, setTagIndexExpanded] = useState(false)
+  // 归档分页页码：只做组件状态，不写 URL / 记忆
+  const [page, setPage] = useState(1)
 
   const facets = useMemo(
     () => buildArchiveFacets(archivePosts),
@@ -869,6 +875,16 @@ const LayoutArchive = props => {
       ),
     [filteredArchivePosts]
   )
+  // 归档按「整月」分页：月份边界不拆，4 个月一页（12 个月 → 3 页）。
+  const { totalPage, safePage, months: visibleMonths } = useMemo(
+    () => paginateArchiveMonths(keys, page, ARCHIVE_MONTHS_PER_PAGE),
+    [keys, page]
+  )
+  // 任何筛选变化（显式点击、深链、记忆恢复、前进/后退）都回到第 1 页，
+  // 避免停留在筛选后已不存在的页。
+  useEffect(() => {
+    setPage(1)
+  }, [activeCategoryKey, activeTagKey])
   const filteredCount = useMemo(
     () =>
       Object.values(filteredArchivePosts).reduce(
@@ -982,19 +998,41 @@ const LayoutArchive = props => {
   const handleCategoryChange = key => {
     setActiveCategoryKey(key)
     setActiveTagKey(ARCHIVE_ALL)
+    // 与筛选同批重置页码，避免 effect 在重渲染后才归零、闪一帧旧页内容
+    setPage(1)
     syncArchiveQuery(key, ARCHIVE_ALL)
   }
 
   const handleTagChange = key => {
     setActiveTagKey(key)
+    // 同上：显式筛选立即回到第 1 页
+    setPage(1)
     syncArchiveQuery(activeCategoryKey, key)
+  }
+
+  // 翻页后把列表阶段区滚回视口顶部并接管焦点，
+  // 避免用户（尤其键盘/读屏）停在已滚出视口的翻页按钮上。
+  const stageRef = useRef(null)
+  const goToPage = next => {
+    const clamped = Math.min(Math.max(next, 1), totalPage)
+    if (clamped === page) return
+    setPage(clamped)
+    if (isBrowser && stageRef.current) {
+      stageRef.current.focus({ preventScroll: true })
+      stageRef.current.scrollIntoView({ block: 'start', behavior: 'smooth' })
+    }
   }
 
   const hasPosts = facets.totalCount > 0
   const statusLabel =
     activeCategoryKey === ARCHIVE_ALL ? '全站归档文章' : activeCategoryName
   const stage = (
-    <div className='cl-archive-stage w-full pb-16'>
+    <div
+      className='cl-archive-stage w-full pb-16'
+      ref={stageRef}
+      role='region'
+      aria-label='归档文章列表'
+      tabIndex={-1}>
       {hasPosts && (
         <div
           className='cl-archive-stage__head'
@@ -1013,7 +1051,7 @@ const LayoutArchive = props => {
           </span>
         </div>
       )}
-      {keys.map(archiveTitle => (
+      {visibleMonths.map(archiveTitle => (
         <BlogListArchive
           key={archiveTitle}
           archiveTitle={archiveTitle}
@@ -1021,6 +1059,33 @@ const LayoutArchive = props => {
           activeTagName={activeTagName}
         />
       ))}
+      {totalPage > 1 && (
+        <nav className='cl-pager-bar' aria-label='归档分页导航'>
+          <button
+            type='button'
+            className='cl-pager-link cl-pager-btn'
+            onClick={() => goToPage(safePage - 1)}
+            disabled={safePage <= 1}
+            aria-label='上一页'>
+            ← 上一页
+          </button>
+          <span className='cl-pager-pos' aria-live='polite'>
+            <span className='cl-pager-pos-cur'>
+              {String(safePage).padStart(2, '0')}
+            </span>
+            {' / '}
+            {String(totalPage).padStart(2, '0')}
+          </span>
+          <button
+            type='button'
+            className='cl-pager-link cl-pager-btn'
+            onClick={() => goToPage(safePage + 1)}
+            disabled={safePage >= totalPage}
+            aria-label='下一页'>
+            下一页 →
+          </button>
+        </nav>
+      )}
       {keys.length === 0 && (
         <p className='cl-archive-empty' role='status'>
           {hasPosts ? '没有符合筛选条件的文章' : '暂无归档文章'}

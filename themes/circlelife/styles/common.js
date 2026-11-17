@@ -354,6 +354,19 @@ export const commonStyle = `
         opacity: 0.55;
         pointer-events: none;
       }
+      /* 归档分页按钮：在 cl-pager-link 视觉基础上重置原生 button */
+      #theme-circlelife .cl-pager-btn {
+        background: none;
+        border: 0;
+        font: inherit;
+        letter-spacing: inherit;
+        cursor: pointer;
+      }
+      #theme-circlelife .cl-pager-btn:disabled {
+        color: var(--cl-faint);
+        opacity: 0.55;
+        cursor: default;
+      }
       /* 首页「全部文章」单链接复用翻页条视觉 */
       #theme-circlelife .cl-recent-more {
         color: var(--cl-muted);

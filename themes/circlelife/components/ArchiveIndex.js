@@ -30,15 +30,13 @@ function TagRow({ label, count, selected, all = false, onClick }) {
   return (
     <button
       type='button'
-      className={`cl-archive-tagrow${all ? ' cl-archive-tagrow--all' : ''}`}
+      className={`cl-archive-chip${all ? ' cl-archive-chip--all' : ''}`}
       aria-pressed={selected}
       aria-label={`${label}，${count} 篇`}
       onClick={onClick}
     >
-      <span className='cl-archive-tagrow__dot' aria-hidden='true' />
-      <span className='cl-archive-tagrow__label'>{label}</span>
-      <span className='cl-archive-tagrow__leader' aria-hidden='true' />
-      <span className='cl-archive-tagrow__count' aria-hidden='true'>
+      <span className='cl-archive-chip__label'>{label}</span>
+      <span className='cl-archive-chip__count' aria-hidden='true'>
         {formatCount(count)}
       </span>
     </button>
@@ -168,7 +166,7 @@ export default function ArchiveIndex({
               </div>
 
               <div
-                className='cl-archive-taggrid'
+                className='cl-archive-tagcloud'
                 role='group'
                 aria-label='按标签筛选'
               >

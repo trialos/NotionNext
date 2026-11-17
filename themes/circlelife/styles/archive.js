@@ -93,97 +93,71 @@ export const archiveStyle = `
         color: var(--cl-accent);
         cursor: pointer;
       }
-      #theme-circlelife .cl-archive-taggrid {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr);
-        column-gap: 2rem;
-      }
-      #theme-circlelife .cl-archive-tagrow {
+      #theme-circlelife .cl-archive-tagcloud {
         display: flex;
+        flex-wrap: wrap;
         align-items: center;
-        gap: 0.55rem;
-        width: 100%;
-        min-height: 2.75rem;
-        padding: 0.35rem 0;
-        border: 0;
-        border-radius: 2px;
-        background: transparent;
+        gap: 0.45rem 0.45rem;
+        padding-top: 0.15rem;
+      }
+      #theme-circlelife .cl-archive-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.32rem;
+        max-width: 100%;
+        min-height: 2.2rem;
+        padding: 0.28rem 0.6rem;
+        border: 1px solid var(--cl-border);
+        border-radius: var(--cl-radius-sm);
+        background: var(--cl-surface);
+        color: var(--cl-muted);
+        font-family: var(--cl-font-body);
+        font-size: 0.82rem;
+        line-height: 1.25;
         text-align: left;
         cursor: pointer;
-        color: var(--cl-muted);
-        transition: color 0.15s var(--cl-ease);
-      }
-      #theme-circlelife .cl-archive-tagrow__dot {
-        flex: none;
-        width: 5px;
-        height: 5px;
-        border: 1px solid var(--cl-border-strong);
-        border-radius: 9999px;
-        background: transparent;
         transition:
-          background 0.15s var(--cl-ease),
-          border-color 0.15s var(--cl-ease);
+          color 0.15s var(--cl-ease),
+          border-color 0.15s var(--cl-ease),
+          background 0.15s var(--cl-ease);
       }
-      #theme-circlelife .cl-archive-tagrow__label {
-        flex: none;
-        max-width: 70%;
-        font-family: var(--cl-font-body);
-        font-size: 0.88rem;
-        line-height: 1.35;
+      #theme-circlelife .cl-archive-chip__label {
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
-      #theme-circlelife .cl-archive-tagrow__leader {
-        flex: 1 1 auto;
-        min-width: 0.75rem;
-        border-bottom: 1px dotted var(--cl-border-strong);
-        transform: translateY(0.15em);
-        transition: border-color 0.15s var(--cl-ease);
-      }
-      #theme-circlelife .cl-archive-tagrow__count {
+      #theme-circlelife .cl-archive-chip__count {
         flex: none;
         font-family: var(--cl-font-mono);
-        font-size: 0.66rem;
+        font-size: 0.62rem;
         letter-spacing: 0.02em;
         color: var(--cl-faint);
         font-variant-numeric: tabular-nums;
       }
-      #theme-circlelife .cl-archive-tagrow:hover {
+      #theme-circlelife .cl-archive-chip:hover {
         color: var(--cl-accent);
-      }
-      #theme-circlelife .cl-archive-tagrow:hover .cl-archive-tagrow__dot {
         border-color: var(--cl-accent);
       }
-      #theme-circlelife .cl-archive-tagrow[aria-pressed='true'] {
+      #theme-circlelife .cl-archive-chip[aria-pressed='true'] {
         color: var(--cl-accent);
+        border-color: var(--cl-accent);
+        background: color-mix(
+          in srgb,
+          var(--cl-accent) 8%,
+          var(--cl-surface)
+        );
         font-weight: 600;
       }
       #theme-circlelife
-        .cl-archive-tagrow[aria-pressed='true']
-        .cl-archive-tagrow__dot {
-        border-color: var(--cl-accent);
-        background: var(--cl-accent);
-      }
-      #theme-circlelife
-        .cl-archive-tagrow[aria-pressed='true']
-        .cl-archive-tagrow__leader {
-        border-bottom-color: color-mix(
-          in srgb,
-          var(--cl-accent) 45%,
-          transparent
-        );
-      }
-      #theme-circlelife
-        .cl-archive-tagrow[aria-pressed='true']
-        .cl-archive-tagrow__count {
+        .cl-archive-chip[aria-pressed='true']
+        .cl-archive-chip__count {
         color: var(--cl-accent);
       }
-      #theme-circlelife
-        .cl-archive-tagrow--all
-        .cl-archive-tagrow__label {
+      #theme-circlelife .cl-archive-chip--all {
         color: var(--cl-text);
       }
-      #theme-circlelife
-        .cl-archive-tagrow--all[aria-pressed='true']
-        .cl-archive-tagrow__label {
+      #theme-circlelife .cl-archive-chip--all[aria-pressed='true'] {
         color: var(--cl-accent);
       }
       #theme-circlelife .cl-archive-taghint {
@@ -411,12 +385,6 @@ export const archiveStyle = `
         }
       }
 
-      @media (min-width: 768px) and (max-width: 1279px) {
-        #theme-circlelife .cl-archive-taggrid {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-      }
-
       @media (min-width: 1024px) {
         #theme-circlelife .cl-archive-page {
           --cl-archive-date-col: 4.75rem;
@@ -448,9 +416,6 @@ export const archiveStyle = `
           overflow-y: auto;
           scrollbar-width: thin;
           scrollbar-color: var(--cl-border-strong) transparent;
-        }
-        #theme-circlelife .cl-archive-taggrid {
-          grid-template-columns: minmax(0, 1fr);
         }
       }
 
