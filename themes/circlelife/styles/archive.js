@@ -410,6 +410,12 @@ export const archiveStyle = `
           top: calc(var(--cl-nav-band) + 1.5rem);
           align-self: start;
           min-width: 0;
+          /* 让位时 top 只切一次，跟着退场动画一起过渡 */
+          transition: top 0.38s var(--cl-ease);
+        }
+        /* 导航让位后轨道上提：否则顶部会空出一条导航带的空档 */
+        #theme-circlelife.cl-nav-parked .cl-archive-rail {
+          top: 1rem;
         }
         #theme-circlelife .cl-archive-rail .cl-archive-tagindex__panel {
           max-height: calc(100vh - var(--cl-nav-band) - 4rem);

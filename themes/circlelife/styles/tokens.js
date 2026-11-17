@@ -49,11 +49,6 @@ export const tokenStyle = `
         --cl-nav-top: max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.65rem));
         --cl-nav-height: 2.5rem;
         --cl-nav-band: calc(var(--cl-nav-top) + var(--cl-nav-height));
-        /* 胶囊圆角半径：border-radius:9999px 的体育场形，半径 = 实高/2。
-           阅读进度基座线两端各内缩此值，端点正好落在胶囊底弧与平直段的切点上，
-           线段与圆弧相切 → 完全收在胶囊轮廓内。calc() 引用 --cl-nav-height，
-           在计算值时才展开，会自动跟随 ≤1023px 的高度覆盖，禁止在媒体查询里重复声明 */
-        --cl-pill-radius: calc(var(--cl-nav-height) / 2);
         /* 宽屏页面容器（归档等大屏模块共用）：最大宽 / 流动 gutter / 双栏间距 */
         --cl-wide-max: 112.5rem;
         --cl-wide-pad: clamp(1rem, 3vw, 3rem);

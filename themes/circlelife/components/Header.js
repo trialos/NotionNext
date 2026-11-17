@@ -1,13 +1,14 @@
 import { siteConfig } from '@/lib/config'
 import { useGlobal } from '@/lib/global'
 import SmartLink from '@/components/SmartLink'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/router'
 import CONFIG from '../config'
 import { ArcMark, BrandLockup } from './BrandLockup'
 import { MenuList } from './MenuList'
 import { linkTitle, normalizeNavLinks } from './navConfig'
+import { resolveNavParking } from './navParking'
 import SearchOverlay from './SearchOverlay'
 import ReadingProgress from './ReadingProgress'
 
@@ -19,6 +20,10 @@ import ReadingProgress from './ReadingProgress'
  *    父级项（只有子菜单、无落地页）就地下拉，叶子项直接跳转
  * 4. >= 1024px 走桌面形态；更窄屏幕收起为「弧标 + 品牌 + ≡」
  * 5. 全屏覆盖折叠大菜单：完整接入 MenuList，恢复 Notion 配置的所有二级子菜单
+ * 6. 下滚让位、上滚归位（判定见 navParking.js）：仅位移 + 淡出，不改变高宽，
+ *    也不改 --cl-nav-height —— 全站靠导航带推导的间距因此在退场期间保持稳定
+ * 7. 阅读进度不放进胶囊：文章页固定一条顶边进度线（ReadingProgress），
+ *    与胶囊进退完全解耦 —— 胶囊让位／归位都不会让进度消失或跳位
  */
 export const Header = props => {
   const { post } = props
@@ -36,10 +41,29 @@ export const Header = props => {
   const subCloseTimer = useRef(null)
   const drawerTriggerRef = useRef(null)
   const searchOpenRef = useRef(false)
+  // 让位状态机的事实源：滚动监听与「取焦 / 路由」共用同一份，
+  // 否则手动唤回后，下一帧滚动会按旧状态立刻把它按回去
+  const parkRef = useRef({ lastY: 0, down: 0, up: 0, parked: false })
   const showProgress = Boolean(post) && post?.type !== 'Page'
   const homeLabel = locale?.NAV?.INDEX || '首页'
   const searchLabel = locale?.NAV?.SEARCH || '搜索'
   const menuLabel = locale?.NAV?.NAVIGATOR || '菜单'
+
+  // 立即唤回胶囊：导航内取焦、路由变化都走这里。
+  // 必须同步改写 parkRef，否则下一帧滚动判定还认为「已让位」，会把它按回去。
+  // 刻意不动 lastY：虚拟滚动页（关于页）的 window.scrollY 恒为 0，
+  // 在这儿拿它当基准，下一次播报就会被读成一次数千像素的大滚动、导航立刻飞走。
+  const revealNav = useCallback(() => {
+    const state = parkRef.current
+    state.parked = false
+    state.down = 0
+    state.up = 0
+    if (typeof document !== 'undefined') {
+      document
+        .getElementById('theme-circlelife')
+        ?.classList.remove('cl-nav-parked')
+    }
+  }, [])
 
   useEffect(() => {
     setMounted(true)
@@ -99,6 +123,111 @@ export const Header = props => {
     }
   }, [])
 
+  /**
+   * 滚动让位
+   *
+   * 判定全部在 navParking.js（纯函数，单测覆盖），这里只负责读滚动量、切 class。
+   * class 挂在主题根节点而不是胶囊上：桌面右上 ≡ 不在胶囊里，两者要同一拍退场。
+   *
+   * 生命周期（踩过的坑）：依赖里必须带 router.asPath，每次站内跳转都重绑监听。
+   * 早期版本在影集页提前 return，于是「在影集页开一次抽屉」就会摘掉监听；
+   * 之后跳到首页 / 音乐页时依赖没变、effect 不重跑，让位就永久失效。
+   */
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined
+
+    const state = parkRef.current
+    state.lastY = window.scrollY || 0
+    state.down = 0
+    state.up = 0
+
+    // 每次写入都重新取根节点：站内跳转后若根节点被替换，缓存的引用会写到已摘除的节点
+    const getRoot = () => document.getElementById('theme-circlelife')
+    // 抽屉 / 搜索 / 子菜单打开期间锁定为展开：否则关闭浮层时触发器已不在场
+    const locked = Boolean(drawerOpen || searchOpen || openMenuId)
+
+    const write = parked => {
+      const root = getRoot()
+      if (!root) return
+      state.parked = parked
+      if (root.classList.contains('cl-nav-parked') === parked) return
+      root.classList.toggle('cl-nav-parked', parked)
+    }
+
+    let raf = 0
+    // 虚拟滚动页（关于页的无限瀑布流）没有 window 滚动，位移由它自己播报过来；
+    // pendingY 是这一帧要判定的位置，null 表示「读 window.scrollY」
+    let pendingY = null
+
+    const update = () => {
+      raf = 0
+      const root = getRoot()
+      // 影集阅读器隐藏了整条头部、页面也不滚动：不参与让位
+      if (!root || root.classList.contains('cl-is-album')) {
+        write(false)
+        return
+      }
+
+      const y =
+        pendingY != null ? pendingY : Math.max(0, window.scrollY || 0)
+      pendingY = null
+      const delta = y - state.lastY
+      state.lastY = y
+
+      const next = resolveNavParking({
+        y,
+        delta,
+        down: state.down,
+        up: state.up,
+        parked: state.parked,
+        reading: showProgress,
+        viewportHeight: window.innerHeight || 800
+      })
+      state.down = next.down
+      state.up = next.up
+      write(locked ? false : next.parked)
+    }
+
+    const schedule = y => {
+      if (y != null) pendingY = y
+      if (raf) return
+      raf = window.requestAnimationFrame(update)
+    }
+
+    const onScroll = () => schedule()
+
+    // 虚拟滚动页的位移播报：关于页无限瀑布流通过 CustomEvent 上报展墙位移。
+    // reset 表示这是显式跳变（开/关序言幕布），先把基准对齐，不让它被读成一次滚动。
+    // 只在关于页响应：离开时的收尾播报（y=0）不能去改下一页的滚动基准。
+    const onVirtualScroll = e => {
+      if (!getRoot()?.classList.contains('cl-is-about')) return
+      const detail = e?.detail
+      if (!detail || typeof detail.y !== 'number') return
+      if (detail.reset) {
+        state.lastY = detail.y
+        state.down = 0
+        state.up = 0
+      }
+      schedule(detail.y)
+    }
+
+    const onResize = () => schedule(state.lastY)
+
+    window.addEventListener('scroll', onScroll, { passive: true })
+    window.addEventListener('resize', onResize, { passive: true })
+    window.addEventListener('cl-virtual-scroll', onVirtualScroll)
+    update()
+
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      window.removeEventListener('resize', onResize)
+      window.removeEventListener('cl-virtual-scroll', onVirtualScroll)
+      if (raf) window.cancelAnimationFrame(raf)
+      getRoot()?.classList.remove('cl-nav-parked')
+      state.parked = false
+    }
+  }, [drawerOpen, searchOpen, openMenuId, showProgress, router?.asPath])
+
   // 主导航来源：与全屏抽屉、navConfig 共用同一份归一化结果，避免两处菜单不一致
   const pillLinks = useMemo(() => {
     let list = []
@@ -156,10 +285,11 @@ export const Header = props => {
     setOpenMenuId(isOpen ? null : key)
   }
 
-  // 路由变化后收起下拉
+  // 路由变化后收起下拉，并把胶囊唤回：新页面首屏不该是「导航不见了」
   useEffect(() => {
     setOpenMenuId(null)
-  }, [router?.asPath])
+    revealNav()
+  }, [router?.asPath, revealNav])
 
   useEffect(() => () => clearSubTimer(), [])
 
@@ -330,7 +460,10 @@ export const Header = props => {
   return (
     <>
       {/* 固定悬浮母层 (脱离文档流，严格水平居中) */}
-      <aside className='cl-floating-header' aria-label='悬浮顶栏'>
+      <aside
+        className='cl-floating-header'
+        aria-label='悬浮顶栏'
+        onFocusCapture={revealNav}>
         {/* 正中悬浮胶囊 */}
         <nav
           className={`cl-floating-pill ${isScrolling ? 'is-scrolling' : ''}`}
@@ -421,8 +554,6 @@ export const Header = props => {
             <i className='fas fa-bars cl-pill-menu-icon' aria-hidden='true' />
           </button>
 
-          {/* 阅读进度：嵌入胶囊底边，作为胶囊的基座线（朱砂自左向右填充） */}
-          {showProgress ? <ReadingProgress /> : null}
         </nav>
       </aside>
 
@@ -436,6 +567,11 @@ export const Header = props => {
         aria-expanded={drawerOpen}>
         <i className='fas fa-bars cl-desktop-menu-icon' aria-hidden='true' />
       </button>
+
+      {/* 阅读进度：固定在视口顶边，与胶囊的进退完全解耦。
+          刻意放在胶囊外面 —— 胶囊让位时带 transform，会把 fixed 后代
+          降级成相对它定位，线就会跟着退场。 */}
+      {showProgress ? <ReadingProgress /> : null}
 
       {drawer}
 

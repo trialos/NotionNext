@@ -415,6 +415,30 @@ export default function InfiniteAboutGrid({
       })
     }
 
+    /**
+     * 把展墙位移播报给页面外壳（顶部导航的让位判定用）
+     *
+     * 关于页是 position:fixed 的无限瀑布流，window 根本不滚动 —— 让位判定若只监听
+     * window scroll，这一页就永远不会触发。这里只暴露一个数「展墙当前位移」，
+     * 外壳自己决定怎么用，展墙不关心谁在听。
+     *
+     * reset：显式跳变（开/关序言幕布）时把基准对齐到新位置，
+     * 否则这一跳会被读成一次巨大的滚动、导航瞬间飞走。
+     * 事件对象复用：滚动期每帧 new 一个 CustomEvent 只是给 GC 添活。
+     */
+    const virtualScrollEvent =
+      typeof window !== 'undefined'
+        ? new CustomEvent('cl-virtual-scroll', { detail: { y: 0, reset: false } })
+        : null
+    let publishedScrollY = 0
+    const publishVirtualScroll = (y, reset = false) => {
+      if (!virtualScrollEvent) return
+      publishedScrollY = y
+      virtualScrollEvent.detail.y = y
+      virtualScrollEvent.detail.reset = reset
+      window.dispatchEvent(virtualScrollEvent)
+    }
+
     // 收起序言幕布，进入画廊自由探索
     const closeHero = () => {
       if (!isHeroOpen) return
@@ -431,14 +455,8 @@ export default function InfiniteAboutGrid({
       reelRef.current?.setActive(false)
       if (reel?.enabled) primeWallMedia()
 
-      // 联动全局导航栏 Header 收缩成极简单条（通过 requestAnimationFrame 延迟调度，消灭同步 Commit/Layout Long Task）
-      if (typeof window !== 'undefined') {
-        window.__CL_ABOUT_SCROLLED__ = true
-        window.__CL_ABOUT_SCROLL_Y__ = 100
-        requestAnimationFrame(() => {
-          window.dispatchEvent(new Event('cl-virtual-scroll'))
-        })
-      }
+      // 幕布落下：把展墙当前位置播报给外壳（reset，不把这一跳读成滚动）
+      publishVirtualScroll(scroll.current, true)
     }
 
     // 唤出序言幕布（原位缓缓降落，零重载，背景恢复缓慢流动）
@@ -451,14 +469,8 @@ export default function InfiniteAboutGrid({
       ambientDrift = 0
       syncHeroOpen({ activateReel: true })
 
-      // 联动全局导航栏 Header 展开复原（延迟到下一帧，消灭同步重绘）
-      if (typeof window !== 'undefined') {
-        window.__CL_ABOUT_SCROLLED__ = false
-        window.__CL_ABOUT_SCROLL_Y__ = 0
-        requestAnimationFrame(() => {
-          window.dispatchEvent(new Event('cl-virtual-scroll'))
-        })
-      }
+      // 幕布升起 = 回到序言态：外壳按 y=0 展开导航
+      publishVirtualScroll(0, true)
     }
 
     closeHeroRef.current = closeHero
@@ -487,6 +499,13 @@ export default function InfiniteAboutGrid({
         let offset = colScroll % h
         if (offset < 0) offset += h
         cd.track.style.transform = `translate3d(0, ${(-offset).toFixed(1)}px, 0)`
+      }
+
+      // 播报给外壳（位移 ≥1px 才发）。
+      // 序言态不播报：幕布重开时展墙位置是保留的（避免背景跳跃），
+      // 若照样播报，上一轮的深度位置会立刻把导航再按下去。
+      if (!isHeroOpen && Math.abs(scroll.current - publishedScrollY) >= 1) {
+        publishVirtualScroll(scroll.current)
       }
 
       scroll.last = scroll.current
@@ -618,6 +637,9 @@ export default function InfiniteAboutGrid({
 
     // 初始化瀑布流布局与渲染
     calculateLayout()
+    // 对齐外壳基准（reset）：effect 重建时展墙可能停得很深，
+    // 不先对齐的话第一帧播报会被读成一次大滚动、导航立刻飞走
+    publishVirtualScroll(scroll.current, true)
     rafId = requestAnimationFrame(render)
 
     stage.addEventListener('pointerdown', onPointerDown)
@@ -644,9 +666,8 @@ export default function InfiniteAboutGrid({
       window.removeEventListener('resize', onResize)
       closeHeroRef.current = null
       openHeroRef.current = null
-      delete window.__CL_ABOUT_SCROLLED__
-      delete window.__CL_ABOUT_SCROLL_Y__
-      window.dispatchEvent(new Event('cl-virtual-scroll'))
+      // 离开关于页：把位移归零，免得外壳带着「已让位」的状态进入下一页
+      publishVirtualScroll(0, true)
       document.body.classList.remove('cursor-grabbing')
     }
   }, [displayCards, reel?.enabled])

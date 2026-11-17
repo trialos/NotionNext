@@ -233,6 +233,12 @@ export const articleStyle = `
           scrollbar-width: thin;
           /* 与加高后的封面 + hero 标题对齐 */
           padding-top: 3rem;
+          /* 让位时 top 只切一次，跟着退场动画一起过渡（不是每帧计算） */
+          transition: top 0.38s var(--cl-ease);
+        }
+        /* 导航让位后轨道上提：否则顶部会空出一条导航带的空档 */
+        #theme-circlelife.cl-nav-parked .cl-article-rail {
+          top: 1rem;
         }
       }
       #theme-circlelife .cl-article-main {

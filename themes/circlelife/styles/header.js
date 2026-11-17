@@ -46,8 +46,14 @@ export const headerStyle = `
         border: 1px solid rgba(255, 255, 255, 0.12);
         box-shadow: 0 10px 32px rgba(0, 0, 0, 0.32);
         white-space: nowrap;
-        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-        /* 阅读进度基座线的定位容器（不加 overflow，避免裁剪父级就地下拉 .cl-pill-sub） */
+        /* 归位方向（默认态）：壳先回 320ms，内容由下面的 90ms 延迟接棒。
+           退场方向由 .cl-nav-parked 里的 transition 覆盖成「内容先走、壳延后」。
+           过渡只发生在 transform/opacity 上，高宽不变 → 全站按导航带推导的间距不抖 */
+        transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0s,
+          opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0s,
+          box-shadow 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0s;
+        /* 定位上下文（就地下拉靠 .cl-pill-item 自身定位；胶囊不加 overflow，
+           否则会裁掉父级就地下拉 .cl-pill-sub） */
         position: relative;
       }
 
@@ -274,7 +280,9 @@ export const headerStyle = `
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
         box-shadow: 0 4px 18px var(--cl-gold-shadow);
-        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.18s ease, box-shadow 0.2s ease;
+        transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+          opacity 0.32s cubic-bezier(0.16, 1, 0.3, 1),
+          filter 0.18s ease, box-shadow 0.2s ease;
       }
       .cl-floating-desktop-menu-btn:hover {
         transform: scale(1.06);
@@ -288,6 +296,52 @@ export const headerStyle = `
         .cl-floating-desktop-menu-btn {
           display: none !important;
         }
+      }
+
+      /* ==========================================================================
+         1.2 滚动让位 (cl-nav-parked)：内容先走、壳后走；归位反向
+         判定见 components/navParking.js。位移只发生在 fixed 层，
+         不动高宽、不动 --cl-nav-height，因此全站按导航带推导的间距保持稳定。
+         ========================================================================== */
+
+      /* 归位方向：内容延后 90ms 回字（壳先回，读者先看到「导航回来了」） */
+      .cl-floating-pill-nav,
+      .cl-floating-pill-brand-text,
+      .cl-floating-pill-logo-link,
+      .cl-pill-menu-btn--mobile {
+        transition: opacity 0.22s var(--cl-ease) 90ms,
+          transform 0.26s cubic-bezier(0.16, 1, 0.3, 1) 90ms;
+      }
+
+      /* 退场：内容 160ms 先走，壳 380ms 延后 90ms 上浮，共 460ms。
+         visibility 延到 460ms 才切 → 让位后不残留不可见却可 Tab 聚焦的链接 */
+      #theme-circlelife.cl-nav-parked .cl-floating-pill {
+        transform: translateY(calc(-1 * (var(--cl-nav-band) + 12px)));
+        opacity: 0;
+        visibility: hidden;
+        box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+        transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1) 90ms,
+          opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1) 90ms,
+          box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1) 90ms,
+          visibility 0s linear 0.46s;
+      }
+      #theme-circlelife.cl-nav-parked .cl-floating-pill-nav,
+      #theme-circlelife.cl-nav-parked .cl-floating-pill-brand-text,
+      #theme-circlelife.cl-nav-parked .cl-floating-pill-logo-link,
+      #theme-circlelife.cl-nav-parked .cl-pill-menu-btn--mobile {
+        opacity: 0;
+        transform: translateY(-4px) scale(0.96);
+        transition: opacity 0.16s var(--cl-ease) 0s,
+          transform 0.18s cubic-bezier(0.16, 1, 0.3, 1) 0s;
+      }
+      /* 桌面右上 ≡ 与胶囊同一拍退场：否则它会成为画面里唯一的残留 */
+      #theme-circlelife.cl-nav-parked .cl-floating-desktop-menu-btn {
+        transform: translateY(calc(-1 * (var(--cl-nav-top) + 4.6rem)));
+        opacity: 0;
+        visibility: hidden;
+        transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1) 90ms,
+          opacity 0.38s cubic-bezier(0.16, 1, 0.3, 1) 90ms,
+          visibility 0s linear 0.46s;
       }
 
       /* 键盘高对比度 Focus 焦点环 (Vercel Guidelines) */
@@ -719,36 +773,53 @@ export const headerStyle = `
       }
 
       /* ==========================================================================
-         4. 阅读进度条 (Reading Progress Bar) — 嵌入胶囊底边的基座线
-         旧形态为视口顶部全宽细线，与悬浮胶囊分离；现改为胶囊内 absolute 底边，
-         随胶囊宽度自适应（桌面窄胶囊 / 移动宽胶囊），朱砂自左向右填充
+         4. 阅读进度：顶部「书口线」(cl-read-progress)
+         与悬浮胶囊完全解耦 —— 固定贴视口顶边，胶囊让位／归位都不影响它。
+         （旧形态是嵌在胶囊底边的基座线，上滚唤回胶囊时进度会跟着跳位，已废弃。）
 
-         几何：胶囊是 border-radius:9999px 的体育场形，底边 = 中间平直段 + 两端圆弧，
-         圆弧与平直段的切点距左右边缘各恰为半径 R。故基座线两端各内缩 R
-         (--cl-pill-radius = 胶囊实高/2)，线段正好落在平直段上、与圆弧相切，
-         100% 收在胶囊轮廓内（胶囊无 overflow:hidden，会裁掉父级就地下拉 .cl-pill-sub，
-         因此不能靠 overflow 裁切，必须靠内缩）。再上移 1px 贴住 1px 描边的内缘。
+         形态：印刷里细/粗双线的秩序感，不是一条裸色带
+           · 上边 2px 朱砂填充，头部 28px 渐隐收笔（墨迹未干，不是平头截断）
+           · 下边 1px 纸边细轨，给填充一条"落笔基准线"；0% 时就是这条线，
+             所以「书口」始终在场，不会让人怀疑进度条没生效
+           · 左右各内缩 24px：避开刘海圆角，也不顶到屏幕边缘（读作页边，不是系统 UI）
+
+         几何：填充用 clip-path 裁切，不用 scaleX —— scaleX 会把头部那段渐隐一起压缩，
+         10% 进度时收笔只剩 2.8px；clip-path 不缩放坐标系，收笔恒为 28px，
+         且只重绘这 2px 高的条带，不触发布局。
          ========================================================================== */
       .cl-read-progress {
-        position: absolute;
-        left: var(--cl-pill-radius);
-        right: var(--cl-pill-radius);
-        bottom: 1px;
-        height: 2px;
-        z-index: 1;
+        position: fixed;
+        top: 0;
+        left: 24px;
+        right: 24px;
+        height: 3px;
+        z-index: 60;
         pointer-events: none;
-        background: color-mix(in srgb, var(--cl-border) 70%, transparent);
-        /* 2px 高的轨道：两端自然收成半圆；朱砂填充也被 overflow 裁在同一形状内 */
-        border-radius: 9999px;
-        overflow: hidden;
+        --cl-progress: 0;
       }
-      .cl-read-progress-bar {
-        height: 100%;
-        width: 100%;
-        transform-origin: left center;
-        transform: scaleX(0);
-        background: var(--cl-accent);
-        will-change: transform;
+      .cl-read-progress-fill {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        border-radius: 0 2px 2px 0;
+        background: linear-gradient(
+          to right,
+          var(--cl-accent) 0,
+          var(--cl-accent) calc(100% - 28px),
+          color-mix(in srgb, var(--cl-accent) 45%, transparent) 100%
+        );
+        clip-path: inset(0 calc((1 - var(--cl-progress)) * 100%) 0 0);
+      }
+      .cl-read-progress-track {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 1px;
+        border-radius: 9999px;
+        background: color-mix(in srgb, var(--cl-border) 55%, transparent);
       }
 
       /* ==========================================================================
@@ -854,6 +925,7 @@ export const headerStyle = `
          ========================================================================== */
       @media (prefers-reduced-motion: reduce) {
         .cl-floating-pill,
+        .cl-floating-desktop-menu-btn,
         .cl-pill-menu-btn,
         .cl-pill-sub,
         .cl-fullscreen-panel,
