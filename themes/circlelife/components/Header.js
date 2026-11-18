@@ -7,7 +7,7 @@ import { useRouter } from 'next/router'
 import CONFIG from '../config'
 import { ArcMark, BrandLockup } from './BrandLockup'
 import { MenuList } from './MenuList'
-import { linkTitle, normalizeNavLinks } from './navConfig'
+import { isCurrentNavPath, linkTitle, normalizeNavLinks } from './navConfig'
 import { resolveNavParking } from './navParking'
 import SearchOverlay from './SearchOverlay'
 import ReadingProgress from './ReadingProgress'
@@ -251,14 +251,6 @@ export const Header = props => {
     ]
   }, [props.customNav, props.customMenu, homeLabel, searchLabel])
 
-  const isCurrent = href => {
-    if (!href || href === '#' || href.endsWith('/#')) return false
-    const path = href.split('?')[0].replace(/\/$/, '') || '/'
-    const current = (router?.asPath || '/').split('?')[0].replace(/\/$/, '') || '/'
-    if (path === '/') return current === '/'
-    return current === path || current.startsWith(`${path}/`)
-  }
-
   const clearSubTimer = () => {
     if (subCloseTimer.current) {
       clearTimeout(subCloseTimer.current)
@@ -498,7 +490,11 @@ export const Header = props => {
                     href={link.href || '/'}
                     target={link.target}
                     className='cl-floating-pill-link'
-                    aria-current={isCurrent(link.href) ? 'page' : undefined}>
+                    aria-current={
+                      isCurrentNavPath(router?.asPath, link.href)
+                        ? 'page'
+                        : undefined
+                    }>
                     {label}
                   </SmartLink>
                 )

@@ -1,11 +1,17 @@
 /**
  * @jest-environment node
  */
+import fs from 'fs'
+import path from 'path'
 import * as navConfig from '@/themes/circlelife/components/navConfig'
 import {
+  isCurrentNavPath,
   linkTitle,
   normalizeNavLinks
 } from '@/themes/circlelife/components/navConfig'
+
+const readSource = (...parts) =>
+  fs.readFileSync(path.join(process.cwd(), ...parts), 'utf8')
 
 const makeLink = (name, href, extra = {}) => ({
   name,
@@ -90,5 +96,56 @@ describe('normalizeNavLinks', () => {
     expect(navConfig.NAV_LEFT).toBeUndefined()
     expect(navConfig.NAV_RIGHT).toBeUndefined()
     expect(navConfig.ICON_FALLBACK).toBeUndefined()
+  })
+})
+
+describe('isCurrentNavPath', () => {
+  test('音乐详情页归入 /music 导航，邻接路径不误命中', () => {
+    expect(isCurrentNavPath('/music', '/music')).toBe(true)
+    expect(isCurrentNavPath('/music/album/xxx', '/music')).toBe(true)
+    expect(isCurrentNavPath('/music/note/xxx', '/music')).toBe(true)
+    expect(isCurrentNavPath('/music?from=home', '/music')).toBe(true)
+    expect(isCurrentNavPath('/musicology', '/music')).toBe(false)
+    expect(isCurrentNavPath('/archive', '/music')).toBe(false)
+  })
+
+  test('首页只精确匹配，占位符与外链不高亮', () => {
+    expect(isCurrentNavPath('/', '/')).toBe(true)
+    expect(isCurrentNavPath('/music', '/')).toBe(false)
+    expect(isCurrentNavPath('/', '#/')).toBe(false)
+    expect(isCurrentNavPath('/music', '#')).toBe(false)
+    expect(isCurrentNavPath('/music', '/music/#')).toBe(false)
+    expect(isCurrentNavPath('/music', 'https://music.163.com/#/album')).toBe(
+      false
+    )
+  })
+
+  test('影集带 deck 查询参数时仍高亮影集导航', () => {
+    expect(isCurrentNavPath('/album?deck=xxx', '/album')).toBe(true)
+    expect(isCurrentNavPath('/album?deck=xxx&chapter=true', '/album')).toBe(
+      true
+    )
+    expect(isCurrentNavPath('/album', '/music')).toBe(false)
+  })
+
+  test('归一化语言前缀与尾斜杠后再判定', () => {
+    expect(isCurrentNavPath('/zh-CN/music/album/xxx', '/music/')).toBe(true)
+    expect(isCurrentNavPath('/en/', '/')).toBe(true)
+  })
+})
+
+describe('导航高亮判定保持单一来源', () => {
+  test('胶囊与抽屉都调用 isCurrentNavPath', () => {
+    const header = readSource('themes', 'circlelife', 'components', 'Header.js')
+    const drawer = readSource(
+      'themes',
+      'circlelife',
+      'components',
+      'MenuItemDrop.js'
+    )
+
+    expect(header).toContain('isCurrentNavPath(')
+    expect(drawer).toContain('isCurrentNavPath(')
+    expect(drawer).not.toContain('stripPath(')
   })
 })

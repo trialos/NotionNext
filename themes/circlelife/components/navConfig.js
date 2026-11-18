@@ -22,3 +22,23 @@ export function normalizeNavLinks(links) {
 
   return { all }
 }
+
+/** 归一化路径：去 query/hash、语言前缀与尾斜杠 */
+const stripNavPath = p =>
+  (p || '')
+    .split(/[?#]/)[0]
+    .replace(/^\/(?:zh-CN|zh-HK|zh-TW|en)(?=\/|$)/, '')
+    .replace(/\/$/, '') || '/'
+
+/**
+ * 导航项是否为当前页：详情页（如 /music/album/xxx）归入父级导航 /music。
+ * '#'、外链不参与判定；首页只精确匹配 '/'。
+ */
+export function isCurrentNavPath(asPath, href) {
+  if (!href || href.startsWith('#') || href.endsWith('/#')) return false
+  if (/^https?:\/\//i.test(href)) return false
+  const target = stripNavPath(href)
+  const current = stripNavPath(asPath)
+  if (target === '/') return current === '/'
+  return current === target || current.startsWith(`${target}/`)
+}

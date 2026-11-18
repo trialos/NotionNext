@@ -3,13 +3,7 @@ import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { useAlbumUI } from './albumContext'
 import { isAlbumPath } from './albumRoute'
-import { linkTitle } from './navConfig'
-
-const stripPath = p =>
-  (p || '')
-    .split(/[?#]/)[0]
-    .replace(/^\/(?:zh-CN|zh-HK|zh-TW|en)(?=\/|$)/, '')
-    .replace(/\/$/, '') || '/'
+import { isCurrentNavPath, linkTitle } from './navConfig'
 
 /**
  * 全屏抽屉菜单条目：编号、当前页高亮、子菜单展开
@@ -23,7 +17,7 @@ export const MenuItemDrop = ({ link, onNavigate, index = 0 }) => {
   const isCurrent =
     !hasSubMenu &&
     router?.isReady !== false &&
-    stripPath(router?.asPath) === stripPath(link?.href)
+    isCurrentNavPath(router?.asPath, link?.href)
   const label = linkTitle(link)
 
   const handleAlbumNavClick = e => {
