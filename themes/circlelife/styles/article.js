@@ -245,7 +245,12 @@ export const articleStyle = `
         min-width: 0;
         /* 宽壳内正文列以舒适测量宽封顶，剩余纸面即杂志页的留白边际。
            margin-inline:auto 让无目录（block 壳）文章也居中；有目录（grid 壳）时
-           在 grid 列内居中，列宽本就等于测量宽，不会有视觉变化。 */
+           在 grid 列内居中，列宽本就等于测量宽，不会有视觉变化。
+           width:100% 承重：cl-article-shell 是 grid，子项在 width:auto 下会按内容的
+           min-content 宽度计算——含宽表格/长串的文章能撑到 601px，在 390px 手机上
+           整页溢出、正文不换行。强制贴满 grid 列后正文回到 358px 正常换行，
+           宽表格仍在自身 overflow-x:auto 容器内左右滑动，不再破版面。 */
+        width: 100%;
         max-width: var(--cl-prose-measure);
         margin-inline: auto;
       }
