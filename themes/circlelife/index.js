@@ -54,6 +54,7 @@ import HomeTiltWall from './components/HomeTiltWall'
 import HomeAlbumShowcase from './components/HomeAlbumShowcase'
 import HomeAlbumShowcaseMobile from './components/HomeAlbumShowcaseMobile'
 import HomeArticleStage from './components/HomeArticleStage'
+import HomeArticleStageMobile from './components/HomeArticleStageMobile'
 import ListScrollMemory from './components/ListScrollMemory'
 import MobileToc from './components/MobileToc'
 import { PostLock } from './components/PostLock'
@@ -343,7 +344,10 @@ const LayoutPostList = props => {
         siteConfig('CIRCLELIFE_HOME_ARTICLE_STAGE', true, CONFIG) &&
         Array.isArray(props.homeArticles) &&
         props.homeArticles.length > 0 && (
-          <HomeArticleStage articles={props.homeArticles} />
+          <>
+            <HomeArticleStage articles={props.homeArticles} />
+            <HomeArticleStageMobile articles={props.homeArticles} />
+          </>
         )}
 
       {/* 首页精选影集段：照片墙（Hero）与文章段之后。

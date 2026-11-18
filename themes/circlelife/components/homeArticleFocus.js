@@ -1,39 +1,62 @@
 /**
- * 首页精选文章章的纯逻辑（等距刻度 / 日期格式 / 精选判定）
+ * 首页精选文章章的纯逻辑（篇位夹取 / 滑动条位置 / 日期格式 / 精选判定）
  *
- * 与影集段共用 Notion「精选」判定（homeAlbumData.js）；
- * 本文件只放文章章自己的刻度 / 日期纯函数。
- *
- * 关键约束：
- * - 刻度只做等距示意：第 0 篇在左端、最后一篇在右端；
- * - 模块内不写任何 transform（iPhone 逐帧合成纪律）。
+ * 与影集段共用 Notion「精选」判定（homeAlbumData.js）；本文件只放文章章自己的纯函数。
+ * 桌面 A「题名脊轨」与手机 M1「顶部滑动朱砂条」共用这里的实现。
  */
 
+/** 精选判定：文章与影集在 Notion 里是同一张表，靠字段判断 */
+export { isFeaturedEntry } from './homeAlbumData'
+
 /**
- * 等距刻度位置（0..1）
- *
- * 只表达「第几篇」，不再按真实日距拉伸；单篇居中。
+ * 篇位夹到 [0, count-1]；空集合返回 0，非数字返回 0
  *
  * @param {number} index
  * @param {number} count
  * @returns {number}
  */
-export function computeRulerFraction(index, count) {
+export function clampArticleIndex(index, count) {
   const n = Math.floor(Number(count))
-  if (!Number.isFinite(n) || n <= 1) return 0.5
-  const i = Number(index)
+  if (!Number.isFinite(n) || n <= 0) return 0
+  const i = Math.round(Number(index))
   if (!Number.isFinite(i)) return 0
-  return Math.min(1, Math.max(0, i / (n - 1)))
+  return Math.min(n - 1, Math.max(0, i))
 }
 
 /**
- * 条目是否被标记为「精选」—— 与影集段共用同一份判定（影集与文章在
- * Notion 里是同一张表，靠 type 区分），此处转出便于文章章直接引用。
+ * 由轨道滚动量算出顶部朱砂条的连续位置（0..count-1）
+ *
+ * 一屏一篇：scrollLeft / 一屏宽 = 当前篇的浮点位置。条宽 = 一栏宽，
+ * transform: translateX(calc(var(--pos) * 100%)) 即可与栏对齐。
+ * 不做逐帧 transform 写入，只在被动 scroll 里 rAF 合帧后写一个 CSS 变量。
+ *
+ * @param {number} scrollLeft
+ * @param {number} slideWidth
+ * @param {number} count
+ * @returns {number}
  */
-export { isFeaturedEntry } from './homeAlbumData'
+export function resolveBarPos(scrollLeft, slideWidth, count) {
+  const last = Math.max(0, Math.floor(Number(count)) - 1)
+  const width = Number(slideWidth)
+  if (!Number.isFinite(width) || width <= 0) return 0
+  const left = Number(scrollLeft)
+  if (!Number.isFinite(left) || left <= 0) return 0
+  return Math.min(last, Math.max(0, left / width))
+}
 
-/** 标尺上的日期标签：'2026-10-9' → '10·09' */
-export function formatRulerDay(day) {
+/**
+ * 节点是否处于可见断点（display:none 时 clientWidth = 0）
+ * 用于两个形态同挂时禁止隐藏形态写回 session / 绘制 canvas。
+ *
+ * @param {HTMLElement|null} node
+ * @returns {boolean}
+ */
+export function isNodeVisible(node) {
+  return Boolean(node && node.clientWidth > 0)
+}
+
+/** 轴上的日期标签：'2026-10-9' → '10·09' */
+export function formatAxisDay(day) {
   const m =
     typeof day === 'string'
       ? day.trim().match(/^\d{4}-(\d{1,2})-(\d{1,2})$/)
@@ -43,30 +66,9 @@ export function formatRulerDay(day) {
   return `${pad(Number(m[1]))}·${pad(Number(m[2]))}`
 }
 
-/**
- * 月份跨度：同年 '2026 · 08 — 10'，跨年 '2025-12 — 2026-10'
- *
- * @param {string[]} days
- * @returns {string}
- */
-export function formatMonthRange(days) {
-  const parsed = (Array.isArray(days) ? days : [])
-    .map(day => {
-      const m = String(day || '').match(/^(\d{4})-(\d{1,2})/)
-      return m ? { year: Number(m[1]), month: Number(m[2]) } : null
-    })
-    .filter(Boolean)
-  if (!parsed.length) return ''
-  const pad = n => String(n).padStart(2, '0')
-  // 跨年时按「年 + 月」的完整元组取首尾，不能把不同年的月份混在一起比
-  const sorted = [...parsed].sort(
-    (a, b) => a.year - b.year || a.month - b.month
-  )
-  const first = sorted[0]
-  const last = sorted[sorted.length - 1]
-  if (first.year !== last.year) {
-    return `${first.year}-${pad(first.month)} — ${last.year}-${pad(last.month)}`
-  }
-  if (first.month === last.month) return `${first.year} · ${pad(first.month)}`
-  return `${first.year} · ${pad(first.month)} — ${pad(last.month)}`
+/** 两位序号：0 → '01' */
+export function formatArticleNo(index) {
+  const i = Number(index)
+  if (!Number.isFinite(i) || i < 0) return '01'
+  return String(Math.floor(i) + 1).padStart(2, '0')
 }

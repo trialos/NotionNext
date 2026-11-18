@@ -23,6 +23,9 @@ import { adapterNotionBlockMap } from '@/lib/utils/notion.util'
 /** 首页影集段的设计上限：1–4 辑；配置只能往下收，避免 5+ 辑进入未设计的版面 */
 const HOME_ALBUM_LIMIT = 4
 
+/** 首页精选文章段的设计上限：1–4 篇；题名轴按 4 栏等分设计，配置只能往下收 */
+const HOME_ARTICLE_LIMIT = 4
+
 /**
  * 首页布局
  * @param {*} props
@@ -222,10 +225,19 @@ export async function getStaticProps(req) {
   // —— 首页下半部：精选文章章 + 收尾「近期」段 ——
   // 与影集段同源的规则：Notion「精选」勾选优先。但文章侧**只显示勾选的**，
   // 不用最新文章补齐 —— 精选是博主的手动策展，补齐会稀释这个信号。
-  const homeArticleCount = Math.max(
-    1,
-    Number(
-      siteConfig('CIRCLELIFE_HOME_ARTICLE_COUNT', 6, props?.NOTION_CONFIG) || 6
+  // 题名轴按 4 栏设计：配置只能往下收，硬上限 4（1–4 篇的版面已设计），
+  // 超过 4 篇勾选也不会进入未设计的 5+ 栏。
+  const homeArticleCount = Math.min(
+    HOME_ARTICLE_LIMIT,
+    Math.max(
+      1,
+      Number(
+        siteConfig(
+          'CIRCLELIFE_HOME_ARTICLE_COUNT',
+          HOME_ARTICLE_LIMIT,
+          props?.NOTION_CONFIG
+        ) || HOME_ARTICLE_LIMIT
+      )
     )
   )
   const allPostPages = cleanPostSummaries(

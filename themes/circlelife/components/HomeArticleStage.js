@@ -2,34 +2,25 @@ import SmartLink from '@/components/SmartLink'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import HomeArticleCover, { clearCoverCache } from './HomeArticleCover'
 import {
-  computeRulerFraction,
-  formatMonthRange,
-  formatRulerDay
+  clampArticleIndex,
+  formatArticleNo,
+  formatAxisDay,
+  isNodeVisible
 } from './homeArticleFocus'
 
 /**
- * 首页精选文章章 (HomeArticleStage)
+ * 首页精选文章章 · 桌面版（>1023px）— A「题名脊轨」
  *
- * 形态：**一窗一屏，原生横向滑动**
- * - 100svh 面板 + 一条原生横向滚动轨道；一屏一篇，`scroll-snap-stop: always`
- *   一次手势最多换一篇。滚动/惯性/吸附全部由浏览器接管，JS 不在拖拽路径里。
- * - 文章 DOM/文字/链接/图版/日期尺全部保留；日期尺是等距可点击的时间轴，
- *   左新右旧，当前篇高亮，桌面有上一张/下一张，键盘左右/Home/End。
- * - 图版继续走 HomeArticleCover 的 canvas 槽位：1024 档，只绘制当前篇与
- *   左右邻篇，再外侧预取/释放；不逐帧绘制，也不做滚动驱动 transform。
- * - 活动篇由 IntersectionObserver 判定；不在 scroll 回调里 setState/写布局。
- *
- * 性能契约：
- * - 零新增依赖、零常驻 RAF、无 wheel/touch 劫持、无 scroll 路径布局读取
- * - 刻度等距、无需量测；图版宽度只在 mount / resize / fonts / load 时重算
- * - 滚动路径只有浏览器原生滚动；JS 只在活动篇变化时更新状态/覆盖图
+ * 形态：单篇舞台 + 底部四栏题名轴，**无横向滑轨**。
+ * - 悬停轴上的题名切换舞台；鼠标移出整段（且焦点不在段内）淡回第 1 篇。
+ * - 选中栏左缘一条 2px 朱砂竖线贯通，题名转朱砂并右移 3px，附极淡朱砂渐变底色。
+ * - 切换只动 opacity / visibility，和影集悬停预览同一套过渡。
+ * - 手机形态见 HomeArticleStageMobile.js，两者靠 ≤1023px 断点二选一。
  */
 
 const ARTICLE_INDEX_KEY = 'cl-home-article-index-v2'
 
 export default function HomeArticleStage({ articles = [] }) {
-  // 展示顺序 = 数据顺序（新→旧）：第一屏最新，时间尺左新右旧。
-  // 数据层 pages/index.js 已按 publishDate 降序取最新 N 篇，这里不再反向。
   const list = useMemo(() => {
     const src = Array.isArray(articles) ? articles : []
     return src.filter(Boolean)
@@ -42,107 +33,70 @@ export default function HomeArticleStage({ articles = [] }) {
 
   const [activeIndex, setActiveIndex] = useState(0)
   const sectionRef = useRef(null)
-  const railRef = useRef(null)
+  const stageRef = useRef(null)
   const coverRefs = useRef([])
   const activeRef = useRef(0)
-  const railWidthRef = useRef(0)
-  const didRestoreRef = useRef(false)
-  const didWriteRef = useRef(false)
+  const wasVisibleRef = useRef(false)
   activeRef.current = activeIndex
 
-  // 移动端图版宽度：只在布局节点变化时算；不进入滚动路径。
-  // 日期尺等距，不需要量轴宽。
-  const layout = useCallback(() => {
-    const rail = railRef.current
-    if (!rail || typeof window === 'undefined') return
-    const railW = rail.clientWidth
-    // 宽度变了（转屏/窗口缩放）：按篇位重算像素偏移，别把当前篇留在半路
-    if (railWidthRef.current && railW && railW !== railWidthRef.current) {
-      rail.style.scrollBehavior = 'auto'
-      rail.scrollLeft = activeRef.current * railW
-      rail.style.removeProperty('scroll-behavior')
+  // 只在「真实交互改了篇位」时落盘（goTo 一个来源）。
+  // restore 只读不写；桌面视口下本组件可见，隐藏态由 isNodeVisible 拦住。
+  // 不用「active 变化 + 首帧跳过」的 effect：隐藏形态不消费首帧守卫，
+  // 切回该断点后第一次真实切换会被吞掉。
+  const persist = useCallback(index => {
+    if (!isNodeVisible(sectionRef.current)) return
+    try {
+      window.sessionStorage.setItem(ARTICLE_INDEX_KEY, String(index))
+    } catch {
+      // 隐私模式下 storage 不可用：忽略
     }
-    railWidthRef.current = railW
-    const narrow =
-      typeof window.matchMedia === 'function' &&
-      window.matchMedia('(max-width: 1023px)').matches
-    const slides = rail.querySelectorAll('.cl-home-article')
-    const avail = rail.clientHeight
-    const containerW = document.documentElement.clientWidth
+  }, [])
 
-    // 用 list 的索引遍历：列表变化时 layout 必须重跑（依赖 [list]）
-    for (let index = 0; index < list.length; index++) {
-      const slide = slides[index]
-      if (!slide) continue
-      const plate = slide.querySelector('.cl-home-article-plate')
-      if (!plate) continue
-      if (!narrow) {
-        plate.style.removeProperty('--plate-w')
-        continue
-      }
-      const body = slide.querySelector('.cl-home-article-body')
-      if (!body) continue
-      const bodyH = body.getBoundingClientRect().height
-      // 高度优先：矮屏宁可图版不满宽，也不让文字被时间轴压住
-      const budget = avail > 0 ? (avail - 16 - bodyH) * 0.75 : containerW
-      const ideal = Math.min(containerW, Math.max(90, budget))
-      plate.style.setProperty('--plate-w', `${Math.floor(ideal)}px`)
+  const restore = useCallback(() => {
+    let stored = 0
+    try {
+      stored = Number(window.sessionStorage.getItem(ARTICLE_INDEX_KEY)) || 0
+    } catch {
+      stored = 0
     }
-  }, [list])
+    setActiveIndex(clampArticleIndex(stored, count))
+  }, [count])
 
   useEffect(() => {
-    layout()
-    let raf = 0
-    const schedule = () => {
-      if (raf) return
-      raf = window.requestAnimationFrame(() => {
-        raf = 0
-        layout()
-      })
+    if (!count) return
+    restore()
+  }, [count, restore])
+
+  // 从手机断点切回桌面：节点由隐藏变可见时重读一次篇位
+  useEffect(() => {
+    if (!count) return undefined
+    const onResize = () => {
+      const visible = isNodeVisible(sectionRef.current)
+      if (visible && !wasVisibleRef.current) restore()
+      wasVisibleRef.current = visible
     }
-    window.addEventListener('resize', schedule)
-    window.addEventListener('load', schedule)
-    const fonts = typeof document !== 'undefined' ? document.fonts : null
-    if (fonts?.ready) fonts.ready.then(schedule)
-    return () => {
-      if (raf) window.cancelAnimationFrame(raf)
-      window.removeEventListener('resize', schedule)
-      window.removeEventListener('load', schedule)
-    }
-  }, [layout])
+    onResize()
+    window.addEventListener('resize', onResize)
+    return () => window.removeEventListener('resize', onResize)
+  }, [count, restore])
 
   const goTo = useCallback(
     target => {
-      const rail = railRef.current
-      if (!rail) return
-      const next = Math.max(0, Math.min(count - 1, Number(target) || 0))
-      const reduce =
-        typeof window.matchMedia === 'function' &&
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches
-      const slide = rail.clientWidth
-      const current = slide ? rail.scrollLeft / slide : activeIndex
-      if (reduce || Math.abs(next - current) > 1) {
-        // 跨多篇的跳转（时间轴/Home/End）直接瞬移：平滑滚过 3–5 篇只会
-        // 让活动篇和 canvas 槽位一路抖过去，还来不及画。邻篇保留平滑。
-        rail.style.scrollBehavior = 'auto'
-        rail.scrollLeft = next * slide
-        rail.style.removeProperty('scroll-behavior')
-      } else {
-        rail.scrollTo({ left: next * slide, behavior: 'smooth' })
-      }
+      const next = clampArticleIndex(target, count)
       setActiveIndex(next)
+      persist(next)
     },
-    [activeIndex, count]
+    [count, persist]
   )
 
   const onKeyDown = useCallback(
     event => {
       if (event.key === 'ArrowLeft') {
         event.preventDefault()
-        goTo(activeIndex - 1)
+        goTo(activeRef.current - 1)
       } else if (event.key === 'ArrowRight') {
         event.preventDefault()
-        goTo(activeIndex + 1)
+        goTo(activeRef.current + 1)
       } else if (event.key === 'Home') {
         event.preventDefault()
         goTo(0)
@@ -151,10 +105,16 @@ export default function HomeArticleStage({ articles = [] }) {
         goTo(count - 1)
       }
     },
-    [activeIndex, count, goTo]
+    [count, goTo]
   )
 
-  // 活动篇 → 图版槽位：当前 + 左右邻篇绘制，±2 预取，其余释放
+  const onMouseLeave = useCallback(() => {
+    const section = sectionRef.current
+    if (section && section.contains(document.activeElement)) return
+    goTo(0)
+  }, [goTo])
+
+  // 篇位 → 图版槽位：当前 high、邻篇 auto、±2 预取，其余释放
   useEffect(() => {
     coverRefs.current.length = count
     coverRefs.current.forEach((cover, index) => {
@@ -163,85 +123,22 @@ export default function HomeArticleStage({ articles = [] }) {
       if (distance === 0) cover.arm('high')
       else if (distance === 1) cover.arm('auto')
       else if (distance === 2) {
-        // 只预取图片，不保留 canvas 位图：最多当前 ±1 三篇有纹理
         cover.release()
         cover.prefetch()
       } else cover.release()
     })
   }, [activeIndex, count, listKey])
 
-  // 从文章返回首页时恢复当前篇（横向轨道不依赖页面滚动位置）
-  useEffect(() => {
-    if (!count) return
-    let stored = 0
-    try {
-      stored = Number(window.sessionStorage.getItem(ARTICLE_INDEX_KEY)) || 0
-    } catch {
-      stored = 0
-    }
-    const target = Math.max(0, Math.min(count - 1, stored))
-    didRestoreRef.current = true
-    if (!target) return
-    const rail = railRef.current
-    if (!rail) return
-    // 轨道 CSS 是 smooth：临时关掉，恢复当前篇必须是瞬时定位
-    rail.style.scrollBehavior = 'auto'
-    rail.scrollLeft = target * rail.clientWidth
-    rail.style.removeProperty('scroll-behavior')
-    setActiveIndex(target)
-  }, [count])
-
-  // active 变化时写回 session；restore 的那一帧不写，避免把旧值先冲成 0
-  useEffect(() => {
-    if (!didRestoreRef.current) return
-    if (!didWriteRef.current) {
-      didWriteRef.current = true
-      return
-    }
-    try {
-      window.sessionStorage.setItem(ARTICLE_INDEX_KEY, String(activeIndex))
-    } catch {
-      // 隐私模式下 storage 不可用：忽略
-    }
-  }, [activeIndex])
-
-  // 原生横向轨道 → 活动篇；只在跨过半屏时更新，不监听 scroll
-  useEffect(() => {
-    const rail = railRef.current
-    if (!rail || typeof IntersectionObserver === 'undefined') return undefined
-    const slides = [...rail.querySelectorAll('.cl-home-article')]
-    const observer = new IntersectionObserver(
-      entries => {
-        let best = null
-        entries.forEach(entry => {
-          if (!entry.isIntersecting) return
-          if (!best || entry.intersectionRatio > best.intersectionRatio) {
-            best = entry
-          }
-        })
-        if (!best) return
-        const index = Number(best.target.dataset.index)
-        if (Number.isFinite(index)) setActiveIndex(index)
-      },
-      {
-        root: rail,
-        threshold: [0.5, 0.6, 0.7, 0.8, 0.9]
-      }
-    )
-    slides.forEach(slide => observer.observe(slide))
-    return () => observer.disconnect()
-  }, [count, listKey])
-
-  // 章节在视口内时隐藏回顶键（它会压在日期尺上）
+  // 章节在视口内时隐藏回顶键；隐藏形态不改这个全局类
   useEffect(() => {
     const section = sectionRef.current
     if (!section || typeof IntersectionObserver === 'undefined') return undefined
     const observer = new IntersectionObserver(
       entries => {
-        const entry = entries[0]
+        if (!isNodeVisible(section)) return
         document.documentElement.classList.toggle(
           'cl-home-article-active',
-          entry.isIntersecting
+          entries[0].isIntersecting
         )
       },
       { threshold: 0.5 }
@@ -264,10 +161,13 @@ export default function HomeArticleStage({ articles = [] }) {
   if (!count) return null
 
   const activeTitle = list[activeIndex]?.title?.trim() || ''
-  const rangeLabel = formatMonthRange(list.map(a => a.publishDay))
 
   return (
-    <section ref={sectionRef} className='cl-home-articles' aria-label='精选文章'>
+    <section
+      ref={sectionRef}
+      className='cl-home-articles'
+      onMouseLeave={onMouseLeave}
+      aria-label='精选文章'>
       <div className='cl-home-articles-panel'>
         <div className='cl-home-articles-top'>
           <SmartLink className='cl-home-sec-link' href='/archive'>
@@ -275,158 +175,126 @@ export default function HomeArticleStage({ articles = [] }) {
           </SmartLink>
         </div>
 
-        <div className='cl-home-articles-stage'>
-          <div
-            className='cl-home-articles-viewport'
-            tabIndex={0}
-            role='region'
-            aria-roledescription='carousel'
-            aria-label={`精选文章，共 ${count} 篇`}
-            onKeyDown={onKeyDown}>
-            <div className='cl-home-articles-rail' ref={railRef}>
-              {list.map((article, index) => (
-                <article
-                  key={article.id || index}
-                  id={`cl-home-article-${article.id || index}`}
-                  data-index={index}
-                  className='cl-home-article'
-                  aria-roledescription='slide'
-                  aria-label={`第 ${index + 1} 篇，共 ${count} 篇：${
-                    article.title?.trim() || ''
-                  }`}
-                  aria-current={index === activeIndex ? 'true' : undefined}>
-                  <figure className='cl-home-article-plate'>
-                    {article.cover?.src ? (
-                      <div className='cl-home-article-plate-frame'>
-                        <HomeArticleCover
-                          ref={el => {
-                            coverRefs.current[index] = el
-                          }}
-                          className='cl-home-article-plate-img'
-                          src={article.cover.src}
-                          /* Notion 自带的封面裁剪焦点（0=顶 0.5=中 1=底）：
-                             页面封面回落时按它取景；用独立「首页封面」时为居中（3:4 成品图） */
-                          position={`50% ${(article.cover.pos ?? 0.5) * 100}%`}
-                        />
-                      </div>
-                    ) : (
-                      <div className='cl-home-article-plate-frame is-empty' />
-                    )}
-                  </figure>
-
-                  <div className='cl-home-article-body'>
-                    <div className='cl-home-article-meta'>
-                      {article.category ? (
-                        <span className='is-accent'>{article.category}</span>
-                      ) : null}
-                      {article.category && article.publishDay ? (
-                        <span className='cl-dot' aria-hidden='true'>
-                          ·
-                        </span>
-                      ) : null}
-                      {article.publishDay ? (
-                        <span>{article.publishDay}</span>
-                      ) : null}
-                      {article.readTime ? (
-                        <>
-                          <span className='cl-dot' aria-hidden='true'>
-                            ·
-                          </span>
-                          <span>约 {article.readTime} 分钟</span>
-                        </>
-                      ) : null}
-                    </div>
-                    <h2 className='cl-home-article-title'>
-                      <SmartLink href={article.href}>{article.title}</SmartLink>
-                    </h2>
-                    <span className='cl-home-article-rule' aria-hidden='true' />
-                    {article.summary ? (
-                      <p className='cl-home-article-summary'>
-                        {article.summary}
-                      </p>
-                    ) : null}
-                    <SmartLink
-                      href={article.href}
-                      className='cl-home-article-cta'>
-                      <span
-                        className='cl-home-article-cta-bar'
-                        aria-hidden='true'
-                      />
-                      继续阅读
-                    </SmartLink>
+        <div
+          ref={stageRef}
+          className='cl-home-articles-stage'
+          tabIndex={0}
+          role='region'
+          aria-roledescription='carousel'
+          aria-label={`精选文章，共 ${count} 篇`}
+          onKeyDown={onKeyDown}>
+          {list.map((article, index) => (
+            <article
+              key={article.id || index}
+              id={`cl-home-article-${article.id || index}`}
+              data-index={index}
+              className={`cl-home-article${
+                index === activeIndex ? ' is-active' : ''
+              }`}
+              aria-roledescription='slide'
+              aria-label={`第 ${index + 1} 篇，共 ${count} 篇：${
+                article.title?.trim() || ''
+              }`}
+              aria-hidden={index === activeIndex ? undefined : 'true'}
+              aria-current={index === activeIndex ? 'true' : undefined}>
+              <figure className='cl-home-article-plate'>
+                {article.cover?.src ? (
+                  <div className='cl-home-article-plate-frame'>
+                    <HomeArticleCover
+                      ref={el => {
+                        coverRefs.current[index] = el
+                      }}
+                      className='cl-home-article-plate-img'
+                      src={article.cover.src}
+                      position={`50% ${(article.cover.pos ?? 0.5) * 100}%`}
+                    />
                   </div>
-                </article>
-              ))}
-            </div>
-          </div>
+                ) : (
+                  <div className='cl-home-article-plate-frame is-empty' />
+                )}
+              </figure>
+
+              <div className='cl-home-article-body'>
+                <div className='cl-home-article-meta'>
+                  {article.category ? (
+                    <span className='is-accent'>{article.category}</span>
+                  ) : null}
+                  {article.category && article.publishDay ? (
+                    <span className='cl-dot' aria-hidden='true'>
+                      ·
+                    </span>
+                  ) : null}
+                  {article.publishDay ? (
+                    <span>{article.publishDay}</span>
+                  ) : null}
+                  {article.readTime ? (
+                    <>
+                      <span className='cl-dot' aria-hidden='true'>
+                        ·
+                      </span>
+                      <span>约 {article.readTime} 分钟</span>
+                    </>
+                  ) : null}
+                </div>
+                <h2 className='cl-home-article-title'>
+                  <SmartLink href={article.href}>{article.title}</SmartLink>
+                </h2>
+                <span className='cl-home-article-rule' aria-hidden='true' />
+                {article.summary ? (
+                  <p className='cl-home-article-summary'>
+                    {article.summary}
+                  </p>
+                ) : null}
+                <SmartLink
+                  href={article.href}
+                  className='cl-home-article-cta'>
+                  <span
+                    className='cl-home-article-cta-bar'
+                    aria-hidden='true'
+                  />
+                  继续阅读
+                </SmartLink>
+              </div>
+            </article>
+          ))}
         </div>
 
         <footer className='cl-home-articles-foot'>
-          <button
-            className='cl-home-articles-nav'
-            type='button'
-            onClick={() => goTo(activeIndex - 1)}
-            disabled={activeIndex <= 0}
-            aria-label='上一张文章'>
-            ← <span>上一张</span>
-          </button>
-
-          <nav className='cl-home-articles-ruler' aria-label='精选文章时间轴'>
-            <div className='cl-home-articles-ruler-axis'>
-              {list.map((article, index) => {
-                const x = computeRulerFraction(index, count) * 100
-                // 端点刻度显式标记：游标也是轴的子元素，靠 :last-child 会选错。
-                // 单篇时两端都不挂，让刻度停在轴中点而不是贴左。
-                const edge =
-                  count > 1 && index === 0
-                    ? ' is-first'
-                    : count > 1 && index === count - 1
-                      ? ' is-last'
-                      : ''
-                return (
-                  <button
-                    key={article.id || index}
-                    className={`cl-home-articles-tick${edge}${
-                      index === activeIndex ? ' is-active' : ''
-                    }`}
-                    type='button'
-                    style={{ '--tick-x': `${x}%` }}
-                    aria-label={`${article.publishDay}，第 ${index + 1} 篇`}
-                    aria-current={index === activeIndex ? 'true' : undefined}
-                    onClick={() => goTo(index)}>
-                    <i aria-hidden='true' />
-                    <span>{formatRulerDay(article.publishDay)}</span>
-                  </button>
-                )
-              })}
-              <span
-                className='cl-home-articles-cursor'
-                style={{
-                  '--cursor-x': `${computeRulerFraction(activeIndex, count) * 100}%`
-                }}
-                aria-hidden='true'>
-                <i />
-              </span>
-            </div>
-            <span className='cl-home-articles-range'>{rangeLabel}</span>
+          <nav
+            className='cl-home-articles-axis'
+            aria-label='精选文章题名轴'>
+            {list.map((article, index) => (
+              <button
+                key={article.id || index}
+                className={`cl-home-articles-axis-item${
+                  index === activeIndex ? ' is-active' : ''
+                }`}
+                type='button'
+                onMouseEnter={() => goTo(index)}
+                onFocus={() => goTo(index)}
+                onClick={() => goTo(index)}
+                aria-current={index === activeIndex ? 'true' : undefined}
+                aria-label={`第 ${index + 1} 篇：${article.title?.trim() || ''}`}>
+                <span className='cl-home-articles-axis-no'>
+                  {formatArticleNo(index)}
+                </span>
+                <span className='cl-home-articles-axis-title'>
+                  {article.title}
+                </span>
+                <span className='cl-home-articles-axis-date'>
+                  {formatAxisDay(article.publishDay)}
+                </span>
+              </button>
+            ))}
           </nav>
-
-          <button
-            className='cl-home-articles-nav'
-            type='button'
-            onClick={() => goTo(activeIndex + 1)}
-            disabled={activeIndex >= count - 1}
-            aria-label='下一张文章'>
-            <span>下一张</span> →
-          </button>
         </footer>
-
-        <p className='sr-only' aria-live='polite'>
-          {activeTitle
-            ? `第 ${activeIndex + 1} 篇，共 ${count} 篇：${activeTitle}`
-            : ''}
-        </p>
       </div>
+
+      <p className='sr-only' aria-live='polite'>
+        {activeTitle
+          ? `第 ${activeIndex + 1} 篇，共 ${count} 篇：${activeTitle}`
+          : ''}
+      </p>
     </section>
   )
 }

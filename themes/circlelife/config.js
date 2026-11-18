@@ -31,8 +31,9 @@ const CONFIG = {
   /**
    * 首页「精选文章」章：一文一屏
    * 排序规则 = Notion「精选」勾选的（**只显示勾选的，不做最新补齐**）
+   * 底部题名轴按 4 栏设计，硬上限 4 篇；配置只能往下收。
    */
-  CIRCLELIFE_HOME_ARTICLE_COUNT: 6,
+  CIRCLELIFE_HOME_ARTICLE_COUNT: 4,
   /** 首页精选文章章总开关 */
   CIRCLELIFE_HOME_ARTICLE_STAGE: true,
   CIRCLELIFE_HOME_RECENT_COUNT: 5,
