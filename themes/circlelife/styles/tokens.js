@@ -14,7 +14,7 @@ export const tokenStyle = `
         --cl-paper: #f0e9dc;
         --cl-paper-2: #eae1cf;
         --cl-paper-3: #dbceb4;
-        --cl-text: #20190f;
+        --cl-text: #2f2a22;
         --cl-muted: #57493a;
         /* --cl-faint 是「弱一级」的信息色（页码、序号、表头、外链文字）。
            浅色模式原值 #948574 对纸底只有 3.14:1 —— 12–13px 的正文级文字达不到
@@ -66,19 +66,14 @@ export const tokenStyle = `
         --cl-prose-size: 1.06rem; /* 正文字号（约 17px；行宽由 --cl-prose-measure 控制） */
         --cl-prose-leading: 1.85; /* 正文行高 */
         --cl-prose-indent: 2em; /* 首行缩进 */
-        --cl-prose-gap: 0.5em; /* 段间距（与缩进叠加的呼吸量） */
         --cl-prose-h1: 1.6rem; /* 文内 H1/H2/H3 衬线阶梯 */
         --cl-prose-h2: 1.28rem;
         --cl-prose-h3: 1.1rem;
-        --cl-prose-h1-gap: 2.6em; /* 标题前置大留白（章节呼吸） */
-        --cl-prose-h2-gap: 2.4em;
-        --cl-prose-h3-gap: 2em;
-        --cl-prose-block-gap: 1.5em; /* 引用/callout/代码/分割线上下距 */
-        --cl-prose-media-gap: 1.6em; /* 图片上下距 */
+        /* 块间距已还原到上游 notion.css 的 padding:3px 单一来源，不再用自定义 margin token */
         --cl-prose-caption-size: 0.8rem; /* 图注字号 */
         --cl-prose-code-size: 0.85em; /* 代码块字号 */
         --cl-prose-code-leading: 1.7; /* 代码块行高 */
-        --cl-prose-measure: 60rem; /* 正文列测量宽（宽屏阅读，约 56 个中文字符/行） */
+        --cl-prose-measure: 45rem; /* 正文列测量宽（约 40 个中文字符/行，对齐少数派舒适行宽） */
         --cl-hero-lead-measure: 36rem; /* 序言导语测量宽：正文级字号下约 33 个中文字符/行 */
         --cl-hero-gutter: 24px; /* 序言幕布左右留白：overlay padding 与导语宽度共用 */
         /* —— 全屏文章壳 token（--cl-article-*）：与影集/归档同构的宽页面 —— */
@@ -208,7 +203,7 @@ export const tokenStyle = `
         background-color: var(--cl-bg);
         color: var(--cl-text);
         font-family: var(--cl-font-body);
-        -webkit-font-smoothing: antialiased;
+        /* 不设 antialiased：保留系统默认字重渲染，避免中文笔画被削细（2026-11-18 正文可读性调整） */
         -webkit-tap-highlight-color: transparent;
       }
 

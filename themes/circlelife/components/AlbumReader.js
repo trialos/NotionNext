@@ -864,7 +864,7 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
               <PageMast
                 eyebrow='ALBUM · 影集'
                 title='影的轨迹'
-                description='影于我是空间的书签'
+                description='影像于我是空间的书签'
                 className='cl-page-mast--section cl-page-mast--album index-drawer-mast'
               />
               <button

@@ -243,8 +243,11 @@ export const articleStyle = `
       }
       #theme-circlelife .cl-article-main {
         min-width: 0;
-        /* 宽壳内正文列以舒适测量宽封顶，剩余纸面即杂志页的留白边际 */
+        /* 宽壳内正文列以舒适测量宽封顶，剩余纸面即杂志页的留白边际。
+           margin-inline:auto 让无目录（block 壳）文章也居中；有目录（grid 壳）时
+           在 grid 列内居中，列宽本就等于测量宽，不会有视觉变化。 */
         max-width: var(--cl-prose-measure);
+        margin-inline: auto;
       }
       #theme-circlelife .cl-article-inner {
         position: relative;
@@ -347,7 +350,7 @@ export const articleStyle = `
         contain-intrinsic-size: auto 60px;
       }
 
-      /* —— 标题阶梯：衬线 + 前置大留白 —— */
+      /* —— 标题阶梯：衬线（间距交给上游 padding 单一来源）—— */
       #theme-circlelife #article-wrapper.cl-prose-wrap h1,
       #theme-circlelife #article-wrapper.cl-prose-wrap h2,
       #theme-circlelife #article-wrapper.cl-prose-wrap h3,
@@ -362,27 +365,31 @@ export const articleStyle = `
       }
       #theme-circlelife #article-wrapper.cl-prose-wrap .notion-h1 {
         font-size: var(--cl-prose-h1);
-        margin: var(--cl-prose-h1-gap) 0 0.8em;
       }
       #theme-circlelife #article-wrapper.cl-prose-wrap .notion-h2 {
         font-size: var(--cl-prose-h2);
-        margin: var(--cl-prose-h2-gap) 0 0.7em;
       }
       #theme-circlelife #article-wrapper.cl-prose-wrap .notion-h3 {
         font-size: var(--cl-prose-h3);
-        margin: var(--cl-prose-h3-gap) 0 0.6em;
-      }
-      /* 内容开头的标题不吃前置留白 */
-      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-h1:first-child,
-      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-h2:first-child,
-      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-h3:first-child {
-        margin-top: 0;
       }
 
-      /* —— 段落节奏：首行缩进 2em + 段间 0.5em —— */
+      /* —— 块间间距：单一来源 ——
+         每个顶层块的间距只由这一条 margin-bottom 决定，margin-top 恒为 0，
+         因此在 flex 容器里不会叠加；任何新块自动获得同样间距。
+         24px 让块间视觉间距约 36px，略大于正文行距 32px，保住「块内紧、块间松」又不显得散。
+         块内片段（callout/引用/折叠/多列）不是 main.notion 直接子元素，不受影响。 */
+      #theme-circlelife #article-wrapper.cl-prose-wrap main.notion > * {
+        margin-top: 0 !important;
+        margin-bottom: 24px !important;
+      }
+      /* 连续有序列表是同一个逻辑列表被 Notion 拆成的多个 ol，项间不该有块间距 */
+      #theme-circlelife #article-wrapper.cl-prose-wrap main.notion > .notion-list-numbered:has(+ .notion-list-numbered) {
+        margin-bottom: 0 !important;
+      }
+
+      /* —— 段落节奏：仅保留首行缩进开关 —— */
       #theme-circlelife #article-wrapper.cl-prose-wrap .notion-text {
         padding: 0;
-        margin: 0 0 var(--cl-prose-gap);
         text-indent: var(--cl-prose-indent);
       }
       /* 免缩进：仅限块内片段上下文（引用/callout/折叠/多列）；顶层正文段一律缩进 */
@@ -412,7 +419,6 @@ export const articleStyle = `
       #theme-circlelife #article-wrapper.cl-prose-wrap .notion-quote {
         border-left: 3px solid var(--cl-accent);
         padding: 0.1em 0 0.1em 1rem;
-        margin: var(--cl-prose-block-gap) 0;
         font-size: 1em;
         font-family: var(--cl-font-display);
         color: var(--cl-text);
@@ -424,7 +430,6 @@ export const articleStyle = `
         background: color-mix(in srgb, var(--cl-paper-2) 45%, var(--cl-surface));
         border-radius: var(--cl-radius-sm);
         padding: 0.85em 1em;
-        margin: var(--cl-prose-block-gap) 0;
       }
 
       /* —— 代码块：等宽 + 纸二底 —— */
@@ -436,7 +441,6 @@ export const articleStyle = `
         border: 1px solid var(--cl-border);
         border-radius: var(--cl-radius-sm);
         padding: 1em 1.1em;
-        margin: var(--cl-prose-block-gap) 0;
       }
       /* 代码块内层 code 不吃行内样式 */
       #theme-circlelife #article-wrapper.cl-prose-wrap .notion-code code {
@@ -459,21 +463,27 @@ export const articleStyle = `
         padding: 0.1em 0.35em;
       }
 
-      /* —— 列表：行距收敛、标记弱化 —— */
-      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-list {
-        margin: 0 0 var(--cl-prose-gap);
-      }
+      /* —— 列表：行距收敛、标记弱化（间距交给上游 padding）—— */
       #theme-circlelife #article-wrapper.cl-prose-wrap .notion-list li {
         padding: 0.3em 0;
       }
       #theme-circlelife #article-wrapper.cl-prose-wrap .notion-list li::marker {
         color: var(--cl-faint);
       }
-
-      /* —— 图片：圆角 + 上下呼吸 + 图注居中 —— */
-      #theme-circlelife #article-wrapper.cl-prose-wrap .notion-asset-wrapper {
-        margin: var(--cl-prose-media-gap) 0;
+      /* 有序列表紧凑化：Notion 把 1./2./3. 存成多个独立 ol，每个 ol 的 padding+margin
+         会重复叠加，使列表项像分段。只针对正文直属的有序列表归零这三层空白，
+         使其紧挨成列表；无序列表、段落、表格、折叠块均不受影响。
+         保留最后一个 ol 的下边距，避免列表与后段贴死。 */
+      #theme-circlelife #article-wrapper.cl-prose-wrap main.notion > .notion-list-numbered {
+        padding-top: 0;
+        padding-bottom: 0;
       }
+      #theme-circlelife #article-wrapper.cl-prose-wrap main.notion > .notion-list-numbered li {
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+
+      /* —— 图片：圆角 + 图注居中（间距交给上游 padding）—— */
       #theme-circlelife #article-wrapper.cl-prose-wrap .notion-image {
         border-radius: var(--cl-media-radius);
       }
@@ -500,7 +510,6 @@ export const articleStyle = `
         border: 1px solid var(--cl-border);
         border-collapse: collapse;
         font-size: 0.95em;
-        margin: var(--cl-prose-block-gap) 0;
       }
       #theme-circlelife #article-wrapper.cl-prose-wrap .notion-simple-table td,
       #theme-circlelife #article-wrapper.cl-prose-wrap .notion-simple-table th {
@@ -519,11 +528,9 @@ export const articleStyle = `
         border-radius: var(--cl-radius-sm);
         background: var(--cl-surface);
         padding: 0.9em 1em;
-        margin: var(--cl-prose-block-gap) 0;
       }
       #theme-circlelife #article-wrapper.cl-prose-wrap .notion-toggle {
         padding: 0.3em 0;
-        margin: 0 0 var(--cl-prose-gap);
       }
       #theme-circlelife #article-wrapper.cl-prose-wrap .notion-toggle > summary {
         cursor: pointer;

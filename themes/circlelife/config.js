@@ -45,8 +45,8 @@ const CONFIG = {
    */
   CIRCLELIFE_ARTICLE_CARD: false,
 
-  /** 文章正文：首行缩进 2em（false 时回到纯段距模式，段间 0.5em 仍保留） */
-  CIRCLELIFE_PROSE_INDENT: true,
+  /** 文章正文：首行缩进已关闭，回到纯段距模式（段间 0.5em 仍保留）；原 2em 规则保留，改回 true 即恢复 */
+  CIRCLELIFE_PROSE_INDENT: false,
 
   CIRCLELIFE_SIDEBAR_ONLY_ON_POST: true,
 

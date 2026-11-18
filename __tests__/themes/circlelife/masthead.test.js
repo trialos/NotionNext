@@ -2,7 +2,7 @@
  * 刊头（mast）契约测试
  *
  * 归档 / 音乐页使用共享 PageMast；影集目录抽屉也复用同一个 PageMast，
- * 文案沿用旧影集页的「影的轨迹 / 影于我是空间的书签」。
+ * 文案沿用旧影集页的「影的轨迹 / 影像于我是空间的书签」。
  * 影集页自身是全屏阅读器，不再有旧书架版心和 --cl-mast-top 页面容器。
  */
 import fs from 'fs'
@@ -104,7 +104,7 @@ describe('circlelife 刊头统一', () => {
     expect(reader).toContain("from './PageMast'")
     expect(reader).toContain('cl-page-mast--section cl-page-mast--album')
     expect(reader).toContain('影的轨迹')
-    expect(reader).toContain('影于我是空间的书签')
+    expect(reader).toContain('影像于我是空间的书签')
   })
 
   test('归档刊头挂上 section 变体', () => {
@@ -116,7 +116,7 @@ describe('circlelife 刊头统一', () => {
     const reader = readThemeFile('components', 'AlbumReader.js')
     expect(reader).toContain('ALBUM · 影集')
     expect(reader).toContain('影的轨迹')
-    expect(reader).toContain('影于我是空间的书签')
+    expect(reader).toContain('影像于我是空间的书签')
     const index = readThemeFile('index.js')
     expect(index).toContain('ARTICLE · 时间线与脉络')
     expect(index).toContain('心的轨迹')
