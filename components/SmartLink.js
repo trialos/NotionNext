@@ -54,8 +54,23 @@ const SmartLink = ({ href, children, ...rest }) => {
     const queryString = window.location.search?.slice(1) || ''
     const params = new URLSearchParams(queryString)
     const preserved = {}
-    // 排除页面与路由私有状态（如影集画廊参数 view/deck、分页参数 page、搜索关键词 keyword 等），仅允许全局状态（如主题预览 theme）跨页面透传
-    const EXCLUDED_KEYS = new Set(['view', 'deck', 'photo', 'page', 'keyword', 'slot'])
+    // 排除页面与路由私有状态，仅允许全局状态（如主题预览 theme）跨页面透传。
+    // category / tag 只在 /archive 的筛选上下文里有意义：它们由 LayoutArchive
+    // 自己用 router.push 写入地址栏（可直达、可分享），但不应被自动注入到其它
+    // 页面的链接里，否则从文章点分类再点首页会得到 /?category=xxx 并一路残留。
+    // s 是 /search 的关键词（keyword 是另一处旧用法），target 是跳评论的一次性锚点。
+    const EXCLUDED_KEYS = new Set([
+      'view',
+      'deck',
+      'photo',
+      'page',
+      'keyword',
+      'slot',
+      'category',
+      'tag',
+      's',
+      'target'
+    ])
     for (const [key, value] of params.entries()) {
       if (value !== '' && !EXCLUDED_KEYS.has(key)) {
         preserved[key] = value
