@@ -63,7 +63,8 @@ yarn
 - `yarn lint:fix`：自动修复可修复的 ESLint 问题。
 - `yarn type-check`：TypeScript 类型检查（不输出产物）。
 - `yarn format`：使用 Prettier 格式化全仓库。
-- `yarn format:check`：检查格式是否符合 Prettier 规则。
+- `yarn format:check`：只检查本次 git 改动文件的格式（已跟踪的修改 + 未跟踪的新增）；无改动时跳过，不受仓库历史遗留格式问题影响。`quality` 与 `health-check` 中的格式检查也走此入口。
+- `yarn format:check:all`：检查全仓库格式（会报出历史遗留的不合规文件，按需手动运行）。
 - `yarn quality`：执行项目质量检查脚本（聚合检查）。
 - `yarn pre-commit`：提交前检查（lint fix + format + type-check）。
 
@@ -197,6 +198,7 @@ NotionNext/
 ```
 
 **类型 (type):**
+
 - `feat`: 新功能
 - `fix`: 修复bug
 - `docs`: 文档更新
@@ -210,6 +212,7 @@ NotionNext/
 - `revert`: 回滚之前的提交
 
 **示例:**
+
 ```
 feat(auth): add user authentication
 fix(ui): resolve button alignment issue
