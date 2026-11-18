@@ -10,6 +10,8 @@ export const tokenStyle = `
         --cl-surface: #fcfaf4;
         /* 二维码静区：扫码需要绝对白底，深浅模式都不换（功能性例外） */
         --cl-qr-plate-bg: #ffffff;
+        /* 相纸边：比 --cl-surface 略暖一档，让带边印相的纸边在纸底上读得出来 */
+        --cl-paper: #f0e9dc;
         --cl-paper-2: #eae1cf;
         --cl-paper-3: #dbceb4;
         --cl-text: #20190f;
@@ -166,6 +168,7 @@ export const tokenStyle = `
         color-scheme: dark;
         --cl-bg: #14110e;
         --cl-surface: #1a1612;
+        --cl-paper: #231d18;
         --cl-paper-2: #1c1814;
         --cl-paper-3: #261f18;
         --cl-text: #f0e9dc;

@@ -465,16 +465,14 @@ export const homeStyle = `
         }
       }
 
-      /* —— 首页精选影集段 (HomeAlbumShowcase) ——
-         形态：接触印相（01）。与上方文章段逐列镜像：
-         文章 = 图 480 左 / 文 620 右；影集 = 索引 620 左 / 主封面 480 右。
-         纯静态版面：无 sticky、无 scroll 监听、无 JS 换挡 —— 页面滚动即原生滚动。
-         数据：只显示 Notion「精选」勾选的影集（上限 4），不补齐；0 辑整段不渲染。 */
+      /* —— 首页精选影集段 (HomeAlbumShowcase) · PC 悬停预览 ——
+         保留「左索引 620 / 右主视觉 480」两栏框架与左右贴缘的空间感。
+         左侧 4 辑纯文字编号列表：悬停/聚焦高亮并切换右侧；
+         右侧是手机端 C 方案同款卡片（带边相纸 + 题签卡叠压），
+         四张叠放交叉淡入，整卡可点。手机端由 homeAlbumMobile.js 接管。 */
       #theme-circlelife .cl-home-album {
-        /* 几何：索引列与文章文字栏同宽；主封面与文章图版同宽（480） */
         --cl-home-album-hero-w: 480px;
         --cl-home-album-index-w: var(--cl-home-article-measure);
-        --cl-home-album-thumb-w: clamp(96px, 8vw, 128px);
         max-width: var(--cl-wide-max);
         margin: var(--cl-home-section-pad) auto 0;
         padding-inline: var(--cl-wide-pad);
@@ -522,79 +520,11 @@ export const homeStyle = `
         gap: var(--cl-wide-gap);
         align-items: stretch;
         margin-top: clamp(1.5rem, 2.5vw, 2rem);
+        /* 段底与页脚分隔线之间留呼吸，避免题签卡下缘贴线 */
+        padding-bottom: clamp(1.25rem, 2.5vw, 2.25rem);
       }
-      #theme-circlelife .cl-home-album-hero {
-        grid-column: 2;
-        grid-row: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 1.1rem;
-        width: 100%;
-        max-width: var(--cl-home-album-hero-w);
-        margin-left: auto;
-        color: inherit;
-        text-decoration: none;
-      }
-      #theme-circlelife .cl-home-album-cover,
-      #theme-circlelife .cl-home-album-thumb {
-        display: block;
-        width: 100%;
-        max-width: none;
-        aspect-ratio: 4 / 5;
-        border-radius: var(--cl-media-radius);
-        background: var(--cl-paper-2);
-      }
-      #theme-circlelife .cl-home-album-hero-copy {
-        display: flex;
-        flex-direction: column;
-        gap: 0.55rem;
-      }
-      #theme-circlelife .cl-home-album-line {
-        display: flex;
-        align-items: baseline;
-        flex-wrap: wrap;
-        gap: 0.55rem;
-      }
-      #theme-circlelife .cl-home-album-idx {
-        font-family: var(--cl-font-mono);
-        font-size: 0.6875rem;
-        letter-spacing: 0.08em;
-        color: var(--cl-faint);
-        font-variant-numeric: tabular-nums;
-      }
-      #theme-circlelife .cl-home-album-meta {
-        font-family: var(--cl-font-mono);
-        font-size: 0.6875rem;
-        letter-spacing: 0.04em;
-        color: var(--cl-faint);
-        font-variant-numeric: tabular-nums;
-      }
-      #theme-circlelife .cl-home-album-name {
-        margin: 0;
-        font-family: var(--cl-font-display);
-        font-weight: 500;
-        letter-spacing: -0.01em;
-        /* 过渡只动颜色（不碰字重/字号 → 换色不触发布局） */
-        transition: color var(--cl-dur) var(--cl-ease);
-        text-wrap: balance;
-      }
-      #theme-circlelife .cl-home-album-hero-name {
-        font-size: clamp(1.75rem, 2.4vw, 2.5rem);
-        line-height: 1.08;
-      }
-      #theme-circlelife .cl-home-album-cta {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        align-self: flex-start;
-        font-family: var(--cl-font-display);
-        font-size: 0.95rem;
-        color: var(--cl-accent);
-        text-decoration: underline;
-        text-underline-offset: 3px;
-        text-decoration-thickness: 1px;
-        transition: color var(--cl-dur) var(--cl-ease);
-      }
+
+      /* 左：4 行纯文字索引，均分右侧主视觉高度 */
       #theme-circlelife .cl-home-album-index {
         grid-column: 1;
         grid-row: 1;
@@ -611,102 +541,188 @@ export const homeStyle = `
         border-bottom: 1px solid var(--cl-border);
       }
       #theme-circlelife .cl-home-album-row {
+        position: relative;
         display: grid;
-        grid-template-columns:
-          var(--cl-home-album-thumb-w) minmax(0, 1fr) auto;
+        grid-template-columns: 2.6rem minmax(0, 1fr) auto;
         align-items: center;
-        gap: 1.15rem;
+        gap: 1.1rem;
         height: 100%;
-        padding-block: 1.35rem;
+        padding: 0.7rem 1rem;
         color: inherit;
         text-decoration: none;
       }
-      #theme-circlelife .cl-home-album-row-copy {
-        display: flex;
-        flex-direction: column;
-        gap: 0.45rem;
-        min-width: 0;
+      /* 书脊竖线：一条独立细线，从中点向上下展开（scaleY 不碰祖先链，
+         不会给首页题字的 fixed 造包含块）。未选中收拢为 0。 */
+      #theme-circlelife .cl-home-album-row::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--cl-accent);
+        transform: scaleY(0);
+        transform-origin: center;
+        transition: transform var(--cl-home-switch) var(--cl-ease);
       }
+      #theme-circlelife .cl-home-album-row.is-active::before,
+      #theme-circlelife .cl-home-album-row:hover::before,
+      #theme-circlelife .cl-home-album-row:focus-visible::before {
+        transform: scaleY(1);
+      }
+      #theme-circlelife .cl-home-album-idx {
+        font-family: var(--cl-font-mono);
+        font-size: 0.6875rem;
+        letter-spacing: 0.08em;
+        color: var(--cl-faint);
+        font-variant-numeric: tabular-nums;
+        transition: color var(--cl-home-switch) var(--cl-ease);
+      }
+      #theme-circlelife .cl-home-album-name {
+        margin: 0;
+        font-family: var(--cl-font-display);
+        font-weight: 500;
+        letter-spacing: -0.01em;
+        /* 过渡只动颜色与 transform（不碰字重/字号 → 不触发布局） */
+        transition: color var(--cl-home-switch) var(--cl-ease),
+          transform var(--cl-home-switch) var(--cl-ease);
+        text-wrap: balance;
+      }
+      /* 借鉴导航的「淡 → 强调」：未选中淡黑、选中朱砂并轻微右移 */
       #theme-circlelife .cl-home-album-row-name {
         font-size: clamp(1.25rem, 1.55vw, 1.6rem);
         line-height: 1.2;
+        color: var(--cl-faint);
       }
       #theme-circlelife .cl-home-album-arrow {
         font-family: var(--cl-font-display);
         font-size: 1rem;
         line-height: 1;
         color: var(--cl-faint);
-        transition: color var(--cl-dur) var(--cl-ease),
-          transform var(--cl-dur) var(--cl-ease);
+        transition: color var(--cl-home-switch) var(--cl-ease),
+          transform var(--cl-home-switch) var(--cl-ease);
       }
-      #theme-circlelife .cl-home-album-hero:hover .cl-home-album-name,
-      #theme-circlelife .cl-home-album-hero:focus-visible .cl-home-album-name,
+      #theme-circlelife .cl-home-album-row.is-active .cl-home-album-idx,
+      #theme-circlelife .cl-home-album-row:hover .cl-home-album-idx,
+      #theme-circlelife .cl-home-album-row:focus-visible .cl-home-album-idx,
+      #theme-circlelife .cl-home-album-row.is-active .cl-home-album-name,
       #theme-circlelife .cl-home-album-row:hover .cl-home-album-name,
-      #theme-circlelife .cl-home-album-row:focus-visible .cl-home-album-name {
-        color: var(--cl-accent);
-      }
-      #theme-circlelife .cl-home-album-hero:hover .cl-home-album-cta {
-        color: var(--cl-accent-press);
-      }
+      #theme-circlelife .cl-home-album-row:focus-visible .cl-home-album-name,
+      #theme-circlelife .cl-home-album-row.is-active .cl-home-album-arrow,
       #theme-circlelife .cl-home-album-row:hover .cl-home-album-arrow,
       #theme-circlelife .cl-home-album-row:focus-visible .cl-home-album-arrow {
         color: var(--cl-accent);
+      }
+      #theme-circlelife .cl-home-album-row.is-active .cl-home-album-row-name,
+      #theme-circlelife .cl-home-album-row:hover .cl-home-album-row-name,
+      #theme-circlelife .cl-home-album-row:focus-visible .cl-home-album-row-name {
+        transform: translateX(3px);
+      }
+      #theme-circlelife .cl-home-album-row.is-active .cl-home-album-arrow,
+      #theme-circlelife .cl-home-album-row:hover .cl-home-album-arrow,
+      #theme-circlelife .cl-home-album-row:focus-visible .cl-home-album-arrow {
         transform: translateX(2px);
+      }
+
+      /* 右：4 张 C 方案卡片叠放同一格，只动 opacity 交叉淡入 */
+      #theme-circlelife .cl-home-album-showcase {
+        grid-column: 2;
+        grid-row: 1;
+        display: grid;
+        width: 100%;
+        max-width: var(--cl-home-album-hero-w);
+        margin-left: auto;
+      }
+      #theme-circlelife .cl-home-album-card {
+        grid-column: 1;
+        grid-row: 1;
+        display: block;
+        color: inherit;
+        text-decoration: none;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity var(--cl-home-switch) var(--cl-ease),
+          visibility 0s linear var(--cl-home-switch);
+      }
+      #theme-circlelife .cl-home-album-card.is-active {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transition: opacity var(--cl-home-switch) var(--cl-ease),
+          visibility 0s;
+      }
+      #theme-circlelife .cl-home-album-plate {
+        margin: 0;
+      }
+      #theme-circlelife .cl-home-album-mat {
+        padding: 10px;
+        background: var(--cl-paper);
+        border: 1px solid var(--cl-border);
+      }
+      #theme-circlelife .cl-home-album-cover {
+        display: block;
+        width: 100%;
+        max-width: none;
+        aspect-ratio: 4 / 5;
+        background: var(--cl-paper-2);
+      }
+      /* 题签卡压在印相下缘：负 margin 叠压，普通文档流、不碰 transform */
+      #theme-circlelife .cl-home-album-caption {
+        position: relative;
+        width: calc(100% - 3rem);
+        max-width: 30rem;
+        margin: -2.6rem auto 0;
+        padding: 1.55rem 1.45rem 1.35rem;
+        background: var(--cl-surface);
+        border: 1px solid var(--cl-border);
+      }
+      #theme-circlelife .cl-home-album-folio {
+        position: absolute;
+        top: -0.7rem;
+        right: 1rem;
+        padding: 0.15rem 0.5rem;
+        background: var(--cl-accent);
+        color: var(--cl-accent-ink);
+        font-family: var(--cl-font-mono);
+        font-size: 0.625rem;
+        letter-spacing: 0.06em;
+        font-variant-numeric: tabular-nums;
+      }
+      #theme-circlelife .cl-home-album-rule {
+        display: block;
+        width: 34px;
+        height: 1px;
+        background: var(--cl-accent);
+        margin: 0 0 0.85rem;
+      }
+      #theme-circlelife .cl-home-album-hero-name {
+        font-size: clamp(1.6rem, 2.1vw, 2.1rem);
+        line-height: 1.15;
+      }
+      #theme-circlelife .cl-home-album-card:hover .cl-home-album-hero-name,
+      #theme-circlelife .cl-home-album-card:focus-visible .cl-home-album-hero-name {
+        color: var(--cl-accent);
       }
       #theme-circlelife .cl-home-album a:focus-visible {
         outline: 2px solid var(--cl-accent);
         outline-offset: 5px;
         border-radius: 2px;
       }
-      /* 少辑退化：2–3 辑时索引行自然高度、靠上，不被拉成很高的空行 */
+      /* 减少动效：全局只压 duration 不压 delay，这里把卡片 visibility 的
+         240ms 延迟清零，避免透明卡片仍滞留无障碍树。 */
+      @media (prefers-reduced-motion: reduce) {
+        #theme-circlelife .cl-home-album-card,
+        #theme-circlelife .cl-home-album-card.is-active {
+          transition-delay: 0s;
+        }
+      }
+      /* 少辑退化：1–3 辑时索引行自然高度、靠上，不被拉成很高的空行 */
+      #theme-circlelife .cl-home-album[data-count='1'] .cl-home-album-index,
       #theme-circlelife .cl-home-album[data-count='2'] .cl-home-album-index,
       #theme-circlelife .cl-home-album[data-count='3'] .cl-home-album-index {
         grid-auto-rows: auto;
         align-content: start;
-      }
-      /* 单辑：不渲染索引，主封面居中收尾 */
-      #theme-circlelife .cl-home-album[data-count='1'] .cl-home-album-body {
-        grid-template-columns: minmax(0, var(--cl-home-album-hero-w));
-        justify-content: center;
-      }
-      #theme-circlelife .cl-home-album[data-count='1'] .cl-home-album-hero {
-        grid-column: 1;
-        margin-inline: auto;
-      }
-
-      /* ≤1023px：主封面满幅出血，索引改为自然高度的纵排 */
-      @media (max-width: 1023px) {
-        #theme-circlelife .cl-home-album-body {
-          display: flex;
-          flex-direction: column;
-          gap: 0;
-          margin-top: 1.35rem;
-        }
-        #theme-circlelife .cl-home-album-hero {
-          max-width: none;
-          margin: 0;
-          gap: 1rem;
-        }
-        #theme-circlelife .cl-home-album-cover {
-          width: 100vw;
-          margin-inline: calc(-1 * var(--cl-wide-pad));
-          border-radius: 0;
-        }
-        #theme-circlelife .cl-home-album-hero-copy {
-          padding-block: 0.1rem 1rem;
-        }
-        #theme-circlelife .cl-home-album-index {
-          grid-auto-rows: auto;
-        }
-        #theme-circlelife .cl-home-album-row {
-          grid-template-columns:
-            clamp(96px, 34vw, 128px) minmax(0, 1fr) auto;
-          gap: 1rem;
-          padding-block: 1rem;
-        }
-        #theme-circlelife .cl-home-album-row-name {
-          font-size: 1.2rem;
-        }
       }
 
       /* 回顶按钮：首页三段（照片墙 / 精选文章 / 精选影集）内隐藏，离开后重新出现。

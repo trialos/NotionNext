@@ -11,6 +11,7 @@ import { filterTrackStyle } from './styles/filterTrack'
 import { headerStyle } from './styles/header'
 import { homeStyle } from './styles/home'
 import { homeArticlesStyle } from './styles/homeArticles'
+import { homeAlbumMobileStyle } from './styles/homeAlbumMobile'
 import { mastStyle } from './styles/mast'
 import { musicStyle } from './styles/music'
 import { tokenStyle } from './styles/tokens'
@@ -29,6 +30,7 @@ ${mastStyle}
 ${filterTrackStyle}
 ${homeStyle}
 ${homeArticlesStyle}
+${homeAlbumMobileStyle}
 ${archiveStyle}
 ${articleStyle}
 ${albumReaderStyle}

@@ -52,6 +52,7 @@ import { Header } from './components/Header'
 import { resolveWechatOrigin } from './components/wechatOrigin'
 import HomeTiltWall from './components/HomeTiltWall'
 import HomeAlbumShowcase from './components/HomeAlbumShowcase'
+import HomeAlbumShowcaseMobile from './components/HomeAlbumShowcaseMobile'
 import HomeArticleStage from './components/HomeArticleStage'
 import ListScrollMemory from './components/ListScrollMemory'
 import MobileToc from './components/MobileToc'
@@ -345,12 +346,16 @@ const LayoutPostList = props => {
           <HomeArticleStage articles={props.homeArticles} />
         )}
 
-      {/* 首页精选影集段：照片墙（Hero）与文章段之后 */}
+      {/* 首页精选影集段：照片墙（Hero）与文章段之后。
+          桌面静态版与手机 A 方案同挂，CSS 断点（≤1023px）二选一显示。 */}
       {router.pathname === '/' &&
         siteConfig('CIRCLELIFE_HOME_ALBUM_SHOWCASE', true, CONFIG) &&
         Array.isArray(props.homeAlbums) &&
         props.homeAlbums.length > 0 && (
-          <HomeAlbumShowcase albums={props.homeAlbums} />
+          <>
+            <HomeAlbumShowcase albums={props.homeAlbums} />
+            <HomeAlbumShowcaseMobile albums={props.homeAlbums} />
+          </>
         )}
 
       {!isHome && (

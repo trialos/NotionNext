@@ -23,7 +23,7 @@ const CONFIG = {
   CIRCLELIFE_HERO_COVER: true,
   /**
    * 首页「精选影集」段：最多放几辑
-   * 排序规则 = Notion「精选」勾选的优先，不足用最新影集补齐
+   * 只显示 Notion「精选」勾选的影集，按发布日期倒序，不补齐
    */
   CIRCLELIFE_HOME_ALBUM_COUNT: 4,
   /** 首页精选影集段总开关 */
