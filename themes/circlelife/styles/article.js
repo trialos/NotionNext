@@ -264,14 +264,15 @@ export const articleStyle = `
         margin-top: 0;
       }
 
-      /* 回顶按钮：全屏文章贴宽容器内容右缘（与归档 cl-is-archive 同款推导） */
+      /* 全屏文章：回顶与目录药丸共同贴宽容器内容右缘（与归档同款推导） */
       @media (min-width: 768px) {
-        #theme-circlelife.cl-is-article .cl-backtop {
-          right: max(
+        #theme-circlelife.cl-is-article {
+          --cl-fab-right: max(
             calc(var(--cl-article-pad) + 0.5rem),
             calc(
               (100vw - var(--cl-article-shell)) / 2 + var(--cl-article-pad) + 0.5rem
-            )
+            ),
+            env(safe-area-inset-right, 0px)
           );
         }
       }
@@ -574,8 +575,9 @@ export const articleStyle = `
       #theme-circlelife .cl-toc-fab {
         display: none;
         position: fixed;
-        right: max(1rem, env(safe-area-inset-right, 0px));
-        bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
+        /* 与回顶共用右缘；目录在下、回顶在上 */
+        right: var(--cl-fab-right);
+        bottom: calc(1.75rem + env(safe-area-inset-bottom, 0px));
         z-index: 35;
         align-items: center;
         justify-content: center;

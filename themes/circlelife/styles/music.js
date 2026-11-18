@@ -44,6 +44,19 @@ export const musicStyle = `
         padding: var(--cl-mast-top) var(--cl-wide-pad) 0;
       }
 
+      /* 音乐走宽壳，浮钮不能再按 48rem 窄栏算（否则会停在画面中间） */
+      @media (min-width: 768px) {
+        #theme-circlelife.cl-is-music {
+          --cl-fab-right: max(
+            calc(var(--cl-wide-pad) + 0.5rem),
+            calc(
+              (100vw - var(--cl-wide-max)) / 2 + var(--cl-wide-pad) + 0.5rem
+            ),
+            env(safe-area-inset-right, 0px)
+          );
+        }
+      }
+
       /* —— 封面框：比例由框决定，图/占位一律绝对铺满 —— */
       #theme-circlelife .cl-music-card-cover,
       #theme-circlelife .cl-music-hero-cover,

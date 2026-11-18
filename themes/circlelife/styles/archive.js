@@ -453,14 +453,15 @@ export const archiveStyle = `
         }
       }
 
-      /* 宽屏归档：返回顶部贴宽容器内容右缘，而不是按 48rem 旧列表宽度 */
+      /* 宽屏归档：回顶与目录药丸共同贴宽容器内容右缘，而不是按 48rem 旧列表宽度 */
       @media (min-width: 768px) {
-        #theme-circlelife.cl-is-archive .cl-backtop {
-          right: max(
+        #theme-circlelife.cl-is-archive {
+          --cl-fab-right: max(
             calc(var(--cl-wide-pad) + 0.5rem),
             calc(
               (100vw - var(--cl-wide-max)) / 2 + var(--cl-wide-pad) + 0.5rem
-            )
+            ),
+            env(safe-area-inset-right, 0px)
           );
         }
       }

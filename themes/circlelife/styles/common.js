@@ -93,13 +93,14 @@ export const commonStyle = `
         color: var(--cl-accent);
         background: var(--cl-accent-soft);
       }
+      /* 回顶与移动目录药丸共用 :root 的 --cl-fab-right；各页面只覆写变量 */
       /* back to top */
       #theme-circlelife .cl-backtop {
         position: fixed;
         z-index: 30;
-        /* 无侧栏：内容右 gutter（max-w-3xl≈48rem） */
-        right: max(1rem, calc((100vw - 48rem) / 2 + 0.5rem));
-        bottom: calc(1.75rem + env(safe-area-inset-bottom, 0px));
+        right: var(--cl-fab-right);
+        /* 回顶在上，目录在下（药丸更宽，贴底更稳） */
+        bottom: calc(5.25rem + env(safe-area-inset-bottom, 0px));
         width: 2.65rem;
         height: 2.65rem;
         border-radius: 9999px;
@@ -128,16 +129,13 @@ export const commonStyle = `
       }
       /* 有目录侧栏：贴 TOC 左缘（max-w-5xl + w-64） */
       @media (min-width: 768px) {
-        #theme-circlelife.cl-has-sidebar .cl-backtop {
-          right: max(1rem, calc((100vw - 64rem) / 2 + 16rem));
-        }
-        #theme-circlelife.cl-is-album .cl-backtop {
-          right: 1.25rem;
+        #theme-circlelife.cl-has-sidebar {
+          --cl-fab-right: max(1rem, calc((100vw - 64rem) / 2 + 16rem), env(safe-area-inset-right, 0px));
         }
       }
       @media (max-width: 767px) {
-        #theme-circlelife .cl-backtop {
-          right: max(1.1rem, env(safe-area-inset-right, 0px));
+        #theme-circlelife {
+          --cl-fab-right: max(1.1rem, env(safe-area-inset-right, 0px));
         }
       }
       #theme-circlelife .cl-backtop.is-visible {

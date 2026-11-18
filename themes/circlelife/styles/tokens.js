@@ -52,6 +52,8 @@ export const tokenStyle = `
         /* 宽屏页面容器（归档等大屏模块共用）：最大宽 / 流动 gutter / 双栏间距 */
         --cl-wide-max: 112.5rem;
         --cl-wide-pad: clamp(1rem, 3vw, 3rem);
+        /* 回顶与移动目录药丸共用右缘；宽屏页面各自定义覆写，手机在 common.js 覆写 */
+        --cl-fab-right: max(1rem, calc((100vw - 48rem) / 2 + 0.5rem), env(safe-area-inset-right, 0px));
         --cl-wide-gap: clamp(2rem, 3.5vw, 4rem);
         /* 刊头顶部基准（归档 / 影集两页共用）：距视口顶部的固定值。
            桌面 88px = 导航带 60px + 28px（14-28-14 节奏的中段值）；
