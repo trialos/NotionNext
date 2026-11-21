@@ -2,9 +2,7 @@
 import BLOG from '@/blog.config'
 import Document, { Head, Html, Main, NextScript } from 'next/document'
 
-const isLocalFontAwesome = BLOG.FONT_AWESOME?.startsWith(
-  '/vendor/fontawesome/'
-)
+const isLocalFontAwesome = BLOG.FONT_AWESOME?.startsWith('/vendor/fontawesome/')
 
 // 预先设置深色模式的脚本内容
 const darkModeScript = `
@@ -50,13 +48,16 @@ class MyDocument extends Document {
           <link rel='preconnect' href='https://images.unsplash.com' />
           <link rel='dns-prefetch' href='//images.unsplash.com' />
 
-          {/* Notion 核心图床与代理域名预连接（消灭 302 重定向握手延迟） */}
-          <link rel='preconnect' href='https://www.notion.so' crossOrigin='anonymous' />
-          <link rel='dns-prefetch' href='//www.notion.so' />
-          <link rel='preconnect' href='https://img.notionusercontent.com' crossOrigin='anonymous' />
-          <link rel='dns-prefetch' href='//img.notionusercontent.com' />
-          <link rel='preconnect' href='https://file.notion.so' crossOrigin='anonymous' />
-          <link rel='dns-prefetch' href='//file.notion.so' />
+          {/* Notion 图片统一走 BLOG.NOTION_HOST 反代，预连接省掉握手延迟 */}
+          <link
+            rel='preconnect'
+            href={BLOG.NOTION_HOST}
+            crossOrigin='anonymous'
+          />
+          <link
+            rel='dns-prefetch'
+            href={BLOG.NOTION_HOST.replace(/^https?:\/\//, '//')}
+          />
 
           {/* 预加载字体 */}
           {BLOG.FONT_AWESOME && (
