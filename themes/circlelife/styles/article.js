@@ -540,20 +540,66 @@ export const articleStyle = `
       #theme-circlelife #article-wrapper.cl-prose-wrap .notion-toggle > summary {
         cursor: pointer;
       }
-      /* article back */
-      #theme-circlelife .cl-article-back {
-        border: 0;
-        background: transparent;
-        color: var(--cl-muted);
-        font-family: var(--cl-font-mono);
-        font-size: var(--cl-article-micro);
-        letter-spacing: 0.06em;
-        padding: 0.35rem 0;
+      /* article back / 微信原文 —— 方案 A：字号放大、换黑体，字重保持 400 */
+      #theme-circlelife .cl-article-back,
+      #theme-circlelife .cl-article-origin {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        box-sizing: border-box;
+        min-height: 2.75rem; /* 44px 手机命中区 */
+        color: var(--cl-text);
+        font-family: var(--cl-font-body);
+        font-size: var(--cl-article-action);
+        font-weight: 400;
+        letter-spacing: 0;
         cursor: pointer;
         transition: color 0.15s ease;
       }
-      #theme-circlelife .cl-article-back:hover {
+      #theme-circlelife .cl-article-back {
+        border: 0;
+        background: transparent;
+        padding: 0.35rem 0;
+      }
+      #theme-circlelife .cl-article-origin {
+        padding-block: 0.35rem;
+        text-decoration: none;
+      }
+      /* 悬停才长出 1px 细线；默认态保持纯文字，不加底色与边框 */
+      #theme-circlelife .cl-article-back::after,
+      #theme-circlelife .cl-article-origin::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: calc(50% - 0.75em);
+        height: 1px;
+        background: currentColor;
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
+        pointer-events: none;
+      }
+      #theme-circlelife .cl-article-back:hover,
+      #theme-circlelife .cl-article-origin:hover {
         color: var(--cl-accent);
+      }
+      #theme-circlelife .cl-article-back:hover::after,
+      #theme-circlelife .cl-article-origin:hover::after {
+        transform: scaleX(1);
+      }
+      @media (min-width: 1024px) {
+        #theme-circlelife .cl-article-back,
+        #theme-circlelife .cl-article-origin {
+          min-height: 2.25rem; /* 36px 桌面命中区 */
+        }
+      }
+      /* 侧栏标题「目录」：限定文章页两种形态，避免影响其他页面的同名标题；目录条目仍走 micro */
+      #theme-circlelife.cl-is-article .cl-article-rail > .cl-sidebar-title,
+      #theme-circlelife.cl-article-card-mode .cl-toc-card--desktop > .cl-sidebar-title {
+        font-size: 0.8125rem;
+        letter-spacing: 0.12em;
+        color: var(--cl-muted);
       }
       #theme-circlelife .cl-article-top-row {
         display: flex;
@@ -570,18 +616,6 @@ export const articleStyle = `
         margin-top: 1.5rem;
         padding-top: 0.85rem;
         border-top: 1px solid var(--cl-border);
-      }
-      #theme-circlelife .cl-article-origin {
-        color: var(--cl-muted);
-        font-family: var(--cl-font-mono);
-        font-size: var(--cl-article-micro);
-        letter-spacing: 0.06em;
-        padding-block: 0.35rem;
-        text-decoration: none;
-        transition: color 0.15s ease;
-      }
-      #theme-circlelife .cl-article-origin:hover {
-        color: var(--cl-accent);
       }
       /* mobile/tablet TOC fab + drawer */
       #theme-circlelife .cl-toc-fab {

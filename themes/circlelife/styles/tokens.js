@@ -84,8 +84,11 @@ export const tokenStyle = `
         --cl-article-cover-h: clamp(280px, 42vh, 480px); /* 全出血封面高 */
         --cl-article-cover-scrim-h: 22%; /* 封面顶部极轻压暗区高度：保证浅色头图上导航胶囊仍读得清 */
         --cl-article-cover-scrim: rgba(20, 16, 12, 0.26); /* 顶部压暗色（明暗模式同值；暗底上无可感影响） */
-        /* 文章页微字（PostMeta / 返回 / 微信原文 / TOC）：手机 12px；≥1024 13px */
+        /* 文章页微字（PostMeta / TOC 条目 / 抽屉标题）：手机 12px；≥1024 13px */
         --cl-article-micro: 0.75rem;
+        /* 文章页两处操作文字（仅「← 返回」与「微信原文 ↗」）：手机 15px；≥1024 16px。
+           字重保持 400、不改 --cl-article-micro，避免连带放大元信息与目录条目。 */
+        --cl-article-action: 0.9375rem;
         /* 封面底边溶解：用遮罩让照片像素自己透明掉、露出封面容器（= 页面底色），
            而不是盖一层色纱。盖纱时那片区域是"照片+色纱"（读作一块黑边），
            遮罩时那片区域就是页面本身的底色（照片真正化进去，没有黑边实体）。
@@ -152,10 +155,11 @@ export const tokenStyle = `
         }
       }
 
-      /* 文章微字桌面档：与音乐模块 micro 同值（0.8125rem = 13px） */
+      /* 文章微字 / 操作文字桌面档：micro 与音乐模块同值（13px），action 单独放大到 16px */
       @media (min-width: 1024px) {
         :root {
           --cl-article-micro: 0.8125rem;
+          --cl-article-action: 1rem;
         }
       }
 
