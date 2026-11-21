@@ -7,49 +7,49 @@
 ## 0. 核心宗旨：博主意志第一与敏捷协同
 
 1. **博主是唯一裁决者**：
-   * 本项目是博主 Felix 的个人独立创作空间。**博主拥有绝对的设计、架构与业务决定权**。
-   * 文档中的规则用于**约束 AI 的盲目自作主张**，绝对不是用来束缚博主手脚的教条。当博主明确要求修改某项设计、重构模块或调整数据结构时，AI 应当高效、敏捷地配合执行，严禁拿既有规则教条式反驳博主。
+   - 本项目是博主 Felix 的个人独立创作空间。**博主拥有绝对的设计、架构与业务决定权**。
+   - 文档中的规则用于**约束 AI 的盲目自作主张**，绝对不是用来束缚博主手脚的教条。当博主明确要求修改某项设计、重构模块或调整数据结构时，AI 应当高效、敏捷地配合执行，严禁拿既有规则教条式反驳博主。
 2. **敏捷双轨制**：
-   * **日常轻量任务**（调样式、修小 Bug、增减小功能）：直奔主题，快速完成，运行本地测试验证即可，坚决排斥形式主义流程。
-   * **重大架构重构**：事先向博主汇报思路与最小改动范围，确认后再动手。
+   - **日常轻量任务**（调样式、修小 Bug、增减小功能）：直奔主题，快速完成，运行本地测试验证即可，坚决排斥形式主义流程。
+   - **重大架构重构**：事先向博主汇报思路与最小改动范围，确认后再动手。
 
 ---
 
 ## 1. 生产发布与分支纪律（保护线上，解放本地）
 
 1. **本地开发完全自由**：
-   * 博主与 AI 在本地可以自由创建临时分支、进行破坏性测试或原型重构。
+   - 博主与 AI 在本地可以自由创建临时分支、进行破坏性测试或原型重构。
 2. **远程推送严格约束（Vercel Hobby 单槽保护）**：
-   * 用户为 Vercel Hobby 计划，**全账号同时只能运行 1 个构建任务**。
-   * 严禁自行创建无关的 `feat/*` 推送到 GitHub 触发无意义的线上构建排队。
-   * **生产分支唯一**：只有最终确认要上线的稳定成果，才合入并在博主明确批准后推送到 **`custom_theme`** 分支。
-   * **一次任务一次 push**：坚决避免为了试错频繁推送触发构建挤压。
+   - 用户为 Vercel Hobby 计划，**全账号同时只能运行 1 个构建任务**。
+   - 严禁自行创建无关的 `feat/*` 推送到 GitHub 触发无意义的线上构建排队。
+   - **生产分支唯一**：只有最终确认要上线的稳定成果，才合入并在博主明确批准后推送到 **`custom_theme`** 分支。
+   - **一次任务一次 push**：坚决避免为了试错频繁推送触发构建挤压。
 
 ---
 
 ## 2. 视觉设计与私有知识库自动探测机制（强制执行，无需博主提醒）
 
 1. **自动探测与全域路由（零心智负担）**：
-   * AI 在执行任何涉及 UI、样式、排版、组件交互、页面优化或主题逻辑的任务时，**必须主动自动探测同级私有知识库**（探测路径：`../withcol-private` 或 `withcol-private/`）：
+   - AI 在执行任何涉及 UI、样式、排版、组件交互、页面优化或主题逻辑的任务时，**必须主动自动探测同级私有知识库**（探测路径：`../withcol-private` 或 `withcol-private/`）：
      - **若私有库存在（本地环境）**：AI **必须在动手前自动查阅** `withcol-private/docs/design-system/circlelife-DESIGN.md`（纸感视觉 Token、色值、排版标准）与 `withcol-private/docs/architecture/circlelife-THEME-ARCH.md`（展墙算法与交互架构），以此为最高权威基准。博主无需每次手动提醒；
      - **若私有库不存在（开源外部环境）**：回退至本仓库既有的默认代码实现与开源通用规范执行。
 2. **支持博主自由演进与回写沉淀**：
-   * 设计系统是“活的资产”。当博主提出视觉改造、版式实验或新元素尝试时，AI 应敏捷配合；在博主确认满意后，协助将沉淀的新 Token 同步回写至私有库的 `circlelife-DESIGN.md` 中。
+   - 设计系统是“活的资产”。当博主提出视觉改造、版式实验或新元素尝试时，AI 应敏捷配合；在博主确认满意后，协助将沉淀的新 Token 同步回写至私有库的 `circlelife-DESIGN.md` 中。
 3. **防外泄红线**：
-   * 即使读取了私有库文档，**严禁**将私有凭据、敏感 ID 或私密设计资产逆向写入本公开仓库的文档或代码中。
+   - 即使读取了私有库文档，**严禁**将私有凭据、敏感 ID 或私密设计资产逆向写入本公开仓库的文档或代码中。
 4. **主题隔离**：
-   * `docs/design/xuhome/DESIGN.md` 仅为 `xuhome` 备选主题规范，未经博主指示不得跨主题混用。
+   - `docs/design/xuhome/DESIGN.md` 仅为 `xuhome` 备选主题规范，未经博主指示不得跨主题混用。
 
 ---
 
 ## 3. Notion 内容操作与技术底线
 
 1. **零 `ext` 写入底线（纯技术硬约束）**：
-   * 严禁向历史兼容属性 `ext` 写入数据。写入 `ext` 会破坏 Notion 原生排版体验与 NotionNext 渲染链路。
-   * 元数据写原生属性列，长正文写 Page Blocks，封面写原生 Page Cover。
+   - 严禁向历史兼容属性 `ext` 写入数据。写入 `ext` 会破坏 Notion 原生排版体验与 NotionNext 渲染链路。
+   - 元数据写原生属性列，长正文写 Page Blocks，封面写原生 Page Cover。
 2. **发布意图遵从**：
-   * 自动化脚本或 MCP 默认创建为 `Invisible` 草稿（防止意外公开曝光）；
-   * 但若博主明确指示“直接发布”或更新已发布文章，AI 遵从博主意图执行。
+   - 自动化脚本或 MCP 默认创建为 `Invisible` 草稿（防止意外公开曝光）；
+   - 但若博主明确指示“直接发布”或更新已发布文章，AI 遵从博主意图执行。
 
 ---
 
@@ -60,37 +60,38 @@
 1. **环境变量**：
    本地调试必须依赖根目录 `.env.local`（配置 `NEXT_PUBLIC_THEME=circlelife` 与 Notion ID），防止本地 Next.js 静默回退至官方演示站。
 2. **本地预检**：
-   * 调测闭环：修改代码 -> `npm run build`（或 `yarn build`）拉取静态快照 -> 确认产物包含 `theme-circlelife` 且无 `theme-simple` / `tanghh` -> `npm run start` 预览。
-   * 不把 `next dev` 作为构建与真实表现的唯一判据。
+   - 调测闭环：修改代码 -> `npm run build`（或 `yarn build`）拉取静态快照 -> 确认产物包含 `theme-circlelife` 且无 `theme-simple` / `tanghh` -> `npm run start` 预览。
+   - 不把 `next dev` 作为构建与真实表现的唯一判据。
 3. **质量底线**：
    ```bash
    yarn lint
    yarn test
    ```
 4. **Notion 数据拉取（构建期）**：
-   * 本机访问 `app.notion.com/api/v3` 会被 Cloudflare 拦（403）→ 构建日志出现 `[API<<--异常]: FetchError 403 Forbidden` → 站点回退到「oops」占位页 → 报 `.prev` 序列化错误（退出码 1）。**绕过**：构建时加环境变量 `API_BASE_URL=https://www.notion.so/api/v3`（`blog.config.js` 读该变量；**不要**改仓库默认值，Vercel 侧不受影响）。
-   * 失败构建会把占位数据写进 `.next/cache/notion/data/`（`global_data_*` / `site_*` / `build_static_paths_all_pages_*` 四个小文件）→ 之后即使网络恢复也会持续命中坏缓存、构建永远失败 → 需先删掉这几个文件再重建。
+   - 本机访问 `app.notion.com/api/v3` 会被 Cloudflare 拦（403）→ 构建日志出现 `[API<<--异常]: FetchError 403 Forbidden` → 站点回退到「oops」占位页 → 报 `.prev` 序列化错误（退出码 1）。**绕过**：构建时加环境变量 `API_BASE_URL=https://www.notion.so/api/v3`（`blog.config.js` 读该变量；**不要**改仓库默认值，Vercel 侧不受影响）。
+   - 失败构建会把占位数据写进 `.next/cache/notion/data/`（`global_data_*` / `site_*` / `build_static_paths_all_pages_*` 四个小文件）→ 之后即使网络恢复也会持续命中坏缓存、构建永远失败 → 需先删掉这几个文件再重建。
 5. **改「默认态」的验收纪律**：
-   * 改动任何 UI 状态的**默认值**（展开/收起、视图模式、筛选器…）时，必须先 grep 该状态的**全部 setter 调用点**逐条判定「谁有权改它」—— 只改 `useState` 初值 / CSS 默认值，漏掉事件回调里的另一处写入，就会出现「首屏对、一操作就回弹」。
-   * **可开合 / 可切换的 UI 状态只由用户的显式操作驱动**：切分类、选标签、清筛选等**不得**隐式重置用户刚做的选择。
-   * 验收不能只看首屏：必须实机走一遍**每条用户操作路径**，并把「谁不能改这个状态」的约束写成契约测试（断言 setter 在源码中只出现在允许的路径上）。
-   * 默认态优先由 **CSS 承担**（服务端与客户端首帧一致），JS 只负责变体 class —— 避免 hydration 不匹配与 CLS。
+   - 改动任何 UI 状态的**默认值**（展开/收起、视图模式、筛选器…）时，必须先 grep 该状态的**全部 setter 调用点**逐条判定「谁有权改它」—— 只改 `useState` 初值 / CSS 默认值，漏掉事件回调里的另一处写入，就会出现「首屏对、一操作就回弹」。
+   - **可开合 / 可切换的 UI 状态只由用户的显式操作驱动**：切分类、选标签、清筛选等**不得**隐式重置用户刚做的选择。
+   - 验收不能只看首屏：必须实机走一遍**每条用户操作路径**，并把「谁不能改这个状态」的约束写成契约测试（断言 setter 在源码中只出现在允许的路径上）。
+   - 默认态优先由 **CSS 承担**（服务端与客户端首帧一致），JS 只负责变体 class —— 避免 hydration 不匹配与 CLS。
 
 ---
 
 ## 5. 特殊避坑提示
 
-* **主题说明防混淆**：`docs/developer/themes/CLAUDE.md` 为 NotionNext 自带主题 “claude” 的说明文档，**不是** Claude AI 的系统指令。
-* **站内图片不走 `srcset` 选档**：Notion 反代在 **srcset 选档路径**下按 **CSS 宽度**出图、**不吃 DPR**（同一 URL 直连得原图，走 srcset 只得 CSS 宽那么多像素）→ Retina 上每张图都差 2~3 倍像素 → 被拉伸放大 → 发虚（实测文章页头图 343×343 铺 880 物理像素 = 放大 2.56 倍）。**已直连的位置**：首页三模块（照片墙 / 精选文章图版 / 精选影集封面）、文章页头图、关于页展墙、影集阅读器（单张 1024 / 缩略 512） —— 一律用 `imageSrcset.js#buildSizedSource` **直连 `width` URL**；档位大多按 `computeTargetPixelWidth`（显示宽 × DPR）自算，**例外：首页精选文章图版固定 1024 档**（`HomeArticleCover.js` 的 `ARTICLE_COVER_TIER`，不按 DPR 升档）；走直连的 `<link rel=preload>` **只给 `href`、不带 `imagesrcset`/`imagesizes`**（否则预加载落在另一个 URL 上，白下载一份）。改图片链路后须用「canvas 叠参考 `<img> + object-fit: cover`」做逐像素 A/B 对照。详见私有库架构库排错 24 / 25。
-* **影集是全屏阅读器（`/album`）**：`AlbumReader.js` 独占全屏，高度链必须用 `100svh` + `min-height: 0` 压过 Tailwind `min-h-screen` 的 100vh，否则 iOS Safari 底栏会盖住页码与抽屉页脚；站点头导航胶囊与页脚隐藏，只留右上菜单；顶部页码、底部居中「目录 | 缩略」（缩略态为「辑名 — 关闭」），目录抽屉固定刊头 + 原生滚动列表 + 固定页脚；抽屉是模态对话框，打开聚焦关闭按钮、Tab 在抽屉内循环、关闭归还「目录」触发器。照片保持静止，由纸面裁切 + 阻尼曲线完成翻页；URL 只记专辑 `deck`，首页与搜索入口都落到该辑章页；`view` 是历史链接的废弃参数（首屏忽略并规范掉，不再生成）。同路由换 `deck`（站内搜索、浏览器前进/后退）必须经 `resolveQueryDeckChange` 的 `lastQueryDeck` 守卫，过渡期旧 query 不得触发切辑，否则会打断跨辑首尾顺序。旧 `AlbumStage` / `AlbumShelfStack` / `AlbumInfiniteWall` / `AlbumLightbox` / `AlbumDeckNav` 与 `styles/album.js` 已删除，不得恢复。详见私有库架构库 §1.1 与设计库 §2.3。
-* **虚拟滚动展墙不得吞掉浮层滚轮**：`InfiniteAboutGrid.js` 这类自研虚拟滚动展墙在 `window` 上注册**非 passive** 的 `wheel` 监听并 `preventDefault()`，会取消浏览器「滚轮作用于最近原生滚动祖先」的默认行为 → **页面上每一个滚轮事件都被吞掉**，浮层内的原生滚动容器（顶栏全屏菜单、搜索结果等）随之滚不动。判定统一走 `themes/circlelife/components/wheelOwnership.js#shouldWallOwnWheel`：**指针落在原生滚动容器（`overflow-y: auto|scroll|overlay`）内 → 不调 `preventDefault()`，交还浏览器；其余 → 展墙照常接管**。回溯 DOM 必须**停在 `body`/`html` 之前**（`html { overflow-x: hidden }` 会让 `overflow-y` 计算成 `auto`，根滚动容器一旦被误判，展墙将彻底失去滚轮）。契约测试见 `__tests__/themes/circlelife/wheelOwnership.test.js`，详见私有库架构库 §1.1 与排错 28。
-* **关于页影像快闪（/about）**：4 个媒体 URL 与可选 B 站链接只从 Notion CONFIG 的 `ABOUT_REEL_DESKTOP/MOBILE/POSTER/POSTER_MOBILE` 与 `ABOUT_REEL_BILIBILI` 读（R2 自定义域 `media.withcol.com`，minTLS 1.2，对象 v 文件名；Cache Rule 已把 `about/*` 覆盖成 1 年 `cache-control`，对象 metadata 仍 4h）；B 站链接为空则不显示按钮。poster preload 优先；reel 启用时展墙首图不加载/不拿 high，序言打开期间 gate 展墙图片，关闭时 `primeWallMedia` 再唤醒；视频 `preload=none`、muted/playsinline，关闭暂停，**重开从 0**，外部暂停显示「播放快闪」，跨 768 切源。**同路由再次点「关于」时组件不卸载**，effect 会因 `cards` 引用变化重建展墙；必须用 `syncHeroOpen()` 把幕布与「序言」胶囊同步回打开态，否则内部 `isHeroOpen` 与 DOM `is-closed` 脱节（Hero 不显示、展墙图片全不加载）。「序言」胶囊另有 CSS 兜底：overlay 非 closed 时 `opacity: 0` + `visibility: hidden` + `pointer-events: none !important`，既不允许盖住底部操作区，也移出 Tab 焦点顺序。手机底部操作区与「序言」胶囊统一用 `calc(56px + env(safe-area-inset-bottom, 0px))` 让开 iOS Safari 底部工具栏（工具栏高度不计入 safe-area，不能只留 28px/20px）。自动播放门禁只认 reduced/Save-Data/**蜂窝网络**的 effectiveType 2g-3g；Wi-Fi/以太网/未知连接不按 effectiveType 拦（Chrome 的网络质量估计会漂移、把桌面误报成 3g），**不认 `downlink`**。门禁通过后仍可能被浏览器策略拒绝（Safari「永不自动播放」、Electron/扩展、后台标签页），被拒时按钮旁显示具体原因（`reelFallbackReason`：减少动态效果 / 省流模式 / 移动网络较慢 / 浏览器阻止 / 播放已暂停），点击仍可播放；原生 Chrome 的 content-setting 禁自动播放与 `--autoplay-policy=user-gesture-required` 实测都不拦 muted 视频。契约：`aboutReel*.test.js`。
-* **Google Fonts 只有一份**：字体 CSS 只在 `themes/circlelife/index.js` 的 Head 引入一份超集；`LayoutAbout` 曾有的页面级字体块已删（同一页会被请求两份，且全局阻塞链接仍在时副本并不能解除阻塞）。改字体加载只动这一个入口，不要回到页面级加 `preload`/`media="print"` 副本。
-* **私密凭据隔离**：本地生产凭据底座已安全隔离至私有库 `../withcol-private/docs/secrets/handover.local.md`（或受 `.git/info/exclude` 保护）。AI 可在本地按需查阅，**严禁提交入库或推送到远端**。
-* **SmartLink 只透传全局 query，页面私有状态必须排除**：所有站内链接经 `components/SmartLink.js` 渲染，它会把 `theme` 这类全局参数自动并入 href 以跨页保留；`EXCLUDED_KEYS` 必须含所有页面私有参数——`view / deck / photo / page / keyword / s / slot / category / tag / target`。曾漏掉 `category` / `tag`：从文章点分类到 `/archive?category=x` 后点导航首页会得到 `/?category=x` 并一路残留；`s`（搜索关键词）/ `target`（跳评论）是同类遗漏。新增任何地址栏筛选参数时，先判断它是否页面私有并同步加入排除名单，否则会复现跨页残留。排除只影响自动注入——归档筛选自身由 `LayoutArchive` 的 `router.push` 写入，深链/分享/前进后退不受影响。契约测试 `__tests__/components/SmartLink.test.js`，详见私有库架构库 §1.5。
-* **归档页按整月分页 + 标签流式胶囊（2026-11-17）**：`ARCHIVE_MONTHS_PER_PAGE = 4`，切片单位是排序后的月份 key、**不拆月**（41 篇 / 12 个月 → 3 页）；页码只做 `LayoutArchive` 组件 state，**不写 URL / sessionStorage**，与 `?category` / `?tag` 深链、筛选记忆解耦，任何筛选变化都回第 1 页。标签索引从「一行一个目录式」改为 `cl-archive-tagcloud` 里的 `cl-archive-chip` 胶囊（16 标签约 6 行），手机端仍「窄条 → 展开」；旧类名 `cl-archive-tagrow` / `cl-archive-taggrid` 已退役，不得恢复。详见私有库设计库 §2.2b / 架构库 §1.6。
-* **导航滚动让位与阅读进度线（2026-11-17）**：胶囊**下滚让位、上滚归位**，判定抽在 `components/navParking.js`（纯函数 + 契约测试）。只认净位移：常驻区 `scrollY ≤ 96`、下滚 36px 让位；上滚阈值 **一般页 14px / 文章阅读态 25% 视口（下限 160px）**；不用定时器与速度 ——「下滚 28px 迟滞收起迷你弧标」那套已废弃，不得恢复。让位**只动 transform/opacity**，不改高宽与 `--cl-nav-height`（否则全站按导航带推导的间距会集体抖）；`visibility: hidden` 延到 0.46s 收尾，不留不可见 Tab 焦点。状态类挂 `#theme-circlelife`（桌面 ≡ 不在胶囊里，必须同一拍）；抽屉 / 搜索 / 子菜单打开、导航取焦、路由变化强制归位。**让位监听的依赖必须含 `router.asPath`**：早期版本在影集页提前 `return`，在影集页开一次抽屉就摘掉监听，跨页后不再重绑、让位永久失效。`/about` 是 window 不滚动的无限瀑布流，由展墙 `CustomEvent('cl-virtual-scroll')`（`detail = { y, reset }`，幕布开合带 reset、幕布打开期间不播报）播报位移接入，外壳只在 `cl-is-about` 时采信。**阅读进度已从胶囊搬到视口顶边**（2px 朱砂 + 1px 纸边细轨，左右内缩 24px，与让位完全解耦），渲染在 `.cl-floating-header` 之外，胶囊内不得再出现进度线。详见设计库 §2.1 / §2.1c / §2.2d 与架构库 §1.5 / §1.7。
-* **导航当前页判定只有一份**：`components/navConfig.js#isCurrentNavPath` 同时供胶囊（`aria-current="page"`）与全屏抽屉（`.is-current`）使用，不要在任一组件里再写第二份路径比较。详情页归入父级（`/music/album/xxx` → `/music`），判定前先归一化 `?deck` / query / hash / 语言前缀 / 尾斜杠；首页只精确匹配，`#` 占位与外链不高亮。曾因胶囊用前缀匹配、抽屉用精确相等两套实现并存，点进歌单详情后抽屉不显示「音乐」当前态。契约测试 `__tests__/themes/circlelife/navConfig.test.js`，详见私有库架构库 §1.5。
-* **快速查阅**：全仓模块索引、冲突裁决与任务路由见根目录 **`PROJECT_MAP.md`**。
-* **音乐展架（/music）**：站点**只读 Notion**、构建期从不请求网易云，网易云取数只发生在本地脚本 `scripts/music/`（凭据只在 `.env.local`）。展架顺序只认 Notion 的 `展架排序` 数字列（数据层会把 `allPages` 按 `publishDate` 重排，行序不可靠）；脚本按「机器列每次覆盖、种子列只补空」写，人改的标题/排序/封面/条目类型不会被冲掉；脚本**从不删行**，下架只置 `已下架`。运行手册在私有库 `../withcol-private/docs/architecture/circlelife-MUSIC-SHELF.md`。
-* **页脚社交通道**：`FooterSocial` 的链接/二维码地址只从 Notion CONFIG 的 `CONTACT_XIAOHONGSHU` / `CONTACT_NETEASE` / `CONTACT_GITHUB` / `CONTACT_STEAM` / `CONTACT_WECHAT_QR` 读，不要改 `conf/contact.config.js`；二维码 `public/images/wechat-public-qr.png` 只在弹层打开时挂载（不要改成首屏预加载），且必须是真 PNG（扩展名与字节一致）。页脚进入视口时回顶/移动目录由 `.cl-footer-inview` 隐藏（`LayoutBase` 的 IntersectionObserver）；文章「微信原文」只认 `post['微信原文']` 的 http(s)。详见私有库 `../withcol-private/docs/design-system/circlelife-DESIGN.md` §2.2j 与 `../withcol-private/docs/architecture/circlelife-THEME-ARCH.md` §1.9。
+- **主题说明防混淆**：`docs/developer/themes/CLAUDE.md` 为 NotionNext 自带主题 “claude” 的说明文档，**不是** Claude AI 的系统指令。
+- **站内图片不走 `srcset` 选档**：Notion 反代在 **srcset 选档路径**下按 **CSS 宽度**出图、**不吃 DPR**（同一 URL 直连得原图，走 srcset 只得 CSS 宽那么多像素）→ Retina 上每张图都差 2~3 倍像素 → 被拉伸放大 → 发虚（实测文章页头图 343×343 铺 880 物理像素 = 放大 2.56 倍）。**已直连的位置**：首页三模块（照片墙 / 精选文章图版 / 精选影集封面）、文章页头图、关于页展墙、影集阅读器（单张 1024 / 缩略 512） —— 一律用 `imageSrcset.js#buildSizedSource` **直连 `width` URL**；档位大多按 `computeTargetPixelWidth`（显示宽 × DPR）自算，**例外：首页精选文章图版固定 1024 档**（`HomeArticleCover.js` 的 `ARTICLE_COVER_TIER`，不按 DPR 升档）；走直连的 `<link rel=preload>` **只给 `href`、不带 `imagesrcset`/`imagesizes`**（否则预加载落在另一个 URL 上，白下载一份）。改图片链路后须用「canvas 叠参考 `<img> + object-fit: cover`」做逐像素 A/B 对照。详见私有库架构库排错 24 / 25。
+- **图片 host 只有一个来源**：env `NEXT_PUBLIC_NOTION_HOST`（`conf/image.config.js` 的 `NOTION_HOST`）→ `BLOG.NOTION_HOST`。2026-11-21 起为 `https://img.withcol.com`，由仓库自带 Worker `cloudflare/notion-image-proxy/worker.mjs` 反代。**换域名只改 env，不改 `mapImage.js` / `imageSrcset.js` / `compressImage` / `next.config.js`**；`_document.js` 的 preconnect 也读同一变量，不写死第二份 Notion 域名。Worker 必须放行 `/image/` + `/images/` 并转发 `www.notion.so`、query 全透传；只代理 `img.notionusercontent.com/s3/...` 的 Worker 会让本站图片全 400（响应头 `x-notion-proxy: ERROR`）。本站部署手册与验收数字见私有库 `../withcol-private/docs/architecture/notion-image-proxy.md`，决策与排错见私有库架构库 §1.10 与排错 30；公开仓库的 `docs/user-guide/deploy/notion-image-proxy.md` 只是上游通用教程（含被测试守护的 Worker 代码块），不写本站私有配置。
+- **影集是全屏阅读器（`/album`）**：`AlbumReader.js` 独占全屏，高度链必须用 `100svh` + `min-height: 0` 压过 Tailwind `min-h-screen` 的 100vh，否则 iOS Safari 底栏会盖住页码与抽屉页脚；站点头导航胶囊与页脚隐藏，只留右上菜单；顶部页码、底部居中「目录 | 缩略」（缩略态为「辑名 — 关闭」），目录抽屉固定刊头 + 原生滚动列表 + 固定页脚；抽屉是模态对话框，打开聚焦关闭按钮、Tab 在抽屉内循环、关闭归还「目录」触发器。照片保持静止，由纸面裁切 + 阻尼曲线完成翻页；URL 只记专辑 `deck`，首页与搜索入口都落到该辑章页；`view` 是历史链接的废弃参数（首屏忽略并规范掉，不再生成）。同路由换 `deck`（站内搜索、浏览器前进/后退）必须经 `resolveQueryDeckChange` 的 `lastQueryDeck` 守卫，过渡期旧 query 不得触发切辑，否则会打断跨辑首尾顺序。旧 `AlbumStage` / `AlbumShelfStack` / `AlbumInfiniteWall` / `AlbumLightbox` / `AlbumDeckNav` 与 `styles/album.js` 已删除，不得恢复。详见私有库架构库 §1.1 与设计库 §2.3。
+- **虚拟滚动展墙不得吞掉浮层滚轮**：`InfiniteAboutGrid.js` 这类自研虚拟滚动展墙在 `window` 上注册**非 passive** 的 `wheel` 监听并 `preventDefault()`，会取消浏览器「滚轮作用于最近原生滚动祖先」的默认行为 → **页面上每一个滚轮事件都被吞掉**，浮层内的原生滚动容器（顶栏全屏菜单、搜索结果等）随之滚不动。判定统一走 `themes/circlelife/components/wheelOwnership.js#shouldWallOwnWheel`：**指针落在原生滚动容器（`overflow-y: auto|scroll|overlay`）内 → 不调 `preventDefault()`，交还浏览器；其余 → 展墙照常接管**。回溯 DOM 必须**停在 `body`/`html` 之前**（`html { overflow-x: hidden }` 会让 `overflow-y` 计算成 `auto`，根滚动容器一旦被误判，展墙将彻底失去滚轮）。契约测试见 `__tests__/themes/circlelife/wheelOwnership.test.js`，详见私有库架构库 §1.1 与排错 28。
+- **关于页影像快闪（/about）**：4 个媒体 URL 与可选 B 站链接只从 Notion CONFIG 的 `ABOUT_REEL_DESKTOP/MOBILE/POSTER/POSTER_MOBILE` 与 `ABOUT_REEL_BILIBILI` 读（R2 自定义域 `media.withcol.com`，minTLS 1.2，对象 v 文件名；Cache Rule 已把 `about/*` 覆盖成 1 年 `cache-control`，对象 metadata 仍 4h）；B 站链接为空则不显示按钮。poster preload 优先；reel 启用时展墙首图不加载/不拿 high，序言打开期间 gate 展墙图片，关闭时 `primeWallMedia` 再唤醒；视频 `preload=none`、muted/playsinline，关闭暂停，**重开从 0**，外部暂停显示「播放快闪」，跨 768 切源。**同路由再次点「关于」时组件不卸载**，effect 会因 `cards` 引用变化重建展墙；必须用 `syncHeroOpen()` 把幕布与「序言」胶囊同步回打开态，否则内部 `isHeroOpen` 与 DOM `is-closed` 脱节（Hero 不显示、展墙图片全不加载）。「序言」胶囊另有 CSS 兜底：overlay 非 closed 时 `opacity: 0` + `visibility: hidden` + `pointer-events: none !important`，既不允许盖住底部操作区，也移出 Tab 焦点顺序。手机底部操作区与「序言」胶囊统一用 `calc(56px + env(safe-area-inset-bottom, 0px))` 让开 iOS Safari 底部工具栏（工具栏高度不计入 safe-area，不能只留 28px/20px）。自动播放门禁只认 reduced/Save-Data/**蜂窝网络**的 effectiveType 2g-3g；Wi-Fi/以太网/未知连接不按 effectiveType 拦（Chrome 的网络质量估计会漂移、把桌面误报成 3g），**不认 `downlink`**。门禁通过后仍可能被浏览器策略拒绝（Safari「永不自动播放」、Electron/扩展、后台标签页），被拒时按钮旁显示具体原因（`reelFallbackReason`：减少动态效果 / 省流模式 / 移动网络较慢 / 浏览器阻止 / 播放已暂停），点击仍可播放；原生 Chrome 的 content-setting 禁自动播放与 `--autoplay-policy=user-gesture-required` 实测都不拦 muted 视频。契约：`aboutReel*.test.js`。
+- **Google Fonts 只有一份**：字体 CSS 只在 `themes/circlelife/index.js` 的 Head 引入一份超集；`LayoutAbout` 曾有的页面级字体块已删（同一页会被请求两份，且全局阻塞链接仍在时副本并不能解除阻塞）。改字体加载只动这一个入口，不要回到页面级加 `preload`/`media="print"` 副本。
+- **私密凭据隔离**：本地生产凭据底座已安全隔离至私有库 `../withcol-private/docs/secrets/handover.local.md`（或受 `.git/info/exclude` 保护）。AI 可在本地按需查阅，**严禁提交入库或推送到远端**。
+- **SmartLink 只透传全局 query，页面私有状态必须排除**：所有站内链接经 `components/SmartLink.js` 渲染，它会把 `theme` 这类全局参数自动并入 href 以跨页保留；`EXCLUDED_KEYS` 必须含所有页面私有参数——`view / deck / photo / page / keyword / s / slot / category / tag / target`。曾漏掉 `category` / `tag`：从文章点分类到 `/archive?category=x` 后点导航首页会得到 `/?category=x` 并一路残留；`s`（搜索关键词）/ `target`（跳评论）是同类遗漏。新增任何地址栏筛选参数时，先判断它是否页面私有并同步加入排除名单，否则会复现跨页残留。排除只影响自动注入——归档筛选自身由 `LayoutArchive` 的 `router.push` 写入，深链/分享/前进后退不受影响。契约测试 `__tests__/components/SmartLink.test.js`，详见私有库架构库 §1.5。
+- **归档页按整月分页 + 标签流式胶囊（2026-11-17）**：`ARCHIVE_MONTHS_PER_PAGE = 4`，切片单位是排序后的月份 key、**不拆月**（41 篇 / 12 个月 → 3 页）；页码只做 `LayoutArchive` 组件 state，**不写 URL / sessionStorage**，与 `?category` / `?tag` 深链、筛选记忆解耦，任何筛选变化都回第 1 页。标签索引从「一行一个目录式」改为 `cl-archive-tagcloud` 里的 `cl-archive-chip` 胶囊（16 标签约 6 行），手机端仍「窄条 → 展开」；旧类名 `cl-archive-tagrow` / `cl-archive-taggrid` 已退役，不得恢复。详见私有库设计库 §2.2b / 架构库 §1.6。
+- **导航滚动让位与阅读进度线（2026-11-17）**：胶囊**下滚让位、上滚归位**，判定抽在 `components/navParking.js`（纯函数 + 契约测试）。只认净位移：常驻区 `scrollY ≤ 96`、下滚 36px 让位；上滚阈值 **一般页 14px / 文章阅读态 25% 视口（下限 160px）**；不用定时器与速度 ——「下滚 28px 迟滞收起迷你弧标」那套已废弃，不得恢复。让位**只动 transform/opacity**，不改高宽与 `--cl-nav-height`（否则全站按导航带推导的间距会集体抖）；`visibility: hidden` 延到 0.46s 收尾，不留不可见 Tab 焦点。状态类挂 `#theme-circlelife`（桌面 ≡ 不在胶囊里，必须同一拍）；抽屉 / 搜索 / 子菜单打开、导航取焦、路由变化强制归位。**让位监听的依赖必须含 `router.asPath`**：早期版本在影集页提前 `return`，在影集页开一次抽屉就摘掉监听，跨页后不再重绑、让位永久失效。`/about` 是 window 不滚动的无限瀑布流，由展墙 `CustomEvent('cl-virtual-scroll')`（`detail = { y, reset }`，幕布开合带 reset、幕布打开期间不播报）播报位移接入，外壳只在 `cl-is-about` 时采信。**阅读进度已从胶囊搬到视口顶边**（2px 朱砂 + 1px 纸边细轨，左右内缩 24px，与让位完全解耦），渲染在 `.cl-floating-header` 之外，胶囊内不得再出现进度线。详见设计库 §2.1 / §2.1c / §2.2d 与架构库 §1.5 / §1.7。
+- **导航当前页判定只有一份**：`components/navConfig.js#isCurrentNavPath` 同时供胶囊（`aria-current="page"`）与全屏抽屉（`.is-current`）使用，不要在任一组件里再写第二份路径比较。详情页归入父级（`/music/album/xxx` → `/music`），判定前先归一化 `?deck` / query / hash / 语言前缀 / 尾斜杠；首页只精确匹配，`#` 占位与外链不高亮。曾因胶囊用前缀匹配、抽屉用精确相等两套实现并存，点进歌单详情后抽屉不显示「音乐」当前态。契约测试 `__tests__/themes/circlelife/navConfig.test.js`，详见私有库架构库 §1.5。
+- **快速查阅**：全仓模块索引、冲突裁决与任务路由见根目录 **`PROJECT_MAP.md`**。
+- **音乐展架（/music）**：站点**只读 Notion**、构建期从不请求网易云，网易云取数只发生在本地脚本 `scripts/music/`（凭据只在 `.env.local`）。展架顺序只认 Notion 的 `展架排序` 数字列（数据层会把 `allPages` 按 `publishDate` 重排，行序不可靠）；脚本按「机器列每次覆盖、种子列只补空」写，人改的标题/排序/封面/条目类型不会被冲掉；脚本**从不删行**，下架只置 `已下架`。运行手册在私有库 `../withcol-private/docs/architecture/circlelife-MUSIC-SHELF.md`。
+- **页脚社交通道**：`FooterSocial` 的链接/二维码地址只从 Notion CONFIG 的 `CONTACT_XIAOHONGSHU` / `CONTACT_NETEASE` / `CONTACT_GITHUB` / `CONTACT_STEAM` / `CONTACT_WECHAT_QR` 读，不要改 `conf/contact.config.js`；二维码 `public/images/wechat-public-qr.png` 只在弹层打开时挂载（不要改成首屏预加载），且必须是真 PNG（扩展名与字节一致）。页脚进入视口时回顶/移动目录由 `.cl-footer-inview` 隐藏（`LayoutBase` 的 IntersectionObserver）；文章「微信原文」只认 `post['微信原文']` 的 http(s)。详见私有库 `../withcol-private/docs/design-system/circlelife-DESIGN.md` §2.2j 与 `../withcol-private/docs/architecture/circlelife-THEME-ARCH.md` §1.9。

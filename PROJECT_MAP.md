@@ -9,20 +9,20 @@
 当文档、历史记录或代码实现之间出现不一致时，严格按照以下裁决链判定：
 
 0. **第零级（博主当前明确指令，最高绝对权威）**：
-   * **博主在当前会话中的直接需求与裁决拥有最高优先级**。博主可随时决定尝试新版式、重构代码或调整业务。
+   - **博主在当前会话中的直接需求与裁决拥有最高优先级**。博主可随时决定尝试新版式、重构代码或调整业务。
 1. **第一级（真实代码实现与本地现场底座）**：
-   * `package.json`、`yarn.lock`、代码实际实现是依赖与技术栈版本（Next.js 15.x / Tailwind 3.4.x）的客观事实来源。
-   * 私有凭据与交接文档已收拢至同级私有库 `../withcol-private/docs/secrets/handover.local.md`，记录的生产域名（withcol.com）、分支规范（custom_theme）、作者人设与 Vercel/Notion 私密 ID 具备最高现场权威。
-   * *注：`OPTIMIZATION_SUMMARY.md`、`PROJECT_COMPLETION_REPORT.md` 属历史归档快照，记载的 Next 14 已失效，不作为当前依据。*
+   - `package.json`、`yarn.lock`、代码实际实现是依赖与技术栈版本（Next.js 15.x / Tailwind 3.4.x）的客观事实来源。
+   - 私有凭据与交接文档已收拢至同级私有库 `../withcol-private/docs/secrets/handover.local.md`，记录的生产域名（withcol.com）、分支规范（custom_theme）、作者人设与 Vercel/Notion 私密 ID 具备最高现场权威。
+   - _注：`OPTIMIZATION_SUMMARY.md`、`PROJECT_COMPLETION_REPORT.md` 属历史归档快照，记载的 Next 14 已失效，不作为当前依据。_
 2. **第二级（核心维护契约与技术底线）**：
-   * 工程规范遵循 `docs/developer/MAINTENANCE_PHILOSOPHY.zh-CN.md`。
-   * Notion 内容读写遵循 `tools/notionnext-content-mcp/server.js` 与 `docs/developer/NOTIONNEXT_CONTENT_MCP.md` 中的“零 ext 写入契约”。
+   - 工程规范遵循 `docs/developer/MAINTENANCE_PHILOSOPHY.zh-CN.md`。
+   - Notion 内容读写遵循 `tools/notionnext-content-mcp/server.js` 与 `docs/developer/NOTIONNEXT_CONTENT_MCP.md` 中的“零 ext 写入契约”。
 3. **第三级（活态设计规范与专项 RFC）**：
-   * 主站视觉以私有库 **`withcol-private/docs/design-system/circlelife-DESIGN.md`**（当前成熟基准，本地由 AI 自动探测加载）为参考。
-   * 特定主题遵循对应规范（如 `docs/design/xuhome/DESIGN.md`）。
-   * 组件级交互遵循已实现的 `docs/developer/rfc/*`。
+   - 主站视觉以私有库 **`withcol-private/docs/design-system/circlelife-DESIGN.md`**（当前成熟基准，本地由 AI 自动探测加载）为参考。
+   - 特定主题遵循对应规范（如 `docs/design/xuhome/DESIGN.md`）。
+   - 组件级交互遵循已实现的 `docs/developer/rfc/*`。
 4. **第四级（维护手册与用户手册）**：
-   * 开发者规范（`docs/developer/*`）优先于大众搭建手册（`docs/user-guide/*`）。
+   - 开发者规范（`docs/developer/*`）优先于大众搭建手册（`docs/user-guide/*`）。
 
 ---
 
@@ -30,13 +30,13 @@
 
 在执行任何涉及 UI、样式、配色、排版或交互的任务前，按需索引本表：
 
-| 模块 / 主题 | 权威设计规范位置 | 核心范围与职责 | 适用任务类型 |
-| :--- | :--- | :--- | :--- |
+| 模块 / 主题                  | 权威设计规范位置                                                                                                                                                                      | 核心范围与职责                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 适用任务类型                                                                                                                                                                                                 |
+| :--------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **主站 Circle of Life 主题** | 1. **`withcol-private/docs/design-system/circlelife-DESIGN.md`**（本地自动探测）<br>2. `withcol-private/docs/architecture/circlelife-THEME-ARCH.md`<br>3. `themes/circlelife/styles/` | 当前成熟基准：纸感杂志风格、纸色 `#F5F0E4`、朱砂红 `#B24A33`、Newsreader / 思源宋体、1024px 导航、关于我 3D 摄影瀑布展墙与动态显存回收（头部为 A 全幅 R2 影像快闪：poster LCP、关闭序言再唤醒展墙、可选 B 站完整版按钮）；归档页为 1800px 宽屏双栏 + 上下文分类/标签筛选 + 分类注记（URL 深链、标签页筛选记忆）+ 按整月分页 + 流式标签胶囊；文章页为全屏纸面内页（42vh 全出血封面 + 88rem 宽壳 + ≥1280px TOC 细轨 + 2em 首行缩进正文 + 顶部书口线阅读进度），导航为悬浮胶囊且**下滚让位 / 上滚归位**、顺序取 Notion 菜单行序；影集为全屏阅读器（目录抽屉 / 当前辑缩略 / 跨辑纸面转场）；页脚社交通道取 Notion CONFIG（公众号二维码 / 小红书 / 网易云 / GitHub / Steam）。支持随博主意图演进。 | 主站日常样式优化、文章页排版与头图、影集全屏阅读器（目录 / 缩略 / 跨辑转场）、首页倾斜照片墙、精选影集段与抽牌调整、关于我展墙与序言幕布（summary 短题眼 / description 导语）维护、归档时间线/筛选、导航顺序 |
-| **XuHome 主题** | `docs/design/xuhome/DESIGN.md` | Neo-brutalist 风格规范、全套 Token（色彩、间距、圆角）、深浅模式对比度、200ms ease-out 控制台抽屉动画 | `xuhome` 主题样式重构、布局调整、组件新增 |
-| **全局色彩系统演进** | `docs/developer/THEME_COLOR_TOKEN_ROADMAP.zh-CN.md` | 主题色变量命名规范（`<THEME>_COLOR_*` 与 `--<theme>-color-*`）、语义色迁移标准与非目标 | 主题色彩配置扩展、调色板变量化改造 |
-| **主题控制台** | `docs/developer/THEME_CONSOLE_DESIGN.zh-CN.md` | 控制台交互约定、4 个浮动入口、深浅配色分组标准、最小配色暴露清单 | 主题控制台功能扩展、交互适配、移动端响应式 |
-| **代码块 / 交互 RFC** | `docs/developer/rfc/` | 代码折叠块 UI 收敛（issue-2941）、桌面侧栏预览、Notion Tabs 选项卡支持、原创存证卡片等已落地 UX 决策 | 涉及相关公共组件的交互改造 |
+| **XuHome 主题**              | `docs/design/xuhome/DESIGN.md`                                                                                                                                                        | Neo-brutalist 风格规范、全套 Token（色彩、间距、圆角）、深浅模式对比度、200ms ease-out 控制台抽屉动画                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | `xuhome` 主题样式重构、布局调整、组件新增                                                                                                                                                                    |
+| **全局色彩系统演进**         | `docs/developer/THEME_COLOR_TOKEN_ROADMAP.zh-CN.md`                                                                                                                                   | 主题色变量命名规范（`<THEME>_COLOR_*` 与 `--<theme>-color-*`）、语义色迁移标准与非目标                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 主题色彩配置扩展、调色板变量化改造                                                                                                                                                                           |
+| **主题控制台**               | `docs/developer/THEME_CONSOLE_DESIGN.zh-CN.md`                                                                                                                                        | 控制台交互约定、4 个浮动入口、深浅配色分组标准、最小配色暴露清单                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | 主题控制台功能扩展、交互适配、移动端响应式                                                                                                                                                                   |
+| **代码块 / 交互 RFC**        | `docs/developer/rfc/`                                                                                                                                                                 | 代码折叠块 UI 收敛（issue-2941）、桌面侧栏预览、Notion Tabs 选项卡支持、原创存证卡片等已落地 UX 决策                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | 涉及相关公共组件的交互改造                                                                                                                                                                                   |
 
 ---
 
@@ -61,64 +61,70 @@ flowchart TD
 ```
 
 ### 1. 主站 circlelife UI 与业务功能改造
-* **按需查阅**：`AGENTS.md`、`withcol-private/docs/design-system/circlelife-DESIGN.md`（本地环境由 AI 自动探测加载）、`themes/circlelife/`。
-* **交付要求**：尊重纸感基调，敏捷配合博主意图；本地通过 `npm run build && npm run start` 快速预览；博主批准后推送到 `custom_theme`。
+
+- **按需查阅**：`AGENTS.md`、`withcol-private/docs/design-system/circlelife-DESIGN.md`（本地环境由 AI 自动探测加载）、`themes/circlelife/`。
+- **交付要求**：尊重纸感基调，敏捷配合博主意图；本地通过 `npm run build && npm run start` 快速预览；博主批准后推送到 `custom_theme`。
 
 ### 2. 通用底层工程、数据流与 Bug 修复
-* **按需查阅**：`AGENTS.md`、`docs/developer/MAINTENANCE_PHILOSOPHY.zh-CN.md`、目标代码。
-* **交付要求**：小步修改，跑通 `yarn test` 确保无回归。
+
+- **按需查阅**：`AGENTS.md`、`docs/developer/MAINTENANCE_PHILOSOPHY.zh-CN.md`、目标代码。
+- **交付要求**：小步修改，跑通 `yarn test` 确保无回归。
 
 ### 3. 内容生成与 Notion 交互（MCP）
-* **按需查阅**：`docs/developer/NOTIONNEXT_CONTENT_MCP.md`、`tools/notionnext-content-mcp/server.js`。
-* **交付要求**：严格执行零 `ext` 写入；默认草稿 `Invisible`，博主若明确要求发布则直接发布。
+
+- **按需查阅**：`docs/developer/NOTIONNEXT_CONTENT_MCP.md`、`tools/notionnext-content-mcp/server.js`。
+- **交付要求**：严格执行零 `ext` 写入；默认草稿 `Invisible`，博主若明确要求发布则直接发布。
 
 ### 4. 双语自动翻译运维
-* **按需查阅**：`scripts/translate/README.md`、`scripts/translate/glossary.json`。
-* **交付要求**：先跑 `--dry-run` 或诊断模式验证。
+
+- **按需查阅**：`scripts/translate/README.md`、`scripts/translate/glossary.json`。
+- **交付要求**：先跑 `--dry-run` 或诊断模式验证。
 
 ### 5. 音乐展架运营（/music）
-* **按需查阅**：`withcol-private/docs/architecture/circlelife-MUSIC-SHELF.md`（运行手册）、`lib/music/`、`scripts/music/`。
-* **交付要求**：站点只读 Notion，网易云取数只在本地脚本；改数据先 `yarn music:add --dry-run` 看差异，写完 `yarn music:doctor` 体检。凭据只在 `.env.local`。
+
+- **按需查阅**：`withcol-private/docs/architecture/circlelife-MUSIC-SHELF.md`（运行手册）、`lib/music/`、`scripts/music/`。
+- **交付要求**：站点只读 Notion，网易云取数只在本地脚本；改数据先 `yarn music:add --dry-run` 看差异，写完 `yarn music:doctor` 体检。凭据只在 `.env.local`。
 
 ---
 
 ## 四、 核心代码目录速查
 
-* `themes/circlelife/`：主站当前运行的核心主题实现目录
-* `lib/music/`：音乐展架的**站点侧**纯数据层 —— `contract.json`（站点与脚本共用的契约）、`paths.js`（列 → 字段的解析与路由）、`data.js`（展架/条目/手记的组装与**手动排序**）、`tracks.js`（曲目 JSON 的读取与校验）、`loaders.js`、`notes.js`、`images.js`
-* `scripts/music/`：音乐展架的**本地同步脚本** —— `cli.mjs`（`yarn music:*` 命令）、`ncm.mjs`（网易云取数）、`normalize.mjs`（清洗与哈希）、`plan.mjs`（机器列/种子列归属与写入计划）、`notion.mjs`（官方 API 客户端）
-* `pages/music/`：`/music` 展架、`/music/album/[album]` 条目页、`/music/note/[note]` 手记页
-* `themes/circlelife/components/music/`：音乐模块组件（展架 `MusicShelf` / 卡片 `AlbumCard` `SingleCard` / 条目页 `TrackList` / 手记头 `NoteHead` / `MusicCover` `NcmLink`）；样式在 `themes/circlelife/styles/music.js`（视觉规范见私有库 `circlelife-DESIGN.md` §2.2i）
-* `themes/theme.js`：**全站共享**的主题动态布局装载层。布局 `next/dynamic` 组件一律走**模块级注册表**（模块求值期预建，渲染期只查表）——在渲染期才 `dynamic()` 会让部分页面的静态产物落成骨架屏（详见私有库 `circlelife-THEME-ARCH.md` 排错 14）。`blog.config.js` 是 CommonJS，具名导入恒为 undefined，取值走 `BLOG.*`
-  * **主主题的 loader 必须用可静态识别的 `import()`**（`primaryThemeLayouts`，每个布局一条字面量 import）。`next/dynamic` 只有在 loader 里的 `import()` 能被 babel 静态识别时才会生成 `loadableGenerated`，客户端水合才能同步 require 该 chunk；用模板字面量 `import(\`@/themes/${x}\`)` 则是 context import，插件识别不了 → 主题 chunk 不进 script 列表 → 水合时组件还处在 loading 态 → **整棵树 hydration 不匹配** → 新旧两棵树并存、页面高度翻倍再回落 → **CLS 直接到 1.0**。其余主题（`?theme=` 切换）仍走 context import，代价是切换时一次闪烁，属可接受的边缘场景
-* `components/SmartLink.js`：全站内链统一入口。自动把全局 query（如 `theme`）并入 href 以跨页保留；`EXCLUDED_KEYS` 排除所有页面私有参数（`view / deck / photo / page / keyword / s / slot / category / tag / target`），防止归档筛选、搜索词等跨页残留。契约测试在 `__tests__/components/SmartLink.test.js`
-* `components/NotionPage.js`：Notion 正文渲染。承担**正文标题层级修正**——react-notion-x 给 Notion 标题统一 +1 偏移（假定 Notion 页面标题是 h1），而本站文章标题本身已是 `h1`；正文缺 Notion h1 时首个正文标题会变成 `<h3>`，形成 h1 → h3 的层级跳跃（`heading-order` 失分）。修法是在正文根节点挂 `articleRef`，缺 `.notion-h1` 时把 `.notion-h2/h3/h4` 降级为 `H2/H3/H4`，**只换标签、保留 class 与 `data-id`**（样式与目录锚点不受影响）
-* `pages/archive/index.js`：归档页数据入口；按月分组，circlelife 下会裁剪 pageProps 与 `archivePosts` 白名单字段，并把分类选项注释收成 `categoryNotes` 映射（完整 `categoryOptions` 不下发）。`getStaticProps` 仍全量下发，分页在 `LayoutArchive` 客户端做、不切数据
-* `themes/circlelife/components/ArchiveIndex.js`、`archiveFilter.js`、`archiveDeepLink.js`、`archiveMemory.js`、`archivePagination.js`、`BlogListArchive.js`：归档筛选索引、分类/标签聚合纯函数、URL 深链映射、标签页筛选记忆、按整月分页纯函数、分类注记、时间线条目。标签索引为**流式胶囊**（`cl-archive-tagcloud` / `cl-archive-chip`，16 标签约 6 行）；手机端**默认收成窄条**（默认态由 CSS 承担，JS 只挂 `.is-expanded` 变体），展开/收起**只由两个按钮驱动**，切分类/选标签不重置该状态 —— 契约测试在 `archiveTagIndex.test.js` / `archivePagination.test.js`
-* **归档分页（2026-11-17）**：`ARCHIVE_MONTHS_PER_PAGE = 4`，按排序后的月份 key 切片、不拆月；页码只做 `LayoutArchive` 组件 state，不写 URL / sessionStorage，任何筛选变化回第 1 页；翻页条复用 `cl-pager-bar`。
-* **路由（2026-11-11）**：分类链接统一为 `/archive?category=<名字>`；`/category/*` 路由已删除，`next.config.js` 做 308（`/category/:category/page/:page`、`/category/:category` → 归档分类视图，`/category` → `/archive`）；sitemap 不再输出分类 URL。
-* `themes/circlelife/components/navConfig.js`：Notion 菜单行序归一化（首页固定最前，不再左右翼重排）；`isCurrentNavPath(asPath, href)` 是胶囊与抽屉**共用**的当前页高亮纯函数（详情页归入父级、query/hash/语言前缀/尾斜杠归一化、占位符与外链不命中）。契约测试在 `__tests__/themes/circlelife/navConfig.test.js`
-* `themes/circlelife/components/navParking.js`：悬浮胶囊**滚动让位**的纯判定（`computeUpThreshold` / `resolveNavParking`）。只认净位移：常驻区 `scrollY ≤ 96`、下滚累计 36px 让位；上滚阈值不对称——一般页 14px、文章正文阅读态 25% 视口（下限 160px）；方向翻转即清零，不用定时器与速度（旧的迟滞收起已废弃）。Header 只负责读滚动量、切 `#theme-circlelife` 上的 `cl-nav-parked`；`/about` 由展墙通过 `CustomEvent('cl-virtual-scroll')`（`detail = { y, reset }`）播报位移接入。契约测试在 `__tests__/themes/circlelife/navParking.test.js`，样式契约在 `styleFragments.test.js`
-* `themes/circlelife/components/ReadingProgress.js`：文章页**顶部书口线**（2px 朱砂填充 + 1px 纸边细轨，左右内缩 24px）。渲染在 `.cl-floating-header` 之外、与胶囊进退完全解耦；填充用 `clip-path` 裁切（不用 `scaleX`，否则 28px 收笔会随进度缩放）；每帧只写 `--cl-progress` 一个变量
-* `themes/circlelife/components/wheelOwnership.js`：`shouldWallOwnWheel(target, stage)` —— 自研虚拟滚动展墙 `InfiniteAboutGrid.js`（关于展墙）的**滚轮归属判定**。展墙在 `window` 上注册非 passive 的 `wheel` 监听并 `preventDefault()`，会取消浏览器「滚轮作用于最近原生滚动祖先」的默认行为 → **页面上每一个滚轮事件都被吞掉**，浮层内的原生滚动容器（顶栏全屏菜单、搜索结果等）随之滚不动。规则：指针落在原生滚动容器（`overflow-y: auto|scroll|overlay`）内 → 展墙不接管，交还浏览器原生滚动；其余（展墙自身、顶栏导航胶囊等不含滚动容器的浮层）→ 展墙照常接管。回溯 DOM 必须**停在 `body`/`html` 之前**（`html { overflow-x: hidden }` 会让 `overflow-y` 计算成 `auto`，误判根滚动容器会让展墙彻底失去滚轮）。契约测试在 `__tests__/themes/circlelife/wheelOwnership.test.js`
-* `themes/circlelife/components/heroCopy.js`：序言幕布文案判定 `resolveHeroCopy(summary, description, fallback)` —— `summary` 作短题眼、`description` 作导语，空/相同导语不渲染；关于页使用。契约测试在 `__tests__/themes/circlelife/heroCopy.test.js` 与 `__tests__/themes/circlelife/heroLead.test.js`
-* `themes/circlelife/components/aboutReel.js`、`AboutReelMedia.js`：关于页影像快闪的数据清洗/双源选择、poster LCP、延迟自动播放、关闭与页面可见性暂停、reduced/Save-Data/蜂窝 2g-3g 降级（降级原因随「播放快闪」按钮显示）；Notion CONFIG 只读 `ABOUT_REEL_*`；`ABOUT_REEL_BILIBILI` 为空则隐藏 B 站按钮。契约测试在 `aboutReel.test.js` / `aboutReelMedia.test.js` / `aboutReelContract.test.js`
-* `themes/circlelife/styles/archive.js`：归档宽屏/筛选/流式胶囊标签/时间线样式；宽屏容器 token 在 `styles/tokens.js`
-* `themes/circlelife/styles/article.js`：文章页全屏壳（全出血封面 + 宽容器 + TOC 细轨）、封面遮罩溶解与顶部压暗、正文排版体系；排版参数 token 在 `styles/tokens.js` 的 `--cl-prose-*` / `--cl-article-*`（溶解曲线是 `--cl-article-cover-mask`，深浅两套停靠点）
-* `themes/circlelife/components/imageSrcset.js`：Notion 反代取图档位与 srcSet 候选集（默认 512/1024 两档，可用 `widths` 覆盖；全出血封面用 `[1024, 2048]` + `sizes=100vw`）
-* `themes/circlelife/components/HomeArticleStage.js`、`HomeArticleCover.js`、`homeArticleFocus.js`、`styles/homeArticles.js`：首页「精选文章」段 —— `100svh` 一屏一篇的原生横向 scroll-snap 轨道（无 wheel/touch 劫持、无滚动驱动 transform）；数据新→旧（第一屏最新），底部日期尺等距可点击、桌面 30rem 封顶居中 / 手机满宽，键盘 ←/→/Home/End，当前篇写 `sessionStorage`（v2）并在返回时恢复。图版走 `HomeArticleCover` 槽位池：固定 1024 档，当前篇 ±1 绘制、±2 预取、其余释放；机制与几何刷新见私有库 `circlelife-THEME-ARCH.md` §1.2，视觉规范见 `circlelife-DESIGN.md` §2.2h；契约测试在 `__tests__/themes/circlelife/homeArticleStage.test.js` / `homeArticleCover.test.js`
-* `themes/circlelife/components/HomeAlbumShowcase.js`、`HomeAlbumShowcaseMobile.js`、`styles/homeAlbumMobile.js`、`homeAlbumData.js`：首页「精选影集」段 —— 只显示 Notion「精选」勾选的影集、硬上限 4、不补齐；PC 悬停预览（左纯文字索引 + 右叠放卡片）与手机 C 方案「对开书页」（横向轨道 + 题签卡）拆成两个独立组件、CSS 断点二选一；封面走 `CanvasImage`，入口 `/album?deck=<id>`。契约测试在 `__tests__/themes/circlelife/homeAlbumShowcase.test.js` / `homeAlbumShowcaseMobile.test.js`；机制见私有库 `circlelife-THEME-ARCH.md` §1.2，视觉规范见 `circlelife-DESIGN.md` §2.2g
-* `themes/circlelife/components/AlbumReader.js`、`albumReaderData.js`、`albumContext.js`、`albumRoute.js`、`styles/albumReader.js`：影集全屏阅读器 —— 章页 → 单张阅读 → 目录抽屉 / 当前辑缩略，跨辑用静止照片 + 纸面裁切 + 阻尼曲线转场；顶部页码、底部居中「目录 | 缩略」；`100svh` + `min-height: 0` 避开 iOS Safari 底栏；站点头导航胶囊与页脚隐藏、只留右上菜单；URL 只记 `deck`（首页 / 搜索入口落章页；旧 `view` 参数被忽略并规范掉）；同路由换 `deck` 由 `resolveQueryDeckChange` 判定，过渡期旧 query 不触发切辑。数据模型 / URL 纯函数在 `albumReaderData.js`，深色米灰纸与全屏高度链在 `styles/albumReader.js`。旧 `AlbumStage` / `AlbumShelfStack` / `AlbumInfiniteWall` / `AlbumLightbox` / `AlbumDeckNav` 与 `styles/album.js` 已删除。契约测试在 `__tests__/themes/circlelife/albumReaderData.test.js` / `albumRoute.test.js` / `styleFragments.test.js` / `masthead.test.js`（入口 URL 契约在 `homeAlbumShowcase.test.js`）
-* `themes/circlelife/components/Footer.js`、`FooterSocial.js`、`brandIcons.js`、`wechatOrigin.js`：页脚社交通道（微信二维码 / 小红书 / 网易云 / GitHub / Steam）与文章「微信原文」。链接/二维码地址走 Notion CONFIG 的 `CONTACT_*`，二维码在 `public/images/wechat-public-qr.png`（仅弹层打开时加载），页脚进入视口时由 `LayoutBase` 的 IntersectionObserver + `.cl-footer-inview` 隐藏回顶/移动目录。视觉规范见私有库 `withcol-private/docs/design-system/circlelife-DESIGN.md` §2.2j，数据流见 `withcol-private/docs/architecture/circlelife-THEME-ARCH.md` §1.9。
-* `docs/design/`：官方设计规范中心（`xuhome/` 为备用主题规范；主站专属纸感设计体系已迁移至私有库 `withcol-private/docs/design-system/`）
-* `docs/developer/themes/`：开源主题架构与实现手册（包含 `CLAUDE.md`, `HEO.md` 等；Circlelife 核心架构推演已迁移至私有库 `withcol-private/docs/architecture/`）
-* `pages/`：Next.js 路由入口、SSG/ISR 页面生命周期
-* `pages/[prefix]/[slug]/index.js`：文章页路由；`getStaticProps` 解析主题配置并算出 `coverLcp`（头图 LCP 预加载信息），预加载必须放在**页面级**（主题内的 `<Head>` 在 SSR 阶段会被丢弃）
-* `lib/db/notion/articleCover.js`：文章头图 LCP 预加载信息（`resolveArticleCoverPreload`）；候选集必须与主题实际渲染一致，否则等于白下载 2048 档
-* `components/`：跨主题通用公共组件（`NotionPage`, `NotionTabs`, `PrismMac` 等）
-* `lib/db/SiteDataApi.js`：全站 Notion 数据清洗与拉取总入口
-* `lib/config.js`：`siteConfig()` 全局动态配置读取与优先级控制
-* `components/SEO.js`：全站 `<Head>`（SEO + PWA 提示）。其中 `theme-color`（浏览器地址栏/状态栏底色）**首屏取 `conf/dev.config.js` 的 `BROWSER_THEME_COLOR`，运行时再按页面实际底色重写以跟随深浅模式**；注意该 meta 由 next/head 托管，命令式改属性会被重渲染冲掉，必须走 React state
-* `conf/`：原子化配置文件（最终由 `blog.config.js` 统一聚合）
-* `tools/notionnext-content-mcp/`：内容操作 MCP 服务器
-* `scripts/translate/`：多语言翻译 CLI 工具集
+- `themes/circlelife/`：主站当前运行的核心主题实现目录
+- `lib/music/`：音乐展架的**站点侧**纯数据层 —— `contract.json`（站点与脚本共用的契约）、`paths.js`（列 → 字段的解析与路由）、`data.js`（展架/条目/手记的组装与**手动排序**）、`tracks.js`（曲目 JSON 的读取与校验）、`loaders.js`、`notes.js`、`images.js`
+- `scripts/music/`：音乐展架的**本地同步脚本** —— `cli.mjs`（`yarn music:*` 命令）、`ncm.mjs`（网易云取数）、`normalize.mjs`（清洗与哈希）、`plan.mjs`（机器列/种子列归属与写入计划）、`notion.mjs`（官方 API 客户端）
+- `pages/music/`：`/music` 展架、`/music/album/[album]` 条目页、`/music/note/[note]` 手记页
+- `themes/circlelife/components/music/`：音乐模块组件（展架 `MusicShelf` / 卡片 `AlbumCard` `SingleCard` / 条目页 `TrackList` / 手记头 `NoteHead` / `MusicCover` `NcmLink`）；样式在 `themes/circlelife/styles/music.js`（视觉规范见私有库 `circlelife-DESIGN.md` §2.2i）
+- `themes/theme.js`：**全站共享**的主题动态布局装载层。布局 `next/dynamic` 组件一律走**模块级注册表**（模块求值期预建，渲染期只查表）——在渲染期才 `dynamic()` 会让部分页面的静态产物落成骨架屏（详见私有库 `circlelife-THEME-ARCH.md` 排错 14）。`blog.config.js` 是 CommonJS，具名导入恒为 undefined，取值走 `BLOG.*`
+  - **主主题的 loader 必须用可静态识别的 `import()`**（`primaryThemeLayouts`，每个布局一条字面量 import）。`next/dynamic` 只有在 loader 里的 `import()` 能被 babel 静态识别时才会生成 `loadableGenerated`，客户端水合才能同步 require 该 chunk；用模板字面量 `import(\`@/themes/${x}\`)` 则是 context import，插件识别不了 → 主题 chunk 不进 script 列表 → 水合时组件还处在 loading 态 → **整棵树 hydration 不匹配** → 新旧两棵树并存、页面高度翻倍再回落 → **CLS 直接到 1.0**。其余主题（`?theme=` 切换）仍走 context import，代价是切换时一次闪烁，属可接受的边缘场景
+- `components/SmartLink.js`：全站内链统一入口。自动把全局 query（如 `theme`）并入 href 以跨页保留；`EXCLUDED_KEYS` 排除所有页面私有参数（`view / deck / photo / page / keyword / s / slot / category / tag / target`），防止归档筛选、搜索词等跨页残留。契约测试在 `__tests__/components/SmartLink.test.js`
+- `components/NotionPage.js`：Notion 正文渲染。承担**正文标题层级修正**——react-notion-x 给 Notion 标题统一 +1 偏移（假定 Notion 页面标题是 h1），而本站文章标题本身已是 `h1`；正文缺 Notion h1 时首个正文标题会变成 `<h3>`，形成 h1 → h3 的层级跳跃（`heading-order` 失分）。修法是在正文根节点挂 `articleRef`，缺 `.notion-h1` 时把 `.notion-h2/h3/h4` 降级为 `H2/H3/H4`，**只换标签、保留 class 与 `data-id`**（样式与目录锚点不受影响）
+- `pages/archive/index.js`：归档页数据入口；按月分组，circlelife 下会裁剪 pageProps 与 `archivePosts` 白名单字段，并把分类选项注释收成 `categoryNotes` 映射（完整 `categoryOptions` 不下发）。`getStaticProps` 仍全量下发，分页在 `LayoutArchive` 客户端做、不切数据
+- `themes/circlelife/components/ArchiveIndex.js`、`archiveFilter.js`、`archiveDeepLink.js`、`archiveMemory.js`、`archivePagination.js`、`BlogListArchive.js`：归档筛选索引、分类/标签聚合纯函数、URL 深链映射、标签页筛选记忆、按整月分页纯函数、分类注记、时间线条目。标签索引为**流式胶囊**（`cl-archive-tagcloud` / `cl-archive-chip`，16 标签约 6 行）；手机端**默认收成窄条**（默认态由 CSS 承担，JS 只挂 `.is-expanded` 变体），展开/收起**只由两个按钮驱动**，切分类/选标签不重置该状态 —— 契约测试在 `archiveTagIndex.test.js` / `archivePagination.test.js`
+- **归档分页（2026-11-17）**：`ARCHIVE_MONTHS_PER_PAGE = 4`，按排序后的月份 key 切片、不拆月；页码只做 `LayoutArchive` 组件 state，不写 URL / sessionStorage，任何筛选变化回第 1 页；翻页条复用 `cl-pager-bar`。
+- **路由（2026-11-11）**：分类链接统一为 `/archive?category=<名字>`；`/category/*` 路由已删除，`next.config.js` 做 308（`/category/:category/page/:page`、`/category/:category` → 归档分类视图，`/category` → `/archive`）；sitemap 不再输出分类 URL。
+- `themes/circlelife/components/navConfig.js`：Notion 菜单行序归一化（首页固定最前，不再左右翼重排）；`isCurrentNavPath(asPath, href)` 是胶囊与抽屉**共用**的当前页高亮纯函数（详情页归入父级、query/hash/语言前缀/尾斜杠归一化、占位符与外链不命中）。契约测试在 `__tests__/themes/circlelife/navConfig.test.js`
+- `themes/circlelife/components/navParking.js`：悬浮胶囊**滚动让位**的纯判定（`computeUpThreshold` / `resolveNavParking`）。只认净位移：常驻区 `scrollY ≤ 96`、下滚累计 36px 让位；上滚阈值不对称——一般页 14px、文章正文阅读态 25% 视口（下限 160px）；方向翻转即清零，不用定时器与速度（旧的迟滞收起已废弃）。Header 只负责读滚动量、切 `#theme-circlelife` 上的 `cl-nav-parked`；`/about` 由展墙通过 `CustomEvent('cl-virtual-scroll')`（`detail = { y, reset }`）播报位移接入。契约测试在 `__tests__/themes/circlelife/navParking.test.js`，样式契约在 `styleFragments.test.js`
+- `themes/circlelife/components/ReadingProgress.js`：文章页**顶部书口线**（2px 朱砂填充 + 1px 纸边细轨，左右内缩 24px）。渲染在 `.cl-floating-header` 之外、与胶囊进退完全解耦；填充用 `clip-path` 裁切（不用 `scaleX`，否则 28px 收笔会随进度缩放）；每帧只写 `--cl-progress` 一个变量
+- `themes/circlelife/components/wheelOwnership.js`：`shouldWallOwnWheel(target, stage)` —— 自研虚拟滚动展墙 `InfiniteAboutGrid.js`（关于展墙）的**滚轮归属判定**。展墙在 `window` 上注册非 passive 的 `wheel` 监听并 `preventDefault()`，会取消浏览器「滚轮作用于最近原生滚动祖先」的默认行为 → **页面上每一个滚轮事件都被吞掉**，浮层内的原生滚动容器（顶栏全屏菜单、搜索结果等）随之滚不动。规则：指针落在原生滚动容器（`overflow-y: auto|scroll|overlay`）内 → 展墙不接管，交还浏览器原生滚动；其余（展墙自身、顶栏导航胶囊等不含滚动容器的浮层）→ 展墙照常接管。回溯 DOM 必须**停在 `body`/`html` 之前**（`html { overflow-x: hidden }` 会让 `overflow-y` 计算成 `auto`，误判根滚动容器会让展墙彻底失去滚轮）。契约测试在 `__tests__/themes/circlelife/wheelOwnership.test.js`
+- `themes/circlelife/components/heroCopy.js`：序言幕布文案判定 `resolveHeroCopy(summary, description, fallback)` —— `summary` 作短题眼、`description` 作导语，空/相同导语不渲染；关于页使用。契约测试在 `__tests__/themes/circlelife/heroCopy.test.js` 与 `__tests__/themes/circlelife/heroLead.test.js`
+- `themes/circlelife/components/aboutReel.js`、`AboutReelMedia.js`：关于页影像快闪的数据清洗/双源选择、poster LCP、延迟自动播放、关闭与页面可见性暂停、reduced/Save-Data/蜂窝 2g-3g 降级（降级原因随「播放快闪」按钮显示）；Notion CONFIG 只读 `ABOUT_REEL_*`；`ABOUT_REEL_BILIBILI` 为空则隐藏 B 站按钮。契约测试在 `aboutReel.test.js` / `aboutReelMedia.test.js` / `aboutReelContract.test.js`
+- `themes/circlelife/styles/archive.js`：归档宽屏/筛选/流式胶囊标签/时间线样式；宽屏容器 token 在 `styles/tokens.js`
+- `themes/circlelife/styles/article.js`：文章页全屏壳（全出血封面 + 宽容器 + TOC 细轨）、封面遮罩溶解与顶部压暗、正文排版体系；排版参数 token 在 `styles/tokens.js` 的 `--cl-prose-*` / `--cl-article-*`（溶解曲线是 `--cl-article-cover-mask`，深浅两套停靠点）
+- `themes/circlelife/components/imageSrcset.js`：Notion 反代取图档位与 srcSet 候选集（默认 512/1024 两档，可用 `widths` 覆盖；全出血封面用 `[1024, 2048]` + `sizes=100vw`）
+- `conf/image.config.js` / `NEXT_PUBLIC_NOTION_HOST`：全站图片 host 的唯一来源（`BLOG.NOTION_HOST`，当前 `https://img.withcol.com`）；配套反代 Worker 在 `cloudflare/notion-image-proxy/`，本站部署手册见私有库 `notion-image-proxy.md`（公开同名文档只是上游通用教程）。换域名的决策、协议契约与 400 排错详见私有库 `circlelife-THEME-ARCH.md` §1.10 / 排错 30
+- `themes/circlelife/components/HomeArticleStage.js`、`HomeArticleCover.js`、`homeArticleFocus.js`、`styles/homeArticles.js`：首页「精选文章」段 —— `100svh` 一屏一篇的原生横向 scroll-snap 轨道（无 wheel/touch 劫持、无滚动驱动 transform）；数据新→旧（第一屏最新），底部日期尺等距可点击、桌面 30rem 封顶居中 / 手机满宽，键盘 ←/→/Home/End，当前篇写 `sessionStorage`（v2）并在返回时恢复。图版走 `HomeArticleCover` 槽位池：固定 1024 档，当前篇 ±1 绘制、±2 预取、其余释放；机制与几何刷新见私有库 `circlelife-THEME-ARCH.md` §1.2，视觉规范见 `circlelife-DESIGN.md` §2.2h；契约测试在 `__tests__/themes/circlelife/homeArticleStage.test.js` / `homeArticleCover.test.js`
+- `themes/circlelife/components/HomeAlbumShowcase.js`、`HomeAlbumShowcaseMobile.js`、`styles/homeAlbumMobile.js`、`homeAlbumData.js`：首页「精选影集」段 —— 只显示 Notion「精选」勾选的影集、硬上限 4、不补齐；PC 悬停预览（左纯文字索引 + 右叠放卡片）与手机 C 方案「对开书页」（横向轨道 + 题签卡）拆成两个独立组件、CSS 断点二选一；封面走 `CanvasImage`，入口 `/album?deck=<id>`。契约测试在 `__tests__/themes/circlelife/homeAlbumShowcase.test.js` / `homeAlbumShowcaseMobile.test.js`；机制见私有库 `circlelife-THEME-ARCH.md` §1.2，视觉规范见 `circlelife-DESIGN.md` §2.2g
+- `themes/circlelife/components/AlbumReader.js`、`albumReaderData.js`、`albumContext.js`、`albumRoute.js`、`styles/albumReader.js`：影集全屏阅读器 —— 章页 → 单张阅读 → 目录抽屉 / 当前辑缩略，跨辑用静止照片 + 纸面裁切 + 阻尼曲线转场；顶部页码、底部居中「目录 | 缩略」；`100svh` + `min-height: 0` 避开 iOS Safari 底栏；站点头导航胶囊与页脚隐藏、只留右上菜单；URL 只记 `deck`（首页 / 搜索入口落章页；旧 `view` 参数被忽略并规范掉）；同路由换 `deck` 由 `resolveQueryDeckChange` 判定，过渡期旧 query 不触发切辑。数据模型 / URL 纯函数在 `albumReaderData.js`，深色米灰纸与全屏高度链在 `styles/albumReader.js`。旧 `AlbumStage` / `AlbumShelfStack` / `AlbumInfiniteWall` / `AlbumLightbox` / `AlbumDeckNav` 与 `styles/album.js` 已删除。契约测试在 `__tests__/themes/circlelife/albumReaderData.test.js` / `albumRoute.test.js` / `styleFragments.test.js` / `masthead.test.js`（入口 URL 契约在 `homeAlbumShowcase.test.js`）
+- `themes/circlelife/components/Footer.js`、`FooterSocial.js`、`brandIcons.js`、`wechatOrigin.js`：页脚社交通道（微信二维码 / 小红书 / 网易云 / GitHub / Steam）与文章「微信原文」。链接/二维码地址走 Notion CONFIG 的 `CONTACT_*`，二维码在 `public/images/wechat-public-qr.png`（仅弹层打开时加载），页脚进入视口时由 `LayoutBase` 的 IntersectionObserver + `.cl-footer-inview` 隐藏回顶/移动目录。视觉规范见私有库 `withcol-private/docs/design-system/circlelife-DESIGN.md` §2.2j，数据流见 `withcol-private/docs/architecture/circlelife-THEME-ARCH.md` §1.9。
+- `docs/design/`：官方设计规范中心（`xuhome/` 为备用主题规范；主站专属纸感设计体系已迁移至私有库 `withcol-private/docs/design-system/`）
+- `docs/developer/themes/`：开源主题架构与实现手册（包含 `CLAUDE.md`, `HEO.md` 等；Circlelife 核心架构推演已迁移至私有库 `withcol-private/docs/architecture/`）
+- `pages/`：Next.js 路由入口、SSG/ISR 页面生命周期
+- `pages/[prefix]/[slug]/index.js`：文章页路由；`getStaticProps` 解析主题配置并算出 `coverLcp`（头图 LCP 预加载信息），预加载必须放在**页面级**（主题内的 `<Head>` 在 SSR 阶段会被丢弃）
+- `lib/db/notion/articleCover.js`：文章头图 LCP 预加载信息（`resolveArticleCoverPreload`）；候选集必须与主题实际渲染一致，否则等于白下载 2048 档
+- `components/`：跨主题通用公共组件（`NotionPage`, `NotionTabs`, `PrismMac` 等）
+- `lib/db/SiteDataApi.js`：全站 Notion 数据清洗与拉取总入口
+- `lib/config.js`：`siteConfig()` 全局动态配置读取与优先级控制
+- `components/SEO.js`：全站 `<Head>`（SEO + PWA 提示）。其中 `theme-color`（浏览器地址栏/状态栏底色）**首屏取 `conf/dev.config.js` 的 `BROWSER_THEME_COLOR`，运行时再按页面实际底色重写以跟随深浅模式**；注意该 meta 由 next/head 托管，命令式改属性会被重渲染冲掉，必须走 React state
+- `conf/`：原子化配置文件（最终由 `blog.config.js` 统一聚合）
+- `tools/notionnext-content-mcp/`：内容操作 MCP 服务器
+- `scripts/translate/`：多语言翻译 CLI 工具集
