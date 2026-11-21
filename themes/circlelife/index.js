@@ -69,7 +69,10 @@ import NcmLink from './components/music/NcmLink'
 import TrackList from './components/music/TrackList'
 import TlPageHero from './components/TlPageHero'
 import CONFIG from './config'
-import { buildSizedSource, computeTargetPixelWidth } from './components/imageSrcset'
+import {
+  buildSizedSource,
+  computeTargetPixelWidth
+} from './components/imageSrcset'
 import { Style } from './style'
 
 const Comment = dynamic(() => import('@/components/Comment'), { ssr: false })
@@ -116,7 +119,8 @@ const LayoutBase = props => {
   // 因此 isArticlePage 必须排除音乐路由，否则会吃进文章封面全出血与目录侧栏
   const isMusicPage =
     (typeof router?.pathname === 'string' &&
-      (router.pathname === '/music' || router.pathname.startsWith('/music/'))) ||
+      (router.pathname === '/music' ||
+        router.pathname.startsWith('/music/'))) ||
     cleanPath === '/music' ||
     /^\/[a-z]{2}(?:-[A-Z]{2})?\/music(?:\/|$)/.test(cleanPath)
 
@@ -185,92 +189,83 @@ const LayoutBase = props => {
 
   return (
     <AlbumUIProvider>
-    <Head>
-      <link rel='preconnect' href='https://fonts.googleapis.com' />
-      <link
-        rel='preconnect'
-        href='https://fonts.gstatic.com'
-        crossOrigin='anonymous'
-      />
-      <link
-        rel='stylesheet'
-        href='https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Newsreader:wght@500;600&family=Noto+Serif+SC:wght@500;600;700&display=swap'
-      />
-    </Head>
-    <div
-      id='theme-circlelife'
-      ref={themeRootRef}
-      className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth${isAlbumPage ? ' cl-is-album' : ''}${isAboutPage ? ' cl-is-about' : ''}${isHomePage ? ' cl-is-home' : ''}${isArchivePage ? ' cl-is-archive' : ''}${isMusicPage ? ' cl-is-music' : ''}${isArticlePage && !ARTICLE_CARD ? ' cl-is-article' : ''}${isArticlePage && ARTICLE_CARD ? ' cl-article-card-mode' : ''}${showSidebar ? ' cl-has-sidebar' : ''}`}>
-      <Style />
+      <Head>
+        <link rel='stylesheet' href='/fonts/fonts.css' />
+      </Head>
+      <div
+        id='theme-circlelife'
+        ref={themeRootRef}
+        className={`${siteConfig('FONT_STYLE')} flex min-h-screen flex-col scroll-smooth${isAlbumPage ? ' cl-is-album' : ''}${isAboutPage ? ' cl-is-about' : ''}${isHomePage ? ' cl-is-home' : ''}${isArchivePage ? ' cl-is-archive' : ''}${isMusicPage ? ' cl-is-music' : ''}${isArticlePage && !ARTICLE_CARD ? ' cl-is-article' : ''}${isArticlePage && ARTICLE_CARD ? ' cl-article-card-mode' : ''}${showSidebar ? ' cl-has-sidebar' : ''}`}>
+        <Style />
 
-      {/* 跳过链接：键盘用户按一次 Tab 即可直达正文，视觉上常态隐藏 */}
-      <a href='#main-content' className='cl-skip-link'>
-        {locale?.COMMON?.SKIP_TO_CONTENT || '跳到正文'}
-      </a>
+        {/* 跳过链接：键盘用户按一次 Tab 即可直达正文，视觉上常态隐藏 */}
+        <a href='#main-content' className='cl-skip-link'>
+          {locale?.COMMON?.SKIP_TO_CONTENT || '跳到正文'}
+        </a>
 
-      <Header {...props} />
+        <Header {...props} />
 
-      <div id='container-inner' className='relative z-10 w-full flex-1'>
-        <div
-          id='container-wrapper'
-          className={`relative mx-auto flex justify-center ${
-            isAlbumPage ||
-            isAboutPage ||
-            isHomePage ||
-            isArchivePage ||
-            isMusicPage ||
-            (isArticlePage && !ARTICLE_CARD)
-              ? 'max-w-none w-full flex-col items-stretch px-0 py-0'
-              : `px-4 py-8 md:px-6 ${LAYOUT_SIDEBAR_REVERSE ? 'md:flex-row-reverse' : ''} ${
-                  LAYOUT_VERTICAL
-                    ? 'max-w-5xl flex-col items-center'
-                    : showSidebar
-                      ? 'max-w-5xl flex-col items-start gap-8 md:flex-row md:gap-10'
-                      : 'max-w-3xl flex-col items-start'
-                }`
-          }`}>
-          <main
-            id='main-content'
-            tabIndex={-1}
-            className={`min-w-0 flex-1 ${
-              wide
-                ? 'w-full max-w-none'
-                : LAYOUT_VERTICAL
-                  ? 'w-full max-w-5xl'
-                  : 'w-full max-w-3xl'
+        <div id='container-inner' className='relative z-10 w-full flex-1'>
+          <div
+            id='container-wrapper'
+            className={`relative mx-auto flex justify-center ${
+              isAlbumPage ||
+              isAboutPage ||
+              isHomePage ||
+              isArchivePage ||
+              isMusicPage ||
+              (isArticlePage && !ARTICLE_CARD)
+                ? 'max-w-none w-full flex-col items-stretch px-0 py-0'
+                : `px-4 py-8 md:px-6 ${LAYOUT_SIDEBAR_REVERSE ? 'md:flex-row-reverse' : ''} ${
+                    LAYOUT_VERTICAL
+                      ? 'max-w-5xl flex-col items-center'
+                      : showSidebar
+                        ? 'max-w-5xl flex-col items-start gap-8 md:flex-row md:gap-10'
+                        : 'max-w-3xl flex-col items-start'
+                  }`
             }`}>
-            {/* 入场动效：统一由 styles/common.js 的纯 CSS 动画 clContentIn 承担
+            <main
+              id='main-content'
+              tabIndex={-1}
+              className={`min-w-0 flex-1 ${
+                wide
+                  ? 'w-full max-w-none'
+                  : LAYOUT_VERTICAL
+                    ? 'w-full max-w-5xl'
+                    : 'w-full max-w-3xl'
+              }`}>
+              {/* 入场动效：统一由 styles/common.js 的纯 CSS 动画 clContentIn 承担
                 （#main-content 上的 opacity 淡入，服务端与客户端输出一致）。
                 原先这里用的是 headlessui <Transition> + translate-y-16：文章 / 归档
                 等页会「从下往上」滑入，而影集 / 首页直接显示，两页观感不一致；且该
                 transform 会给 position: fixed 的子元素（目录 fab、回顶按钮）造出
                 包含块，动画期间回顶按钮实测漂移约 13px。按设计规范「只淡入、不位移」，
                 此处统一改为不位移。 */}
-            <div className='w-full'>
-              {props.slotTop}
-              {children}
-            </div>
-          </main>
+              <div className='w-full'>
+                {props.slotTop}
+                {children}
+              </div>
+            </main>
 
-          {showSidebar && (
-            <div className='w-full flex-shrink-0 md:w-64 md:sticky cl-sidebar-sticky'>
-              <SideBar {...props} />
-            </div>
-          )}
+            {showSidebar && (
+              <div className='w-full flex-shrink-0 md:w-64 md:sticky cl-sidebar-sticky'>
+                <SideBar {...props} />
+              </div>
+            )}
 
-          {LAYOUT_VERTICAL && !wide && (
-            <div className='flex w-full max-w-5xl flex-col justify-center space-y-0 px-0 md:flex-row md:space-x-2 md:space-y-0'>
-              <SideBar {...props} />
-            </div>
-          )}
+            {LAYOUT_VERTICAL && !wide && (
+              <div className='flex w-full max-w-5xl flex-col justify-center space-y-0 px-0 md:flex-row md:space-x-2 md:space-y-0'>
+                <SideBar {...props} />
+              </div>
+            )}
+          </div>
         </div>
+
+        {!isAboutPage && <Footer footerRef={footerRef} />}
+
+        <BackToTop label={locale?.POST?.TOP || '返回顶部'} />
+        <ListScrollMemory />
       </div>
-
-      {!isAboutPage && <Footer footerRef={footerRef} />}
-
-      <BackToTop label={locale?.POST?.TOP || '返回顶部'} />
-      <ListScrollMemory />
-    </div>
     </AlbumUIProvider>
   )
 }
@@ -416,19 +411,18 @@ const LayoutSlug = props => {
   useEffect(() => {
     // 404
     if (!post) {
-      setTimeout(
-        () => {
-          if (isBrowser) {
-            const article = document.querySelector('#article-wrapper #notion-article')
-            if (!article) {
-              router.push('/404').then(() => {
-                console.warn('找不到页面', router.asPath)
-              })
-            }
+      setTimeout(() => {
+        if (isBrowser) {
+          const article = document.querySelector(
+            '#article-wrapper #notion-article'
+          )
+          if (!article) {
+            router.push('/404').then(() => {
+              console.warn('找不到页面', router.asPath)
+            })
           }
-        },
-        waiting404
-      )
+        }
+      }, waiting404)
     }
   }, [post])
   return (
@@ -436,144 +430,149 @@ const LayoutSlug = props => {
       {lock ? (
         <PostLock validPassword={validPassword} />
       ) : (
-        post && (
-          (() => {
-            const PROSE_INDENT = siteConfig(
-              'CIRCLELIFE_PROSE_INDENT',
-              true,
-              CONFIG
-            )
-            const hasCover =
-              siteConfig('CIRCLELIFE_ARTICLE_COVER', true, CONFIG) &&
-              (post.pageCoverThumbnail || post.pageCover)
-            const hasToc = Boolean(post.toc && post.toc.length > 2)
+        post &&
+        (() => {
+          const PROSE_INDENT = siteConfig(
+            'CIRCLELIFE_PROSE_INDENT',
+            true,
+            CONFIG
+          )
+          const hasCover =
+            siteConfig('CIRCLELIFE_ARTICLE_COVER', true, CONFIG) &&
+            (post.pageCoverThumbnail || post.pageCover)
+          const hasToc = Boolean(post.toc && post.toc.length > 2)
 
-            // 封面取图：直连 Notion 的 width URL，档位按「显示宽 × DPR」自算。
-            // （LazyImage 会把 width 改写封顶 1080 且不透传 srcSet，故封面直出 img）
-            //
-            // ⚠️ **不再走 srcset**（2026-10-24 实测）：Notion 代理在 srcset 选档路径下
-            // 按 **CSS 宽度**出图、不吃 DPR → Retina 上每张头图都差 2~3 倍像素
-            // （实测 440 宽 @DPR2 的头图只拿到 343×343，而显示要 880×400）→ 被拉伸放大 → 发虚。
-            // 直连路径则严格按 `width` 参数出图，自己算档位就正好。
-            const coverSrc = post.pageCover
-              ? compressImage(post.pageCover, 1600)
-              : post.pageCoverThumbnail
-            const coverUrl = buildSizedSource(coverSrc, coverTier)
+          // 封面取图：直连 Notion 的 width URL，档位按「显示宽 × DPR」自算。
+          // （LazyImage 会把 width 改写封顶 1080 且不透传 srcSet，故封面直出 img）
+          //
+          // ⚠️ **不再走 srcset**（2026-10-24 实测）：Notion 代理在 srcset 选档路径下
+          // 按 **CSS 宽度**出图、不吃 DPR → Retina 上每张头图都差 2~3 倍像素
+          // （实测 440 宽 @DPR2 的头图只拿到 343×343，而显示要 880×400）→ 被拉伸放大 → 发虚。
+          // 直连路径则严格按 `width` 参数出图，自己算档位就正好。
+          const coverSrc = post.pageCover
+            ? compressImage(post.pageCover, 1600)
+            : post.pageCoverThumbnail
+          const coverUrl = buildSizedSource(coverSrc, coverTier)
 
-            const cover = hasCover ? (
-              <div className='cl-article-cover'>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={coverUrl}
-                  alt=''
-                  className='cl-article-cover-img'
-                  fetchPriority='high'
-                  decoding='async'
-                  // Notion 自带的封面裁剪焦点（0=顶 0.5=中 1=底）：
-                  // 横幅是 3:1 长条，同一张图在这里的取景与首页 3:4 图版完全不同 ——
-                  // 此前站点写死居中，导致「在 Notion 里拖了头图却没反应」。
-                  style={{
-                    objectPosition: `50% ${
-                      (post.pageCoverPosition ?? 0.5) * 100
-                    }%`
-                  }}
+          const cover = hasCover ? (
+            <div className='cl-article-cover'>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={coverUrl}
+                alt=''
+                className='cl-article-cover-img'
+                fetchPriority='high'
+                decoding='async'
+                // Notion 自带的封面裁剪焦点（0=顶 0.5=中 1=底）：
+                // 横幅是 3:1 长条，同一张图在这里的取景与首页 3:4 图版完全不同 ——
+                // 此前站点写死居中，导致「在 Notion 里拖了头图却没反应」。
+                style={{
+                  objectPosition: `50% ${
+                    (post.pageCoverPosition ?? 0.5) * 100
+                  }%`
+                }}
+              />
+              {/* 顶部极轻压暗：仅全屏形态。卡片回退形态封面小且不浮导航，不加此层 */}
+              {!ARTICLE_CARD ? (
+                <div className='cl-article-cover-scrim' aria-hidden='true' />
+              ) : null}
+            </div>
+          ) : null
+
+          const body = (
+            <>
+              <div className='cl-article-top-row'>
+                <ArticleBack
+                  className='cl-article-back--top'
+                  postId={post?.id}
                 />
-                {/* 顶部极轻压暗：仅全屏形态。卡片回退形态封面小且不浮导航，不加此层 */}
-                {!ARTICLE_CARD ? (
-                  <div className='cl-article-cover-scrim' aria-hidden='true' />
+                {wechatOrigin ? (
+                  <a
+                    className='cl-article-origin'
+                    href={wechatOrigin}
+                    target='_blank'
+                    rel='noopener noreferrer'>
+                    微信原文 <span aria-hidden='true'>↗</span>
+                  </a>
                 ) : null}
               </div>
-            ) : null
-
-            const body = (
-              <>
-                <div className='cl-article-top-row'>
-                  <ArticleBack className='cl-article-back--top' postId={post?.id} />
-                  {wechatOrigin ? (
-                    <a
-                      className='cl-article-origin'
-                      href={wechatOrigin}
-                      target='_blank'
-                      rel='noopener noreferrer'>
-                      微信原文 <span aria-hidden='true'>↗</span>
-                    </a>
-                  ) : null}
-                </div>
-                {isPage ? (
-                  <PageMast
-                    title={post.title}
-                    description={post.summary || undefined}
-                    className='cl-page-mast--article'
-                  />
-                ) : (
-                  <header className='cl-article-hero'>
-                    <h1 className='cl-article-title'>
-                      {siteConfig('POST_TITLE_ICON') && (
-                        <NotionIcon icon={post.pageIcon} />
-                      )}
-                      {post.title}
-                    </h1>
-                    <PostMeta post={post} />
-                  </header>
-                )}
-                <div
-                  id='article-wrapper'
-                  className={`cl-prose-wrap${
-                    PROSE_INDENT ? '' : ' cl-indent-off'
-                  }`}>
-                  <NotionPage post={post} />
-                  {siteConfig('CIRCLELIFE_SHOW_SHARE', false, CONFIG) ? (
-                    <ShareBar post={post} />
-                  ) : null}
-                </div>
-                <div className='cl-article-back-row'>
-                  <ArticleBack className='cl-article-back--bottom' postId={post?.id} />
-                </div>
-                {siteConfig('CIRCLELIFE_SHOW_COMMENT', false, CONFIG) ? (
-                  <section
-                    className='mt-8 border-t border-[var(--cl-border)] pt-6'
-                    aria-label={locale?.COMMON?.COMMENTS || 'Comments'}>
-                    <h2 className='cl-kicker mb-4 !text-[var(--cl-muted)]'>
-                      {locale?.COMMON?.COMMENTS || '评论'}
-                    </h2>
-                    <Comment frontMatter={post} />
-                  </section>
+              {isPage ? (
+                <PageMast
+                  title={post.title}
+                  description={post.summary || undefined}
+                  className='cl-page-mast--article'
+                />
+              ) : (
+                <header className='cl-article-hero'>
+                  <h1 className='cl-article-title'>
+                    {siteConfig('POST_TITLE_ICON') && (
+                      <NotionIcon icon={post.pageIcon} />
+                    )}
+                    {post.title}
+                  </h1>
+                  <PostMeta post={post} />
+                </header>
+              )}
+              <div
+                id='article-wrapper'
+                className={`cl-prose-wrap${
+                  PROSE_INDENT ? '' : ' cl-indent-off'
+                }`}>
+                <NotionPage post={post} />
+                {siteConfig('CIRCLELIFE_SHOW_SHARE', false, CONFIG) ? (
+                  <ShareBar post={post} />
                 ) : null}
-              </>
-            )
+              </div>
+              <div className='cl-article-back-row'>
+                <ArticleBack
+                  className='cl-article-back--bottom'
+                  postId={post?.id}
+                />
+              </div>
+              {siteConfig('CIRCLELIFE_SHOW_COMMENT', false, CONFIG) ? (
+                <section
+                  className='mt-8 border-t border-[var(--cl-border)] pt-6'
+                  aria-label={locale?.COMMON?.COMMENTS || 'Comments'}>
+                  <h2 className='cl-kicker mb-4 !text-[var(--cl-muted)]'>
+                    {locale?.COMMON?.COMMENTS || '评论'}
+                  </h2>
+                  <Comment frontMatter={post} />
+                </section>
+              ) : null}
+            </>
+          )
 
-            /* 回退形态：旧卡片窄栏（含 LayoutBase 侧栏目录） */
-            if (ARTICLE_CARD) {
-              return (
-                <article className='cl-card cl-article-card cl-article--card overflow-hidden'>
-                  {cover}
-                  <div className='cl-article-inner'>{body}</div>
-                </article>
-              )
-            }
-
-            /* 全屏形态：全出血封面 + 宽容器双栏壳（TOC 细轨 + 正文列） */
+          /* 回退形态：旧卡片窄栏（含 LayoutBase 侧栏目录） */
+          if (ARTICLE_CARD) {
             return (
-              <article className='cl-article-page'>
+              <article className='cl-card cl-article-card cl-article--card overflow-hidden'>
                 {cover}
-                <div
-                  className={`cl-article-shell${
-                    hasToc ? ' cl-article-shell--toc' : ''
-                  }${hasCover ? '' : ' cl-article-shell--no-cover'}`}>
-                  {hasToc && (
-                    <div className='cl-article-rail'>
-                      <h2 className='cl-sidebar-title'>目录</h2>
-                      <Catalog toc={post.toc} />
-                    </div>
-                  )}
-                  <div className='cl-article-main'>
-                    <div className='cl-article-inner'>{body}</div>
-                  </div>
-                </div>
+                <div className='cl-article-inner'>{body}</div>
               </article>
             )
-          })()
-        )
+          }
+
+          /* 全屏形态：全出血封面 + 宽容器双栏壳（TOC 细轨 + 正文列） */
+          return (
+            <article className='cl-article-page'>
+              {cover}
+              <div
+                className={`cl-article-shell${
+                  hasToc ? ' cl-article-shell--toc' : ''
+                }${hasCover ? '' : ' cl-article-shell--no-cover'}`}>
+                {hasToc && (
+                  <div className='cl-article-rail'>
+                    <h2 className='cl-sidebar-title'>目录</h2>
+                    <Catalog toc={post.toc} />
+                  </div>
+                )}
+                <div className='cl-article-main'>
+                  <div className='cl-article-inner'>{body}</div>
+                </div>
+              </div>
+            </article>
+          )
+        })()
       )}
       {post?.toc && post.toc.length > 2 ? <MobileToc toc={post.toc} /> : null}
     </>
@@ -677,7 +676,9 @@ const LayoutMusicAlbum = props => {
           </p>
           <h1 className='cl-music-title'>{album.title}</h1>
           {metaLine ? <p className='cl-music-meta'>{metaLine}</p> : null}
-          {album.summary ? <p className='cl-music-desc'>{album.summary}</p> : null}
+          {album.summary ? (
+            <p className='cl-music-desc'>{album.summary}</p>
+          ) : null}
           {album.description && album.description !== album.summary ? (
             <p className='cl-music-album-desc'>{album.description}</p>
           ) : null}
@@ -794,16 +795,21 @@ const Layout404 = props => {
     }, 3000)
   }, [])
 
-  return <>
-        <div className='cl-card mx-auto mt-24 max-w-md px-8 py-12 text-center'>
-            <div className='text-[var(--cl-text)]'>
-                <h1 className='inline-block border-r-2 border-[var(--cl-border)] mr-2 px-3 py-2 align-top text-2xl font-semibold'><i className='mr-2 fas fa-spinner animate-spin' />404</h1>
-                <div className='inline-block text-left h-32 leading-10 items-center text-[var(--cl-muted)]'>
-                    <p className='m-0 p-0 text-base'>页面无法加载，即将返回首页</p>
-                </div>
-            </div>
+  return (
+    <>
+      <div className='cl-card mx-auto mt-24 max-w-md px-8 py-12 text-center'>
+        <div className='text-[var(--cl-text)]'>
+          <h1 className='inline-block border-r-2 border-[var(--cl-border)] mr-2 px-3 py-2 align-top text-2xl font-semibold'>
+            <i className='mr-2 fas fa-spinner animate-spin' />
+            404
+          </h1>
+          <div className='inline-block text-left h-32 leading-10 items-center text-[var(--cl-muted)]'>
+            <p className='m-0 p-0 text-base'>页面无法加载，即将返回首页</p>
+          </div>
         </div>
+      </div>
     </>
+  )
 }
 
 /**
@@ -866,10 +872,7 @@ const LayoutArchive = props => {
   // 归档分页页码：只做组件状态，不写 URL / 记忆
   const [page, setPage] = useState(1)
 
-  const facets = useMemo(
-    () => buildArchiveFacets(archivePosts),
-    [archivePosts]
-  )
+  const facets = useMemo(() => buildArchiveFacets(archivePosts), [archivePosts])
   const filteredArchivePosts = useMemo(
     () => filterArchivePosts(archivePosts, activeCategoryKey, activeTagKey),
     [archivePosts, activeCategoryKey, activeTagKey]
@@ -885,7 +888,11 @@ const LayoutArchive = props => {
     [filteredArchivePosts]
   )
   // 归档按「整月」分页：月份边界不拆，4 个月一页（12 个月 → 3 页）。
-  const { totalPage, safePage, months: visibleMonths } = useMemo(
+  const {
+    totalPage,
+    safePage,
+    months: visibleMonths
+  } = useMemo(
     () => paginateArchiveMonths(keys, page, ARCHIVE_MONTHS_PER_PAGE),
     [keys, page]
   )
@@ -985,9 +992,7 @@ const LayoutArchive = props => {
     category => category.key === activeCategoryKey
   )
   const activeCategoryName =
-    activeCategoryKey === ARCHIVE_ALL
-      ? ''
-      : activeCategory?.name || '未分类'
+    activeCategoryKey === ARCHIVE_ALL ? '' : activeCategory?.name || '未分类'
   const activeScope =
     facets.scopes.get(activeCategoryKey) || facets.scopes.get(ARCHIVE_ALL)
   const activeTagName =
@@ -1055,9 +1060,7 @@ const LayoutArchive = props => {
               {activeTagName ? ` / #${activeTagName}` : ''}
             </strong>
           </span>
-          <span className='cl-archive-stage__count'>
-            共 {filteredCount} 篇
-          </span>
+          <span className='cl-archive-stage__count'>共 {filteredCount} 篇</span>
         </div>
       )}
       {visibleMonths.map(archiveTitle => (
