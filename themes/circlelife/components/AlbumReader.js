@@ -54,20 +54,14 @@ function ChapterIntro({ album }) {
   )
 }
 
-function ChapterInner({ album, albumIndex, total, withEnter, onEnter }) {
+function ChapterInner({ album, withEnter, onEnter }) {
   if (!album) return null
   return (
     <div className='chapter-inner'>
       <span className='chapter-rule' aria-hidden='true' />
-      <p className='chapter-kicker'>
-        ALBUM · {pad(albumIndex + 1)} / {pad(total)}
-      </p>
       <h2 className='chapter-title'>{album.title}</h2>
       <ChapterIntro album={album} />
-      <p className='chapter-meta'>
-        {album.month ? `${album.month} · ` : ''}
-        {album.count} 张
-      </p>
+      {album.month ? <p className='chapter-meta'>{album.month}</p> : null}
       {withEnter ? (
         <button type='button' className='chapter-enter' onClick={onEnter}>
           点击进入影集 →
@@ -753,8 +747,6 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
                 } ${chapterRevealing ? 'is-revealing' : ''}`}>
                 <ChapterInner
                   album={activeAlbum}
-                  albumIndex={albumIndex}
-                  total={albums.length}
                   withEnter
                   onEnter={enterChapter}
                 />
@@ -767,11 +759,7 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
                   transition.covering ? 'is-covering' : ''
                 } ${transition.revealing ? 'is-revealing' : ''}`}
                 aria-hidden='true'>
-                <ChapterInner
-                  album={albums[transition.albumIndex]}
-                  albumIndex={transition.albumIndex}
-                  total={albums.length}
-                />
+                <ChapterInner album={albums[transition.albumIndex]} />
               </div>
             ) : null}
           </div>

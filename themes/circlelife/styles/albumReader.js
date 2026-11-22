@@ -329,14 +329,6 @@ export const albumReaderStyle = `
     margin: 0 auto 18px;
     background: var(--cl-vermilion);
   }
-  .chapter-kicker {
-    margin: 0 0 10px;
-    font-family: var(--cl-font-mono);
-    font-size: 9px;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--cl-faint);
-  }
   .chapter-title {
     margin: 0 0 10px;
     font-family: var(--cl-font-display);
@@ -396,7 +388,7 @@ export const albumReaderStyle = `
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    margin-top: 26px;
+    margin-top: 14px;
     padding: 0;
     border: 0;
     background: transparent;
@@ -855,7 +847,6 @@ export const albumReaderStyle = `
     .chapter-panel { padding: 0 var(--cl-wide-pad); }
     .chapter-inner { max-width: 52rem; }
     .chapter-rule { width: 32px; margin-bottom: 22px; }
-    .chapter-kicker { font-size: 10px; letter-spacing: 0.18em; }
     .chapter-title { font-size: clamp(2.6rem, 4.4vw, 4rem); }
     .chapter-intro-rule {
       margin-bottom: 16px;
@@ -871,7 +862,7 @@ export const albumReaderStyle = `
       margin-top: 0.7em;
     }
     .chapter-meta { font-size: 11px; }
-    button.chapter-enter { margin-top: 32px; font-size: 10px; }
+    button.chapter-enter { margin-top: 16px; font-size: 10px; }
 
     #indexOverlay { width: min(44%, 620px); }
     #indexOverlay .overlay-head {
