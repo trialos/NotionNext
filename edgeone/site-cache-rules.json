@@ -1,0 +1,100 @@
+{
+  "FormatVersion": "1.0",
+  "Rules": [
+    {
+      "RuleName": "withcol.com 站点节点缓存",
+      "Branches": [
+        {
+          "Condition": "${http.request.host} in ['www.withcol.com', 'withcol.com']",
+          "Actions": [],
+          "SubRules": [
+            {
+              "Branches": [
+                {
+                  "Condition": "${http.request.uri.path} matches '^/api(/|$)'",
+                  "Actions": [
+                    {
+                      "Name": "Cache",
+                      "CacheParameters": {
+                        "NoCache": { "Switch": "on" }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "Condition": "${http.request.uri.path} in ['/auth', '/sitemap.xml']",
+                  "Actions": [
+                    {
+                      "Name": "Cache",
+                      "CacheParameters": {
+                        "NoCache": { "Switch": "on" }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "Condition": "${http.request.uri.path} matches '^/(dashboard|user|sign-in|sign-up)(/|$)'",
+                  "Actions": [
+                    {
+                      "Name": "Cache",
+                      "CacheParameters": {
+                        "NoCache": { "Switch": "on" }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "Condition": "${http.request.uri.path} matches '^/_next/static/'",
+                  "Actions": [
+                    {
+                      "Name": "Cache",
+                      "CacheParameters": {
+                        "CustomTime": {
+                          "Switch": "on",
+                          "IgnoreCacheControl": "on",
+                          "CacheTime": 31536000
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "Condition": "${http.request.uri.path} matches '^/fonts/'",
+                  "Actions": [
+                    {
+                      "Name": "Cache",
+                      "CacheParameters": {
+                        "CustomTime": {
+                          "Switch": "on",
+                          "IgnoreCacheControl": "on",
+                          "CacheTime": 31536000
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "Condition": "*",
+                  "Actions": [
+                    {
+                      "Name": "Cache",
+                      "CacheParameters": {
+                        "CustomTime": {
+                          "Switch": "on",
+                          "IgnoreCacheControl": "on",
+                          "CacheTime": 60
+                        }
+                      }
+                    }
+                  ]
+                }
+              ],
+              "Description": []
+            }
+          ]
+        }
+      ],
+      "Description": []
+    }
+  ]
+}
