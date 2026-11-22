@@ -117,12 +117,16 @@ export const albumReaderStyle = `
     --album-safe-top: env(safe-area-inset-top, 0px);
     --album-safe-bottom: env(safe-area-inset-bottom, 0px);
     --album-bar: calc(56px + var(--album-safe-top));
-    --album-foot: calc(176px + var(--album-safe-bottom));
+    --album-foot: calc(66px + var(--album-safe-bottom));
     --index-nudge: 10px;
     position: absolute;
     inset: 0;
     background: var(--cl-bg);
     color: var(--cl-text);
+  }
+  /* 图注为空时不留文字带，底部只留「目录 | 缩略」那一条 */
+  .reader.has-caption {
+    --album-foot: calc(176px + var(--album-safe-bottom));
   }
   .reader-top {
     position: absolute;
@@ -800,8 +804,11 @@ export const albumReaderStyle = `
   @media (min-width: 1024px) {
     .reader {
       --album-bar: calc(72px + var(--album-safe-top));
-      --album-foot: 140px;
+      --album-foot: calc(64px + var(--album-safe-bottom));
       --index-nudge: 20px;
+    }
+    .reader.has-caption {
+      --album-foot: 140px;
     }
     .reader-top { padding-left: 92px; padding-right: 92px; }
     .reader-center { gap: 14px; }

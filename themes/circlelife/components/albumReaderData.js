@@ -1,8 +1,20 @@
-import { buildSizedSource } from './imageSrcset'
+import { buildSizedSource, computeTargetPixelWidth } from './imageSrcset'
 
-/** 阅读器取图：正文/单张大图 1024 档，缩略 512 档；S3/外链原样返回 */
+/** 阅读器取图：正文/单张大图的兜底档 1024，缩略 512；S3/外链原样返回 */
 export const READER_IMAGE_WIDTH = 1024
 export const THUMB_IMAGE_WIDTH = 512
+
+/**
+ * 大图按「照片框实际显示宽 × DPR」选档，覆盖预生成的 1024 兜底档。
+ * 没有框宽（首屏 / SSR）时保留 1024 档，避免误落到 256 档。
+ */
+export function selectReaderPhotoSrc(photo, frameWidth, dpr = 1) {
+  if (!photo) return ''
+  const width = Number(frameWidth)
+  if (!(width > 0) || !photo.fullSrc) return photo.src
+  const targetPx = computeTargetPixelWidth(width, dpr)
+  return buildSizedSource(photo.fullSrc, targetPx) || photo.src
+}
 
 function firstString(value) {
   if (!value) return ''

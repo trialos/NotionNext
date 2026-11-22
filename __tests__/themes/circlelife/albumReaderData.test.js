@@ -4,6 +4,7 @@ import {
   parseReaderQuery,
   readerQuery,
   resolveQueryDeckChange,
+  selectReaderPhotoSrc,
   splitIntroParagraphs
 } from '@/themes/circlelife/components/albumReaderData'
 
@@ -197,5 +198,35 @@ describe('albumReaderData', () => {
         lastQueryDeck: 'a'
       })
     ).toBe('')
+  })
+})
+
+describe('selectReaderPhotoSrc', () => {
+  const photo = {
+    src: 'https://www.notion.so/image/a.jpg?width=1024&cache=v2',
+    fullSrc: 'https://www.notion.so/image/a.jpg?width=1080&cache=v2'
+  }
+  const widthOf = src => Number(new URL(src).searchParams.get('width'))
+
+  test('按显示宽 × DPR 选档：大屏 Retina 升 2048，小屏维持 1024', () => {
+    expect(widthOf(selectReaderPhotoSrc(photo, 1008, 1))).toBe(1024)
+    expect(widthOf(selectReaderPhotoSrc(photo, 1008, 2))).toBe(2048)
+    expect(widthOf(selectReaderPhotoSrc(photo, 504, 2))).toBe(1024)
+    expect(widthOf(selectReaderPhotoSrc(photo, 504, 1))).toBe(512)
+  })
+
+  test('无框宽或缺失 fullSrc 时退回预生成的 1024 档', () => {
+    expect(selectReaderPhotoSrc(photo, 0, 3)).toBe(photo.src)
+    expect(selectReaderPhotoSrc(photo, undefined, 2)).toBe(photo.src)
+    expect(selectReaderPhotoSrc({ src: photo.src }, 1008, 2)).toBe(photo.src)
+    expect(selectReaderPhotoSrc(null, 1008, 2)).toBe('')
+  })
+
+  test('外链原样返回，不强行改写 width', () => {
+    const external = {
+      src: 'https://example.com/a.jpg?width=800',
+      fullSrc: 'https://example.com/a.jpg?width=800'
+    }
+    expect(selectReaderPhotoSrc(external, 1008, 2)).toBe(external.src)
   })
 })

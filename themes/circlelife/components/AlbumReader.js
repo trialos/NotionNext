@@ -10,7 +10,8 @@ import {
   findReaderAlbumIndex,
   parseReaderQuery,
   readerQuery,
-  resolveQueryDeckChange
+  resolveQueryDeckChange,
+  selectReaderPhotoSrc
 } from './albumReaderData'
 import { linkTitle } from './navConfig'
 
@@ -91,6 +92,7 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
   const [loaded, setLoaded] = useState(false)
   const [naturalRatio, setNaturalRatio] = useState(0)
   const [frameSize, setFrameSize] = useState({ w: 0, h: 0 })
+  const [dpr, setDpr] = useState(1)
   const [indexOpen, setIndexOpen] = useState(false)
   const [indexRising, setIndexRising] = useState(false)
   const [indexClosing, setIndexClosing] = useState(false)
@@ -249,6 +251,13 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
   }, [loaded, albumIndex, photoIndex, activePhoto?.src])
 
   useEffect(() => {
+    const syncDpr = () => setDpr(window.devicePixelRatio || 1)
+    syncDpr()
+    window.addEventListener('resize', syncDpr)
+    return () => window.removeEventListener('resize', syncDpr)
+  }, [])
+
+  useEffect(() => {
     const stage = stageRef.current
     if (!stage || typeof ResizeObserver === 'undefined') return undefined
     const observer = new ResizeObserver(() => computeFrame())
@@ -256,12 +265,21 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
     return () => observer.disconnect()
   }, [computeFrame])
 
-  const preload = useCallback(photo => {
-    if (!photo?.src || typeof window === 'undefined') return
-    const img = new window.Image()
-    img.decoding = 'async'
-    img.src = photo.src
-  }, [])
+  const displaySrc = useMemo(
+    () => selectReaderPhotoSrc(activePhoto, frameSize.w, dpr),
+    [activePhoto, frameSize.w, dpr]
+  )
+
+  const preload = useCallback(
+    photo => {
+      const src = selectReaderPhotoSrc(photo, frameSize.w, dpr)
+      if (!src || typeof window === 'undefined') return
+      const img = new window.Image()
+      img.decoding = 'async'
+      img.src = src
+    },
+    [frameSize.w, dpr]
+  )
 
   // 预载同辑前后张 + 相邻辑的首/尾
   useEffect(() => {
@@ -667,6 +685,7 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
 
   const readerClass = [
     'reader',
+    activePhoto?.caption ? 'has-caption' : '',
     indexOpen ? 'is-index' : '',
     indexPhoto ? 'is-index-photo' : '',
     thumbsOpen ? 'is-thumbs' : ''
@@ -716,7 +735,7 @@ export default function AlbumReader({ pages = [], navLinks = [] }) {
                 <img
                   ref={imageRef}
                   key={`${albumIndex}-${photoIndex}`}
-                  src={activePhoto.src}
+                  src={displaySrc}
                   alt={`${activeAlbum?.title || '影集'} · ${photoIndex + 1}`}
                   decoding='async'
                   loading='eager'
