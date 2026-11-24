@@ -55,6 +55,12 @@ class MyDocument extends Document {
             href={BLOG.NOTION_HOST.replace(/^https?:\/\//, '//')}
           />
 
+          {/* 2026-11-24 PageSpeed：百度统计脚本由 ExternalPlugins 运行时动态
+              插入，浏览器解析到那段 JS 前不知道要连 hm.baidu.com → Lighthouse
+              uses-rel-preconnect 估省 210ms。用 dns-prefetch（只解析 DNS，成本
+              极低），即使站点没启用百度统计也无害；不建完整连接以免浪费握手。 */}
+          <link rel='dns-prefetch' href='//hm.baidu.com' />
+
           {/* FontAwesome 字体不做高优先级 preload：
               2026-11-24 PageSpeed 手机端 LCP 12.7s，早期带宽要全留给首屏 LCP 图。
               两个 woff2 交给下面的 CSS 按需触发，不再抢占首图的下载窗口。

@@ -3,7 +3,7 @@
 import { siteConfig } from '@/lib/config'
 import { useEffect, useRef, useMemo } from 'react'
 import CONFIG from '../config'
-import { buildImageSources, buildSizedSource, computeTargetPixelWidth } from './imageSrcset'
+import { buildImageSources, buildSizedSource } from './imageSrcset'
 import { loadIntoCanvas, releaseCanvas } from './CanvasImage'
 import {
   computeTiltProgress,
@@ -362,12 +362,6 @@ export default function HomeTiltWall({
     )
 
     let columns = []
-    /**
-     * 卡片显示宽（= 列宽，.cl-home-tilt-item 是 width:100%）——
-     * 取图档位按「列宽 × DPR」算。不在这里量 DOM：卡片创建时还没入列。
-     */
-    let cardCssWidth = 300
-
     // 依据视口宽度构建充裕的列数（移动端 3 列，桌面端 5 列，大屏 6 列），确保多轴视野饱满展开
     const buildColumns = () => {
       // SSR 直出的首屏种子图：必须在 innerHTML 清空前按序摘下，否则重新创建的
@@ -400,7 +394,6 @@ export default function HomeTiltWall({
       rotated.appendChild(probe)
       const colWidth = probe.offsetWidth || 300
       probe.remove()
-      cardCssWidth = colWidth
 
       const colGap = winW <= 767 ? 12 : winW <= 1024 ? 18 : 24
 
@@ -561,11 +554,13 @@ export default function HomeTiltWall({
         el.setAttribute('aria-label', card.title || 'Circle of Life')
       }
 
-      // 首屏图固定 512 档（SSR 种子图同款，URL 一致 → 命中缓存不重复下载）；
-      // 其余卡片仍按「列宽 × DPR」选档，直连取原图
-      // （不走 srcset：Notion 代理在 srcset 路径下返回预裁切小图）
-      const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1
-      const targetPx = immediate ? HERO_IMAGE_TIER : computeTargetPixelWidth(cardCssWidth, dpr)
+      // 档位口径（2026-11-24 线上 Lighthouse 实证）：照片墙**所有**卡片统一 512，
+      // 不按 DPR 分档。原因：Set A 种子图（SSR 直出 512）与 Set B 克隆图若各按
+      // DPR 算出不同档位（如 256），同一张图会下载两次（线上实测 512 High +
+      // 256 Low，第二次在 4247ms 才发出白抢带宽）。统一 512 后 URL 一致，
+      // canvas 的 decoded cache 才能命中；继续走直连 width URL（不用 srcset，
+      // Notion 代理在 srcset 路径下返回预裁切小图）。
+      const targetPx = HERO_IMAGE_TIER
       el.dataset.src = buildSizedSource(card.src, targetPx)
       el.dataset.targetpx = String(targetPx)
 

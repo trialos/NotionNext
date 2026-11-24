@@ -13,7 +13,8 @@
  * 2. 首屏图（SSR 与 JS）统一固定 512 档：倾斜缩小的装饰图不追求 DPR 精确，
  *    URL 一致 → 浏览器命中缓存，不重复下载。preload 也必须是同一个 URL。
  * 3. 客户端按 DOM 顺序（先进先出）复用种子节点，不用 id 匹配、不另建 img。
- * 4. 非首屏卡片仍按 DPR 选档 + 用 <canvas>（不进 LCP 候选）。
+ * 4. 照片墙所有卡片统一 512 档（Set A/B 同 URL，避免重复下载）；
+ *    非首屏卡片用 <canvas>（不进 LCP 候选）。
  */
 import { TextDecoder, TextEncoder } from 'util'
 import React, { createElement } from 'react'
@@ -79,12 +80,13 @@ describe('首页照片墙首屏图固定档 SSR 直出', () => {
     expect(source).not.toMatch(/seedPool/)
   })
 
-  test('首屏图固定 512 档，非首屏卡片才按 DPR 选档', () => {
+  test('照片墙所有卡片统一 512 档（不按 DPR），避免 Set A/B 重复下载', () => {
     expect(source).toMatch(/const HERO_IMAGE_TIER = 512/)
-    expect(source).toMatch(
-      /const targetPx = immediate \? HERO_IMAGE_TIER : computeTargetPixelWidth\(cardCssWidth, dpr\)/
-    )
-    expect(source).toMatch(/buildSizedSource\(card\.src, HERO_IMAGE_TIER\)/)
+    // 关键：所有卡片（含 Set B 克隆的 canvas）都用 512，否则同一张图
+    // Set A 下 512、Set B 下 256 → 下载两次（线上实测 512 High + 256 Low）
+    expect(source).toMatch(/const targetPx = HERO_IMAGE_TIER/)
+    expect(source).not.toMatch(/computeTargetPixelWidth/)
+    expect(source).toMatch(/buildSizedSource\(card\.src, targetPx\)/)
   })
 
   test('非首屏卡片仍用 canvas，不产生额外 LCP 候选', () => {

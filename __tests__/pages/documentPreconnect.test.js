@@ -33,6 +33,10 @@ describe('_document 预连接（手机 LCP）', () => {
     )
   })
 
+  test('百度统计源做 dns-prefetch（uses-rel-preconnect 估省 210ms）', () => {
+    expect(source).toContain("rel='dns-prefetch' href='//hm.baidu.com'")
+  })
+
   test('FontAwesome 字体仍不做高优先级 preload', () => {
     expect(source).toMatch(/FontAwesome 字体不做高优先级 preload/)
   })
