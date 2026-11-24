@@ -35,6 +35,7 @@ export default function HomeArticleStageMobile({ articles = [] }) {
   )
 
   const [activeIndex, setActiveIndex] = useState(0)
+  const [nearViewport, setNearViewport] = useState(false)
   const sectionRef = useRef(null)
   const railRef = useRef(null)
   const barRef = useRef(null)
@@ -43,6 +44,23 @@ export default function HomeArticleStageMobile({ articles = [] }) {
   const railWidthRef = useRef(0)
   const wasVisibleRef = useRef(false)
   activeRef.current = activeIndex
+
+  // 2026-11-24 PageSpeed：同桌面版，文章段滚到提前一屏才取图，
+  // 避免挂载即下 4~5 张 1024 大图抢首屏 LCP 图带宽。无 IO 时立即取图。
+  useEffect(() => {
+    const section = sectionRef.current
+    if (!section) return undefined
+    if (typeof IntersectionObserver === 'undefined') {
+      setNearViewport(true)
+      return undefined
+    }
+    const observer = new IntersectionObserver(
+      entries => setNearViewport(entries.some(e => e.isIntersecting)),
+      { rootMargin: '100% 0px' }
+    )
+    observer.observe(section)
+    return () => observer.disconnect()
+  }, [])
 
   // 只在真实交互改篇位时落盘（goTo / IO 两个来源）。
   // restore 只读不写；桌面视口本组件 display:none、轨道宽 0，天然不写。
@@ -178,11 +196,16 @@ export default function HomeArticleStageMobile({ articles = [] }) {
     [count, goTo]
   )
 
-  // 篇位 → 图版槽位：当前 + 左右邻篇绘制，±2 预取，其余释放
+  // 篇位 → 图版槽位：当前 + 左右邻篇绘制，±2 预取，其余释放。
+  // 仅在文章段进入视口附近后执行；未进入时全部 release，不下载大图。
   useEffect(() => {
     coverRefs.current.length = count
     coverRefs.current.forEach((cover, index) => {
       if (!cover) return
+      if (!nearViewport || !isNodeVisible(sectionRef.current)) {
+        cover.release()
+        return
+      }
       const distance = Math.abs(index - activeIndex)
       if (distance === 0) cover.arm('high')
       else if (distance === 1) cover.arm('auto')
@@ -191,7 +214,7 @@ export default function HomeArticleStageMobile({ articles = [] }) {
         cover.prefetch()
       } else cover.release()
     })
-  }, [activeIndex, count, listKey])
+  }, [activeIndex, count, listKey, nearViewport])
 
   // 恢复篇位：只在可见时定位轨道，隐藏形态不写 session
   useEffect(() => {

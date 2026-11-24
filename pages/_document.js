@@ -2,8 +2,6 @@
 import BLOG from '@/blog.config'
 import Document, { Head, Html, Main, NextScript } from 'next/document'
 
-const isLocalFontAwesome = BLOG.FONT_AWESOME?.startsWith('/vendor/fontawesome/')
-
 // 预先设置深色模式的脚本内容
 const darkModeScript = `
 (function() {
@@ -45,41 +43,24 @@ class MyDocument extends Document {
     return (
       <Html lang={BLOG.LANG}>
         <Head>
-          <link rel='preconnect' href='https://images.unsplash.com' />
-          <link rel='dns-prefetch' href='//images.unsplash.com' />
-
-          {/* Notion 图片统一走 BLOG.NOTION_HOST 反代，预连接省掉握手延迟 */}
-          <link
-            rel='preconnect'
-            href={BLOG.NOTION_HOST}
-            crossOrigin='anonymous'
-          />
+          {/* 2026-11-24 PageSpeed：删掉未使用的 images.unsplash.com preconnect
+              （页面并不请求该源，留着只会多一次握手）。 */}
+          {/* Notion 图片统一走 BLOG.NOTION_HOST 反代，预连接省掉握手延迟。
+              ⚠️ 不带 crossorigin：<img> 请求是 no-cors，带 anonymous 会让
+              preconnect 建的是另一条 CORS 连接、命中不到（PageSpeed 实测
+              「未使用的 preconnect」，修掉预计省 350ms）。 */}
+          <link rel='preconnect' href={BLOG.NOTION_HOST} />
           <link
             rel='dns-prefetch'
             href={BLOG.NOTION_HOST.replace(/^https?:\/\//, '//')}
           />
 
-          {/* 预加载字体 */}
+          {/* FontAwesome 字体不做高优先级 preload：
+              2026-11-24 PageSpeed 手机端 LCP 12.7s，早期带宽要全留给首屏 LCP 图。
+              两个 woff2 交给下面的 CSS 按需触发，不再抢占首图的下载窗口。
+              CSS 本体仍是 preload + rAF 切 stylesheet，noscript 有兜底，功能不变。 */}
           {BLOG.FONT_AWESOME && (
             <>
-              {isLocalFontAwesome && (
-                <>
-                  <link
-                    rel='preload'
-                    href='/vendor/fontawesome/webfonts/fa-solid-900.woff2'
-                    as='font'
-                    type='font/woff2'
-                    crossOrigin='anonymous'
-                  />
-                  <link
-                    rel='preload'
-                    href='/vendor/fontawesome/webfonts/fa-regular-400.woff2'
-                    as='font'
-                    type='font/woff2'
-                    crossOrigin='anonymous'
-                  />
-                </>
-              )}
               <style
                 dangerouslySetInnerHTML={{
                   __html:

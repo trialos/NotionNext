@@ -28,6 +28,16 @@ const WALL_TITLE_FADE_START = 0.66
 const WALL_TITLE_FADE_END = 0.88
 
 /**
+ * 首屏照片墙图片的固定取图档位（width 参数）。
+ * 这里刻意不按 DPR 选档：首屏图是倾斜 8°、持续平移的装饰图，
+ * 视觉上分辨不出 512 与 1024 的差别，但 1024 在慢网下要贵好几倍。
+ * 固定 512 让 SSR 种子图与 JS 挂载用同一个 URL —— 浏览器命中缓存，
+ * 不会下载两次，LCP 候选也能在初始 HTML 就被发现。
+ * 真正需要清晰的大图（文章封面 / 影集阅读器）继续走 DPR 自适应。
+ */
+const HERO_IMAGE_TIER = 512
+
+/**
  * 只在值真的变了时才写自定义属性。
  * 静止时呼吸与位移几乎不变，省掉每帧的样式失效与重算。
  */
@@ -105,6 +115,11 @@ export default function HomeTiltWall({
     let isVisible = true
     let isExited = false
     let rafId = null
+
+    // SSR 直出的首屏种子图：buildColumns 重建 DOM 前按序摘下，
+    // Set A 建列时按同样的顺序取回复用。种子顺序 = displayCards 顺序 =
+    // 分桶后 Set A 的创建顺序，所以队列先进先出即可，无需按 id 匹配。
+    let seedQueue = []
 
     // 旋转角度与几何自适应缩放（顺时针 8 度，精确消除四角留白）
     const ROTATE_DEG = 8
@@ -284,7 +299,9 @@ export default function HomeTiltWall({
       // ⚠️ 不用 srcset/sizes：Notion 代理在 srcset 选档路径下返回「预裁切小图」
       // （同一 URL 直连才是未裁切原图）→ 见 imageSrcset.js 的说明。
       // 档位在创建卡片时就按「列宽 × DPR」算好，写进了 src 的 width 参数。
-      el.src = src
+      // SSR 种子图在 HTML 解析阶段就已带同一 src 发起请求，这里不能再赋值一次
+      // （否则 Lighthouse 会把它当成 JS 发起的新请求 → discoverable=false）。
+      if (el.getAttribute('src') !== src) el.src = src
       decodeImage(el)
     }
 
@@ -353,6 +370,9 @@ export default function HomeTiltWall({
 
     // 依据视口宽度构建充裕的列数（移动端 3 列，桌面端 5 列，大屏 6 列），确保多轴视野饱满展开
     const buildColumns = () => {
+      // SSR 直出的首屏种子图：必须在 innerHTML 清空前按序摘下，否则重新创建的
+      // <img> 会落在 hydration 之后 → LCP 候选又晚回来。
+      seedQueue = [...rotated.querySelectorAll('img[data-ssr-seed="true"]')]
       memoryLifecycleObserver.disconnect()
       rotated.innerHTML = ''
       columns = []
@@ -521,9 +541,16 @@ export default function HomeTiltWall({
       // 首屏不空窗：前几列立即挂载且不回收
       const immediate = isSetA && colIndex < IMMEDIATE_COLUMNS
 
+      // 与页面 preload 对应的那一张（首图）：给最高加载优先级
+      const isPreloadTarget = isSetA && colIndex === 0 && cardIdx === 0
+      // 复用 SSR 直出的种子图：它们是初始 HTML 里的 LCP 候选，
+      // 重新 createElement 会让候选晚到 hydration 之后。
+      // 种子顺序 = Set A 创建顺序，先进先出即可；Set B 不取。
+      const seed = isSetA && seedQueue.length ? seedQueue.shift() : undefined
+
       // 首屏那几张用 <img>（大 LCP 候选 + 精确命中页面 preload），
       // 其余用 <canvas>（不进 LCP 候选）
-      const el = document.createElement(immediate ? 'img' : 'canvas')
+      const el = seed || document.createElement(immediate ? 'img' : 'canvas')
       if (immediate) {
         el.alt = card.title || 'Circle of Life'
         el.decoding = 'async'
@@ -534,16 +561,12 @@ export default function HomeTiltWall({
         el.setAttribute('aria-label', card.title || 'Circle of Life')
       }
 
-      // 与页面 preload 对应的那一张（首图）：**必须用与 preload 完全相同的 URL**
-      // → 保留 card.src 原样（它就是 preload 的 href），否则会白下载两份。
-      const isPreloadTarget = isSetA && colIndex === 0 && cardIdx === 0
-      // 其余卡片：按「列宽 × DPR」选 Notion 的 width 档位，直连取原图
+      // 首屏图固定 512 档（SSR 种子图同款，URL 一致 → 命中缓存不重复下载）；
+      // 其余卡片仍按「列宽 × DPR」选档，直连取原图
       // （不走 srcset：Notion 代理在 srcset 路径下返回预裁切小图）
       const dpr = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1
-      const targetPx = computeTargetPixelWidth(cardCssWidth, dpr)
-      el.dataset.src = isPreloadTarget
-        ? card.src
-        : buildSizedSource(card.src, targetPx)
+      const targetPx = immediate ? HERO_IMAGE_TIER : computeTargetPixelWidth(cardCssWidth, dpr)
+      el.dataset.src = buildSizedSource(card.src, targetPx)
       el.dataset.targetpx = String(targetPx)
 
       if (immediate) {
@@ -832,8 +855,17 @@ export default function HomeTiltWall({
     showWallTitle &&
     siteConfig('CIRCLELIFE_HOME_WALL_TITLE', true, CONFIG) !== false
 
-  // 首屏 LCP 的 preload 由主题布局（LayoutPostList）在 SSR 阶段输出，
-  // 组件内 critical 图会自行带 fetchpriority，此处不重复声明
+  // 首屏 LCP 候选图必须在 SSR 阶段就出现在 HTML 里：
+  // 页面级 preload 只暖了网络，若 <img> 元素本身要等 hydration 才创建，
+  // 浏览器拿不到 LCP 候选（PageSpeed 2026-11-24 实测 LCP 12.7s）。
+  // 首屏是 3 列 × 最多 4 slots = 12 张（buildColumnBuckets 的连续分块），
+  // 其中哪张最终成为 LCP 由旋转布局与视口决定，无法在 SSR 预知 →
+  // 把这 12 张全部直出并带 fetchpriority=high（见 homeTiltWallLcp.test.js）。
+  // URL 用固定的 HERO_IMAGE_TIER=512，与 JS 首屏图挂载时完全一致 →
+  // 浏览器命中缓存下载一次，LCP 候选在初始 HTML 就可被发现。
+  // useEffect 建列时按序取出复用同一节点，无需 id 匹配。
+  const ssrSeeds = displayCards.slice(0, 12)
+
   return (
     <div ref={trackWrapperRef} className='cl-home-tilt-track-wrapper'>
       {/* 240vh 区块随页面滚走：提供约 2.4 屏的浏览时长，内部只做 0.12 微视差 */}
@@ -843,7 +875,30 @@ export default function HomeTiltWall({
         {/* 平移层：每帧只翻 translate，尺寸=视口；旋转与缩放交给内层静态变换 */}
         <div ref={panRef} className='cl-home-tilt-pan' aria-hidden='true'>
           {/* 8° 倾斜的无限照片瀑布流母画卷（rotate/scale 静态，缩放值走 CSS 变量） */}
-          <div ref={rotatedRef} className='cl-home-tilt-rotated' />
+          <div ref={rotatedRef} className='cl-home-tilt-rotated'>
+            {ssrSeeds.map(card => (
+              <div className='cl-home-tilt-col' key={card.id}>
+                <div className='cl-home-tilt-track'>
+                  <div className='cl-home-tilt-set cl-home-tilt-set-a'>
+                    <div
+                      className='cl-home-tilt-item'
+                      style={{ aspectRatio: String(card.aspectRatio || 1.333) }}>
+                      <img
+                        className='is-loaded'
+                        alt={card.title || 'Circle of Life'}
+                        src={buildSizedSource(card.src, HERO_IMAGE_TIER)}
+                        decoding='async'
+                        draggable='false'
+                        fetchpriority='high'
+                        data-critical='true'
+                        data-ssr-seed='true'
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* 同行题字：与照片墙同源的漂移与呼吸。

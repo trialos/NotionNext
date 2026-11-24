@@ -40,14 +40,20 @@ const Index = props => {
   // 不同 URL 上（白下载一份，且预加载的还是被裁过的图）。直连路径下 href 就是
   // 照片墙首图用的同一个 URL → 精确命中。
   const heroLcp = props.homeCoverImages?.[0]
+  // ⚠️ 必须与 HomeTiltWall 首屏图 URL 完全一致（固定 512 档）：
+  // 首屏图是倾斜缩小的装饰图，不按 DPR 选档；preload 与种子图同 URL，
+  // 浏览器只下载一份。真正需要清晰的大图才走 DPR 自适应。
+  const heroLcpSrc = heroLcp?.src
+    ? buildSizedSource(heroLcp.src, 512)
+    : null
   return (
     <>
-      {heroLcp?.src ? (
+      {heroLcpSrc ? (
         <Head>
           <link
             rel='preload'
             as='image'
-            href={heroLcp.src}
+            href={heroLcpSrc}
             fetchPriority='high'
           />
         </Head>

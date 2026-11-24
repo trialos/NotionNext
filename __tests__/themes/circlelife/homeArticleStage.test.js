@@ -202,6 +202,22 @@ describe('circlelife 首页精选文章章（桌面 A / 手机 M1）', () => {
       expect(coverSource).toContain('ARTICLE_COVER_TIER = 1024')
       expect(coverSource).not.toContain('2048')
     })
+
+    test('2026-11-24：文章段滚到提前一屏才取图，首屏不下载 1024 大图', () => {
+      for (const source of [desktopSource, mobileSource]) {
+        // 视口门控：IntersectionObserver + 提前一屏
+        expect(source).toContain('const [nearViewport, setNearViewport]')
+        expect(source).toContain('new IntersectionObserver')
+        expect(source).toContain("{ rootMargin: '100% 0px' }")
+        // arm effect 受门控：未进入视口时 release 且不取图
+        expect(source).toContain('if (!nearViewport || !isNodeVisible(sectionRef.current))')
+        expect(source).toContain('cover.release()\n        return')
+        expect(source).toContain('}, [activeIndex, count, listKey, nearViewport])')
+        // 无 IO 时退化为立即取图
+        expect(source).toContain("typeof IntersectionObserver === 'undefined'")
+        expect(source).toContain('setNearViewport(true)')
+      }
+    })
   })
 
   describe('手机 M1：顶部滑动朱砂条', () => {

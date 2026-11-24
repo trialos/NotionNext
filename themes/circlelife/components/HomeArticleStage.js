@@ -32,12 +32,31 @@ export default function HomeArticleStage({ articles = [] }) {
   )
 
   const [activeIndex, setActiveIndex] = useState(0)
+  const [nearViewport, setNearViewport] = useState(false)
   const sectionRef = useRef(null)
   const stageRef = useRef(null)
   const coverRefs = useRef([])
   const activeRef = useRef(0)
   const wasVisibleRef = useRef(false)
   activeRef.current = activeIndex
+
+  // 2026-11-24 PageSpeed：文章段在首屏下方很远（照片墙 240vh 之后），
+  // 挂载即 arm 会让 4~5 张 1024 大图抢首屏 LCP 图的带宽。
+  // 改为滚到提前一屏才取图；无 IO 时退化为立即取图。
+  useEffect(() => {
+    const section = sectionRef.current
+    if (!section) return undefined
+    if (typeof IntersectionObserver === 'undefined') {
+      setNearViewport(true)
+      return undefined
+    }
+    const observer = new IntersectionObserver(
+      entries => setNearViewport(entries.some(e => e.isIntersecting)),
+      { rootMargin: '100% 0px' }
+    )
+    observer.observe(section)
+    return () => observer.disconnect()
+  }, [])
 
   // 只在「真实交互改了篇位」时落盘（goTo 一个来源）。
   // restore 只读不写；桌面视口下本组件可见，隐藏态由 isNodeVisible 拦住。
@@ -114,11 +133,16 @@ export default function HomeArticleStage({ articles = [] }) {
     goTo(0)
   }, [goTo])
 
-  // 篇位 → 图版槽位：当前 high、邻篇 auto、±2 预取，其余释放
+  // 篇位 → 图版槽位：当前 high、邻篇 auto、±2 预取，其余释放。
+  // 仅在文章段进入视口附近后执行；未进入时全部 release，不下载大图。
   useEffect(() => {
     coverRefs.current.length = count
     coverRefs.current.forEach((cover, index) => {
       if (!cover) return
+      if (!nearViewport || !isNodeVisible(sectionRef.current)) {
+        cover.release()
+        return
+      }
       const distance = Math.abs(index - activeIndex)
       if (distance === 0) cover.arm('high')
       else if (distance === 1) cover.arm('auto')
@@ -127,7 +151,7 @@ export default function HomeArticleStage({ articles = [] }) {
         cover.prefetch()
       } else cover.release()
     })
-  }, [activeIndex, count, listKey])
+  }, [activeIndex, count, listKey, nearViewport])
 
   // 章节在视口内时隐藏回顶键；隐藏形态不改这个全局类
   useEffect(() => {
