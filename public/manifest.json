@@ -1,7 +1,7 @@
 {
-  "name": "NotionNext Blog",
-  "short_name": "NotionNext",
-  "description": "A blog powered by NotionNext",
+  "name": "时光的弧线",
+  "short_name": "时光的弧线",
+  "description": "时光的弧线 · CIRCLE OF LIFE",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

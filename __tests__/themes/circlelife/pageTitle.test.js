@@ -31,8 +31,8 @@ describe('circlelife 页签标题', () => {
       expect(blogConfigSource).toContain('ARCHIVE_TITLE:')
     })
 
-    test('HOME_TITLE = 时光的弧线|Circle of Life', () => {
-      expect(BLOG.HOME_TITLE).toBe('时光的弧线|Circle of Life')
+    test('HOME_TITLE = 时光的弧线|CIRCLE OF LIFE', () => {
+      expect(BLOG.HOME_TITLE).toBe('时光的弧线|CIRCLE OF LIFE')
     })
 
     test('ARCHIVE_TITLE = 文章（与导航项同名）', () => {
