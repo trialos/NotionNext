@@ -1,7 +1,10 @@
 import {
   ARCHIVE_MEMORY_KEY,
+  ARCHIVE_PAGE_KEY,
   readArchiveMemory,
-  writeArchiveMemory
+  readArchivePage,
+  writeArchiveMemory,
+  writeArchivePage
 } from '@/themes/circlelife/components/archiveMemory'
 
 function createStorage(initial = {}) {
@@ -69,5 +72,56 @@ describe('归档筛选记忆（sessionStorage）', () => {
     expect(() =>
       writeArchiveMemory(throwing, { category: '字里行间' })
     ).not.toThrow()
+  })
+})
+
+describe('归档页码记忆（sessionStorage，返回归档恢复用）', () => {
+  test('写入后可读回页码与筛选签名', () => {
+    const storage = createStorage()
+    writeArchivePage(storage, 3, { category: '字里行间', tag: '思考' })
+    expect(readArchivePage(storage)).toEqual({
+      page: 3,
+      category: '字里行间',
+      tag: '思考'
+    })
+  })
+
+  test('空筛选签名也能记住（裸 /archive 翻页）', () => {
+    const storage = createStorage()
+    writeArchivePage(storage, 2, {})
+    expect(readArchivePage(storage)).toEqual({ page: 2, category: '', tag: '' })
+  })
+
+  test('页码 0 / 非法值清空记忆', () => {
+    const storage = createStorage()
+    writeArchivePage(storage, 2, {})
+    writeArchivePage(storage, 0, null)
+    expect(readArchivePage(storage)).toBe(null)
+    expect(storage.dump()[ARCHIVE_PAGE_KEY]).toBeUndefined()
+    writeArchivePage(storage, -1, null)
+    expect(readArchivePage(storage)).toBe(null)
+  })
+
+  test('非法 JSON / 空值 / 无存储 / 抛错均安全降级', () => {
+    expect(
+      readArchivePage(createStorage({ [ARCHIVE_PAGE_KEY]: '{oops' }))
+    ).toBe(null)
+    expect(readArchivePage(createStorage({ [ARCHIVE_PAGE_KEY]: '{}' }))).toBe(
+      null
+    )
+    expect(readArchivePage(null)).toBe(null)
+    const throwing = {
+      getItem: () => {
+        throw new Error('blocked')
+      },
+      setItem: () => {
+        throw new Error('blocked')
+      },
+      removeItem: () => {
+        throw new Error('blocked')
+      }
+    }
+    expect(readArchivePage(throwing)).toBe(null)
+    expect(() => writeArchivePage(throwing, 2, {})).not.toThrow()
   })
 })

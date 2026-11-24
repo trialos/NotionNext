@@ -34,7 +34,9 @@ import {
 } from './components/archiveDeepLink'
 import {
   readArchiveMemory,
-  writeArchiveMemory
+  readArchivePage,
+  writeArchiveMemory,
+  writeArchivePage
 } from './components/archiveMemory'
 import { paginateArchiveMonths } from './components/archivePagination'
 import { BlogListPage } from './components/BlogListPage'
@@ -869,8 +871,11 @@ const LayoutArchive = props => {
   // 展开态而非收缩态：手机端（<768px）默认由 CSS 呈「窄条」，
   // 显式点「展开」才挂 .is-expanded 铺开面板；桌面不受影响。
   const [tagIndexExpanded, setTagIndexExpanded] = useState(false)
-  // 归档分页页码：只做组件状态，不写 URL / 记忆
+  // 归档分页页码：首帧恒为 1（SSR/CSR 一致，无 hydration 不匹配），
+  // 路由就绪后在 effect 里按签名恢复；翻页写 sessionStorage 供「返回归档」用。
   const [page, setPage] = useState(1)
+  // null=尚未首次解析；否则为上次已应用的筛选签名，用于区分首次恢复与后续筛选变化
+  const pageFilterSigRef = useRef(null)
 
   const facets = useMemo(() => buildArchiveFacets(archivePosts), [archivePosts])
   const filteredArchivePosts = useMemo(
@@ -896,11 +901,8 @@ const LayoutArchive = props => {
     () => paginateArchiveMonths(keys, page, ARCHIVE_MONTHS_PER_PAGE),
     [keys, page]
   )
-  // 任何筛选变化（显式点击、深链、记忆恢复、前进/后退）都回到第 1 页，
-  // 避免停留在筛选后已不存在的页。
-  useEffect(() => {
-    setPage(1)
-  }, [activeCategoryKey, activeTagKey])
+  // 页码恢复并入下方深链 effect：它解析出的 categoryKey/tagKey 才是「已稳定的筛选」，
+  // 在那里比对记忆签名才不会在筛选解析前误判。此处不再单独决策。
   const filteredCount = useMemo(
     () =>
       Object.values(filteredArchivePosts).reduce(
@@ -963,6 +965,29 @@ const LayoutArchive = props => {
       })
     setActiveCategoryKey(prev => (prev === categoryKey ? prev : categoryKey))
     setActiveTagKey(prev => (prev === tagKey ? prev : tagKey))
+
+    // 页码决策：categoryKey/tagKey 此刻已稳定。
+    //  - 首次解析：与记忆签名比对，命中就回到离开时那页（文章返回场景）；
+    //  - 后续筛选真的变了（显式切换 / 前进后退）：回第 1 页，避免停在不存在的页。
+    // 用签名而非 effect 重跑次数判断，router 对象变化不会误重置页码。
+    const filterSig = `${categoryKey}|${tagKey}`
+    if (pageFilterSigRef.current === null) {
+      pageFilterSigRef.current = filterSig
+      const remembered = readArchivePage(storage)
+      const rememberedQuery = remembered
+        ? { category: remembered.category, tag: remembered.tag }
+        : null
+      const expectedQuery = buildArchiveQuery(facets, categoryKey, tagKey)
+      const signatureMatches =
+        rememberedQuery &&
+        (rememberedQuery.category || '') === (expectedQuery.category || '') &&
+        (rememberedQuery.tag || '') === (expectedQuery.tag || '')
+      if (signatureMatches) setPage(remembered.page)
+    } else if (pageFilterSigRef.current !== filterSig) {
+      pageFilterSigRef.current = filterSig
+      setPage(1)
+    }
+
     // 旧分类名/失效标签：把 URL 清成实际生效的筛选，保持地址与状态条一致
     if (needsCleanup) {
       router.replace({ pathname: router.pathname, query: cleaned }, undefined, {
@@ -981,6 +1006,8 @@ const LayoutArchive = props => {
       (query.category || '') === current.categoryName &&
       (query.tag || '') === current.tagName
     if (unchanged) return
+    // 筛选真的变了才清页码记忆：重复点当前分类不应抹掉有效页码
+    writeArchivePage(isBrowser ? window.sessionStorage : null, 0, null)
     // push：筛选切换进入历史，返回/前进可回到上一个筛选
     router.push({ pathname: router.pathname, query }, undefined, {
       shallow: true,
@@ -1031,6 +1058,17 @@ const LayoutArchive = props => {
     const clamped = Math.min(Math.max(next, 1), totalPage)
     if (clamped === page) return
     setPage(clamped)
+    // 记录页码 + 当前筛选签名，供从文章返回时恢复到这一页
+    const currentQuery = buildArchiveQuery(
+      facets,
+      activeCategoryKey,
+      activeTagKey
+    )
+    writeArchivePage(
+      isBrowser ? window.sessionStorage : null,
+      clamped,
+      currentQuery
+    )
     if (isBrowser && stageRef.current) {
       stageRef.current.focus({ preventScroll: true })
       stageRef.current.scrollIntoView({ block: 'start', behavior: 'smooth' })
