@@ -128,6 +128,31 @@ describe('isCurrentNavPath', () => {
     expect(isCurrentNavPath('/album', '/music')).toBe(false)
   })
 
+  test('文章详情页归入 /archive 导航，其他页面不被误吞', () => {
+    expect(isCurrentNavPath('/article/318801ce', '/archive')).toBe(true)
+    expect(isCurrentNavPath('/article/2026/11/xxx', '/archive')).toBe(true)
+    expect(isCurrentNavPath('/article/xxx/extra', '/archive')).toBe(true)
+    expect(isCurrentNavPath('/article/xxx/', '/archive')).toBe(true)
+    expect(isCurrentNavPath('/article/xxx#section', '/archive')).toBe(true)
+    expect(isCurrentNavPath('/zh-CN/article/xxx?theme=dark', '/archive')).toBe(
+      true
+    )
+    expect(isCurrentNavPath('/archive?category=随笔', '/archive')).toBe(true)
+    expect(isCurrentNavPath('/articlex/xxx', '/archive')).toBe(false)
+    expect(isCurrentNavPath('/about', '/archive')).toBe(false)
+    expect(isCurrentNavPath('/album?deck=xxx', '/archive')).toBe(false)
+    expect(isCurrentNavPath('/article/xxx', '/music')).toBe(false)
+  })
+
+  test('文章前缀取自 conf 配置，不再在组件里另写一份', () => {
+    const config = readSource('conf', 'post.config.js')
+    const nav = readSource('themes', 'circlelife', 'components', 'navConfig.js')
+
+    expect(config).toContain('POST_URL_PREFIX:')
+    expect(nav).toContain("from '@/conf/post.config'")
+    expect(nav).not.toContain("const ARTICLE_PREFIX = '/article'")
+  })
+
   test('归一化语言前缀与尾斜杠后再判定', () => {
     expect(isCurrentNavPath('/zh-CN/music/album/xxx', '/music/')).toBe(true)
     expect(isCurrentNavPath('/en/', '/')).toBe(true)
