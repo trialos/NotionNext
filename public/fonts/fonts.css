@@ -22,10 +22,30 @@
   src: url('/fonts/newsreader-latin.woff2') format('woff2');
 }
 
+/* 完整中文字体：按站点用字裁剪（约 1255 字 / 508 KB）。
+   2026-11-24 起用 unicode-range 排除首屏极小子集覆盖的字——
+   这些字由下面的 16 KB 子集提供，避免首屏等 508 KB 下载。 */
 @font-face {
   font-family: 'Noto Serif SC';
   font-style: normal;
   font-weight: 500 700;
   font-display: swap;
   src: url('/fonts/notoserifsc-subset.woff2') format('woff2');
+  unicode-range: U+0000-001F, U+0021-002F, U+003A-00B6, U+00B8-2013, U+2015-2025, U+2027-3000, U+3003-3009, U+300E-4E0D, U+4E0F-4E4F, U+4E51-4E8D, U+4E8F-5148, U+514A-5172, U+5174-540B, U+540D-5F26, U+5F28-5F70, U+5F72-6210, U+6212-6586, U+6588-65F5, U+65F7-7683, U+7685-7ADF, U+7AE1-7EBE, U+7EC0-884B, U+884D-96C5, U+96C7-97F2, U+97F4-9874, U+9876-9995, U+9997-FF00, U+FF02-FF07, U+FF0A-FF0B, U+FF0D-FF19, U+FF1C-FF1E, U+FF20-FFFF;
+}
+
+/* 首屏极小子集（16 KB）：只含照片墙题字「与我同行」、导航品牌「时光的弧线」、
+   桌面导航项「首页/文章/影集/音乐/关于」+ 数字与常用标点，共 19 字。
+   与完整字体同为 'Noto Serif SC' 族，靠 unicode-range 分工：
+   首屏这些字只下 16 KB，LCP 不再等 508 KB（实测能把渲染延迟从 2.1s 砍掉）。
+   2026-11-24 注：曾尝试把它挪到 CSS 最前，实测加载顺序无变化——
+   字体下载由 DOM 里实际用到该字的元素触发，不由 @font-face 声明顺序决定。
+   新增首屏文案时须同步重裁这个子集（见私有库设计库 §3.2）。 */
+@font-face {
+  font-family: 'Noto Serif SC';
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
+  src: url('/fonts/notoserifsc-critical.woff2') format('woff2');
+  unicode-range: U+0020, U+0030-0039, U+00B7, U+2014, U+2026, U+3001-3002, U+300A-300D, U+4E0E, U+4E50, U+4E8E, U+5149, U+5173, U+540C, U+5F27, U+5F71, U+6211, U+6587, U+65F6, U+7684, U+7AE0, U+7EBF, U+884C, U+96C6, U+97F3, U+9875, U+9996, U+FF01, U+FF08-FF09, U+FF0C, U+FF1A-FF1B, U+FF1F;
 }

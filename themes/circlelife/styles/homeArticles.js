@@ -127,7 +127,7 @@ export const homeArticlesStyle = `
   }
   #theme-circlelife .cl-home-article-title {
     margin: 0;
-    font-family: var(--cl-font-display);
+    font-family: var(--cl-font-display-system);
     font-size: clamp(2.1rem, 3.4vw, 3.35rem);
     font-weight: 600;
     line-height: 1.28;

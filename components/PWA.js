@@ -54,9 +54,9 @@ export function PWA(post, siteInfo) {
   // 将 manifest 添加到 head 中
   document.head.appendChild(manifest)
 
-  // 不要忘记在适当的时候释放 Blob URL，避免内存泄漏
-  // 例如，在页面卸载或不再需要该 Blob URL 时
-  window.addEventListener('unload', () => {
+  // 页面隐藏时释放 Blob URL，避免内存泄漏。
+  // 用 pagehide 而非 unload：Chrome 已禁止 unload 监听器执行（权限策略违规）。
+  window.addEventListener('pagehide', () => {
     URL.revokeObjectURL(blobUrl)
   })
 }

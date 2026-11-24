@@ -168,7 +168,7 @@ export const homeAlbumMobileStyle = `
     }
     #theme-circlelife .cl-home-album-m-name {
       margin: 0;
-      font-family: var(--cl-font-display);
+      font-family: var(--cl-font-display-system);
       font-size: 1.55rem;
       font-weight: 500;
       line-height: 1.2;

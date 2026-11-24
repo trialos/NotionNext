@@ -40,6 +40,10 @@ export const tokenStyle = `
         --cl-shadow-sm: none;
         --cl-shadow-md: none;
         --cl-font-display: 'Newsreader', 'Noto Serif SC', 'Songti SC', 'STSong', 'Songti TC', 'HiraMinProN-W3', serif;
+        /* 首屏下方的动态中文标题用：系统衬线，外观接近 Noto Serif SC 但不下载字体。
+           2026-11-24：这些标题（文章/影集名）文字来自 Notion、无法预知，
+           若用 --cl-font-display 会在首屏就触发 508 KB 完整中文字体下载。 */
+        --cl-font-display-system: 'Newsreader', 'Songti SC', 'STSong', 'Songti TC', 'SimSun', 'Noto Serif CJK SC', 'Source Han Serif SC', serif;
         --cl-font-body: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
         --cl-font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         --cl-media-radius: 10px;

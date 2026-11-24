@@ -61,7 +61,7 @@ export const homeStyle = `
         gap: 0.4rem 0.6rem;
       }
       #theme-circlelife .cl-post-title {
-        font-family: var(--cl-font-display);
+        font-family: var(--cl-font-display-system);
         font-size: 1.05rem;
         font-weight: 600;
         letter-spacing: -0.01em;
@@ -419,11 +419,12 @@ export const homeStyle = `
 
       @media (max-width: 767px) {
         #theme-circlelife .cl-home-tilt-title-zh {
+          font-size: clamp(3.1rem, 9vw, 3.9rem);
           letter-spacing: 0.12em;
           padding-left: 0.12em;
         }
         #theme-circlelife .cl-home-tilt-title-en {
-          font-size: 0.64rem;
+          font-size: clamp(0.72rem, 3vw, 0.82rem);
           letter-spacing: 0.24em;
           padding-left: 0.24em;
         }
@@ -580,7 +581,7 @@ export const homeStyle = `
       }
       #theme-circlelife .cl-home-album-name {
         margin: 0;
-        font-family: var(--cl-font-display);
+        font-family: var(--cl-font-display-system);
         font-weight: 500;
         letter-spacing: -0.01em;
         /* 过渡只动颜色与 transform（不碰字重/字号 → 不触发布局） */
